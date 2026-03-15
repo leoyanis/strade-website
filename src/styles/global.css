@@ -202,6 +202,7 @@ a { color: inherit; text-decoration: none; }
 .nav-cta {
   font-size: 13px; font-weight: 500; color: var(--cyan);
   opacity: 0.6; transition: opacity 0.3s; letter-spacing: 0.02em;
+  padding: 12px 0;
 }
 .nav-cta:hover { opacity: 1; }
 
@@ -481,26 +482,48 @@ a { color: inherit; text-decoration: none; }
 .sv-cta-punch span { color: var(--cyan); }
 .sv-cta-sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; letter-spacing: 0.02em; }
 
-/* Mobile: show everything static, no scroll animation */
+/* Mobile: condensed layout with animated reveals */
 @media (max-width: 767px) {
   .sv-scroll-space { height: auto !important; }
-  .sv-sticky { position: static !important; height: auto; padding: 80px 24px; justify-content: flex-start; }
-  .sv-entry { padding: 0; margin-bottom: 32px; }
-  .sv-content { padding: 0; gap: 20px; }
-  .sv-step-labels { min-height: auto; position: static; }
-  .sv-step-label { position: static; opacity: 1 !important; margin-bottom: 16px; }
-  .sv-step-label:nth-child(2), .sv-step-label:nth-child(3) { display: none; }
+  .sv-sticky { position: static !important; height: auto; padding: 60px 20px; justify-content: flex-start; }
+  .sv-entry { padding: 0; margin-bottom: 24px; }
+  .sv-content { padding: 0; gap: 16px; }
+
+  /* Hide step labels on mobile — content tells the story */
+  .sv-step-labels { display: none; }
+
+  /* Stack chat and brief vertically */
   .sv-phase-layout { flex-direction: column; min-height: auto; }
   .sv-chat { max-width: 100%; }
   .sv-brief { width: 100%; opacity: 1 !important; transform: none !important; }
+
+  /* Show results statically */
   .sv-results { position: static; opacity: 1 !important; pointer-events: auto; }
-  .sv-cta-phase { display: none; }
+
+  /* Show CTA phase on mobile too — it's the payoff */
+  .sv-cta-phase {
+    position: static !important;
+    opacity: 1 !important;
+    display: flex !important;
+    pointer-events: auto !important;
+    padding: 48px 0 16px;
+  }
+  .sv-cta-stat, .sv-cta-text, .sv-cta-punch, .sv-cta-sub {
+    opacity: 1 !important; transform: none !important;
+  }
+
+  /* Force visibility on animated children */
   .sv-msg, .sv-chips, .sv-signal-row, .sv-card {
     opacity: 1 !important; transform: none !important;
   }
   .sv-brief-title, .sv-brief-overview, .sv-signals-heading, .sv-cal {
     opacity: 1 !important;
   }
+
+  /* Tighten card spacing */
+  .sv-card { margin-bottom: 8px; }
+  .sv-msg { font-size: 13px; padding: 8px 14px; }
+  .sv-chip { font-size: 12px; padding: 5px 12px; }
 }
 
 /* ================================================================
@@ -523,6 +546,7 @@ a { color: inherit; text-decoration: none; }
 }
 .yc-mockup-img {
   max-width: 280px; width: 100%;
+  aspect-ratio: 519 / 1024;
   border-radius: 20px;
   animation: float-y 3.5s ease-in-out infinite;
   border: none !important;
@@ -674,4 +698,104 @@ a { color: inherit; text-decoration: none; }
 /* ================================================================
    GLOBAL IMG OVERRIDE
    ================================================================ */
-img { max-width: 100%; }
+img { max-width: 100%; height: auto; }
+
+/* ================================================================
+   MOBILE RESPONSIVE OVERRIDES
+   ================================================================ */
+@media (max-width: 767px) {
+
+  /* ---- Nav ---- */
+  #site-nav { padding: 0 16px; }
+  .nav-logo { font-size: 16px; }
+  .nav-cta { font-size: 12px; }
+
+  /* ---- Typography ---- */
+  h1 { font-size: clamp(32px, 8vw, 44px); }
+  h2 { font-size: clamp(24px, 6vw, 32px); }
+  h3 { font-size: 20px; }
+
+  /* ---- Buttons ---- */
+  .btn-primary {
+    padding: 16px 28px;
+    font-size: 16px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ---- Hero ---- */
+  #hero { height: auto; min-height: 100svh; padding: 0 0 48px; }
+  .hero-inner { max-width: 100%; padding: 0 20px; }
+  .hero-h1 { font-size: clamp(36px, 10vw, 48px); }
+  .hero-body { font-size: 15px; }
+  .hero-glow { width: 300px; height: 300px; }
+  .scroll-indicator { bottom: 24px; }
+
+  /* ---- Section spacing ---- */
+  #youcook { padding: 80px 0; }
+  #noteless { padding: 60px 0 80px; }
+  #process { padding: 80px 0; }
+  #founder { padding: 80px 0; }
+  #cta { padding: 80px 0; }
+
+  /* ---- Container ---- */
+  .container { padding: 0 20px; }
+
+  /* ---- YouCook ---- */
+  .yc-mockup-wrap { justify-content: center; }
+  .yc-mockup-img {
+    max-width: 220px;
+    animation: float-y 4s ease-in-out infinite;
+  }
+  .yc-text p { max-width: 100%; }
+
+  /* ---- Noteless ---- */
+  .nl-inner { padding: 0 20px; }
+  .nl-inner h3 { font-size: 24px; }
+  .nl-mockup-img { max-width: 300px; }
+
+  /* ---- Process ---- */
+  .process-header { margin-bottom: 40px; }
+  .process-grid { gap: 16px; }
+  .process-step { padding: 0; }
+  .process-num-wrap { width: 48px; height: 48px; margin-bottom: 12px; }
+  .process-num { font-size: 40px; }
+  .process-num-glow { opacity: 1; }
+  .process-step h3 { font-size: 20px; margin-bottom: 8px; }
+  .process-step p { font-size: 14px; }
+
+  /* ---- Founder ---- */
+  .founder-grid { gap: 32px; }
+  .founder-photo {
+    max-height: 420px; width: 100%; aspect-ratio: auto;
+    object-position: center 20%;
+  }
+  .founder-text p { max-width: 100%; }
+  .founder-links a {
+    padding: 8px 0;
+    font-size: 15px;
+  }
+
+  /* ---- CTA ---- */
+  .cta-inner { padding: 0 20px; }
+  .cta-inner > p { margin-bottom: 32px; }
+
+  /* ---- Footer ---- */
+  .footer-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .footer-links { gap: 20px; }
+  .footer-links a { padding: 4px 0; }
+
+  /* ---- Atmosphere: simplify on mobile ---- */
+  #cursor-glow { display: none; }
+  #particle-canvas { opacity: 0.4; }
+  #blueprint-grid { display: none; }
+
+  /* ---- Reveal animations: reduce movement on mobile ---- */
+  .reveal-section { transform: translateY(16px); }
+  .reveal-left { transform: translateX(-16px); }
+  .reveal-right { transform: translateX(16px); }
+}

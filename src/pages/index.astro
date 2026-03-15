@@ -95,7 +95,7 @@ const schema = {
           <div class="sv-phase-layout" id="sv-phase-layout">
 
             <div class="sv-chat" id="sv-chat">
-              <div class="sv-msg user" id="sv-msg-user"></div>
+              <div class="sv-msg user" id="sv-msg-user">I need an entry-level marketing specialist who can write copy and run basic analytics</div>
               <div class="sv-msg ai" id="sv-msg-ai1">What type of engagement are you looking for?</div>
               <div class="sv-chips" id="sv-chips-1">
                 <div class="sv-chip" id="sv-chip-ft">Full-time</div>
@@ -241,6 +241,8 @@ const schema = {
             src="/images/youcook-mockup.png"
             alt="YouCook app - recipe detail screen"
             class="yc-mockup-img"
+            width="519"
+            height="1024"
             loading="lazy"
           />
         </div>
@@ -260,6 +262,8 @@ const schema = {
         src="/images/noteless-case-study.png"
         alt="Noteless AI note-taking app screenshots"
         class="nl-mockup-img"
+        width="1500"
+        height="1500"
         loading="lazy"
       />
 
@@ -529,6 +533,10 @@ const schema = {
         });
       }
 
+      // Clear pre-populated mobile fallback text for desktop animation
+      const userMsgEl = document.getElementById('sv-msg-user');
+      if (userMsgEl) userMsgEl.textContent = '';
+
       const USER_TEXT = 'I need an entry-level marketing specialist who can write copy and run basic analytics';
       let typingInterval: ReturnType<typeof setInterval> | null = null;
       function typeMessage(el: HTMLElement, text: string, ms: number) {
@@ -650,21 +658,39 @@ const schema = {
 
       const isMobile = window.innerWidth < 768;
 
+      if (isMobile) {
+        // On mobile: staggered reveal with scale + glow. No pinning.
+        // Don't set initial opacity via GSAP — CSS !important handles visibility.
+        // Instead, use CSS classes for a nice entrance.
+        const steps = document.querySelectorAll<HTMLElement>('.process-step');
+        steps.forEach((step, i) => {
+          step.style.opacity = '0';
+          step.style.transform = 'translateY(40px)';
+          step.style.transition = 'none';
+        });
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              const el = e.target as HTMLElement;
+              const idx = Array.from(steps).indexOf(el);
+              setTimeout(() => {
+                el.style.transition = 'opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+                el.classList.add('lit');
+              }, idx * 150);
+              observer.unobserve(el);
+            }
+          });
+        }, { threshold: 0.15 });
+        steps.forEach(s => observer.observe(s));
+        return;
+      }
+
       // Initial hidden state for steps + SVG elements
       gsap.set(['#proc-step-1','#proc-step-2','#proc-step-3'], { opacity: 0, y: 32 });
       gsap.set('#proc-line-fill', { strokeDashoffset: 666 });
       gsap.set(['#proc-ring-1','#proc-dot-1','#proc-ring-2','#proc-dot-2','#proc-ring-3','#proc-dot-3'], { opacity: 0 });
-
-      if (isMobile) {
-        // On mobile: simple one-shot reveal, no pinning
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: '#process', start: 'top 75%', end: 'bottom 30%', scrub: 0.8 }
-        });
-        tl.to('#proc-step-1', { opacity: 1, y: 0, duration: 0.3 }, 0);
-        tl.to('#proc-step-2', { opacity: 1, y: 0, duration: 0.3 }, 0.35);
-        tl.to('#proc-step-3', { opacity: 1, y: 0, duration: 0.3 }, 0.7);
-        return;
-      }
 
       // Desktop: pin the section while animation plays
       // The section pins when its center hits the viewport center.
@@ -729,6 +755,79 @@ const schema = {
           scrollTrigger: { trigger: '#founder', start: 'top bottom', end: 'bottom top', scrub: true }
         });
       }
+    } catch { /* silent */ }
+  })();
+</script>
+
+<!-- ================================================================
+     MOBILE SCROLL ANIMATIONS
+     Staggered reveals + subtle parallax for mobile.
+     ================================================================ -->
+<script>
+  (async () => {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ---- SV section: staggered card reveals ----
+      const svCards = document.querySelectorAll<HTMLElement>('.sv-card');
+      svCards.forEach((card, i) => {
+        gsap.from(card, {
+          y: 30, opacity: 0, duration: 0.6,
+          delay: i * 0.1,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: card, start: 'top 85%' }
+        });
+      });
+
+      // ---- SV CTA phase: dramatic entrance ----
+      const svCta = document.getElementById('sv-cta');
+      if (svCta) {
+        gsap.from('.sv-cta-stat', {
+          scale: 0.8, opacity: 0, y: 30, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: svCta, start: 'top 80%' }
+        });
+        gsap.from('.sv-cta-text', {
+          y: 20, opacity: 0, duration: 0.6, delay: 0.2, ease: 'power3.out',
+          scrollTrigger: { trigger: svCta, start: 'top 80%' }
+        });
+        gsap.from('.sv-cta-punch', {
+          y: 16, opacity: 0, duration: 0.6, delay: 0.35, ease: 'power3.out',
+          scrollTrigger: { trigger: svCta, start: 'top 80%' }
+        });
+      }
+
+      // ---- YC mockup: subtle parallax float ----
+      const ycImg = document.querySelector<HTMLElement>('.yc-mockup-img');
+      if (ycImg) {
+        gsap.to(ycImg, {
+          yPercent: -8, ease: 'none',
+          scrollTrigger: { trigger: '#youcook', start: 'top bottom', end: 'bottom top', scrub: true }
+        });
+      }
+
+      // ---- Noteless image: slight scale on scroll ----
+      const nlImg = document.querySelector<HTMLElement>('.nl-mockup-img');
+      if (nlImg) {
+        gsap.from(nlImg, {
+          scale: 0.92, opacity: 0.5, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: nlImg, start: 'top 85%' }
+        });
+      }
+
+      // ---- CTA section: animate heading ----
+      const ctaH2 = document.querySelector<HTMLElement>('#cta h2');
+      if (ctaH2) {
+        gsap.from(ctaH2, {
+          y: 24, opacity: 0, duration: 0.7, ease: 'power3.out',
+          scrollTrigger: { trigger: '#cta', start: 'top 75%' }
+        });
+      }
+
     } catch { /* silent */ }
   })();
 </script>
