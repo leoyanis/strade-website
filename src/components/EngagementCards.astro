@@ -1,0 +1,66 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+---
+
+<section class="eng-section">
+  <div class="container">
+    <span class="label">{t(locale, 'consulting.offerings_label')}</span>
+
+    <div class="eng-top-row">
+      <!-- Card 1: Free Audit -->
+      <div class="eng-card reveal-section" style="--reveal-delay:0s; border-top: 2px solid var(--cyan)">
+        <h3>{t(locale, 'consulting.card1_h3')}</h3>
+        <p class="eng-body">{t(locale, 'consulting.card1_body')}</p>
+        <span class="tag eng-tag">{t(locale, 'consulting.card1_tag')}</span>
+        <a href={CALENDLY} target="_blank" rel="noopener" class="text-link eng-link">
+          {t(locale, 'consulting.card1_cta')} &#8594;
+        </a>
+      </div>
+
+      <!-- Card 2: Knowledge Transfer (featured) -->
+      <div class="eng-card eng-featured reveal-section" style="--reveal-delay:0.15s; border-top: 2px solid var(--cyan); box-shadow: 0 0 40px var(--cyan-dim)">
+        <h3>{t(locale, 'consulting.card2_h3')}</h3>
+        <p class="eng-body">{t(locale, 'consulting.card2_body')}</p>
+        <span class="tag eng-tag">{t(locale, 'consulting.card2_tag')}</span>
+        <a href={CALENDLY} target="_blank" rel="noopener" class="text-link eng-link">
+          {t(locale, 'consulting.card2_cta')} &#8594;
+        </a>
+      </div>
+    </div>
+
+    <!-- Card 3: Full width -->
+    <div class="eng-card eng-full reveal-section" style="--reveal-delay:0.3s; border-top: 2px solid var(--purple); margin-top: 24px">
+      <h3>{t(locale, 'consulting.card3_h3')}</h3>
+      <p class="eng-body" style="max-width:600px">{t(locale, 'consulting.card3_body')}</p>
+      <a href={CALENDLY} target="_blank" rel="noopener" class="text-link eng-link" style="color:var(--purple)">
+        {t(locale, 'consulting.card3_cta')} &#8594;
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .eng-section { padding: 96px 0; }
+  .eng-section .label { margin-bottom: 32px; }
+  .eng-top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .eng-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 40px;
+    transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s, border-color 0.4s;
+  }
+  .eng-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
+  .eng-card h3 { margin-bottom: 16px; }
+  .eng-body { color: var(--text-secondary); margin-bottom: 20px; }
+  .eng-tag { margin-bottom: 20px; display: inline-block; color: var(--cyan); border-color: rgba(0,229,255,0.2); }
+  .eng-link { font-size: 15px; font-weight: 600; display: block; margin-top: 8px; }
+  .eng-full { display: flex; gap: 48px; align-items: center; flex-wrap: wrap; }
+  .eng-full .eng-body { margin-bottom: 0; }
+
+  @media (max-width: 768px) {
+    .eng-top-row { grid-template-columns: 1fr; }
+    .eng-full { flex-direction: column; gap: 24px; }
+  }
+</style>

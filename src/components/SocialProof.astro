@@ -1,0 +1,44 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+---
+
+<section class="social-proof reveal-section">
+  <div class="container" style="text-align:center">
+    <p class="caption" style="margin-bottom:32px">{t(locale, 'social_proof.trusted')}</p>
+    <div class="logo-row">
+      <a href="https://studentventure.com" target="_blank" rel="noopener" class="logo-item">
+        <span class="logo-text">StudentVenture</span>
+      </a>
+      <a href="#" class="logo-item">
+        <span class="logo-text">YouCook</span>
+      </a>
+      <div class="logo-item logo-placeholder">
+        <span class="logo-text" style="opacity:0.3">Coming soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .social-proof {
+    padding: 48px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 48px; flex-wrap: wrap;
+  }
+  .logo-item {
+    opacity: 0.6;
+    transition: opacity 0.3s;
+    filter: grayscale(1);
+  }
+  .logo-item:hover { opacity: 1; filter: grayscale(0); }
+  .logo-text {
+    font-size: 18px; font-weight: 700;
+    color: var(--text-secondary); letter-spacing: -0.01em;
+  }
+</style>

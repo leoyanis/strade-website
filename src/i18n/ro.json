@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "services": "Servicii",
+    "work": "Proiecte",
+    "about": "Despre noi",
+    "book": "Programeaza o discutie"
+  },
+  "hero": {
+    "label": "Consultanta si Dezvoltare AI",
+    "h1_line1": "Facem produsul tau",
+    "h1_line2": "inteligent.",
+    "body": "Integrare AI, dezvoltare personalizata si transfer de cunostinte pentru startup-uri care vor sa livreze.",
+    "cta_primary": "Audit gratuit",
+    "cta_secondary": "Vezi proiectele noastre"
+  },
+  "social_proof": { "trusted": "De incredere pentru fondatorii care construiesc urmatoarea generatie de produse" },
+  "services": {
+    "label": "Ce facem",
+    "consulting_label": "Consultanta AI",
+    "consulting_h3": "Echipa ta invata sa construiasca si sa opereze sisteme AI.",
+    "consulting_body": "Antrenam echipa ta sa dezvolte functii AI in mod independent.",
+    "consulting_bullets": ["Arhitectura si selectia modelelor", "Prompt engineering si cadre de evaluare", "Transfer de cunostinte in cateva saptamani"],
+    "dev_label": "Dezvoltare",
+    "dev_h3": "Noi construim. Tu livrezi.",
+    "dev_body": "Aplicatii full-stack, cautare semantica, matching AI si functii LLM. Gata de productie.",
+    "dev_bullets": ["Aplicatii mobile si web", "Cautare semantica si matching AI", "Livrare end-to-end in saptamani"]
+  },
+  "case_study": {
+    "label": "Studiu de Caz", "client": "StudentVenture",
+    "tagline": "Matching semantic pentru 10.000+ profiluri. Fondatorii au numit-o magie.",
+    "cta": "Citeste studiul complet",
+    "problem_h": "Problema", "solution_h": "Solutia", "result_h": "Rezultatul",
+    "problem": "10.000 de studenti. Fara posibilitate de a-i potrivi cu angajatorii la scara.",
+    "solution": "Embeddings plus pgvector plus evaluare LLM. Cautare semantica ce intelege abilitati.",
+    "result": "In productie. Finantat. Matching sub o secunda.",
+    "stack_label": "Tech Stack", "stack_cta": "Audit gratuit"
+  },
+  "process": {
+    "label": "Cum lucram",
+    "h2_line1": "De la primul apel la productie",
+    "h2_line2": "in saptamani.",
+    "step1_num": "01", "step1_label": "Audit gratuit",
+    "step1_body": "Analizam produsul, datele si stack-ul tau. Primesti o foaie de parcurs AI prioritizata.",
+    "step1_sub": "Fara cost. Fara angajament.",
+    "step2_num": "02", "step2_label": "Transfer de cunostinte",
+    "step2_body": "Echipa ta invata sa construiasca sisteme AI. Arhitectura, selectia modelelor, prompts, evaluare.",
+    "step2_sub": "Echipa ta. Capacitatea ta. Pentru totdeauna.",
+    "step3_num": "03", "step3_label": "Construim si livram",
+    "step3_body": "Sau noi construim pentru tine. In productie in saptamani, nu luni.",
+    "step3_sub": "Definit. Pretuit. Livrat."
+  },
+  "founder": {
+    "name": "Yanis Schweizer", "label": "Fondator & Consultant",
+    "bio1": "4 ani construind cu LLM-uri. Cautare semantica la scara. Echipe formate sa opereze independent.",
+    "bio2": "Bazat in Europa. Lucreaza in engleza, germana, spaniola si romana."
+  },
+  "cta_block": {
+    "h2": "Gata sa faci produsul tau inteligent?",
+    "body": "Rezerva un audit gratuit. Fara cost, fara angajament. Analizam produsul si iti spunem ce este posibil.",
+    "button": "Audit gratuit"
+  },
+  "footer": {
+    "services": "Servicii", "consulting": "Consultanta", "development": "Dezvoltare", "free_audit": "Audit gratuit",
+    "connect": "Contact", "linkedin": "LinkedIn", "email": "Email", "calendly": "Calendly",
+    "legal": "2026 Strade SMIP SRL. Brasov, Romania. CIF: RO48204960"
+  },
+  "consulting": {
+    "label": "Consultanta AI",
+    "h1_line1": "Echipa ta construieste AI.",
+    "h1_line2": "Noi aratam cum.",
+    "body": "Arhitectura, selectia modelelor, prompt engineering, cadre de evaluare.",
+    "cta": "Audit gratuit",
+    "without_label": "Fara noi",
+    "without_bullets": ["Luni de incercari cu API-uri LLM", "O angajare costisitoare pe care nu ti-o permiti", "Un chatbot generic fara valoare reala", "Prompt engineering prin ghicire"],
+    "with_label": "Cu noi",
+    "with_bullets": ["Arhitectura dovedita din prima zi", "Echipa ta updatata in saptamani", "Functii AI pe care utilizatorii le numesc magie", "Cadru de evaluare pentru garantia calitatii"],
+    "offerings_label": "Ce obtii",
+    "card1_h3": "Audit gratuit", "card1_body": "Analizam produsul, datele si stack-ul tau. Primesti o foaie de parcurs AI.", "card1_tag": "Fara cost. Fara angajament.", "card1_cta": "Rezerva audit",
+    "card2_h3": "Transfer de cunostinte", "card2_body": "Training practic pentru echipa ta. Decizii de arhitectura, selectia modelelor, structura de prompts.", "card2_tag": "Echipa ta. Capacitatea ta. Pentru totdeauna.", "card2_cta": "Rezerva o discutie",
+    "card3_h3": "Implementare personalizata", "card3_body": "Noi construim pentru tine. Cautare semantica, matching AI, functii LLM, aplicatii full-stack.", "card3_cta": "Discuta proiectul",
+    "mini_label": "Dovedit in productie",
+    "mini_h2": "Matching semantic pentru 10.000+ profiluri.",
+    "mini_body": "StudentVenture. Platforma de recrutare cu doua fete. Chatbot AI creeaza briefing-uri de job prin conversatie. Cautare semantica gaseste candidatii in sub o secunda.",
+    "mini_cta": "Citeste studiul complet",
+    "faq_label": "Intrebari",
+    "faq": [
+      {"q": "Cu ce tip de companii lucrati?", "a": "Marketplace-uri si produse SaaS, de la seed pana la pre-Series A."},
+      {"q": "Ce include auditul gratuit?", "a": "Analizam produsul, datele si stack-ul tehnic. Primesti o foaie de parcurs prioritizata."},
+      {"q": "Cum difera transferul de cunostinte de angajarea unui inginer AI?", "a": "Antrenam echipa existenta in saptamani. Fara angajament salarial pe termen lung."},
+      {"q": "In ce limbi lucrati?", "a": "Engleza, germana, spaniola, romana."},
+      {"q": "Cat dureaza un angajament?", "a": "Transfer de cunostinte: 2 pana la 4 saptamani. Build-uri personalizate: 4 pana la 8 saptamani pana la productie."}
+    ]
+  },
+  "development": {
+    "label": "Dezvoltare",
+    "h1_line1": "Aplicatia ta. Construita si livrata",
+    "h1_line2": "in saptamani.",
+    "body": "Aplicatii mobile, web si cu AI. Personalizate. Gata de productie.",
+    "cta": "Incepe proiectul",
+    "cap_label": "Ce construim",
+    "cap1_h3": "Aplicatii Mobile", "cap1_body": "Flutter plus performanta nativa. iOS si Android dintr-o singura baza de cod.",
+    "cap2_h3": "Aplicatii Web", "cap2_body": "Aplicatii web full-stack care scaleza. Arhitectura curata, unelte moderne.",
+    "cap3_h3": "Integrare AI", "cap3_body": "Cautare, matching, generare, automatizare. Adaugam stratul de inteligenta la produsul tau.",
+    "projects_label": "Proiectele noastre"
+  },
+  "case_study_page": {
+    "label": "Studiu de Caz", "h1": "StudentVenture", "tagline": "Recrutare cu AI pentru talente tinere",
+    "metric1_num": "10.000+", "metric1_label": "profiluri indexate",
+    "metric2_num": "<1s", "metric2_label": "viteza de matching",
+    "metric3_num": "Live si Finantat", "metric3_label": "statut platforma",
+    "challenge_h": "Provocarea", "challenge_body": "StudentVenture este un marketplace cu peste 10.000 de profiluri. Cautarea prin cuvinte cheie rata 80% din potrivirile relevante.",
+    "approach_h": "Abordarea", "approach_body": "Am proiectat un sistem de cautare semantica cu embeddings OpenAI, pgvector pe PostgreSQL si un evaluator LLM.",
+    "result_h": "Rezultatul", "result_body": "Platforma a fost lansata in productie si a inchis runda de finantare.",
+    "quote": "Se simte ca magie.", "quote_attr": "Fondator, StudentVenture",
+    "stack_label": "Tech Stack utilizat", "next_label": "Urmatorul proiect", "next_title": "YouCook"
+  }
+}

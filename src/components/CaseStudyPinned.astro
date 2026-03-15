@@ -1,0 +1,309 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+---
+
+<section id="case-study" class="cs-outer">
+  <div id="cs-container" class="cs-container">
+
+    <!-- Slide dots indicator -->
+    <div class="cs-dots" aria-hidden="true">
+      <span class="cs-dot cs-dot-active" id="cs-dot-0"></span>
+      <span class="cs-dot" id="cs-dot-1"></span>
+      <span class="cs-dot" id="cs-dot-2"></span>
+    </div>
+
+    <!-- Slide 1: StudentVenture -->
+    <div class="cs-slide" id="cs-slide-0">
+      <div class="container cs-two-col">
+        <div class="cs-text">
+          <span class="label">CASE STUDY 01</span>
+          <h2>StudentVenture</h2>
+          <p class="cs-desc">Semantic matching over 10,000 student profiles. The founders called it magic.</p>
+          <div class="cs-tags">
+            <span class="tag">Flutter</span>
+            <span class="tag">pgvector</span>
+            <span class="tag">OpenAI</span>
+            <span class="tag">Firebase</span>
+          </div>
+          <a href="/case-studies/studentventure" class="text-link cs-cta">Read full case study <span aria-hidden="true">&#8594;</span></a>
+        </div>
+        <div class="cs-mockup-wrap">
+          <svg class="cs-wireframe" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="8" y="8" width="324" height="204" rx="10" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.15"/>
+            <rect x="0" y="0" width="340" height="220" rx="12" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.08"/>
+            <line x1="8" y1="30" x2="332" y2="30" stroke="#00e5ff" stroke-opacity="0.1" stroke-width="1"/>
+            <circle cx="22" cy="19" r="4" stroke="#00e5ff" stroke-opacity="0.12" stroke-width="1"/>
+            <circle cx="36" cy="19" r="4" stroke="#00e5ff" stroke-opacity="0.12" stroke-width="1"/>
+          </svg>
+          <div class="cs-mockup cs-float">
+            <div class="mockup-bar"><span></span><span></span><span></span></div>
+            <div class="mockup-content">
+              <div class="mockup-line mockup-line-cyan" style="width:55%"></div>
+              <div class="mockup-line" style="width:80%;margin-top:8px"></div>
+              <div class="mockup-line" style="width:40%;margin-top:6px"></div>
+              <div class="mockup-chip">Semantic Match: 94%</div>
+              <div class="mockup-chip mockup-chip-sm">pgvector</div>
+              <div class="mockup-chip mockup-chip-sm">OpenAI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: YouCook -->
+    <div class="cs-slide cs-slide-hidden" id="cs-slide-1">
+      <div class="container cs-two-col">
+        <div class="cs-text">
+          <span class="label">CASE STUDY 02</span>
+          <h2>YouCook</h2>
+          <p class="cs-desc">AI-powered recipe generation from the ingredients in your fridge. Scan, choose preferences, cook. Available on iOS and Android.</p>
+          <div class="cs-tags">
+            <span class="tag">Flutter</span>
+            <span class="tag">Firebase</span>
+            <span class="tag">RevenueCat</span>
+            <span class="tag">OpenAI</span>
+          </div>
+          <a href="https://youcookapp.com" target="_blank" rel="noopener" class="text-link cs-cta">Visit youcookapp.com <span aria-hidden="true">&#8594;</span></a>
+        </div>
+        <div class="cs-mockup-wrap">
+          <svg class="cs-wireframe" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="8" y="8" width="324" height="204" rx="10" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.15"/>
+            <rect x="0" y="0" width="340" height="220" rx="12" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.08"/>
+            <line x1="8" y1="30" x2="332" y2="30" stroke="#00e5ff" stroke-opacity="0.1" stroke-width="1"/>
+          </svg>
+          <div class="cs-mockup cs-float">
+            <div class="mockup-bar"><span></span><span></span><span></span></div>
+            <div class="mockup-content">
+              <div class="mockup-line mockup-line-purple" style="width:65%"></div>
+              <div class="mockup-line" style="width:75%;margin-top:8px"></div>
+              <div class="mockup-line" style="width:50%;margin-top:6px"></div>
+              <div class="mockup-chip mockup-chip-purple">Recipe Generated</div>
+              <div class="mockup-chip mockup-chip-sm">iOS</div>
+              <div class="mockup-chip mockup-chip-sm">Android</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Noteless -->
+    <div class="cs-slide cs-slide-hidden" id="cs-slide-2">
+      <div class="container cs-two-col">
+        <div class="cs-text">
+          <span class="label">CASE STUDY 03</span>
+          <h2>Noteless</h2>
+          <p class="cs-desc">AI note-taking with ChatGPT integration. Speech-to-text, smart assistant, image-to-text. Multi-platform.</p>
+          <div class="cs-tags">
+            <span class="tag">Flutter</span>
+            <span class="tag">Firebase</span>
+            <span class="tag">OpenAI</span>
+          </div>
+          <a href="https://noteless.co.uk" target="_blank" rel="noopener" class="text-link cs-cta">Visit noteless.co.uk <span aria-hidden="true">&#8594;</span></a>
+        </div>
+        <div class="cs-mockup-wrap">
+          <svg class="cs-wireframe" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="8" y="8" width="324" height="204" rx="10" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.15"/>
+            <rect x="0" y="0" width="340" height="220" rx="12" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.08"/>
+            <line x1="8" y1="30" x2="332" y2="30" stroke="#00e5ff" stroke-opacity="0.1" stroke-width="1"/>
+          </svg>
+          <div class="cs-mockup cs-float">
+            <div class="mockup-bar"><span></span><span></span><span></span></div>
+            <div class="mockup-content">
+              <div class="mockup-line mockup-line-cyan" style="width:70%"></div>
+              <div class="mockup-line" style="width:60%;margin-top:8px"></div>
+              <div class="mockup-line" style="width:85%;margin-top:6px"></div>
+              <div class="mockup-chip">Speech-to-text</div>
+              <div class="mockup-chip mockup-chip-sm">ChatGPT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* GSAP pin handles the scroll travel -- no CSS sticky needed */
+  .cs-outer {
+    position: relative;
+    background: var(--bg-void);
+  }
+
+  /* Container: 100vh, GSAP will pin it and add spacer for 300vh travel */
+  .cs-container {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Slides: stacked absolutely */
+  .cs-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .cs-slide-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+  }
+
+  /* Two-col layout */
+  .cs-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    width: 100%;
+  }
+  .cs-text h2 { margin: 12px 0 16px; }
+  .cs-desc { color: var(--text-secondary); margin-bottom: 24px; font-size: 17px; line-height: 1.7; }
+  .cs-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .cs-cta { font-size: 15px; font-weight: 600; }
+
+  /* Slide dots */
+  .cs-dots {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .cs-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border);
+    transition: width 0.3s, background 0.3s;
+  }
+  .cs-dot-active {
+    width: 8px; height: 8px;
+    background: var(--cyan);
+  }
+
+  /* Mockup */
+  .cs-mockup-wrap { position: relative; }
+  .cs-wireframe {
+    position: absolute; top: -8px; left: -8px;
+    width: calc(100% + 16px); height: calc(100% + 16px);
+    pointer-events: none; z-index: 0;
+  }
+  .cs-float {
+    animation: float-mock 3s ease-in-out infinite;
+    position: relative; z-index: 1;
+  }
+  @keyframes float-mock {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .cs-mockup {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+  }
+  .mockup-bar {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 6px;
+  }
+  .mockup-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--border-hover); }
+  .mockup-content { padding: 20px; }
+  .mockup-line { height: 8px; background: var(--bg-elevated); border-radius: 4px; }
+  .mockup-line-cyan { background: rgba(0,229,255,0.3); }
+  .mockup-line-purple { background: rgba(123,47,255,0.3); }
+  .mockup-chip {
+    display: inline-block; margin-top: 16px; margin-right: 8px;
+    padding: 6px 12px; border-radius: 4px;
+    background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2);
+    color: var(--cyan); font-size: 12px; font-weight: 600;
+  }
+  .mockup-chip-purple {
+    background: rgba(123,47,255,0.1); border-color: rgba(123,47,255,0.2);
+    color: var(--purple);
+  }
+  .mockup-chip-sm { font-size: 11px; padding: 4px 10px; }
+
+  /* Mobile: no pinning, each slide scrolls normally */
+  @media (max-width: 768px) {
+    .cs-container { height: auto; display: block; overflow: visible; }
+    .cs-slide { position: relative; inset: auto; opacity: 1 !important; transform: none !important; pointer-events: auto !important; padding: 64px 0; }
+    .cs-two-col { grid-template-columns: 1fr; gap: 32px; }
+    .cs-dots { display: none; }
+  }
+</style>
+
+<script>
+  (async () => {
+    if (window.innerWidth < 768) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      const slides = [
+        document.getElementById('cs-slide-0'),
+        document.getElementById('cs-slide-1'),
+        document.getElementById('cs-slide-2'),
+      ];
+      const dots = [
+        document.getElementById('cs-dot-0'),
+        document.getElementById('cs-dot-1'),
+        document.getElementById('cs-dot-2'),
+      ];
+
+      let activeSlide = 0;
+
+      function showSlide(idx) {
+        if (idx === activeSlide) return;
+        const prev = slides[activeSlide];
+        const next = slides[idx];
+        if (prev) { prev.style.opacity = '0'; prev.style.pointerEvents = 'none'; prev.style.transform = 'translateY(-20px)'; }
+        if (next) { next.style.opacity = '1'; next.style.pointerEvents = 'auto'; next.style.transform = 'translateY(0)'; }
+        dots.forEach((d, i) => {
+          if (!d) return;
+          d.classList.toggle('cs-dot-active', i === idx);
+          d.style.width = i === idx ? '8px' : '6px';
+          d.style.height = i === idx ? '8px' : '6px';
+          d.style.background = i === idx ? 'var(--cyan)' : 'var(--border)';
+        });
+        activeSlide = idx;
+      }
+
+      // GSAP pin: pins #cs-container for 300vh of extra scroll travel
+      // end: '+=300%' adds 300vh spacer so user scrolls through 3 slides
+      ScrollTrigger.create({
+        trigger: '#cs-container',
+        start: 'top top',
+        end: '+=300%',
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          const p = self.progress;
+          if (p < 0.33) showSlide(0);
+          else if (p < 0.66) showSlide(1);
+          else showSlide(2);
+        },
+      });
+
+      // Refresh after load to ensure correct sizing
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch (e) {
+      // Fallback: just show all slides stacked if GSAP fails
+      const container = document.getElementById('cs-container');
+      if (container) { container.style.position = 'relative'; container.style.height = 'auto'; }
+      document.querySelectorAll('.cs-slide').forEach(s => {
+        (s as HTMLElement).style.position = 'relative';
+        (s as HTMLElement).style.opacity = '1';
+        (s as HTMLElement).style.pointerEvents = 'auto';
+      });
+    }
+  })();
+</script>

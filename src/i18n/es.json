@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "services": "Servicios",
+    "work": "Proyectos",
+    "about": "Nosotros",
+    "book": "Reservar llamada"
+  },
+  "hero": {
+    "label": "Consultoria y Desarrollo de IA",
+    "h1_line1": "Hacemos tu producto",
+    "h1_line2": "inteligente.",
+    "body": "Integracion de IA, desarrollo personalizado y transferencia de conocimiento para startups que necesitan lanzar.",
+    "cta_primary": "Auditoria gratuita",
+    "cta_secondary": "Ver nuestro trabajo"
+  },
+  "social_proof": { "trusted": "Con la confianza de fundadores que construyen la proxima generacion de productos" },
+  "services": {
+    "label": "Lo que hacemos",
+    "consulting_label": "Consultoria de IA",
+    "consulting_h3": "Tu equipo aprende a construir y operar sistemas de IA.",
+    "consulting_body": "Formamos a tu equipo para desarrollar funciones de IA de forma independiente.",
+    "consulting_bullets": ["Arquitectura y seleccion de modelos", "Ingenieria de prompts y marcos de evaluacion", "Transferencia de conocimiento en semanas"],
+    "dev_label": "Desarrollo",
+    "dev_h3": "Lo construimos. Tu lo lanzas.",
+    "dev_body": "Aplicaciones full-stack, busqueda semantica, matching con IA y funciones LLM. Listas para produccion.",
+    "dev_bullets": ["Aplicaciones moviles y web", "Busqueda semantica y matching con IA", "Entrega end-to-end en semanas"]
+  },
+  "case_study": {
+    "label": "Caso de Estudio", "client": "StudentVenture",
+    "tagline": "Matching semantico sobre 10.000+ perfiles. Los fundadores lo llamaron magia.",
+    "cta": "Leer caso completo",
+    "problem_h": "El Problema", "solution_h": "La Solucion", "result_h": "El Resultado",
+    "problem": "10.000 estudiantes. Sin forma de conectarlos con empleadores a escala.",
+    "solution": "Embeddings mas pgvector mas calificacion LLM. Busqueda semantica que entiende habilidades.",
+    "result": "En produccion. Financiado. Matching en menos de un segundo.",
+    "stack_label": "Stack Tecnologico", "stack_cta": "Reservar auditoria gratuita"
+  },
+  "process": {
+    "label": "Como trabajamos",
+    "h2_line1": "De la primera llamada a produccion",
+    "h2_line2": "en semanas.",
+    "step1_num": "01", "step1_label": "Auditoria gratuita",
+    "step1_body": "Revisamos tu producto, datos y stack. Obtienes una hoja de ruta de IA priorizada.",
+    "step1_sub": "Sin coste. Sin compromiso.",
+    "step2_num": "02", "step2_label": "Transferencia de conocimiento",
+    "step2_body": "Tu equipo aprende a construir sistemas de IA. Arquitectura, seleccion de modelos, prompts.",
+    "step2_sub": "Tu equipo. Tu capacidad. Para siempre.",
+    "step3_num": "03", "step3_label": "Construir y lanzar",
+    "step3_body": "O lo construimos por ti. En produccion en semanas, no meses.",
+    "step3_sub": "Alcance definido. Precio fijo. Entregado."
+  },
+  "founder": {
+    "name": "Yanis Schweizer", "label": "Fundador y Consultor",
+    "bio1": "4 anos construyendo con LLMs. Busqueda semantica a escala. Equipos formados para operar de forma independiente.",
+    "bio2": "Basado en Europa. Trabaja en ingles, aleman, espanol y rumano."
+  },
+  "cta_block": {
+    "h2": "Listo para hacer tu producto inteligente?",
+    "body": "Reserva una auditoria gratuita. Sin coste, sin compromiso. Analizamos tu producto y te decimos que es posible.",
+    "button": "Reservar auditoria gratuita"
+  },
+  "footer": {
+    "services": "Servicios", "consulting": "Consultoria", "development": "Desarrollo", "free_audit": "Auditoria gratuita",
+    "connect": "Conectar", "linkedin": "LinkedIn", "email": "Email", "calendly": "Calendly",
+    "legal": "2026 Strade SMIP SRL. Brasov, Rumania. CIF: RO48204960"
+  },
+  "consulting": {
+    "label": "Consultoria de IA",
+    "h1_line1": "Tu equipo construye IA.",
+    "h1_line2": "Nosotros ensenamos como.",
+    "body": "Arquitectura, seleccion de modelos, ingenieria de prompts, marcos de evaluacion.",
+    "cta": "Reservar auditoria gratuita",
+    "without_label": "Sin nosotros",
+    "without_bullets": ["Meses de prueba y error con APIs LLM", "Una costosa contratacion de IA que no puedes permitirte", "Un chatbot generico sin valor real", "Ingenieria de prompts a ciegas"],
+    "with_label": "Con nosotros",
+    "with_bullets": ["Arquitectura probada desde el primer dia", "Tu equipo actualizado en semanas", "Funciones de IA que los usuarios llaman magia", "Marco de evaluacion para saber que funciona"],
+    "offerings_label": "Que obtienes",
+    "card1_h3": "Auditoria gratuita", "card1_body": "Revisamos tu producto, datos y stack. Obtienes una hoja de ruta de IA priorizada.", "card1_tag": "Sin coste. Sin compromiso.", "card1_cta": "Reservar auditoria",
+    "card2_h3": "Transferencia de conocimiento", "card2_body": "Formacion practica para tu equipo. Decisiones de arquitectura, seleccion de modelos, estructura de prompts.", "card2_tag": "Tu equipo. Tu capacidad. Para siempre.", "card2_cta": "Reservar llamada",
+    "card3_h3": "Implementacion personalizada", "card3_body": "Lo construimos por ti. Busqueda semantica, matching con IA, funciones LLM, aplicaciones full-stack.", "card3_cta": "Hablar del proyecto",
+    "mini_label": "Probado en produccion",
+    "mini_h2": "Matching semantico para 10.000+ perfiles.",
+    "mini_body": "StudentVenture. Plataforma de reclutamiento dual. Chatbot de IA crea briefings de trabajo por conversacion. Busqueda semantica encuentra candidatos en menos de un segundo.",
+    "mini_cta": "Leer el caso completo",
+    "faq_label": "Preguntas",
+    "faq": [
+      {"q": "Con que tipo de empresas trabajais?", "a": "Marketplaces y productos SaaS, desde seed hasta pre-Series A."},
+      {"q": "Que incluye la auditoria gratuita?", "a": "Revisamos tu producto, datos y stack tecnologico. Obtienes una hoja de ruta priorizada. Tipicamente una llamada de 30 minutos mas un resumen escrito."},
+      {"q": "Como se diferencia la transferencia de conocimiento de contratar un ingeniero de IA?", "a": "Formamos a tu equipo existente en semanas. Sin compromiso salarial a largo plazo."},
+      {"q": "En que idiomas trabajais?", "a": "Ingles, aleman, espanol, rumano."},
+      {"q": "Cuanto dura un compromiso?", "a": "Transferencia de conocimiento: 2 a 4 semanas. Builds personalizados: tipicamente 4 a 8 semanas hasta produccion."}
+    ]
+  },
+  "development": {
+    "label": "Desarrollo",
+    "h1_line1": "Tu app. Construida y lanzada",
+    "h1_line2": "en semanas.",
+    "body": "Aplicaciones moviles, web y con IA. Personalizadas. Listas para produccion.",
+    "cta": "Iniciar proyecto",
+    "cap_label": "Lo que construimos",
+    "cap1_h3": "Apps Moviles", "cap1_body": "Flutter mas rendimiento nativo. iOS y Android desde una sola base de codigo.",
+    "cap2_h3": "Aplicaciones Web", "cap2_body": "Apps web full-stack que escalan. Arquitectura limpia, herramientas modernas.",
+    "cap3_h3": "Integracion de IA", "cap3_body": "Busqueda, matching, generacion, automatizacion. Anadimos la capa de inteligencia a tu producto.",
+    "projects_label": "Nuestros proyectos"
+  },
+  "case_study_page": {
+    "label": "Caso de Estudio", "h1": "StudentVenture", "tagline": "Reclutamiento con IA para talento temprano",
+    "metric1_num": "10.000+", "metric1_label": "perfiles indexados",
+    "metric2_num": "<1s", "metric2_label": "velocidad de matching",
+    "metric3_num": "Activo y Financiado", "metric3_label": "estado de la plataforma",
+    "challenge_h": "El Desafio", "challenge_body": "StudentVenture es un marketplace de reclutamiento con mas de 10.000 perfiles. La busqueda por palabras clave fallaba en el 80% de los casos.",
+    "approach_h": "El Enfoque", "approach_body": "Disenamos un sistema de busqueda semantica con embeddings de OpenAI, pgvector en PostgreSQL y un clasificador LLM.",
+    "result_h": "El Resultado", "result_body": "La plataforma se lanzo a produccion y cerro su ronda de financiacion.",
+    "quote": "Se siente como magia.", "quote_attr": "Fundador, StudentVenture",
+    "stack_label": "Stack tecnologico utilizado", "next_label": "Siguiente proyecto", "next_title": "YouCook"
+  }
+}

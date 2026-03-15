@@ -1,0 +1,55 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+---
+
+<section class="cta-block reveal-section">
+  <!-- Gradient mesh background -->
+  <div class="cta-mesh" aria-hidden="true">
+    <div class="cta-mesh-1"></div>
+    <div class="cta-mesh-2"></div>
+  </div>
+
+  <div class="container cta-inner">
+    <h2>{t(locale, 'cta_block.h2')}</h2>
+    <p class="cta-body">{t(locale, 'cta_block.body')}</p>
+    <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary btn-cta">
+      {t(locale, 'cta_block.button')} <span aria-hidden="true">&#8594;</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta-block {
+    margin: 64px auto; padding: 96px 0;
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+  .cta-mesh { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .cta-mesh-1 {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 700px 500px at 20% 50%, rgba(0,229,255,0.12), transparent);
+    animation: mesh-drift-1 20s ease-in-out infinite;
+  }
+  .cta-mesh-2 {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 500px 700px at 80% 50%, rgba(123,47,255,0.12), transparent);
+    animation: mesh-drift-2 20s ease-in-out infinite;
+  }
+  .cta-inner {
+    position: relative; z-index: 1;
+    max-width: 900px;
+  }
+  .cta-body {
+    color: var(--text-secondary); font-size: 18px;
+    max-width: 520px; margin: 16px auto 40px;
+  }
+  .btn-cta {
+    padding: 16px 32px; font-size: 18px;
+  }
+  .btn-cta:hover {
+    box-shadow: 0 0 30px var(--cyan-glow);
+  }
+</style>

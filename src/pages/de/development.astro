@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t } from '../../i18n/utils';
+import TechMarquee from '../../components/TechMarquee.astro';
+import CTABlock from '../../components/CTABlock.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+const locale = 'de';
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+---
+<Base title="Entwicklung | Strade" description="Flutter Apps, Full-Stack-Web und KI-Funktionen. In Wochen geliefert." locale={locale} path="/development">
+  <section style="min-height:80vh;display:flex;align-items:center;position:relative;overflow:hidden;padding-top:96px">
+    <div class="container" style="position:relative;z-index:1;padding-bottom:64px">
+      <span class="label" style="color:var(--purple)">{t(locale,'development.label')}</span>
+      <h1 style="margin:16px 0 24px">{t(locale,'development.h1_line1')}<br/><span style="color:var(--purple)">{t(locale,'development.h1_line2')}</span></h1>
+      <p style="max-width:520px;color:var(--text-secondary);font-size:18px">{t(locale,'development.body')}</p>
+      <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary" style="margin-top:32px;display:inline-flex;gap:8px;background:var(--purple)">{t(locale,'development.cta')} &#8594;</a>
+    </div>
+  </section>
+  <section style="padding:64px 0"><div class="container">
+    <span class="label">{t(locale,'development.projects_label')}</span>
+    <ProjectCard title="StudentVenture" tagline="KI-Recruiting-Marktplatz. Semantische Suche fur 10.000+ Profile." tags={['Flutter','Firebase','pgvector','OpenAI']} caseStudyUrl="/case-studies/studentventure"/>
+  </div></section>
+  <TechMarquee />
+  <CTABlock locale={locale} />
+</Base>

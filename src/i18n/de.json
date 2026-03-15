@@ -1,0 +1,188 @@
+{
+  "nav": {
+    "services": "Leistungen",
+    "work": "Projekte",
+    "about": "Uber uns",
+    "book": "Termin buchen"
+  },
+  "hero": {
+    "label": "KI-Beratung & Entwicklung",
+    "h1_line1": "Wir machen Ihr Produkt",
+    "h1_line2": "intelligent.",
+    "body": "KI-Integration, massgeschneiderte Entwicklung und Wissenstransfer fur Startups, die liefern wollen.",
+    "cta_primary": "Kostenloses Audit buchen",
+    "cta_secondary": "Unsere Projekte"
+  },
+  "social_proof": {
+    "trusted": "Trusted by founders building the next wave of products"
+  },
+  "services": {
+    "label": "Was wir tun",
+    "consulting_label": "KI-Beratung",
+    "consulting_h3": "Ihr Team lernt, KI-Systeme zu bauen und zu betreiben.",
+    "consulting_body": "Wir trainieren Ihr Team, KI-Funktionen eigenstandig zu entwickeln und zu betreiben. Die Kompetenz bleibt nach unserem Einsatz bei Ihnen.",
+    "consulting_bullets": [
+      "Architektur und Modellauswahl",
+      "Prompt Engineering und Evaluierungsframeworks",
+      "Praxisnaher Wissenstransfer in wenigen Wochen"
+    ],
+    "dev_label": "Entwicklung",
+    "dev_h3": "Wir bauen es. Sie liefern es aus.",
+    "dev_body": "Full-Stack-Applikationen, semantische Suche, KI-Matching und LLM-Funktionen. Produktionsreif und auf Ihre Bedurfnisse zugeschnitten.",
+    "dev_bullets": [
+      "Mobile und Web-Applikationen",
+      "Semantische Suche und KI-Matching",
+      "End-to-End-Lieferung in wenigen Wochen"
+    ]
+  },
+  "case_study": {
+    "label": "Fallstudie",
+    "client": "StudentVenture",
+    "tagline": "Semantisches Matching uber 10.000+ Studentenprofile. Die Grunder nannten es Magie.",
+    "cta": "Vollstandige Fallstudie lesen",
+    "problem_h": "Das Problem",
+    "solution_h": "Die Losung",
+    "result_h": "Das Ergebnis",
+    "problem": "10.000 Studenten. Kein Weg, sie Arbeitgebern zuzuordnen. Keyword-Suche verfehlte 80% der passenden Kandidaten.",
+    "solution": "Embeddings plus pgvector plus LLM-Bewertung. Semantische Suche, die Fahigkeiten versteht.",
+    "result": "Live. Finanziert. Sub-Sekunden-Matching. Grunder beschrieben es als 'fuhlt sich wie Magie an.'",
+    "stack_label": "Tech Stack",
+    "stack_cta": "Kostenloses Audit buchen"
+  },
+  "process": {
+    "label": "So arbeiten wir",
+    "h2_line1": "Vom ersten Gesprach bis zur Produktion",
+    "h2_line2": "in wenigen Wochen.",
+    "step1_num": "01",
+    "step1_label": "Kostenloses Audit",
+    "step1_body": "Wir analysieren Ihr Produkt, Ihre Daten und Ihren Stack. Sie erhalten eine priorisierte KI-Roadmap.",
+    "step1_sub": "Keine Kosten. Keine Verpflichtung.",
+    "step2_num": "02",
+    "step2_label": "Wissenstransfer",
+    "step2_body": "Ihr Team lernt, KI-Systeme zu entwickeln und zu betreiben. Architektur, Modellauswahl, Prompts, Evaluierung.",
+    "step2_sub": "Ihr Team. Ihre Fahigkeit. Fur immer.",
+    "step3_num": "03",
+    "step3_label": "Bauen & Liefern",
+    "step3_body": "Oder wir bauen es fur Sie. Live in Wochen, nicht Monaten.",
+    "step3_sub": "Kalkuliert. Bepreist. Geliefert."
+  },
+  "founder": {
+    "name": "Yanis Schweizer",
+    "label": "Grunder & Berater",
+    "bio1": "4 Jahre Erfahrung mit LLMs. Semantische Suche in grossem Massstab entwickelt. Teams eigenstandig gemacht.",
+    "bio2": "In Europa ansassig. Arbeitet auf Englisch, Deutsch, Spanisch und Rumanisch."
+  },
+  "cta_block": {
+    "h2": "Bereit, Ihr Produkt intelligent zu machen?",
+    "body": "Kostenloses Audit buchen. Keine Kosten, keine Verpflichtung. Wir analysieren Ihr Produkt und zeigen, was moglich ist.",
+    "button": "Kostenloses Audit buchen"
+  },
+  "footer": {
+    "services": "Leistungen",
+    "consulting": "Beratung",
+    "development": "Entwicklung",
+    "free_audit": "Kostenloses Audit",
+    "connect": "Kontakt",
+    "linkedin": "LinkedIn",
+    "email": "E-Mail",
+    "calendly": "Calendly",
+    "legal": "2026 Strade SMIP SRL. Brasov, Rumanien. CIF: RO48204960"
+  },
+  "consulting": {
+    "label": "KI-Beratung",
+    "h1_line1": "Ihr Team entwickelt KI.",
+    "h1_line2": "Wir zeigen wie.",
+    "body": "Architektur, Modellauswahl, Prompt Engineering, Evaluierungsframeworks. Ihr Team verlasst uns fahig, eigenstandig umzusetzen.",
+    "cta": "Kostenloses Audit buchen",
+    "without_label": "Ohne uns",
+    "without_bullets": [
+      "Monate des Ausprobierens mit LLM-APIs",
+      "Eine teure KI-Einstellung, die Sie sich noch nicht leisten konnen",
+      "Ein generischer Chatbot ohne echten Mehrwert",
+      "Prompt Engineering nach Bauchgefuhl"
+    ],
+    "with_label": "Mit uns",
+    "with_bullets": [
+      "Bewahnte Architektur von Anfang an",
+      "Ihr bestehendes Team in wenigen Wochen upskilled",
+      "KI-Funktionen, die Nutzer als Magie beschreiben",
+      "Evaluierungsframework, das Qualitat sichert"
+    ],
+    "offerings_label": "Was Sie bekommen",
+    "card1_h3": "Kostenloses Audit",
+    "card1_body": "Wir analysieren Ihr Produkt, Ihre Daten und Ihren Stack. Sie erhalten eine priorisierte KI-Roadmap.",
+    "card1_tag": "Keine Kosten. Keine Verpflichtung.",
+    "card1_cta": "Audit buchen",
+    "card2_h3": "Wissenstransfer",
+    "card2_body": "Praxisnahes Training fur Ihr Team. Architekturentscheidungen, Modellauswahl, Prompt-Struktur, Evaluierungsframeworks.",
+    "card2_tag": "Ihr Team. Ihre Fahigkeit. Fur immer.",
+    "card2_cta": "Termin buchen",
+    "card3_h3": "Massgeschneiderte Umsetzung",
+    "card3_body": "Wir bauen es fur Sie. Semantische Suche, KI-Matching, LLM-Funktionen, Full-Stack-Applikationen.",
+    "card3_cta": "Projekt besprechen",
+    "mini_label": "Bewahnt in der Praxis",
+    "mini_h2": "Semantisches Matching fur 10.000+ Profile.",
+    "mini_body": "StudentVenture. Dual-seitige Recruiting-Plattform. KI-Chatbot erstellt Stellenbriefe per Gesprach. Semantische Suche findet passende Kandidaten in unter einer Sekunde. Live. Finanziert. Als Magie beschrieben.",
+    "mini_cta": "Vollstandige Fallstudie lesen",
+    "faq_label": "Fragen",
+    "faq": [
+      {
+        "q": "Mit welchen Unternehmen arbeiten Sie?",
+        "a": "Marktplatze und SaaS-Produkte, von Seed bis pre-Series A. Wenn Ihr Produkt ein Such-, Entdeckungs-, Matching- oder Empfehlungsproblem hat, konnen wir helfen."
+      },
+      {
+        "q": "Was beinhaltet das kostenlose Audit?",
+        "a": "Wir analysieren Ihr Produkt, Ihre Daten und Ihren Tech-Stack. Sie erhalten eine priorisierte Roadmap fur die KI-Integration. In der Regel ein 30-minutiges Gesprach plus schriftliche Zusammenfassung."
+      },
+      {
+        "q": "Wie unterscheidet sich Wissenstransfer vom Einstellen eines KI-Ingenieurs?",
+        "a": "Wir trainieren Ihr bestehendes Team in wenigen Wochen. Sie lernen, KI-Systeme eigenstandig zu entwickeln. Keine Gehaltskosten, kein Recruiting, kein Onboarding."
+      },
+      {
+        "q": "In welchen Sprachen arbeiten Sie?",
+        "a": "Englisch, Deutsch, Spanisch, Rumanisch. Wir arbeiten mit Teams in ganz Europa und daruber hinaus."
+      },
+      {
+        "q": "Wie lange dauert ein Engagement?",
+        "a": "Wissenstransfer: 2 bis 4 Wochen. Individuelle Builds: projektabhangig, typischerweise 4 bis 8 Wochen bis zur Produktion."
+      }
+    ]
+  },
+  "development": {
+    "label": "Entwicklung",
+    "h1_line1": "Ihre App. Gebaut und",
+    "h1_line2": "in Wochen geliefert.",
+    "body": "Mobile, Web und KI-Applikationen. Massgeschneidert. Produktionsreif.",
+    "cta": "Projekt starten",
+    "cap_label": "Was wir bauen",
+    "cap1_h3": "Mobile Apps",
+    "cap1_body": "Flutter plus native Performance. iOS und Android aus einer Codebase. Schnelle Iteration, poliertes UI.",
+    "cap2_h3": "Web-Applikationen",
+    "cap2_body": "Full-Stack-Web-Apps, die skalieren. Saubere Architektur, moderne Werkzeuge, in der Produktion.",
+    "cap3_h3": "KI-Integration",
+    "cap3_body": "Suche, Matching, Generierung, Automatisierung. Wir fugen die Intelligenzschicht zu Ihrem Produkt hinzu.",
+    "projects_label": "Unsere Projekte"
+  },
+  "case_study_page": {
+    "label": "Fallstudie",
+    "h1": "StudentVenture",
+    "tagline": "KI-gestutztes Recruiting fur Nachwuchstalente",
+    "metric1_num": "10.000+",
+    "metric1_label": "indizierte Profile",
+    "metric2_num": "<1s",
+    "metric2_label": "Matching-Geschwindigkeit",
+    "metric3_num": "Live & Finanziert",
+    "metric3_label": "Plattformstatus",
+    "challenge_h": "Die Herausforderung",
+    "challenge_body": "StudentVenture ist ein zweiseitiger Recruiting-Marktplatz fur Nachwuchstalente. Die Plattform hatte uber 10.000 Studentenprofile. Das Problem: Keine Moglichkeit, sie in grossem Massstab relevanten Arbeitgebern zuzuordnen. Traditionelle Keyword-Suche verfehlte 80% der passenden Kandidaten.",
+    "approach_h": "Der Ansatz",
+    "approach_body": "Wir haben ein semantisches Suchsystem mit OpenAI Embeddings, pgvector auf PostgreSQL und einem LLM-basierten Bewertungsschicht entwickelt. Studentenprofile werden bei der Erstellung eingebettet. Wenn ein Arbeitgeber eine Stellenbeschreibung erstellt, fuhrt das System eine Suche uber alle 10.000+ Embeddings durch und bewertet die Top-Kandidaten.",
+    "result_h": "Das Ergebnis",
+    "result_body": "Die Plattform wurde in Produktion gebracht und schloss ihre Finanzierungsrunde ab. Sub-Sekunden-Semantik-Matching ist live.",
+    "quote": "Es fuhlt sich wie Magie an.",
+    "quote_attr": "Grunder, StudentVenture",
+    "stack_label": "Verwendeter Tech-Stack",
+    "next_label": "Nachstes Projekt",
+    "next_title": "YouCook"
+  }
+}

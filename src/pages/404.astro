@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="404 | Strade"
+  description="This page does not exist."
+  locale="en"
+  path="/404"
+>
+  <section class="not-found">
+    <div class="nf-dot-rain" id="nf-dots" aria-hidden="true"></div>
+    <div class="container nf-content">
+      <span class="label">404</span>
+      <h1>This page does not exist.</h1>
+      <p style="color:var(--text-secondary);margin:16px 0 32px">
+        Let's get you back on track.
+      </p>
+      <a href="/" class="btn-primary">Go home &#8594;</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .not-found {
+    min-height: 100vh; display: flex; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .nf-dot-rain {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
+    background-size: 32px 32px;
+    animation: rain-fall 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes rain-fall {
+    from { background-position: 0 0; }
+    to { background-position: 0 100px; }
+  }
+  .nf-content { position: relative; z-index: 1; }
+  .nf-content h1 { margin: 12px 0; }
+</style>

@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import CTABlock from '../../components/CTABlock.astro';
+const locale = 'en';
+---
+
+<Base
+  title="YouCook Case Study | Strade"
+  description="AI-powered cooking app built with Flutter and Firebase. Recipe generation and meal planning."
+  locale={locale}
+  path="/case-studies/youcook"
+>
+  <section class="cs-hero" style="min-height:60vh;display:flex;align-items:flex-end;padding-bottom:64px;background:linear-gradient(to bottom, var(--bg-void) 60%, var(--bg-base))">
+    <div class="container" style="padding-top:96px;position:relative;z-index:1">
+      <span class="label">Case Study</span>
+      <h1>YouCook</h1>
+      <p style="color:var(--text-secondary);font-size:18px;max-width:500px;margin-top:12px">
+        AI-powered cooking and meal planning app.
+      </p>
+    </div>
+  </section>
+
+  <section style="padding:64px 0 96px">
+    <div class="container" style="max-width:800px;margin:0 auto">
+      <h2 style="margin-bottom:16px">The Project</h2>
+      <p style="color:var(--text-secondary);line-height:1.8">
+        YouCook is a mobile application that uses AI to generate personalized recipes and meal plans based on dietary preferences, available ingredients, and cooking skill level. Built with Flutter for cross-platform delivery on iOS and Android.
+      </p>
+
+      <h2 style="margin:48px 0 16px">Tech Stack</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+        {['Flutter', 'Firebase', 'OpenAI', 'RevenueCat', 'Dart'].map(t => (
+          <span class="tag">{t}</span>
+        ))}
+      </div>
+
+      <div style="margin-top:48px;padding:32px;background:var(--bg-surface);border-radius:8px;border-left:2px solid var(--cyan)">
+        <p style="color:var(--text-secondary);font-style:italic;font-size:18px">Full case study coming soon.</p>
+      </div>
+    </div>
+  </section>
+
+  <CTABlock locale={locale} />
+</Base>

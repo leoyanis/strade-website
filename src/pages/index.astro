@@ -1,0 +1,734 @@
+---
+import Base from '../layouts/Base.astro';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "Strade",
+      "url": "https://strade.tech",
+      "logo": "https://strade.tech/images/logo.svg",
+      "description": "AI consulting and custom development for startups.",
+      "founder": { "@type": "Person", "name": "Yanis Schweizer" },
+    },
+    {
+      "@type": "Person",
+      "name": "Yanis Schweizer",
+      "jobTitle": "Founder and AI Consultant",
+      "worksFor": { "@type": "Organization", "name": "Strade" },
+      "knowsLanguage": ["en", "de", "es", "ro"],
+    },
+    {
+      "@type": "Service",
+      "name": "AI Consulting",
+      "provider": { "@type": "Organization", "name": "Strade" },
+      "description": "Knowledge transfer and AI architecture consulting for startup teams.",
+    },
+    {
+      "@type": "Service",
+      "name": "Custom AI Development",
+      "provider": { "@type": "Organization", "name": "Strade" },
+      "description": "Custom mobile, web, and AI-powered applications for startups.",
+    },
+  ]
+};
+---
+
+<Base
+  title="Strade: AI Consulting and Development for Startups"
+  description="Custom AI integration and development for startups. Consulting and building. See our work: StudentVenture, YouCook, Noteless."
+  locale="en"
+  path="/"
+  schema={schema}
+>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="hero-glow"></div>
+      <span class="hero-label" id="hero-label">AI Consulting &amp; Development</span>
+      <h1 class="hero-h1" id="hero-h1">We make your<br>product intelligent.</h1>
+      <p class="hero-body" id="hero-body">
+        Custom AI integration and development
+        for startups. Consulting and building.
+      </p>
+    </div>
+    <div class="scroll-indicator" id="hero-scroll-ind">
+      <div class="scroll-dot"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STUDENTVENTURE (pinned scroll, 400vh)
+       ============================================================ -->
+  <section id="sv-section">
+    <div class="sv-scroll-space" id="sv-scroll-space">
+      <div class="sv-sticky" id="sv-sticky">
+
+        <!-- Entry: at top of sticky. Label + h2 stay as persistent header. Description fades. -->
+        <div class="sv-entry" id="sv-entry">
+          <span class="label" id="sv-entry-label">Case Study 01</span>
+          <h2 id="sv-entry-title">StudentVenture</h2>
+          <p id="sv-entry-desc">AI-powered recruitment matching 10,000+ student profiles to employers in seconds.</p>
+        </div>
+
+        <div class="sv-content" id="sv-content">
+          <!-- 3 step labels stacked. Each fades in/out independently so scroll-back works. -->
+          <div class="sv-step-labels">
+            <div class="sv-step-label" id="sv-label-1">
+              <span class="sv-step-num">STEP 01</span>
+              <div class="sv-step-title">Describe your role</div>
+            </div>
+            <div class="sv-step-label" id="sv-label-2">
+              <span class="sv-step-num">STEP 02</span>
+              <div class="sv-step-title">AI builds your brief</div>
+            </div>
+            <div class="sv-step-label" id="sv-label-3">
+              <span class="sv-step-num">STEP 03</span>
+              <div class="sv-step-title">Meet your top matches</div>
+            </div>
+          </div>
+
+          <div class="sv-phase-layout" id="sv-phase-layout">
+
+            <div class="sv-chat" id="sv-chat">
+              <div class="sv-msg user" id="sv-msg-user"></div>
+              <div class="sv-msg ai" id="sv-msg-ai1">What type of engagement are you looking for?</div>
+              <div class="sv-chips" id="sv-chips-1">
+                <div class="sv-chip" id="sv-chip-ft">Full-time</div>
+                <div class="sv-chip" id="sv-chip-pt">Part-time</div>
+                <div class="sv-chip" id="sv-chip-pb">Project-based</div>
+                <div class="sv-chip" id="sv-chip-in">Internship</div>
+              </div>
+              <div class="sv-msg ai" id="sv-msg-ai2">What's the salary range?</div>
+              <div class="sv-chips" id="sv-chips-2">
+                <div class="sv-chip" id="sv-chip-s1">20-25k</div>
+                <div class="sv-chip" id="sv-chip-s2">25-30k</div>
+                <div class="sv-chip" id="sv-chip-s3">30-35k</div>
+                <div class="sv-chip" id="sv-chip-s4">Flexible</div>
+              </div>
+            </div>
+
+            <div class="sv-brief" id="sv-brief">
+              <div class="sv-brief-label">Hiring Brief</div>
+              <div class="sv-brief-title" id="sv-bc-title">Marketing Specialist - Part-time</div>
+              <div class="sv-brief-overview" id="sv-bc-overview">Entry-level marketer, strong copywriting and analytics skills. Part-time, 25-30k range.</div>
+              <div class="sv-signals-heading" id="sv-bc-signals-label">Matching Signals</div>
+              <div id="sv-bc-signals">
+                <div class="sv-signal-row" id="sv-bs1">
+                  <div class="sv-signal-dot" style="background:#3B6BF8;"></div>
+                  <div>
+                    <div class="sv-signal-name">Content &amp; Copy</div>
+                    <div class="sv-cal" id="sv-bs1-cal">
+                      <div><span class="sv-cal-star">***</span> Compelling copy across formats</div>
+                      <div><span class="sv-cal-star">**</span><span class="sv-cal-empty">*</span> Clear, structured content</div>
+                      <div><span class="sv-cal-star">*</span><span class="sv-cal-empty">**</span> Basic drafting with direction</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="sv-signal-row" id="sv-bs2">
+                  <div class="sv-signal-dot" style="background:#03FE07;"></div>
+                  <div class="sv-signal-name">Analytics Reporting</div>
+                </div>
+                <div class="sv-signal-row" id="sv-bs3">
+                  <div class="sv-signal-dot" style="background:#F59E0B;"></div>
+                  <div class="sv-signal-name">Campaign Execution</div>
+                </div>
+                <div class="sv-signal-row" id="sv-bs4">
+                  <div class="sv-signal-dot" style="background:#A78BFA;"></div>
+                  <div class="sv-signal-name">Learning Mindset</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sv-results" id="sv-results">
+              <div class="sv-search-bar">
+                <div><span class="sv-role-badge">Marketing Specialist</span></div>
+                <span class="sv-match-count" id="sv-match-count">Showing 0 of 40 matches</span>
+              </div>
+              <div class="sv-card" id="sv-card-1">
+                <div class="sv-card-header">
+                  <div>
+                    <div class="sv-card-name">Sarah M. - University of Leeds</div>
+                    <div class="sv-card-uni">Content Marketing &amp; Analytics</div>
+                  </div>
+                  <div class="sv-card-actions">
+                    <button class="sv-btn-contact">Contact</button>
+                    <button class="sv-btn-save">Save</button>
+                  </div>
+                </div>
+                <div class="sv-signal-chips">
+                  <div class="sv-signal-chip" id="sv-chip-tooltip-wrap">
+                    <span class="sv-star-f">***</span> Content &amp; Copy
+                    <div class="sv-tooltip" id="sv-tooltip-1">
+                      <div class="sv-tooltip-label">AI Reasoning - Content &amp; Copy</div>
+                      Sarah demonstrates strong copywriting across multiple formats. Portfolio includes blog posts and social campaigns with measurable outcomes.
+                    </div>
+                  </div>
+                  <div class="sv-signal-chip"><span class="sv-star-f">**</span><span class="sv-star-e">*</span> Analytics</div>
+                  <div class="sv-signal-chip"><span class="sv-star-f">**</span><span class="sv-star-e">*</span> Campaigns</div>
+                </div>
+                <div class="sv-summary">"Managed social media content calendars, wrote blog posts driving a 40% increase in organic traffic over one semester..."</div>
+              </div>
+              <div class="sv-card" id="sv-card-2">
+                <div class="sv-card-header">
+                  <div>
+                    <div class="sv-card-name">James T. - University of Bristol</div>
+                    <div class="sv-card-uni">Digital Marketing &amp; Data</div>
+                  </div>
+                </div>
+                <div class="sv-signal-chips">
+                  <div class="sv-signal-chip"><span class="sv-star-f">**</span><span class="sv-star-e">*</span> Content &amp; Copy</div>
+                  <div class="sv-signal-chip"><span class="sv-star-f">***</span> Analytics</div>
+                  <div class="sv-signal-chip"><span class="sv-star-f">**</span><span class="sv-star-e">*</span> Campaigns</div>
+                </div>
+                <div class="sv-summary">"Built automated reporting dashboards in Google Analytics for three university society marketing campaigns..."</div>
+              </div>
+              <div class="sv-card" id="sv-card-3">
+                <div class="sv-card-header">
+                  <div>
+                    <div class="sv-card-name">Priya K. - UCL</div>
+                    <div class="sv-card-uni">Brand &amp; Communications</div>
+                  </div>
+                </div>
+                <div class="sv-signal-chips">
+                  <div class="sv-signal-chip"><span class="sv-star-f">***</span> Content &amp; Copy</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sv-cta-phase" id="sv-cta">
+              <div class="sv-cta-stat">10,000+</div>
+              <div class="sv-cta-text">
+                student profiles. CV, portfolio,<br>skills data, work samples.
+              </div>
+              <div class="sv-cta-punch"><span>Matched to exactly what you need.</span> In seconds.</div>
+              <p class="sv-cta-sub">This is what we built for StudentVenture.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       YOUCOOK
+       ============================================================ -->
+  <section id="youcook">
+    <div class="container">
+      <div class="yc-grid">
+        <div class="yc-text reveal-left">
+          <span class="label">Case Study 02</span>
+          <h2>YouCook</h2>
+          <p>AI recipe generation from the ingredients in your fridge. Scan what you have, choose your preferences, get a perfect recipe. Built with Flutter, available on iOS and Android.</p>
+          <div class="yc-tags">
+            <span class="tag">Flutter</span>
+            <span class="tag">Firebase</span>
+            <span class="tag">RevenueCat</span>
+            <span class="tag">AI</span>
+          </div>
+          <a href="https://youcookapp.com" class="text-link" target="_blank" rel="noopener">
+            Visit youcookapp.com
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="yc-mockup-wrap reveal-right">
+          <img
+            src="/images/youcook-mockup.png"
+            alt="YouCook app - recipe detail screen"
+            class="yc-mockup-img"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       NOTELESS
+       ============================================================ -->
+  <section id="noteless">
+    <div class="nl-inner reveal-section">
+      <span class="label">Where It Started - 2021</span>
+      <h3>Noteless</h3>
+
+      <img
+        src="/images/noteless-case-study.png"
+        alt="Noteless AI note-taking app screenshots"
+        class="nl-mockup-img"
+        loading="lazy"
+      />
+
+      <p>
+        My first commercial project. An AI-powered note-taking app with ChatGPT integration,
+        speech-to-text, and multi-platform support.
+        This is where I learned to build and ship.
+      </p>
+      <div class="nl-tags">
+        <span class="tag">Flutter</span>
+        <span class="tag">Firebase</span>
+        <span class="tag">OpenAI</span>
+      </div>
+      <a href="https://noteless.co.uk" class="text-link" target="_blank" rel="noopener">
+        Visit noteless.co.uk
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PROCESS
+       ============================================================ -->
+  <section id="process">
+    <div class="container">
+      <div class="process-header reveal-section">
+        <span class="label">How We Work</span>
+        <h2>From first call to production in weeks.</h2>
+      </div>
+
+      <div class="process-grid-wrap">
+        <!--
+          SVG track: viewBox 0 0 1000 20.
+          Step centers at x=167, x=500, x=833 (thirds of 1000).
+          Track line from 167 to 833 = 666 units long.
+        -->
+        <svg class="process-svg-connector" id="proc-svg" viewBox="0 0 1000 20" preserveAspectRatio="none" aria-hidden="true">
+          <!-- dim background track -->
+          <line x1="167" y1="10" x2="833" y2="10" stroke="#ffffff08" stroke-width="1.5"/>
+          <!-- animated progress fill line -->
+          <line id="proc-line-fill" x1="167" y1="10" x2="833" y2="10"
+            stroke="#00e5ff" stroke-width="1" opacity="0.55"
+            stroke-dasharray="666" stroke-dashoffset="666"/>
+          <!-- step nodes: outer ring + inner dot -->
+          <circle id="proc-ring-1" cx="167" cy="10" r="5" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0"/>
+          <circle id="proc-dot-1"  cx="167" cy="10" r="2.5" fill="#00e5ff" opacity="0"/>
+          <circle id="proc-ring-2" cx="500" cy="10" r="5" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0"/>
+          <circle id="proc-dot-2"  cx="500" cy="10" r="2.5" fill="#00e5ff" opacity="0"/>
+          <circle id="proc-ring-3" cx="833" cy="10" r="5" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0"/>
+          <circle id="proc-dot-3"  cx="833" cy="10" r="2.5" fill="#00e5ff" opacity="0"/>
+        </svg>
+
+        <div class="process-grid">
+          <div class="process-step" id="proc-step-1">
+            <div class="process-num-wrap">
+              <div class="process-num-glow"></div>
+              <div class="process-num" id="proc-num-1">01</div>
+            </div>
+            <h3>Free Audit</h3>
+            <p>We review your product, data, and stack. You get a prioritized AI roadmap. No cost. No commitment.</p>
+          </div>
+          <div class="process-step" id="proc-step-2">
+            <div class="process-num-wrap">
+              <div class="process-num-glow"></div>
+              <div class="process-num" id="proc-num-2">02</div>
+            </div>
+            <h3>Knowledge Transfer</h3>
+            <p>Your team learns to architect, build, and operate AI systems. They leave capable of executing independently.</p>
+          </div>
+          <div class="process-step" id="proc-step-3">
+            <div class="process-num-wrap">
+              <div class="process-num-glow"></div>
+              <div class="process-num" id="proc-num-3">03</div>
+            </div>
+            <h3>Build and Ship</h3>
+            <p>Or we build it for you. Mobile, web, AI features. Live in weeks, scoped and delivered.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOUNDER
+       ============================================================ -->
+  <section id="founder">
+    <div class="container">
+      <div class="founder-grid">
+        <div class="founder-photo-wrap reveal-left">
+          <img src="/images/yanis.webp" alt="Yanis Schweizer, Founder of Strade" class="founder-photo" loading="lazy" />
+        </div>
+        <div class="founder-text reveal-right">
+          <h2>Yanis Schweizer</h2>
+          <span class="label">Founder &amp; Consultant</span>
+          <p>4 years building with LLMs. Shipped semantic search at scale. Trained teams to run it independently.</p>
+          <p>Based in Europe. Works in English, German, Spanish, and Romanian.</p>
+          <div class="founder-links">
+            <a href="https://linkedin.com/in/yanis-schweizer" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              LinkedIn
+            </a>
+            <a href="mailto:yanis@strade.tech">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+              Email
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA
+       ============================================================ -->
+  <section id="cta">
+    <div class="cta-inner reveal-section">
+      <h2>Ready to make your product intelligent?</h2>
+      <p>
+        Book a free audit. We look at your product and tell you
+        what is possible. No cost, no commitment.
+      </p>
+      <a href="https://calendly.com/yanis-strade/consultation" class="btn-primary" target="_blank" rel="noopener">
+        Book a call
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <p class="cta-subtext">Consulting, knowledge transfer, or custom builds.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-row">
+        <span class="footer-logo">Strade</span>
+        <span class="footer-copy">&copy; 2026 Strade SMIP SRL</span>
+        <div class="footer-links">
+          <a href="https://linkedin.com/in/yanis-schweizer" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:yanis@strade.tech">Email</a>
+          <a href="https://calendly.com/yanis-strade" target="_blank" rel="noopener">Calendly</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</Base>
+
+<!-- ================================================================
+     HERO: LOAD ANIMATION + SCROLL SCATTER
+     ================================================================ -->
+<script>
+  (async () => {
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      const label = document.getElementById('hero-label') as HTMLElement;
+      const h1 = document.getElementById('hero-h1') as HTMLElement;
+      const body = document.getElementById('hero-body') as HTMLElement;
+      const scrollInd = document.getElementById('hero-scroll-ind') as HTMLElement;
+
+      // Split h1 into chars.
+      // In dev mode Astro adds data attributes to <br> tags, so normalize first.
+      const allChars: HTMLElement[] = [];
+      const normalized = h1.innerHTML.replace(/<br\b[^>]*>/gi, '[[BR]]');
+      const lines = normalized.split('[[BR]]');
+      h1.innerHTML = lines.map(line =>
+        line.split('').map(ch => {
+          const c = ch === ' ' ? '&nbsp;' : ch;
+          return `<span class="char">${c}</span>`;
+        }).join('')
+      ).join('<br>');
+      h1.querySelectorAll<HTMLElement>('.char').forEach(c => {
+        c.dataset.rx = String((Math.random() - 0.5) * 120);
+        c.dataset.ry = String((Math.random() - 0.5) * 80 - 20);
+        c.dataset.rr = String((Math.random() - 0.5) * 30);
+        allChars.push(c);
+      });
+
+      // Set hidden
+      gsap.set([label, body, scrollInd], { opacity: 0 });
+      gsap.set(allChars, { opacity: 0, y: 10 });
+
+      // Load entrance animation
+      const loadTl = gsap.timeline({ delay: 0.15 });
+      loadTl
+        .to(label, { opacity: 1, duration: 0.4, ease: 'power2.out' }, 0)
+        .to(allChars, { opacity: 1, y: 0, duration: 0.6, stagger: 0.018, ease: 'power3.out' }, 0.2)
+        .to(body, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.65)
+        .to(scrollInd, { opacity: 1, duration: 0.4 }, 0.95);
+
+      // Scroll scatter
+      ScrollTrigger.create({
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 0.6,
+        onUpdate: (self) => {
+          const p = self.progress;
+          const ease = Math.pow(p, 1.4);
+          allChars.forEach(c => {
+            gsap.set(c, {
+              x: parseFloat(c.dataset.rx!) * ease,
+              y: parseFloat(c.dataset.ry!) * ease,
+              rotation: parseFloat(c.dataset.rr!) * ease,
+              opacity: Math.max(0, 1 - ease * 1.8),
+            });
+          });
+          if (label) label.style.opacity = String(Math.max(0, 1 - p * 3));
+          if (body) body.style.opacity = String(Math.max(0, 1 - p * 2.5));
+          if (scrollInd) scrollInd.style.opacity = String(Math.max(0, 1 - p * 6));
+          const glow = document.querySelector<HTMLElement>('.hero-glow');
+          if (glow) glow.style.transform = `translate(-50%,-50%) scale(${1 + p * 1.2})`;
+        }
+      });
+
+    } catch {
+      const h1 = document.getElementById('hero-h1');
+      if (h1) { h1.style.opacity = '1'; h1.style.transform = 'none'; }
+    }
+  })();
+</script>
+
+<!-- ================================================================
+     STUDENTVENTURE SCROLL ANIMATION
+     3 separate step labels (no .call text-swap = fully reversible).
+     CTA enters from bottom, scatters on exit like hero headline.
+     ================================================================ -->
+<script>
+  (async () => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ---- initial states ----
+      // Entry is visible at top. Label + h2 stay as persistent header.
+      gsap.set('#sv-entry', { opacity: 1 });
+      gsap.set('#sv-entry-desc', { opacity: 1 });
+      gsap.set(['#sv-label-1','#sv-label-2','#sv-label-3'], { opacity: 0, y: 20 });
+      gsap.set('#sv-cta', { zIndex: 20 });
+
+      // CTA children: hidden, enter from below
+      gsap.set('.sv-cta-stat', { opacity: 0, y: 40 });
+      gsap.set('.sv-cta-text', { opacity: 0, y: 24 });
+      gsap.set('.sv-cta-punch', { opacity: 0, y: 20 });
+      gsap.set('.sv-cta-sub', { opacity: 0, y: 16 });
+
+      // Split CTA stat into chars for scatter effect
+      const ctaStat = document.querySelector('.sv-cta-stat') as HTMLElement;
+      const ctaChars: HTMLElement[] = [];
+      if (ctaStat) {
+        const txt = ctaStat.textContent || '';
+        ctaStat.innerHTML = txt.split('').map(ch =>
+          `<span class="sv-cta-char">${ch}</span>`
+        ).join('');
+        ctaStat.querySelectorAll<HTMLElement>('.sv-cta-char').forEach(c => {
+          c.dataset.rx = String((Math.random() - 0.5) * 180);
+          c.dataset.ry = String((Math.random() - 0.5) * 120 - 30);
+          c.dataset.rr = String((Math.random() - 0.5) * 45);
+          ctaChars.push(c);
+        });
+      }
+
+      const USER_TEXT = 'I need an entry-level marketing specialist who can write copy and run basic analytics';
+      let typingInterval: ReturnType<typeof setInterval> | null = null;
+      function typeMessage(el: HTMLElement, text: string, ms: number) {
+        if (typingInterval) clearInterval(typingInterval);
+        el.textContent = '';
+        const words = text.split(' ');
+        let i = 0;
+        typingInterval = setInterval(() => {
+          if (i >= words.length) { clearInterval(typingInterval!); return; }
+          el.textContent = words.slice(0, i + 1).join(' ');
+          i++;
+        }, ms / words.length);
+      }
+
+      // ---- master timeline ----
+      const m = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#sv-scroll-space',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1,
+        }
+      });
+
+      // -- Description fades out (0 to 3%), label 1 appears below header (3 to 6%) --
+      // Entry label + h2 STAY visible throughout (they ARE the persistent header).
+      m.to('#sv-entry-desc', { opacity: 0, y: -8, duration: 0.03 }, 0);
+      m.to('#sv-label-1', { opacity: 1, y: 0, duration: 0.04 }, 0.03);
+
+      // -- Phase 1: Chat (6 to 30%) --
+      m.to('#sv-msg-user', { opacity: 1, y: 0, duration: 0.04 }, 0.07)
+       .call(() => typeMessage(document.getElementById('sv-msg-user')!, USER_TEXT, 800), undefined, 0.07)
+       .call(() => { document.getElementById('sv-msg-user')!.textContent = USER_TEXT; }, undefined, 0.14)
+       .to('#sv-msg-ai1', { opacity: 1, y: 0, duration: 0.04 }, 0.16)
+       .to('#sv-chips-1', { opacity: 1, y: 0, duration: 0.04 }, 0.19)
+       .call(() => { document.getElementById('sv-chip-pt')?.classList.add('selected'); }, undefined, 0.23)
+       .to('#sv-msg-ai2', { opacity: 1, y: 0, duration: 0.04 }, 0.25)
+       .to('#sv-chips-2', { opacity: 1, y: 0, duration: 0.04 }, 0.28)
+       .call(() => { document.getElementById('sv-chip-s2')?.classList.add('selected'); }, undefined, 0.30);
+
+      // -- Label 1 out, label 2 in (31%) --
+      m.to('#sv-label-1', { opacity: 0, y: -12, duration: 0.03 }, 0.31);
+      m.to('#sv-label-2', { opacity: 1, y: 0, duration: 0.04 }, 0.33);
+
+      // -- Phase 2: Brief (31 to 54%) --
+      m.to('#sv-chat', { opacity: 0.35, duration: 0.06 }, 0.31)
+       .to('#sv-brief', { opacity: 1, x: 0, duration: 0.06 }, 0.33)
+       .to('#sv-bc-title', { opacity: 1, duration: 0.04 }, 0.37)
+       .to('#sv-bc-overview', { opacity: 1, duration: 0.04 }, 0.40)
+       .to('#sv-bc-signals-label', { opacity: 1, duration: 0.03 }, 0.42)
+       .to('#sv-bs1', { opacity: 1, y: 0, duration: 0.04 }, 0.44)
+       .to('#sv-bs2', { opacity: 1, y: 0, duration: 0.04 }, 0.46)
+       .to('#sv-bs3', { opacity: 1, y: 0, duration: 0.04 }, 0.48)
+       .to('#sv-bs4', { opacity: 1, y: 0, duration: 0.04 }, 0.50)
+       .to('#sv-bs1-cal', { opacity: 1, duration: 0.04 }, 0.52);
+
+      // -- Label 2 out, label 3 in (55%) --
+      m.to('#sv-label-2', { opacity: 0, y: -12, duration: 0.03 }, 0.55);
+      m.to('#sv-label-3', { opacity: 1, y: 0, duration: 0.04 }, 0.57);
+
+      // -- Phase 3: Results (55 to 68%) --
+      m.to(['#sv-chat','#sv-brief'], { opacity: 0, duration: 0.04 }, 0.56)
+       .to('#sv-results', { opacity: 1, zIndex: 5, pointerEvents: 'auto', duration: 0.03 }, 0.58)
+       .to('#sv-card-1', { opacity: 1, y: 0, duration: 0.04 }, 0.60)
+       .call(() => { document.getElementById('sv-match-count')!.textContent = 'Showing 1 of 40 matches'; }, undefined, 0.60)
+       .to('#sv-card-2', { opacity: 1, y: 0, duration: 0.04 }, 0.63)
+       .call(() => { document.getElementById('sv-match-count')!.textContent = 'Showing 2 of 40 matches'; }, undefined, 0.63)
+       .to('#sv-card-3', { opacity: 0.4, y: 0, duration: 0.03 }, 0.65)
+       .call(() => {
+         document.getElementById('sv-card-1')?.classList.add('highlighted');
+         document.getElementById('sv-chip-tooltip-wrap')?.classList.add('show-tooltip');
+       }, undefined, 0.66)
+       .to('#sv-tooltip-1', { opacity: 1, y: 0, duration: 0.03 }, 0.67);
+
+      // -- Label 3 out, results fade, entry header fades for CTA (68 to 72%) --
+      m.to('#sv-label-3', { opacity: 0, duration: 0.03 }, 0.68);
+      m.to('#sv-entry-label', { opacity: 0, duration: 0.03 }, 0.68);
+      m.to('#sv-entry-title', { opacity: 0, duration: 0.03 }, 0.68);
+      m.to('#sv-results', { opacity: 0.08, duration: 0.04 }, 0.68);
+
+      // -- Phase 4: CTA rises from bottom (72 to 80%) --
+      m.to('#sv-cta', { opacity: 1, duration: 0.01 }, 0.72);
+      m.to('.sv-cta-stat', { opacity: 1, y: 0, duration: 0.05 }, 0.72);
+      m.to('.sv-cta-text', { opacity: 1, y: 0, duration: 0.04 }, 0.76);
+      m.to('.sv-cta-punch', { opacity: 1, y: 0, duration: 0.04 }, 0.78);
+      m.to('.sv-cta-sub', { opacity: 1, y: 0, duration: 0.03 }, 0.80);
+
+      // -- CTA scatter: chars fly out (86 to 100%). No hold after. --
+      if (ctaChars.length) {
+        m.to('.sv-cta-text', { opacity: 0, y: -16, duration: 0.04 }, 0.86);
+        m.to('.sv-cta-punch', { opacity: 0, y: -16, duration: 0.04 }, 0.87);
+        m.to('.sv-cta-sub', { opacity: 0, duration: 0.03 }, 0.88);
+        ctaChars.forEach((c, i) => {
+          m.to(c, {
+            x: parseFloat(c.dataset.rx!),
+            y: parseFloat(c.dataset.ry!),
+            rotation: parseFloat(c.dataset.rr!),
+            opacity: 0,
+            duration: 0.12,
+          }, 0.86 + i * 0.005);
+        });
+      }
+
+    } catch { /* silent */ }
+  })();
+</script>
+
+<!-- ================================================================
+     PROCESS: PINNED SCROLL ANIMATION
+     Section pins to viewport center. Line draws 1-2-3 while pinned.
+     When animation completes, scroll continues normally.
+     ================================================================ -->
+<script>
+  (async () => {
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      const isMobile = window.innerWidth < 768;
+
+      // Initial hidden state for steps + SVG elements
+      gsap.set(['#proc-step-1','#proc-step-2','#proc-step-3'], { opacity: 0, y: 32 });
+      gsap.set('#proc-line-fill', { strokeDashoffset: 666 });
+      gsap.set(['#proc-ring-1','#proc-dot-1','#proc-ring-2','#proc-dot-2','#proc-ring-3','#proc-dot-3'], { opacity: 0 });
+
+      if (isMobile) {
+        // On mobile: simple one-shot reveal, no pinning
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: '#process', start: 'top 75%', end: 'bottom 30%', scrub: 0.8 }
+        });
+        tl.to('#proc-step-1', { opacity: 1, y: 0, duration: 0.3 }, 0);
+        tl.to('#proc-step-2', { opacity: 1, y: 0, duration: 0.3 }, 0.35);
+        tl.to('#proc-step-3', { opacity: 1, y: 0, duration: 0.3 }, 0.7);
+        return;
+      }
+
+      // Desktop: pin the section while animation plays
+      // The section pins when its center hits the viewport center.
+      // Pin lasts for 1600px of scroll, giving the animation room to breathe.
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#process',
+          start: 'center center',
+          end: '+=1600',
+          pin: true,
+          anticipatePin: 1,
+          scrub: 1,
+        }
+      });
+
+      // Step 1 rises + node 1 lights (0 to 20%)
+      tl.to('#proc-step-1', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0);
+      tl.to(['#proc-ring-1','#proc-dot-1'], { opacity: 1, duration: 0.1 }, 0.1);
+      tl.call(() => document.querySelector<HTMLElement>('#proc-step-1')?.classList.add('lit'), undefined, 0.14);
+
+      // Line draws 1 to 2 (20 to 45%)
+      tl.to('#proc-line-fill', { strokeDashoffset: 333, duration: 0.22, ease: 'power2.inOut' }, 0.2);
+
+      // Step 2 rises + node 2 lights (38 to 55%)
+      tl.to('#proc-step-2', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0.38);
+      tl.to(['#proc-ring-2','#proc-dot-2'], { opacity: 1, duration: 0.1 }, 0.44);
+      tl.call(() => document.querySelector<HTMLElement>('#proc-step-2')?.classList.add('lit'), undefined, 0.48);
+
+      // Line draws 2 to 3 (52 to 76%)
+      tl.to('#proc-line-fill', { strokeDashoffset: 0, duration: 0.22, ease: 'power2.inOut' }, 0.52);
+
+      // Step 3 rises + node 3 lights (68 to 85%)
+      tl.to('#proc-step-3', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0.68);
+      tl.to(['#proc-ring-3','#proc-dot-3'], { opacity: 1, duration: 0.1 }, 0.76);
+      tl.call(() => document.querySelector<HTMLElement>('#proc-step-3')?.classList.add('lit'), undefined, 0.80);
+
+      // Hold: all steps visible, nothing changes (85 to 100%)
+      tl.to({}, { duration: 0.15 }, 0.85);
+
+    } catch {
+      ['#proc-step-1','#proc-step-2','#proc-step-3'].forEach(s => {
+        const el = document.querySelector<HTMLElement>(s);
+        if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
+      });
+    }
+  })();
+</script>
+
+<!-- ================================================================
+     FOUNDER PARALLAX
+     ================================================================ -->
+<script>
+  (async () => {
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      const photo = document.querySelector<HTMLElement>('.founder-photo-wrap');
+      if (photo) {
+        gsap.to(photo, {
+          yPercent: -6, ease: 'none',
+          scrollTrigger: { trigger: '#founder', start: 'top bottom', end: 'bottom top', scrub: true }
+        });
+      }
+    } catch { /* silent */ }
+  })();
+</script>

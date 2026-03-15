@@ -1,0 +1,119 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const LINKEDIN = 'https://linkedin.com/in/yanis-schweizer';
+const EMAIL = 'yanis@strade.tech';
+---
+
+<section id="founder" class="founder-section">
+  <!-- Warm overlay activated by scroll -->
+  <div class="founder-warm" id="founder-warm" aria-hidden="true"></div>
+
+  <div class="container founder-grid">
+    <!-- Photo -->
+    <div class="founder-photo-wrap reveal-left" id="founder-photo">
+      <div class="founder-photo-placeholder">
+        <!-- Placeholder until yanis.webp is added to /public/images/ -->
+        <img src="/images/logo-white.png" alt="" aria-hidden="true" class="founder-logo-placeholder" width="120" height="45" loading="lazy" decoding="async" />
+      </div>
+    </div>
+
+    <!-- Text -->
+    <div class="founder-text reveal-right" id="founder-text">
+      <h2>{t(locale, 'founder.name')}</h2>
+      <span class="label" style="margin-top:8px;margin-bottom:24px">{t(locale, 'founder.label')}</span>
+      <p style="color:var(--text-secondary);margin-bottom:16px">{t(locale, 'founder.bio1')}</p>
+      <p style="color:var(--text-secondary);margin-bottom:32px">{t(locale, 'founder.bio2')}</p>
+      <div class="founder-links">
+        <a href={LINKEDIN} target="_blank" rel="noopener" class="founder-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+          LinkedIn
+        </a>
+        <a href={`mailto:${EMAIL}`} class="founder-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+          Email
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .founder-section { padding: 96px 0; position: relative; }
+  .founder-warm {
+    position: absolute; inset: 0; pointer-events: none;
+    background: #1a1410; opacity: 0;
+    transition: opacity 1.5s var(--ease-out-expo);
+  }
+  .founder-section:has(#founder-photo.visible) .founder-warm { opacity: 0.15; }
+  .founder-grid {
+    display: grid; grid-template-columns: 2fr 3fr;
+    gap: 80px; align-items: center;
+    position: relative; z-index: 1;
+  }
+  .founder-photo-wrap { }
+  .founder-photo-placeholder {
+    width: 100%; aspect-ratio: 3/4; max-width: 340px;
+    background: var(--bg-surface); border-radius: 8px;
+    border: 1px solid var(--cyan-dim);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  /* When real photo is added, use this: */
+  .founder-photo-placeholder img {
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 8px; border: none;
+  }
+  .founder-logo-placeholder {
+    width: 120px; height: auto; opacity: 0.2;
+  }
+  .founder-links { display: flex; gap: 24px; }
+  .founder-link {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-secondary); font-size: 15px; font-weight: 600;
+    transition: color 0.3s;
+  }
+  .founder-link:hover { color: var(--cyan); }
+
+  @media (max-width: 768px) {
+    .founder-grid { grid-template-columns: 1fr; gap: 40px; }
+    .founder-photo-placeholder { max-width: 100%; aspect-ratio: 4/3; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const gsapModule = await import('gsap');
+    const gsap = gsapModule.gsap;
+    const ScrollTriggerModule = await import('gsap/ScrollTrigger');
+    const { ScrollTrigger } = ScrollTriggerModule;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const photo = document.getElementById('founder-photo');
+    const text = document.getElementById('founder-text');
+
+    if (photo) {
+      gsap.from(photo, {
+        x: -40, opacity: 0, duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: '#founder', start: 'top 70%' }
+      });
+      ScrollTrigger.create({
+        trigger: '#founder', start: 'top 70%',
+        onEnter: () => photo.classList.add('visible')
+      });
+    }
+    if (text) {
+      gsap.from(text, {
+        x: 40, opacity: 0, duration: 0.9, ease: 'power3.out', delay: 0.15,
+        scrollTrigger: { trigger: '#founder', start: 'top 70%' }
+      });
+    }
+  })();
+</script>

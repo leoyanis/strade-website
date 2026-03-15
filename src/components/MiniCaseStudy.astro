@@ -1,0 +1,51 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+---
+
+<section class="mini-cs reveal-section">
+  <div class="mini-cs-bg" aria-hidden="true">
+    <svg class="mini-bp-grid" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <pattern id="mini-bp" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#00e5ff" stroke-width="0.5" opacity="0.08"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#mini-bp)"/>
+    </svg>
+  </div>
+
+  <div class="container mini-cs-inner">
+    <div class="mini-cs-text">
+      <span class="label">{t(locale, 'consulting.mini_label')}</span>
+      <h2>{t(locale, 'consulting.mini_h2')}</h2>
+      <p class="mini-cs-body">{t(locale, 'consulting.mini_body')}</p>
+      <a href="/case-studies/studentventure" class="text-link" style="font-size:15px;font-weight:600">
+        {t(locale, 'consulting.mini_cta')} &#8594;
+      </a>
+    </div>
+    <div class="mini-cs-mockup cs-float">
+      <div class="mockup-screen" style="min-width:260px">
+        <div class="mockup-bar">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="mockup-content">
+          <div class="mockup-line mockup-line-cyan" style="width:70%"></div>
+          <div class="mockup-line" style="width:90%;margin-top:8px"></div>
+          <div class="mockup-line" style="width:55%;margin-top:6px"></div>
+          <div class="mockup-chip">Match: 97%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .mini-cs { padding: 96px 0; background: var(--bg-void); position: relative; overflow: hidden; }
+  .mini-cs-bg { position: absolute; inset: 0; pointer-events: none; }
+  .mini-bp-grid { width: 100%; height: 100%; }
+  .mini-cs-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
+  .mini-cs-body { color: var(--text-secondary); margin: 16px 0 24px; }
+  @media (max-width: 768px) { .mini-cs-inner { grid-template-columns: 1fr; } }
+</style>

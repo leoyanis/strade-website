@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+const EMAIL = 'yanis@strade.tech';
+---
+
+<Base
+  title="Contact | Strade"
+  description="Book a free audit or get in touch with Yanis Schweizer."
+  locale="en"
+  path="/contact"
+>
+  <section style="min-height:80vh;display:flex;align-items:center">
+    <div class="container" style="padding-top:96px">
+      <span class="label">Contact</span>
+      <h1 style="margin:12px 0 24px">Let's talk.</h1>
+      <p style="color:var(--text-secondary);font-size:18px;max-width:480px;margin-bottom:48px">
+        Book a free 30-minute audit or reach out directly.
+      </p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary">
+          Book a free audit &#8594;
+        </a>
+        <a href={`mailto:${EMAIL}`} class="btn-outline">
+          Send an email
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

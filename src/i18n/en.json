@@ -1,0 +1,188 @@
+{
+  "nav": {
+    "services": "Services",
+    "work": "Work",
+    "about": "About",
+    "book": "Book a call"
+  },
+  "hero": {
+    "label": "AI Consulting & Development",
+    "h1_line1": "We make your product",
+    "h1_line2": "intelligent.",
+    "body": "AI integration, custom development, and knowledge transfer for startups that need to ship, not hire.",
+    "cta_primary": "Book a free audit",
+    "cta_secondary": "See our work"
+  },
+  "social_proof": {
+    "trusted": "Trusted by founders building the next wave of products"
+  },
+  "services": {
+    "label": "What we do",
+    "consulting_label": "AI Consulting",
+    "consulting_h3": "Your team learns to build and run AI systems.",
+    "consulting_body": "We train your team to architect, build, and operate AI features independently. You keep the capability after we leave.",
+    "consulting_bullets": [
+      "Architecture and model selection",
+      "Prompt engineering and evaluation frameworks",
+      "Hands-on knowledge transfer in weeks"
+    ],
+    "dev_label": "Development",
+    "dev_h3": "We build it. You ship it.",
+    "dev_body": "Full-stack applications, semantic search, AI matching, and LLM-powered features. Production-ready and scoped to your needs.",
+    "dev_bullets": [
+      "Mobile and web applications",
+      "Semantic search and AI matching",
+      "End-to-end delivery in weeks"
+    ]
+  },
+  "case_study": {
+    "label": "Case Study",
+    "client": "StudentVenture",
+    "tagline": "Semantic matching over 10,000+ student profiles. The founders called it magic.",
+    "cta": "Read full case study",
+    "problem_h": "The Problem",
+    "solution_h": "The Solution",
+    "result_h": "The Result",
+    "problem": "10,000 students. No way to match them to employers at scale. Traditional keyword matching missed 80% of fits.",
+    "solution": "Embeddings plus pgvector plus LLM grading. Semantic search that understands skills, not keywords.",
+    "result": "Live. Funded. Sub-second matching. Founders described it as 'feels like magic.'",
+    "stack_label": "Tech Stack",
+    "stack_cta": "Book your free audit"
+  },
+  "process": {
+    "label": "How We Work",
+    "h2_line1": "From first call to production",
+    "h2_line2": "in weeks.",
+    "step1_num": "01",
+    "step1_label": "Free Audit",
+    "step1_body": "We review your product, data, and stack. You get a prioritized AI roadmap.",
+    "step1_sub": "No cost. No commitment.",
+    "step2_num": "02",
+    "step2_label": "Knowledge Transfer",
+    "step2_body": "Your team learns to build and run AI systems. Architecture, model selection, prompts, evaluation.",
+    "step2_sub": "Your team. Your capability. Forever.",
+    "step3_num": "03",
+    "step3_label": "Build & Ship",
+    "step3_body": "Or we build it for you. Live in weeks, not months.",
+    "step3_sub": "Scoped. Priced. Delivered."
+  },
+  "founder": {
+    "name": "Yanis Schweizer",
+    "label": "Founder & Consultant",
+    "bio1": "4 years building with LLMs. Shipped semantic search at scale. Trained teams to run it independently.",
+    "bio2": "Based in Europe. Works in English, German, Spanish, and Romanian."
+  },
+  "cta_block": {
+    "h2": "Ready to make your product intelligent?",
+    "body": "Book a free audit. No cost, no commitment. We look at your product and tell you what is possible.",
+    "button": "Book your free audit"
+  },
+  "footer": {
+    "services": "Services",
+    "consulting": "Consulting",
+    "development": "Development",
+    "free_audit": "Free Audit",
+    "connect": "Connect",
+    "linkedin": "LinkedIn",
+    "email": "Email",
+    "calendly": "Calendly",
+    "legal": "2026 Strade SMIP SRL. Brasov, Romania. CIF: RO48204960"
+  },
+  "consulting": {
+    "label": "AI Consulting",
+    "h1_line1": "Your team builds AI.",
+    "h1_line2": "We show them how.",
+    "body": "Architecture, model selection, prompt engineering, evaluation frameworks. Your team leaves capable of executing independently.",
+    "cta": "Book your free audit",
+    "without_label": "Without Us",
+    "without_bullets": [
+      "Months of trial and error with LLM APIs",
+      "An expensive AI hire you cannot afford yet",
+      "A generic chatbot that adds no real value",
+      "Prompt engineering by guesswork"
+    ],
+    "with_label": "With Us",
+    "with_bullets": [
+      "Proven architecture from day one",
+      "Your existing team upskilled in weeks",
+      "AI features that users call magic",
+      "Evaluation framework so you know it works"
+    ],
+    "offerings_label": "What You Get",
+    "card1_h3": "Free Audit",
+    "card1_body": "We review your product, data, and stack. You get a prioritized AI roadmap.",
+    "card1_tag": "No cost. No commitment.",
+    "card1_cta": "Book your audit",
+    "card2_h3": "Knowledge Transfer",
+    "card2_body": "Hands-on training for your team. Architecture decisions, model selection, prompt structure, evaluation frameworks.",
+    "card2_tag": "Your team. Your capability. Forever.",
+    "card2_cta": "Book a call",
+    "card3_h3": "Custom Implementation",
+    "card3_body": "We build it for you. Semantic search, AI matching, LLM features, full-stack applications. Scoped to your needs.",
+    "card3_cta": "Discuss your project",
+    "mini_label": "Proven in Production",
+    "mini_h2": "Semantic matching for 10,000+ profiles.",
+    "mini_body": "StudentVenture. Dual-sided recruitment platform. AI chatbot creates job briefs via conversation. Semantic search finds the right candidates in under a second. Live. Funded. Described by the founders as 'feels like magic.'",
+    "mini_cta": "Read the full case study",
+    "faq_label": "Questions",
+    "faq": [
+      {
+        "q": "What kind of companies do you work with?",
+        "a": "Marketplaces and SaaS products, seed to pre-Series A. If your product has a search, discovery, matching, or recommendation problem, we can help."
+      },
+      {
+        "q": "What does the free audit include?",
+        "a": "We review your product, data, and tech stack. You get a prioritized roadmap for AI integration. Typically a 30-minute call plus a written summary. No cost, no strings."
+      },
+      {
+        "q": "How is knowledge transfer different from hiring a full-time AI engineer?",
+        "a": "We train your existing team in weeks. They learn to build and operate AI systems independently. No long-term salary commitment, no recruiting, no onboarding. Your capability stays in-house after we leave."
+      },
+      {
+        "q": "What languages do you work in?",
+        "a": "English, German, Spanish, Romanian. We work with teams across Europe and beyond."
+      },
+      {
+        "q": "How long does an engagement take?",
+        "a": "Knowledge transfer: 2 to 4 weeks. Custom builds: scoped per project, typically 4 to 8 weeks to production."
+      }
+    ]
+  },
+  "development": {
+    "label": "Development",
+    "h1_line1": "Your app. Built and shipped",
+    "h1_line2": "in weeks.",
+    "body": "Mobile, web, and AI-powered applications. Custom to your needs. Production-ready.",
+    "cta": "Start your project",
+    "cap_label": "What We Build",
+    "cap1_h3": "Mobile Apps",
+    "cap1_body": "Flutter plus native performance. iOS and Android from one codebase. Fast iteration, polished UI.",
+    "cap2_h3": "Web Applications",
+    "cap2_body": "Full-stack web apps that scale. Clean architecture, modern tooling, deployed to production.",
+    "cap3_h3": "AI Integration",
+    "cap3_body": "Search, matching, generation, automation. We add the intelligence layer to your product.",
+    "projects_label": "Our Work"
+  },
+  "case_study_page": {
+    "label": "Case Study",
+    "h1": "StudentVenture",
+    "tagline": "AI-powered recruitment for early talent",
+    "metric1_num": "10,000+",
+    "metric1_label": "profiles indexed",
+    "metric2_num": "<1s",
+    "metric2_label": "matching speed",
+    "metric3_num": "Live & Funded",
+    "metric3_label": "platform status",
+    "challenge_h": "The Challenge",
+    "challenge_body": "StudentVenture is a dual-sided recruitment marketplace connecting early-talent students with startups and scale-ups. The platform had over 10,000 student profiles. The problem: no way to match them to relevant employers at scale. Traditional keyword search missed 80% of relevant fits. Candidates were invisible to recruiters unless their CV contained the exact right words.",
+    "approach_h": "The Approach",
+    "approach_body": "We designed and built a semantic search system using OpenAI embeddings, pgvector on PostgreSQL, and a custom LLM-based grading layer. Student profiles are embedded at creation and on update. When an employer posts a job brief (created conversationally by an AI chatbot), the system performs approximate nearest-neighbor search over all 10,000+ embeddings, then grades the top candidates with a fine-tuned LLM scorer. The result is ranked, relevant candidates in under one second.",
+    "result_h": "The Result",
+    "result_body": "The platform shipped to production and closed its funding round. Sub-second semantic matching is live. The founders had a clear reaction.",
+    "quote": "It feels like magic.",
+    "quote_attr": "Founder, StudentVenture",
+    "stack_label": "Tech Stack Used",
+    "next_label": "Next Project",
+    "next_title": "YouCook"
+  }
+}

@@ -1,0 +1,384 @@
+---
+import '../styles/global.css';
+import { type Locale, LOCALES } from '../i18n/utils';
+
+interface Props {
+  title: string;
+  description: string;
+  locale?: Locale;
+  path?: string;
+  ogImage?: string;
+  schema?: object;
+}
+
+const {
+  title,
+  description,
+  locale = 'en',
+  path = '/',
+  ogImage = '/images/og-image.png',
+  schema,
+} = Astro.props;
+
+const canonical = `https://strade.tech${path}`;
+const localeMap: Record<string, string> = { en: '', de: '/de', es: '/es', ro: '/ro' };
+---
+
+<!doctype html>
+<html lang={locale}>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+
+  <!-- hreflang -->
+  {LOCALES.map(l => (
+    <link rel="alternate" hreflang={l} href={`https://strade.tech${localeMap[l]}${path === '/' ? '' : path}`} />
+  ))}
+  <link rel="alternate" hreflang="x-default" href={`https://strade.tech${path}`} />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={`https://strade.tech${ogImage}`} />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={`https://strade.tech${ogImage}`} />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <!-- Schema.org -->
+  {schema && (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  )}
+</head>
+<body>
+
+  <!-- Scroll progress bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Cursor glow (desktop) -->
+  <div id="cursor-glow"></div>
+
+  <!-- Particle canvas -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- Atmosphere background layers -->
+  <div id="atmosphere" aria-hidden="true">
+    <div id="dot-grid"></div>
+    <div id="blueprint-grid">
+      <svg id="blueprint-inner" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <defs>
+          <pattern id="bp-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#00e5ff" stroke-width="0.5" opacity="0.2"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#bp-grid)"/>
+      </svg>
+    </div>
+    <div id="radial-glows"></div>
+    <div id="warm-overlay"></div>
+    <div id="gradient-mesh">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 800px 600px at 20% 50%, #00e5ff, transparent);opacity:0.12;animation:mesh-drift-1 20s ease-in-out infinite;"></div>
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 600px 800px at 80% 50%, #7b2fff, transparent);opacity:0.12;animation:mesh-drift-2 20s ease-in-out infinite;"></div>
+    </div>
+  </div>
+
+  <!-- Minimal nav -->
+  <nav id="site-nav" aria-label="Site navigation">
+    <a href="/" class="nav-logo">Strade</a>
+    <a href="#cta" class="nav-cta">Book a call</a>
+  </nav>
+
+  <!-- Page content -->
+  <main style="position:relative;z-index:2;">
+    <slot />
+  </main>
+
+  <!-- ============================================================
+       PARTICLE SYSTEM
+       ============================================================ -->
+  <script>
+    (function() {
+      const canvas = document.getElementById('particle-canvas') as HTMLCanvasElement;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      let mouseX = -9999, mouseY = -9999;
+      const isMobile = window.innerWidth < 768;
+      const isTablet = window.innerWidth < 1024;
+      const COUNT = isMobile ? 22 : isTablet ? 44 : 65;
+
+      type Particle = {
+        x: number; y: number;
+        vx: number; vy: number;
+        size: number;
+        isCyan: boolean;
+        pulsePhase: number;
+        pulseSpeed: number;
+      };
+
+      const particles: Particle[] = [];
+      let w = 0, h = 0;
+      let t = 0;
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+
+      for (let i = 0; i < COUNT; i++) {
+        // ~1 in 8 particles has a subtle cyan tint
+        const isCyan = (i % 8 === 3);
+        particles.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          size: 1.8,
+          isCyan,
+          pulsePhase: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.008 + Math.random() * 0.006,
+        });
+      }
+
+      if (!isMobile) {
+        window.addEventListener('mousemove', (e: MouseEvent) => {
+          mouseX = e.clientX; mouseY = e.clientY;
+        }, { passive: true });
+      }
+
+      let lastTime = 0;
+      function draw(now: number) {
+        if (document.hidden) { requestAnimationFrame(draw); return; }
+        const delta = now - lastTime;
+        if (delta < 16) { requestAnimationFrame(draw); return; }
+        lastTime = now;
+        t++;
+
+        ctx!.clearRect(0, 0, w, h);
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.pulsePhase += p.pulseSpeed;
+
+          if (!isMobile) {
+            const dx = p.x - mouseX, dy = p.y - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 150 && dist > 0) {
+              p.x += (dx / dist) * 0.5;
+              p.y += (dy / dist) * 0.5;
+            }
+          }
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          if (p.isCyan) {
+            // Subtle cyan-tinted dot (same size, slight color shift + tiny glow)
+            const pulse = 0.5 + 0.5 * Math.sin(p.pulsePhase);
+            const alpha = 0.18 + pulse * 0.12;
+            // Subtle glow halo
+            const grd = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
+            grd.addColorStop(0, `rgba(0,229,255,${alpha * 0.15})`);
+            grd.addColorStop(1, 'rgba(0,229,255,0)');
+            ctx!.beginPath();
+            ctx!.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+            ctx!.fillStyle = grd;
+            ctx!.fill();
+            // Core dot (same size as white)
+            ctx!.beginPath();
+            ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx!.fillStyle = `rgba(0,229,255,${alpha})`;
+            ctx!.fill();
+          } else {
+            // White dot, slightly more visible
+            ctx!.beginPath();
+            ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx!.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx!.fill();
+          }
+        }
+
+        // Connection lines
+        const CONNECT_DIST = 130;
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < CONNECT_DIST) {
+              const factor = 1 - dist / CONNECT_DIST;
+              // Same line thickness everywhere, subtle cyan tint if near cyan node
+              const eitherCyan = particles[i].isCyan || particles[j].isCyan;
+              if (eitherCyan) {
+                ctx!.strokeStyle = `rgba(0,229,255,${0.05 * factor})`;
+              } else {
+                ctx!.strokeStyle = `rgba(255,255,255,${0.06 * factor})`;
+              }
+              ctx!.lineWidth = 0.5;
+              ctx!.beginPath();
+              ctx!.moveTo(particles[i].x, particles[i].y);
+              ctx!.lineTo(particles[j].x, particles[j].y);
+              ctx!.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+    })();
+  </script>
+
+  <!-- ============================================================
+       SCROLL PROGRESS + CURSOR GLOW
+       ============================================================ -->
+  <script>
+    const bar = document.getElementById('scroll-progress');
+    if (bar) {
+      window.addEventListener('scroll', () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+      }, { passive: true });
+    }
+
+    const glow = document.getElementById('cursor-glow');
+    if (glow && window.matchMedia('(pointer: fine)').matches) {
+      let cx = 0, cy = 0, tx = 0, ty = 0;
+      window.addEventListener('mousemove', (e: MouseEvent) => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+      function lerpGlow() {
+        cx += (tx - cx) * 0.12;
+        cy += (ty - cy) * 0.12;
+        (glow as HTMLElement).style.left = cx + 'px';
+        (glow as HTMLElement).style.top = cy + 'px';
+        requestAnimationFrame(lerpGlow);
+      }
+      requestAnimationFrame(lerpGlow);
+    }
+  </script>
+
+  <!-- ============================================================
+       ATMOSPHERE MOOD SYSTEM
+       ============================================================ -->
+  <script>
+    (async () => {
+      try {
+        const { gsap } = await import('gsap');
+        const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+        gsap.registerPlugin(ScrollTrigger);
+
+        const dotGrid = document.getElementById('dot-grid');
+        const blueprintGrid = document.getElementById('blueprint-grid');
+        const gradientMesh = document.getElementById('gradient-mesh');
+        const warmOverlay = document.getElementById('warm-overlay');
+        const radialGlows = document.getElementById('radial-glows');
+
+        let currentMood = '';
+
+        function setMood(mood: string) {
+          if (mood === currentMood) return;
+          currentMood = mood;
+
+          if (dotGrid) dotGrid.style.opacity = '0';
+          if (blueprintGrid) blueprintGrid.style.opacity = '0';
+          if (gradientMesh) gradientMesh.style.opacity = '0';
+          if (warmOverlay) warmOverlay.style.opacity = '0';
+          if (radialGlows) radialGlows.innerHTML = '';
+
+          switch (mood) {
+            case 'void':
+              if (dotGrid) dotGrid.style.opacity = '1';
+              if (radialGlows) radialGlows.innerHTML = `
+                <div style="position:absolute;width:600px;height:600px;top:50%;left:50%;
+                  background:radial-gradient(circle,rgba(0,229,255,0.06) 0%,transparent 70%);
+                  border-radius:50%;animation:breathe-cyan 4s ease-in-out infinite;
+                  transform:translate(-50%,-50%);pointer-events:none"></div>`;
+              break;
+            case 'blueprint':
+              if (blueprintGrid) blueprintGrid.style.opacity = '0.04';
+              break;
+            case 'warm-amber':
+              if (radialGlows) radialGlows.innerHTML = `
+                <div style="position:absolute;width:800px;height:600px;top:40%;left:60%;
+                  background:radial-gradient(ellipse,rgba(255,160,60,0.04) 0%,transparent 70%);
+                  border-radius:50%;transform:translate(-50%,-50%);pointer-events:none"></div>`;
+              break;
+            case 'process':
+              if (dotGrid) dotGrid.style.opacity = '0.3';
+              break;
+            case 'warm':
+              if (warmOverlay) warmOverlay.style.opacity = '0.12';
+              break;
+            case 'gradient':
+              if (gradientMesh) gradientMesh.style.opacity = '1';
+              break;
+          }
+        }
+
+        const sectionMoods = [
+          { id: 'hero',     mood: 'void' },
+          { id: 'sv-section', mood: 'blueprint' },
+          { id: 'youcook',  mood: 'warm-amber' },
+          { id: 'noteless', mood: 'void' },
+          { id: 'process',  mood: 'process' },
+          { id: 'founder',  mood: 'warm' },
+          { id: 'cta',      mood: 'gradient' },
+        ];
+
+        sectionMoods.forEach(({ id, mood }) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top center',
+            end: 'bottom center',
+            onEnter: () => setMood(mood),
+            onEnterBack: () => setMood(mood),
+          });
+        });
+
+        setMood('void');
+        window.addEventListener('load', () => ScrollTrigger.refresh());
+      } catch {
+        // atmosphere is cosmetic, silent fail
+      }
+    })();
+  </script>
+
+  <!-- ============================================================
+       SCROLL REVEAL (IntersectionObserver)
+       ============================================================ -->
+  <script>
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal-section, .reveal-left, .reveal-right').forEach(el => io.observe(el));
+  </script>
+
+</body>
+</html>

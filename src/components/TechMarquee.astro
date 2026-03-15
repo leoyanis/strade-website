@@ -1,0 +1,40 @@
+---
+const row1 = ['Flutter', 'Dart', 'Firebase', 'Google Cloud', 'OpenAI', 'Anthropic', 'Python'];
+const row2 = ['pgvector', 'FlutterFlow', 'RevenueCat', 'JavaScript', 'GSAP', 'Vercel', 'PostgreSQL'];
+---
+
+<section class="marquee-section">
+  <!-- Row 1: left -->
+  <div class="marquee-row">
+    <div class="marquee-track marquee-left">
+      {[...row1, ...row1].map(tech => (
+        <span class="marquee-item">{tech}</span>
+      ))}
+    </div>
+  </div>
+
+  <!-- Row 2: right -->
+  <div class="marquee-row marquee-row-2">
+    <div class="marquee-track marquee-right">
+      {[...row2, ...row2].map(tech => (
+        <span class="marquee-item marquee-item-dim">{tech}</span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .marquee-section { padding: 64px 0; overflow: hidden; }
+  .marquee-row { overflow: hidden; padding: 8px 0; }
+  .marquee-row-2 { margin-top: 16px; }
+  .marquee-track { display: flex; gap: 48px; width: max-content; }
+  .marquee-item {
+    font-size: 14px; font-weight: 600; color: var(--text-secondary);
+    opacity: 0.4; white-space: nowrap;
+    transition: opacity 0.3s, color 0.3s, filter 0.3s;
+    filter: grayscale(1);
+    cursor: default;
+  }
+  .marquee-item:hover { opacity: 1; color: var(--text-primary); filter: grayscale(0); }
+  .marquee-item-dim { opacity: 0.2; }
+</style>

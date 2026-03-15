@@ -1,0 +1,111 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+---
+
+<section id="process" class="process-section">
+  <div class="container">
+    <span class="label">{t(locale, 'process.label')}</span>
+    <h2 class="process-h2">
+      {t(locale, 'process.h2_line1')}<br/>
+      {t(locale, 'process.h2_line2')}
+    </h2>
+
+    <div class="process-grid">
+      <!-- Connector SVG (desktop only) -->
+      <svg class="process-connector" viewBox="0 0 800 2" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="none">
+        <path id="connector-path" d="M 0 1 L 800 1" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.3"
+              stroke-dasharray="800" stroke-dashoffset="800"/>
+      </svg>
+
+      <!-- Steps -->
+      {[
+        { num: t(locale, 'process.step1_num'), label: t(locale, 'process.step1_label'), body: t(locale, 'process.step1_body'), sub: t(locale, 'process.step1_sub') },
+        { num: t(locale, 'process.step2_num'), label: t(locale, 'process.step2_label'), body: t(locale, 'process.step2_body'), sub: t(locale, 'process.step2_sub') },
+        { num: t(locale, 'process.step3_num'), label: t(locale, 'process.step3_label'), body: t(locale, 'process.step3_body'), sub: t(locale, 'process.step3_sub') },
+      ].map((step, i) => (
+        <div class="process-step" style={`--step-delay: ${i * 0.2}s`}>
+          <div class="step-glow" aria-hidden="true"></div>
+          <div class="step-num">{step.num}</div>
+          <div class="step-label-text">{step.label}</div>
+          <p class="step-body">{step.body}</p>
+          <p class="step-sub">{step.sub}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .process-section { padding: 96px 0; position: relative; }
+  .process-h2 { margin: 16px 0 64px; }
+  .process-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 48px; position: relative;
+  }
+  .process-connector {
+    position: absolute; top: 28px; left: 10%; width: 80%; height: 2px;
+    z-index: 0; pointer-events: none;
+  }
+  .process-step {
+    position: relative; z-index: 1;
+    opacity: 0; transform: translateY(20px);
+  }
+  .process-step.visible { opacity: 1; transform: translateY(0); transition: opacity 0.8s var(--ease-out-expo) var(--step-delay), transform 0.8s var(--ease-out-expo) var(--step-delay); }
+  .step-glow {
+    position: absolute; top: -20px; left: -20px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .process-step.visible .step-glow { opacity: 1; }
+  .step-num {
+    font-size: 48px; font-weight: 700; color: var(--cyan);
+    line-height: 1; margin-bottom: 16px;
+  }
+  .step-label-text {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .step-body { color: var(--text-secondary); margin-bottom: 12px; }
+  .step-sub { font-size: 13px; color: var(--cyan); font-weight: 600; }
+
+  @media (max-width: 768px) {
+    .process-grid { grid-template-columns: 1fr; gap: 48px; }
+    .process-connector { display: none; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const gsapModule = await import('gsap');
+    const gsap = gsapModule.gsap;
+    const ScrollTriggerModule = await import('gsap/ScrollTrigger');
+    const { ScrollTrigger } = ScrollTriggerModule;
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Animate connector
+    const path = document.getElementById('connector-path');
+    if (path) {
+      ScrollTrigger.create({
+        trigger: '#process',
+        start: 'top 70%',
+        onEnter: () => {
+          gsap.to(path, { strokeDashoffset: 0, duration: 1.2, ease: 'power2.out' });
+        }
+      });
+    }
+
+    // Animate steps
+    document.querySelectorAll('.process-step').forEach((step) => {
+      ScrollTrigger.create({
+        trigger: step,
+        start: 'top 80%',
+        onEnter: () => step.classList.add('visible')
+      });
+    });
+  })();
+</script>

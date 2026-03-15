@@ -1,0 +1,137 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t } from '../../i18n/utils';
+import MetricsBar from '../../components/MetricsBar.astro';
+import CTABlock from '../../components/CTABlock.astro';
+
+const locale = 'en';
+---
+
+<Base
+  title="StudentVenture Case Study | Strade"
+  description="How we built semantic matching for 10,000+ student profiles using OpenAI embeddings and pgvector. Sub-second results."
+  locale={locale}
+  path="/case-studies/studentventure"
+>
+  <!-- Hero -->
+  <section class="cs-hero">
+    <div class="cs-hero-overlay" aria-hidden="true"></div>
+    <div class="container cs-hero-inner">
+      <span class="label">{t(locale, 'case_study_page.label')}</span>
+      <h1>{t(locale, 'case_study_page.h1')}</h1>
+      <p class="cs-hero-tag">{t(locale, 'case_study_page.tagline')}</p>
+    </div>
+  </section>
+
+  <MetricsBar locale={locale} />
+
+  <!-- Narrative -->
+  <section class="cs-narrative">
+    <div class="container cs-narrative-inner">
+
+      <h2>{t(locale, 'case_study_page.challenge_h')}</h2>
+      <p>{t(locale, 'case_study_page.challenge_body')}</p>
+
+      <h2>{t(locale, 'case_study_page.approach_h')}</h2>
+      <p>{t(locale, 'case_study_page.approach_body')}</p>
+
+      <!-- Architecture diagram (SVG) -->
+      <div class="arch-diagram reveal-section">
+        <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" width="100%" aria-label="Architecture diagram">
+          <!-- Boxes -->
+          <rect x="10" y="40" width="110" height="40" rx="6" fill="var(--bg-surface)" stroke="var(--border)" stroke-width="1"/>
+          <text x="65" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="var(--text-secondary)">Student Profile</text>
+
+          <rect x="160" y="40" width="110" height="40" rx="6" fill="var(--bg-surface)" stroke="var(--cyan)" stroke-width="1"/>
+          <text x="215" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="var(--cyan)">OpenAI Embed</text>
+
+          <rect x="310" y="40" width="110" height="40" rx="6" fill="var(--bg-surface)" stroke="var(--border)" stroke-width="1"/>
+          <text x="365" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="var(--text-secondary)">pgvector ANN</text>
+
+          <rect x="460" y="40" width="110" height="40" rx="6" fill="var(--bg-surface)" stroke="var(--cyan)" stroke-width="1"/>
+          <text x="515" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="var(--cyan)">LLM Grader</text>
+
+          <!-- Arrows -->
+          <path d="M 120 60 L 158 60" stroke="var(--cyan)" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arrow)"/>
+          <path d="M 270 60 L 308 60" stroke="var(--cyan)" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arrow)"/>
+          <path d="M 420 60 L 458 60" stroke="var(--cyan)" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arrow)"/>
+
+          <defs>
+            <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M 0 0 L 6 3 L 0 6 z" fill="rgba(0,229,255,0.5)"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <h2>{t(locale, 'case_study_page.result_h')}</h2>
+      <p>{t(locale, 'case_study_page.result_body')}</p>
+
+      <blockquote>
+        <p>{t(locale, 'case_study_page.quote')}</p>
+        <cite>{t(locale, 'case_study_page.quote_attr')}</cite>
+      </blockquote>
+
+      <!-- Stack -->
+      <div class="cs-stack-section">
+        <span class="label">{t(locale, 'case_study_page.stack_label')}</span>
+        <div class="cs-stack-tags">
+          {['Flutter', 'Firebase', 'pgvector', 'OpenAI', 'Google Cloud', 'PostgreSQL', 'Python'].map(t => (
+            <span class="tag">{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Next project -->
+  <section class="cs-next reveal-section">
+    <div class="container">
+      <p class="label">{t(locale, 'case_study_page.next_label')}</p>
+      <a href="/case-studies/youcook" class="cs-next-card">
+        <h3>{t(locale, 'case_study_page.next_title')}</h3>
+        <span class="text-link">View case study &#8594;</span>
+      </a>
+    </div>
+  </section>
+
+  <CTABlock locale={locale} />
+</Base>
+
+<style>
+  .cs-hero {
+    min-height: 60vh; display: flex; align-items: flex-end;
+    position: relative; padding-bottom: 64px;
+    background: linear-gradient(to bottom, var(--bg-void) 60%, var(--bg-base));
+  }
+  .cs-hero-overlay {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 700px 400px at 50% 30%, rgba(0,229,255,0.06), transparent);
+  }
+  .cs-hero-inner { position: relative; z-index: 1; padding-top: 96px; }
+  .cs-hero-inner h1 { margin: 12px 0 16px; }
+  .cs-hero-tag { color: var(--text-secondary); font-size: 18px; max-width: 500px; }
+
+  .cs-narrative { padding: 64px 0 96px; }
+  .cs-narrative-inner { max-width: 800px; margin: 0 auto; }
+  .cs-narrative-inner h2 { margin: 48px 0 16px; }
+  .cs-narrative-inner p { color: var(--text-secondary); line-height: 1.8; }
+
+  .arch-diagram { margin: 40px 0; padding: 24px; background: var(--bg-surface); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+
+  blockquote p { font-size: 20px; line-height: 1.6; }
+  blockquote cite { display: block; margin-top: 12px; font-style: normal; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .cs-stack-section { margin-top: 48px; }
+  .cs-stack-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
+  .cs-next { padding: 64px 0; border-top: 1px solid var(--border); }
+  .cs-next-card {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 32px 40px; background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 8px; margin-top: 16px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .cs-next-card:hover { border-color: var(--border-hover); transform: translateX(4px); }
+  .cs-next-card h3 { margin: 0; }
+</style>

@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t } from '../../i18n/utils';
+import ProblemSolution from '../../components/ProblemSolution.astro';
+import EngagementCards from '../../components/EngagementCards.astro';
+import MiniCaseStudy from '../../components/MiniCaseStudy.astro';
+import FAQ from '../../components/FAQ.astro';
+import CTABlock from '../../components/CTABlock.astro';
+const locale = 'ro';
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+---
+<Base title="Consultanta AI | Strade" description="Arhitectura, selectia modelelor si cadre de evaluare pentru echipa ta." locale={locale} path="/consulting">
+  <section style="min-height:80vh;display:flex;align-items:center;padding-top:96px">
+    <div class="container" style="padding-bottom:64px">
+      <span class="label">{t(locale,'consulting.label')}</span>
+      <h1 style="margin:16px 0 24px">{t(locale,'consulting.h1_line1')}<br/><span style="color:var(--cyan)">{t(locale,'consulting.h1_line2')}</span></h1>
+      <p style="max-width:520px;color:var(--text-secondary);font-size:18px">{t(locale,'consulting.body')}</p>
+      <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary" style="margin-top:32px;display:inline-flex;gap:8px">{t(locale,'consulting.cta')} &#8594;</a>
+    </div>
+  </section>
+  <ProblemSolution locale={locale} />
+  <EngagementCards locale={locale} />
+  <MiniCaseStudy locale={locale} />
+  <FAQ locale={locale} />
+  <CTABlock locale={locale} />
+</Base>

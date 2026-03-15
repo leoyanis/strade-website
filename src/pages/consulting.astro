@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import { t } from '../i18n/utils';
+import ProblemSolution from '../components/ProblemSolution.astro';
+import EngagementCards from '../components/EngagementCards.astro';
+import MiniCaseStudy from '../components/MiniCaseStudy.astro';
+import FAQ from '../components/FAQ.astro';
+import CTABlock from '../components/CTABlock.astro';
+
+const locale = 'en';
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "AI Consulting",
+  "provider": { "@type": "Organization", "name": "Strade" },
+  "description": "AI integration consulting for SaaS and marketplace startups.",
+  "areaServed": ["Europe", "United Kingdom"],
+  "availableLanguage": ["English", "German", "Spanish", "Romanian"]
+};
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": (t(locale, 'consulting.faq') as {q:string;a:string}[]).map(f => ({
+    "@type": "Question",
+    "name": f.q,
+    "acceptedAnswer": { "@type": "Answer", "text": f.a }
+  }))
+};
+---
+
+<Base
+  title="AI Consulting | Strade"
+  description="Knowledge transfer, architecture, and evaluation frameworks. Your team ships AI features independently after working with us."
+  locale={locale}
+  path="/consulting"
+  schema={schema}
+>
+  <!-- Extra FAQ schema -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <!-- Hero -->
+  <section class="consulting-hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container consulting-hero-inner">
+      <span class="label" id="c-label">{t(locale, 'consulting.label')}</span>
+      <h1 id="c-h1">
+        {t(locale, 'consulting.h1_line1')}<br/>
+        <span style="color:var(--cyan)">{t(locale, 'consulting.h1_line2')}</span>
+      </h1>
+      <p class="c-body">{t(locale, 'consulting.body')}</p>
+      <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary" style="margin-top:32px;display:inline-flex;gap:8px">
+        {t(locale, 'consulting.cta')} <span>&#8594;</span>
+      </a>
+    </div>
+  </section>
+
+  <ProblemSolution locale={locale} />
+  <EngagementCards locale={locale} />
+  <MiniCaseStudy locale={locale} />
+  <FAQ locale={locale} />
+  <CTABlock locale={locale} />
+</Base>
+
+<style>
+  .consulting-hero {
+    min-height: 80vh; display: flex; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; top: 50%; left: 50%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, transparent 65%);
+    transform: translate(-50%, -55%);
+    pointer-events: none; animation: pulse-hero 4s ease-in-out infinite;
+  }
+  .consulting-hero-inner { position: relative; z-index: 1; padding-top: 96px; padding-bottom: 64px; }
+  h1 { margin: 16px 0 24px; }
+  .c-body { max-width: 520px; color: var(--text-secondary); font-size: 18px; }
+
+  /* No opacity:0 here -- global.css .gsap-ready guard handles it */
+</style>
+
+<script>
+  (async () => {
+    try {
+      const gsap = (await import('gsap')).gsap;
+      // Mark gsap-ready so global.css hides elements for animation
+      document.documentElement.classList.add('gsap-ready');
+      const tl = gsap.timeline({ delay: 0.05 });
+      tl.to('#c-label', { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+      tl.to('#c-h1', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.1');
+      tl.to('.c-body', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3');
+    } catch (e) {
+      document.documentElement.classList.remove('gsap-ready');
+    }
+  })();
+</script>

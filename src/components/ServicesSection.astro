@@ -1,0 +1,108 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+---
+
+<section id="services" class="services-section">
+  <!-- Cyan glow left, purple glow right, low opacity, breathing -->
+  <div class="services-glow services-glow-cyan glow-cyan" aria-hidden="true"></div>
+  <div class="services-glow services-glow-purple glow-purple" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="services-grid">
+      <!-- Consulting card -->
+      <div class="service-card service-card-cyan reveal-left">
+        <span class="label">{t(locale, 'services.consulting_label')}</span>
+        <h2>{t(locale, 'services.consulting_h3')}</h2>
+        <p class="service-body">{t(locale, 'services.consulting_body')}</p>
+        <ul class="service-bullets">
+          {(t(locale, 'services.consulting_bullets') as string[]).map((b: string) => (
+            <li><span class="bullet-dot" aria-hidden="true"></span>{b}</li>
+          ))}
+        </ul>
+        <a href="/consulting" class="text-link service-link">
+          {t(locale, 'nav.services')} <span class="link-arrow">&#8594;</span>
+        </a>
+      </div>
+
+      <!-- Development card -->
+      <div class="service-card service-card-purple reveal-right">
+        <span class="label" style="color:var(--purple)">{t(locale, 'services.dev_label')}</span>
+        <h2>{t(locale, 'services.dev_h3')}</h2>
+        <p class="service-body">{t(locale, 'services.dev_body')}</p>
+        <ul class="service-bullets">
+          {(t(locale, 'services.dev_bullets') as string[]).map((b: string) => (
+            <li><span class="bullet-dot bullet-dot-purple" aria-hidden="true"></span>{b}</li>
+          ))}
+        </ul>
+        <a href="/development" class="text-link service-link" style="color:var(--purple)">
+          {t(locale, 'nav.services')} <span class="link-arrow">&#8594;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .services-section {
+    padding: 96px 0;
+    position: relative;
+  }
+  .services-glow {
+    position: absolute; pointer-events: none; z-index: 0;
+    width: 500px; height: 500px; border-radius: 50%;
+  }
+  .services-glow-cyan {
+    left: 0; top: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.10) 0%, transparent 70%);
+    transform: translateY(-50%);
+  }
+  .services-glow-purple {
+    right: 0; top: 50%;
+    background: radial-gradient(circle, rgba(123,47,255,0.10) 0%, transparent 70%);
+    transform: translateY(-50%);
+  }
+  .services-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    position: relative; z-index: 1;
+  }
+  .service-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 48px;
+    transition: border-color 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo);
+  }
+  .service-card-cyan:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px var(--cyan-dim);
+  }
+  .service-card-purple:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px var(--purple-dim);
+  }
+  .service-card h2 { margin-bottom: 16px; }
+  .service-body { color: var(--text-secondary); margin-bottom: 24px; }
+  .service-bullets {
+    list-style: none; display: flex; flex-direction: column; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .service-bullets li {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 15px; color: var(--text-secondary);
+  }
+  .bullet-dot {
+    flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cyan);
+  }
+  .bullet-dot-purple { background: var(--purple); }
+  .service-link { font-size: 15px; font-weight: 600; }
+  .link-arrow { display: inline-block; transition: transform 0.3s; }
+  .service-link:hover .link-arrow { transform: translateX(4px); }
+
+  @media (max-width: 768px) {
+    .services-grid { grid-template-columns: 1fr; }
+    .service-card { padding: 32px; }
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+---
+
+<section class="ps-section">
+  <div class="container ps-grid">
+    <!-- Without -->
+    <div class="ps-card ps-without reveal-left">
+      <span class="label" style="color:#ff4444aa">{t(locale, 'consulting.without_label')}</span>
+      <ul class="ps-list">
+        {(t(locale, 'consulting.without_bullets') as string[]).map((b: string) => (
+          <li>
+            <span class="ps-bullet ps-bullet-red" aria-hidden="true">&#10005;</span>
+            {b}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <!-- With -->
+    <div class="ps-card ps-with reveal-right" style="transition-delay:0.3s">
+      <span class="label">{t(locale, 'consulting.with_label')}</span>
+      <ul class="ps-list">
+        {(t(locale, 'consulting.with_bullets') as string[]).map((b: string) => (
+          <li>
+            <span class="ps-bullet ps-bullet-cyan" aria-hidden="true">&#10003;</span>
+            {b}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ps-section { padding: 96px 0; }
+  .ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .ps-card { background: var(--bg-surface); border-radius: 8px; padding: 48px; }
+  .ps-without {
+    border-left: 2px solid rgba(255,68,68,0.3);
+    background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(26,17,17,0.8) 100%);
+  }
+  .ps-with {
+    border-left: 2px solid rgba(0,229,255,0.4);
+    background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(10,18,20,0.9) 100%);
+  }
+  .ps-list { list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .ps-list li { display: flex; align-items: flex-start; gap: 12px; color: var(--text-secondary); font-size: 15px; }
+  .ps-bullet { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+  .ps-bullet-red { color: rgba(255,68,68,0.7); }
+  .ps-bullet-cyan { color: var(--cyan); }
+
+  @media (max-width: 768px) { .ps-grid { grid-template-columns: 1fr; } }
+</style>

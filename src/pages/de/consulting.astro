@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t } from '../../i18n/utils';
+import ProblemSolution from '../../components/ProblemSolution.astro';
+import EngagementCards from '../../components/EngagementCards.astro';
+import MiniCaseStudy from '../../components/MiniCaseStudy.astro';
+import FAQ from '../../components/FAQ.astro';
+import CTABlock from '../../components/CTABlock.astro';
+const locale = 'de';
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+---
+<Base title="KI-Beratung | Strade" description="Wissenstransfer, Architektur und Evaluierungsframeworks. Ihr Team entwickelt KI unabhangig." locale={locale} path="/consulting">
+  <section style="min-height:80vh;display:flex;align-items:center;position:relative;overflow:hidden">
+    <div class="hero-glow" aria-hidden="true" style="position:absolute;top:50%;left:50%;width:600px;height:600px;background:radial-gradient(circle,rgba(0,229,255,0.15) 0%,transparent 65%);transform:translate(-50%,-55%);pointer-events:none;animation:pulse-hero 4s ease-in-out infinite;"></div>
+    <div class="container" style="position:relative;z-index:1;padding-top:96px;padding-bottom:64px">
+      <span class="label">{t(locale, 'consulting.label')}</span>
+      <h1 style="margin:16px 0 24px">{t(locale, 'consulting.h1_line1')}<br/><span style="color:var(--cyan)">{t(locale, 'consulting.h1_line2')}</span></h1>
+      <p style="max-width:520px;color:var(--text-secondary);font-size:18px">{t(locale, 'consulting.body')}</p>
+      <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary" style="margin-top:32px;display:inline-flex;gap:8px">{t(locale, 'consulting.cta')} <span>&#8594;</span></a>
+    </div>
+  </section>
+  <ProblemSolution locale={locale} />
+  <EngagementCards locale={locale} />
+  <MiniCaseStudy locale={locale} />
+  <FAQ locale={locale} />
+  <CTABlock locale={locale} />
+</Base>

@@ -1,0 +1,74 @@
+---
+import { t, type Locale } from '../i18n/utils';
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const faqs = t(locale, 'consulting.faq') as { q: string; a: string }[];
+---
+
+<section class="faq-section">
+  <div class="container faq-inner">
+    <span class="label">{t(locale, 'consulting.faq_label')}</span>
+
+    <div class="faq-list" id="faq-list">
+      {faqs.map((item, i) => (
+        <div class="faq-item" id={`faq-${i}`}>
+          <button class="faq-question" aria-expanded="false" aria-controls={`faq-answer-${i}`}>
+            <span>{item.q}</span>
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer" id={`faq-answer-${i}`} role="region" aria-hidden="true">
+            <p>{item.a}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-section { padding: 96px 0; }
+  .faq-inner { max-width: 800px; }
+  .faq-list { margin-top: 32px; display: flex; flex-direction: column; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-question {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    padding: 24px 0; background: none; border: none; cursor: pointer;
+    text-align: left; color: var(--text-primary); font-size: 16px; font-weight: 500;
+    gap: 16px; transition: color 0.3s;
+  }
+  .faq-question:hover { color: var(--cyan); }
+  .faq-icon {
+    font-size: 20px; color: var(--cyan); flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-answer {
+    overflow: hidden; max-height: 0;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    color: var(--text-secondary); font-size: 15px; line-height: 1.7;
+  }
+  .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 24px; }
+</style>
+
+<script>
+  document.querySelectorAll('.faq-question').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item') as HTMLElement;
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.faq-item').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-question')?.setAttribute('aria-expanded', 'false');
+        const ans = el.querySelector('.faq-answer') as HTMLElement;
+        if (ans) ans.setAttribute('aria-hidden', 'true');
+      });
+      // Toggle current
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+        const ans = item.querySelector('.faq-answer') as HTMLElement;
+        if (ans) ans.setAttribute('aria-hidden', 'false');
+      }
+    });
+  });
+</script>

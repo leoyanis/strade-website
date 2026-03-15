@@ -1,0 +1,51 @@
+---
+interface Props {
+  title: string;
+  tagline: string;
+  tags: string[];
+  caseStudyUrl: string;
+  imageAlt?: string;
+  reverse?: boolean;
+}
+const { title, tagline, tags, caseStudyUrl, imageAlt = '', reverse = false } = Astro.props;
+---
+
+<article class={`project-card reveal-section ${reverse ? 'project-card-reverse' : ''}`}>
+  <div class="project-img">
+    <div class="project-img-placeholder">
+      <span class="project-img-label">{title}</span>
+    </div>
+  </div>
+  <div class="project-info">
+    <h3>{title}</h3>
+    <p class="project-tagline">{tagline}</p>
+    <div class="project-tags">
+      {tags.map(tag => <span class="tag">{tag}</span>)}
+    </div>
+    <a href={caseStudyUrl} class="text-link project-link">View case study &#8594;</a>
+  </div>
+</article>
+
+<style>
+  .project-card {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+    padding: 64px 0; border-bottom: 1px solid var(--border);
+  }
+  .project-card-reverse .project-info { order: -1; }
+  .project-img-placeholder {
+    width: 100%; aspect-ratio: 16/10;
+    background: var(--bg-surface); border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .project-img-label { font-size: 24px; font-weight: 700; color: var(--text-muted); }
+  .project-tagline { color: var(--text-secondary); margin: 12px 0 20px; }
+  .project-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .project-link { font-size: 15px; font-weight: 600; }
+
+  @media (max-width: 768px) {
+    .project-card { grid-template-columns: 1fr; gap: 32px; }
+    .project-card-reverse .project-info { order: 0; }
+  }
+</style>

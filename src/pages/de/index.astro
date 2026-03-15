@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import SocialProof from '../../components/SocialProof.astro';
+import ServicesSection from '../../components/ServicesSection.astro';
+import CaseStudyPinned from '../../components/CaseStudyPinned.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import TechMarquee from '../../components/TechMarquee.astro';
+import FounderSection from '../../components/FounderSection.astro';
+import CTABlock from '../../components/CTABlock.astro';
+
+const locale = 'de';
+---
+<Base title="Strade | KI-Beratung und Entwicklung" description="KI-Integration, massgeschneiderte Entwicklung und Wissenstransfer fur Startups." locale={locale} path="/">
+  <Hero locale={locale} />
+  <SocialProof locale={locale} />
+  <ServicesSection locale={locale} />
+  <CaseStudyPinned locale={locale} />
+  <ProcessSteps locale={locale} />
+  <TechMarquee />
+  <FounderSection locale={locale} />
+  <CTABlock locale={locale} />
+</Base>

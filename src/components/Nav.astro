@@ -1,0 +1,204 @@
+---
+import { t, type Locale, LOCALES, LOCALE_NAMES, getLocalizedPath } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  path: string;
+}
+const { locale, path } = Astro.props;
+
+const CALENDLY = 'https://calendly.com/yanis-schweizer';
+---
+
+<nav id="main-nav" class="nav-bar">
+  <div class="container nav-inner">
+    <!-- Logo -->
+    <a href={getLocalizedPath('/', locale)} class="nav-logo" aria-label="Strade home">
+      <img src="/images/logo-white.png" alt="Strade" width="74" height="28" style="height:28px;width:auto;display:block" />
+    </a>
+
+    <!-- Desktop nav links -->
+    <ul class="nav-links">
+      <li><a href={getLocalizedPath('/#case-study', locale)} class="nav-link">{t(locale, 'nav.work')}</a></li>
+      <li><a href={getLocalizedPath('/#services', locale)} class="nav-link">{t(locale, 'nav.services')}</a></li>
+    </ul>
+
+    <!-- Right side: language + CTA -->
+    <div class="nav-right">
+      <!-- Language selector -->
+      <div class="lang-selector" id="lang-selector">
+        <button class="lang-btn" aria-haspopup="true" aria-expanded="false" id="lang-toggle">
+          {locale.toUpperCase()} <span class="lang-arrow">&#9660;</span>
+        </button>
+        <ul class="lang-dropdown" id="lang-dropdown" role="menu">
+          {LOCALES.map(l => (
+            <li role="none">
+              <a
+                href={l === 'en' ? (path === '/' ? '/' : path) : `/${l}${path === '/' ? '' : path}`}
+                class={`lang-option${l === locale ? ' lang-active' : ''}`}
+                role="menuitem"
+              >
+                {LOCALE_NAMES[l]}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Book a call CTA -->
+      <a href={CALENDLY} target="_blank" rel="noopener" class="btn-outline nav-cta">
+        {t(locale, 'nav.book')}
+      </a>
+
+      <!-- Hamburger (mobile) -->
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile overlay -->
+  <div class="mobile-overlay" id="mobile-overlay" aria-hidden="true">
+    <button class="mobile-close" id="mobile-close" aria-label="Close menu">&#10005;</button>
+    <ul class="mobile-links">
+      <li><a href={getLocalizedPath('/#case-study', locale)} class="mobile-link">{t(locale, 'nav.work')}</a></li>
+      <li><a href={getLocalizedPath('/#services', locale)} class="mobile-link">{t(locale, 'nav.services')}</a></li>
+      <li>
+        <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary" style="margin-top:16px">
+          {t(locale, 'nav.book')}
+        </a>
+      </li>
+    </ul>
+    <div class="mobile-langs">
+      {LOCALES.map(l => (
+        <a href={l === 'en' ? path : `/${l}${path === '/' ? '' : path}`} class={`lang-option${l === locale ? ' lang-active' : ''}`}>
+          {LOCALE_NAMES[l]}
+        </a>
+      ))}
+    </div>
+  </div>
+</nav>
+
+<style>
+  .nav-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    height: 64px;
+    transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+    border-bottom: 1px solid transparent;
+  }
+  .nav-bar.scrolled {
+    background: rgba(10,10,10,0.93);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo { display: flex; align-items: center; }
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+  .nav-link {
+    font-size: 14px; font-weight: 500; color: var(--text-secondary);
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-link::after {
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 0; height: 1px; background: var(--cyan);
+    transition: width 0.3s;
+  }
+  .nav-link:hover { color: var(--text-primary); }
+  .nav-link:hover::after { width: 100%; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+
+  /* Language selector */
+  .lang-selector { position: relative; }
+  .lang-btn {
+    background: none; border: none; color: var(--text-secondary);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: color 0.3s;
+  }
+  .lang-btn:hover { color: var(--text-primary); }
+  .lang-arrow { font-size: 10px; transition: transform 0.3s; }
+  .lang-dropdown {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; list-style: none; min-width: 140px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .lang-dropdown.open { display: block; }
+  .lang-option {
+    display: block; padding: 8px 12px; border-radius: 4px;
+    font-size: 13px; color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+  }
+  .lang-option:hover { background: var(--bg-surface); color: var(--text-primary); }
+  .lang-active { color: var(--cyan); }
+
+  /* Hamburger */
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 4px;
+  }
+  .hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--text-primary); border-radius: 2px;
+    transition: transform 0.3s;
+  }
+
+  /* Mobile overlay */
+  .mobile-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--bg-base);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 32px;
+  }
+  .mobile-overlay.open { display: flex; }
+  .mobile-close {
+    position: absolute; top: 20px; right: 24px;
+    background: none; border: none; color: var(--text-primary);
+    font-size: 24px; cursor: pointer;
+  }
+  .mobile-links { list-style: none; text-align: center; display: flex; flex-direction: column; gap: 24px; }
+  .mobile-link { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+  .mobile-langs { display: flex; gap: 16px; }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-cta { display: none; }
+    .hamburger { display: flex; }
+  }
+</style>
+
+<script>
+  // Scroll state
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 100);
+  }, { passive: true });
+
+  // Lang dropdown
+  const toggle = document.getElementById('lang-toggle');
+  const dropdown = document.getElementById('lang-dropdown');
+  toggle?.addEventListener('click', () => {
+    const open = dropdown?.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('lang-selector')?.contains(e.target as Node)) {
+      dropdown?.classList.remove('open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Mobile menu
+  const hamburger = document.getElementById('hamburger');
+  const overlay = document.getElementById('mobile-overlay');
+  const closeBtn = document.getElementById('mobile-close');
+  hamburger?.addEventListener('click', () => { overlay?.classList.add('open'); });
+  closeBtn?.addEventListener('click', () => { overlay?.classList.remove('open'); });
+  overlay?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => overlay.classList.remove('open')));
+</script>
