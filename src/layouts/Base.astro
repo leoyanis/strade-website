@@ -1,8 +1,9 @@
 ---
 import '../styles/global.css';
 import '../styles/portfolio.css';
-import { type Locale, LOCALES } from '../i18n/utils';
+import { type Locale } from '../i18n/utils';
 import { SITE } from '../data/site';
+import { abs, person, website, breadcrumbList, PERSON_ID, WEBSITE_ID, type Crumb } from '../data/seo';
 
 interface Props {
   title: string;
@@ -10,9 +11,16 @@ interface Props {
   locale?: Locale;
   path?: string;
   ogImage?: string;
-  schema?: object;
-  /** Set on pages that exist in English only, so we don't emit hreflang for URLs that 404. */
-  noAlternates?: boolean;
+  /** Alt text for the link-preview image. Defaults to the title. */
+  ogImageAlt?: string;
+  /** Extra schema.org nodes, merged into the site-wide JSON-LD graph. */
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+  /** Breadcrumb trail for search results, e.g. Home > Work > Vaultt. */
+  crumbs?: Crumb[];
+  /** 'article' for case studies and resources, 'profile' for the homepage. */
+  pageType?: 'website' | 'article' | 'profile';
+  /** Keep the page out of search results (404, previews). */
+  noindex?: boolean;
   hideFooter?: boolean;
   /** Branded case-study pages: drop the starfield/grid atmosphere so the page owns its look. */
   bare?: boolean;
@@ -26,8 +34,11 @@ const {
   locale = 'en',
   path = '/',
   ogImage = '/og/default.png',
+  ogImageAlt,
   schema,
-  noAlternates = true,
+  crumbs,
+  pageType = 'website',
+  noindex = false,
   hideFooter = false,
   bare = false,
   navTheme = 'dark',
@@ -35,8 +46,30 @@ const {
 const navPath = Astro.url.pathname;
 const year = new Date().getFullYear();
 
-const canonical = `https://strade.tech${path}`;
-const localeMap: Record<string, string> = { en: '', de: '/de', es: '/es', ro: '/ro' };
+const canonical = abs(path);
+const ogImageUrl = abs(ogImage);
+
+const webPage = {
+  '@type': pageType === 'profile' ? 'ProfilePage' : 'WebPage',
+  '@id': `${canonical}#webpage`,
+  url: canonical,
+  name: title,
+  description,
+  inLanguage: locale,
+  isPartOf: { '@id': WEBSITE_ID },
+  primaryImageOfPage: ogImageUrl,
+  ...(pageType === 'profile' ? { mainEntity: { '@id': PERSON_ID } } : { author: { '@id': PERSON_ID } }),
+};
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    person,
+    website,
+    webPage,
+    ...(crumbs ? [breadcrumbList(crumbs)] : []),
+    ...(schema ? [schema].flat() : []),
+  ],
+};
 ---
 
 <!doctype html>
@@ -47,41 +80,42 @@ const localeMap: Record<string, string> = { en: '', de: '/de', es: '/es', ro: '/
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
-
-  <!-- hreflang -->
-  {!noAlternates && LOCALES.map(l => (
-    <link rel="alternate" hreflang={l} href={`https://strade.tech${localeMap[l]}${path === '/' ? '' : path}`} />
-  ))}
-  {!noAlternates && <link rel="alternate" hreflang="x-default" href={`https://strade.tech${path}`} />}
+  <meta name="author" content={SITE.name} />
+  <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content={pageType === 'website' ? 'website' : pageType} />
   <meta property="og:url" content={canonical} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:image" content={`https://strade.tech${ogImage}`} />
+  <meta property="og:image" content={ogImageUrl} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={ogImageAlt ?? title} />
   <meta property="og:site_name" content={SITE.name} />
+  <meta property="og:locale" content="en_US" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={`https://strade.tech${ogImage}`} />
+  <meta name="twitter:image" content={ogImageUrl} />
+  <meta name="twitter:image:alt" content={ogImageAlt ?? title} />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
   <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/images/round.png" />
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/png" href="/favicon-96.png" sizes="96x96" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#0a0a0a" />
 
   <!-- Schema.org -->
-  {schema && (
-    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
-  )}
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable summary" />
   <slot name="head" />
 </head>
 <body data-nav={navTheme} class:list={[bare && 'is-bare']}>

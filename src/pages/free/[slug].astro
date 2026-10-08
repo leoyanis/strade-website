@@ -16,6 +16,7 @@ import { inline, pad } from '../../components/free/inline';
 import { visibleResources, type Resource } from '../../data/resources';
 import { getProject } from '../../data/work';
 import { SITE } from '../../data/site';
+import { resourceSchema, resourceCrumbs } from '../../data/seo';
 import '../../styles/quests.css';
 import '../../styles/free.css';
 
@@ -43,8 +44,10 @@ const DownloadIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none
   title={`${r.title} | Free from Yanis Schweizer`}
   description={r.summary}
   path={`/free/${r.slug}`}
-  noAlternates
   ogImage={hasOg ? ogPath : '/og/free.png'}
+  pageType="article"
+  schema={resourceSchema(r, hasOg ? ogPath : '/og/free.png')}
+  crumbs={resourceCrumbs(r)}
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
   <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

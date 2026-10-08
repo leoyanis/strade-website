@@ -1,4 +1,5 @@
 ---
+import { projectSchema, projectCrumbs } from '../../data/seo';
 // Fallow: branded side-quest case study.
 // The look follows the app and its App Store art: night fields in gold scratchboard, a light serif
 // (Apple's New York in the app, so `ui-serif` first, Newsreader elsewhere), parchment ink, antique gold.
@@ -109,7 +110,9 @@ const targets = [
   title={`${p.name}: case study | Yanis Schweizer`}
   description={p.summary}
   path="/work/fallow"
-  noAlternates
+  pageType="article"
+  schema={projectSchema(p)}
+  crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
   ogImage="/og/work-fallow.png"

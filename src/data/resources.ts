@@ -1,7 +1,7 @@
 // Free resources sent out by the Instagram DM automation.
 //
 // To add one:
-//   1. Add an entry below (copy an existing one). The slug becomes the URL: strade.tech/free/<slug>
+//   1. Add an entry below (copy an existing one). The slug becomes the URL: www.strade.tech/free/<slug>
 //   2. Optional: put the DM keyword in `keyword` so the page can say "You commented X".
 //   3. Deliver it any way you like (combine freely):
 //        - `body`:      the resource lives right on the page (prompts get a copy button)

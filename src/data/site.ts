@@ -1,7 +1,7 @@
 // One place for links that appear across the site.
 export const SITE = {
   name: 'Yanis Schweizer',
-  url: 'https://strade.tech',
+  url: 'https://www.strade.tech',
   company: 'Strade SMIP SRL',
   booking: 'https://cal.com/yanis-schweizer-lfdylj/discovery-call?overlayCalendar=true',
   email: 'yanis@strade.tech',

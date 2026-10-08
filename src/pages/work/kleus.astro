@@ -1,4 +1,5 @@
 ---
+import { projectSchema, projectCrumbs } from '../../data/seo';
 // Kleus: a branded case study in Kleus's own register. Warm paper, ink, one thing in amber,
 // the phi mark, DM Sans with Fraunces numerals. Product moments are rebuilt in HTML from
 // kleus.ai (the ring of saved material, the lesson path, the WhatsApp day, the scored check).
@@ -82,7 +83,9 @@ const RAILS = [
   title={`${p.name}: case study | Yanis Schweizer`}
   description={p.summary}
   path="/work/kleus"
-  noAlternates
+  pageType="article"
+  schema={projectSchema(p)}
+  crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
   ogImage="/og/work-kleus.png"

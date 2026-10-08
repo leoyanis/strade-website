@@ -2,6 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "astro",
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/fonts/(.*)",

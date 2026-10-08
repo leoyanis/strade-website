@@ -1,4 +1,5 @@
 ---
+import { projectSchema, projectCrumbs } from '../../data/seo';
 // Noteless: branded side-quest case study.
 // v2's own design system: ink near-black with grain, a light system display face, JetBrains Mono for data,
 // and a warm amber accent that is deliberately not blue. The blue lives on in the icon and in v1.
@@ -58,7 +59,9 @@ const bars = [92, 78, 0, 84, 66, 88, 0, 72, 90, 58, 0, 80];
   title={`${p.name}: case study | Yanis Schweizer`}
   description={p.summary}
   path="/work/noteless"
-  noAlternates
+  pageType="article"
+  schema={projectSchema(p)}
+  crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
   ogImage="/og/work-noteless.png"

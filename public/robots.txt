@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://strade.tech/sitemap-index.xml
+
+Sitemap: https://www.strade.tech/sitemap-index.xml

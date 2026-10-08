@@ -43,22 +43,6 @@ const shapes = [
   { kind: 'ring', x: 62, y: 88, size: 60, color: '#FF4F1F', speed: 1.5 },
 ];
 
-const schema = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      name: SITE.name,
-      url: SITE.url,
-      image: `${SITE.url}${SITE.portrait}`,
-      jobTitle: 'Builder: apps, automations and AI tools',
-      knowsLanguage: ['en', 'de', 'es', 'ro'],
-      sameAs: [SITE.instagram, SITE.linkedin],
-      worksFor: { '@type': 'Organization', name: SITE.company, url: SITE.url },
-    },
-    { '@type': 'WebSite', name: SITE.name, url: SITE.url },
-  ],
-};
 ---
 
 <Base
@@ -66,7 +50,7 @@ const schema = {
   description="Yanis Schweizer builds apps, automations and AI tools at a fixed price, and you own the code. Vaultt, Kleus, YouCook and more."
   locale="en"
   path="/"
-  schema={schema}
+  pageType="profile"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
   <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
