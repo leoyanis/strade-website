@@ -1,0 +1,222 @@
+---
+// SSOT Builder preview, pinned: a messy pile of notes, prices and decks gets read, the price
+// clash gets flagged and resolved, then everything sorts itself into the hub and spokes with
+// CLAUDE.md as the map. motion/ssot.ts scrubs it on desktop and loops it on phones.
+// Without JS it shows the finished hub, the flag and the full log.
+
+const W = 400;
+const H = 340;
+const hub = { x: 200, y: 180 };
+const spokes = [
+  { label: 'Onboarding', x: 70, y: 92 },
+  { label: 'Paywall', x: 330, y: 92 },
+  { label: 'Billing', x: 360, y: 236 },
+  { label: 'Feature A', x: 200, y: 300 },
+  { label: 'Feature B', x: 40, y: 236 },
+];
+const pct = (p: { x: number; y: number }) => `--tx:${((p.x / W) * 100).toFixed(2)}%;--ty:${((p.y / H) * 100).toFixed(2)}%`;
+const to = (i: number | 'hub') => (i === 'hub' ? pct(hub) : pct(spokes[i]));
+
+// The messy inputs. x/y are % of the map, `to` is the doc they end up in.
+const items = [
+  { kind: 'note', x: 23, y: 15, r: -7, to: 2, file: 'notes.txt', html: 'Pro plan: <span class="ssp-price"><s>£29?</s><ins>£24</ins></span>', clash: true },
+  { kind: 'web', x: 70, y: 13, r: 5, to: 2, file: 'yourapp.com', html: 'Pro <span class="ssp-price"><s>£20</s><ins>£24</ins></span> / mo', clash: true },
+  { kind: 'stripe', x: 81, y: 44, r: -4, to: 2, file: 'Stripe', html: '£24 / month', clash: true },
+  { kind: 'deck', x: 46, y: 37, r: 3, to: 'hub' as const, file: 'pitch-deck.pdf', html: '<span class="ssp-bars"><i></i><i></i><i></i></span>' },
+  { kind: 'voice', x: 17, y: 52, r: 6, to: 0, file: 'voice-note.txt', html: '“onboarding in 3 steps”' },
+  { kind: 'chat', x: 66, y: 66, r: -5, to: 1, file: '#product', html: 'paywall after day 3?' },
+  { kind: 'todo', x: 30, y: 78, r: -3, to: 3, file: 'TODO.md', html: '☐ export to PDF' },
+  { kind: 'ideas', x: 76, y: 86, r: 4, to: 4, file: 'ideas.md', html: 'team workspaces' },
+];
+const clash = items.filter((i) => i.clash);
+const log = [
+  { cls: 'is-cmd', html: '<span class="ssp-p">›</span> /ssot-builder' },
+  { cls: '', html: 'Reading your project… <b class="ssp-read">8</b>/8' },
+  { cls: '', html: 'Health: 🟡 Needs work' },
+  { cls: 'is-warn', html: '⚠ Pricing doesn’t match' },
+  { cls: 'is-ok', html: '✓ Accepted: £24 everywhere' },
+  { cls: 'is-ok', html: '✓ Wrote docs/SSOT.md' },
+  { cls: 'is-ok', html: '✓ Wrote 5 spoke docs' },
+  { cls: 'is-ok', html: '✓ CLAUDE.md maps it all' },
+];
+---
+
+<section class="sk-preview ssp" data-fx="ssot">
+  <div class="ssp__pin">
+    <div class="container ssp__grid">
+      <div class="ssp__map" role="img" aria-label="Notes, pricing, a pitch deck and voice notes get read. The landing page says £20, Stripe charges £24 and the notes say £29, so it flags the clash and recommends £24. Then everything is sorted into one source of truth with docs for onboarding, paywall, billing, feature A and feature B, and CLAUDE.md as the map.">
+        <div class="ssp-claude" aria-hidden="true"><span>CLAUDE.md</span><em>the map</em></div>
+        <svg class="ssp-hub" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+          <line class="ssp-up" x1={hub.x} y1="-14" x2={hub.x} y2={hub.y - 46} />
+          {spokes.map((s) => <line class="ssp-line" x1={hub.x} y1={hub.y} x2={s.x} y2={s.y} data-x={s.x} data-y={s.y} />)}
+          <circle class="ssp-glow" cx={hub.x} cy={hub.y} r="62" />
+          <g class="ssp-core">
+            <circle cx={hub.x} cy={hub.y} r="46" />
+            <text x={hub.x} y={hub.y + 6} text-anchor="middle">SSOT</text>
+          </g>
+          {spokes.map((s) => (
+            <g class="ssp-node">
+              <circle cx={s.x} cy={s.y} r="36" />
+              <text x={s.x} y={s.y + 4} text-anchor="middle">{s.label}</text>
+            </g>
+          ))}
+        </svg>
+        <svg class="ssp-clash" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <polygon points={clash.map((c) => `${c.x},${c.y}`).join(' ')} />
+        </svg>
+        {items.map((it) => (
+          <div
+            class:list={['ssp-item', `is-${it.kind}`, it.clash && 'is-clash']}
+            style={`--x:${it.x}%;--y:${it.y}%;--r:${it.r}deg;${to(it.to)}`}
+            aria-hidden="true"
+          >
+            <small>{it.file}</small>
+            <b set:html={it.html} />
+            <i class="ssp-tick">✓</i>
+          </div>
+        ))}
+        <span class="ssp-scan" aria-hidden="true"><span class="ssp-beam"></span></span>
+      </div>
+
+      <div class="ssp__side">
+        <div class="ssp-log" aria-hidden="true">
+          <div class="ssp-log__bar"><i></i><i></i><i></i><span>claude · ssot-builder</span></div>
+          <ol>{log.map((l) => <li class={l.cls} set:html={l.html} />)}</ol>
+        </div>
+
+        <div class="ssp-flag">
+          <header><i>!</i>Contradiction found</header>
+          <p>
+            <b>Pricing:</b> your landing page says <s class="ssp-s1">£20</s>, Stripe charges <mark>£24</mark>, your notes say <s class="ssp-s2">£29</s>.
+          </p>
+          <div class="ssp-flag__rec">
+            <span>Recommendation</span>
+            <strong>£24.</strong> Update the landing page to match.
+          </div>
+          <div class="ssp-flag__btns" aria-hidden="true"><span class="on">Accept all</span><span>Discuss</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* ================================================================
+     SSOT BUILDER: pinned chaos -> source of truth
+     ================================================================ */
+  .ssp { padding: 24px 0 24px; }
+  .ssp__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; max-width: 560px; }
+  .ssp__map { max-width: 620px; }
+  @media (min-width: 901px) {
+    .ssp__grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 44px; align-items: center; max-width: none; }
+    .ssp.is-pinned { padding: 0; }
+    .ssp.is-pinned .ssp__pin { height: 100vh; display: flex; align-items: center; padding: 72px 0 16px; }
+    .ssp.is-pinned .ssp__grid { width: 100%; }
+    .ssp.is-pinned .ssp__map { width: min(100%, 620px, calc((100vh - 150px) * 1.1)); justify-self: center; }
+  }
+
+  .ssp__map { position: relative; aspect-ratio: 400 / 340; width: 100%; }
+  .ssp-claude {
+    position: absolute; left: 50%; top: -2%; translate: -50% -100%; z-index: 3;
+    display: inline-flex; align-items: center; gap: 10px; padding: 8px 15px; border-radius: 10px; white-space: nowrap;
+    background: #121416; box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 50%, transparent), 0 14px 30px -14px #000, 0 0 30px -12px var(--acc);
+  }
+  .ssp-claude span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; font-weight: 600; }
+  .ssp-claude em { font-style: normal; font-size: 13px; color: var(--text-secondary); }
+  .ssp-claude em::before { content: '· '; color: var(--acc); }
+  .ssp__map { margin-top: 44px; }
+
+  .ssp-hub { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .ssp-up { stroke: var(--acc); stroke-width: 1.5; stroke-dasharray: 3 6; opacity: 0.8; animation: ssp-flow 1.2s linear infinite reverse; }
+  .ssp-line { stroke: var(--acc); stroke-width: 1.5; stroke-dasharray: 3 7; opacity: 0.75; animation: ssp-flow 1.2s linear infinite; }
+  @keyframes ssp-flow { to { stroke-dashoffset: -20; } }
+  .ssp-glow { fill: var(--acc); opacity: 0.16; transform-box: fill-box; transform-origin: center; animation: ssp-pulse 2.6s ease-in-out infinite; }
+  @keyframes ssp-pulse { 50% { transform: scale(1.18); opacity: 0.05; } }
+  .ssp-core, .ssp-node { transform-box: fill-box; transform-origin: center; }
+  .ssp-core circle { fill: var(--acc); }
+  .ssp-core text { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 17px; font-weight: 700; fill: #050505; letter-spacing: 0.04em; }
+  .ssp-node { --f: 0; }
+  .ssp-node circle { fill: color-mix(in srgb, var(--acc) calc(var(--f) * 100%), #121416); stroke: color-mix(in srgb, var(--acc) calc(30% + var(--f) * 70%), rgba(255, 255, 255, 0.14)); stroke-width: 1; }
+  .ssp-node text { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; fill: var(--text-primary); }
+
+  .ssp-clash { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+  .ssp-clash polygon { fill: rgba(255, 77, 79, 0.06); stroke: #ff4d4f; stroke-width: 1.5; stroke-dasharray: 5 6; vector-effect: non-scaling-stroke; animation: ssp-flow 1s linear infinite; }
+
+  .ssp-item {
+    --clash: 0;
+    position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; rotate: var(--r); z-index: 2;
+    display: flex; flex-direction: column; gap: 3px; padding: 8px 11px 9px; border-radius: 10px; min-width: 104px; max-width: 30%;
+    background: #15181b; opacity: 0;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #ff4d4f calc(var(--clash) * 100%), rgba(255, 255, 255, 0.1)), 0 0 calc(var(--clash) * 26px) rgba(255, 77, 79, 0.5), 0 14px 26px -12px #000;
+  }
+  .ssp-item small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+  .ssp-item b { font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+  .ssp-item.is-note { background: #f7df7c; color: #2b2300; }
+  .ssp-item.is-note small { color: rgba(43, 35, 0, 0.6); }
+  .ssp-item.is-stripe { background: #1b1838; box-shadow: 0 0 0 1px color-mix(in srgb, #ff4d4f calc(var(--clash) * 100%), #635bff), 0 0 calc(var(--clash) * 26px) rgba(255, 77, 79, 0.5), 0 14px 26px -12px #000; }
+  .ssp-item.is-stripe small { color: #a5a0ff; }
+  .ssp-item.is-web small::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: #28c840; }
+  .ssp-item.is-chat { border-radius: 12px 12px 12px 3px; }
+  .ssp-bars { display: flex; align-items: flex-end; gap: 4px; height: 22px; }
+  .ssp-bars i { width: 12px; border-radius: 2px; background: var(--acc); opacity: 0.85; }
+  .ssp-bars i:nth-child(1) { height: 40%; } .ssp-bars i:nth-child(2) { height: 70%; } .ssp-bars i:nth-child(3) { height: 100%; }
+  .ssp-price { --o: 0; position: relative; display: inline-grid; }
+  .ssp-price > * { grid-area: 1 / 1; text-decoration: none; }
+  .ssp-price s { opacity: var(--o); color: color-mix(in srgb, #ff4d4f calc(var(--clash, 0) * 100%), currentColor); }
+  .ssp-price ins { opacity: calc(1 - var(--o)); }
+  .ssp-tick {
+    --rd: 0;
+    position: absolute; right: -7px; top: -7px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%;
+    font-style: normal; font-size: 10px; font-weight: 800; background: var(--acc); color: #050505; opacity: var(--rd); scale: calc(0.4 + var(--rd) * 0.6);
+  }
+  .ssp-scan { position: absolute; inset: 0; z-index: 4; overflow: hidden; pointer-events: none; border-radius: 16px; }
+  .ssp-beam {
+    position: absolute; top: 0; bottom: 0; left: -30%; width: 22%; pointer-events: none; opacity: 0;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc) 16%, transparent) 70%, color-mix(in srgb, var(--acc) 55%, transparent) 98%, transparent);
+  }
+  .ssp-beam::after { content: ''; position: absolute; top: 0; bottom: 0; right: 1px; width: 1.5px; background: var(--acc); box-shadow: 0 0 14px var(--acc); }
+
+  .ssp__side { display: flex; flex-direction: column; gap: 16px; }
+  .ssp-log { border-radius: 14px; overflow: hidden; background: #0b0d0f; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 30px 70px -30px #000; }
+  .ssp-log__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: rgba(255, 255, 255, 0.03); }
+  .ssp-log__bar i { width: 9px; height: 9px; border-radius: 50%; background: #2b2d30; }
+  .ssp-log__bar i:nth-child(1) { background: #ff5f57; } .ssp-log__bar i:nth-child(2) { background: #febc2e; } .ssp-log__bar i:nth-child(3) { background: #28c840; }
+  .ssp-log__bar span { margin-left: 8px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-muted); }
+  .ssp-log ol { list-style: none; display: flex; flex-direction: column; gap: 5px; padding: 12px 16px 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: var(--text-secondary); min-height: 196px; }
+  .ssp-log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ssp-log li.is-cmd { color: var(--text-primary); }
+  .ssp-log li b { color: var(--text-primary); }
+  .ssp-log .ssp-p { color: var(--acc); font-weight: 700; }
+  .ssp-log li.is-warn { color: #ff6b6b; }
+  .ssp-log li.is-ok { color: color-mix(in srgb, var(--acc) 80%, #fff); }
+
+  .ssp-flag {
+    position: relative; padding: 18px 20px; border-radius: 14px; background: #121110;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent), 0 30px 70px -30px color-mix(in srgb, var(--acc) 45%, transparent);
+  }
+  .ssp-flag header { display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc); }
+  .ssp-flag header i { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 6px; font-style: normal; font-weight: 800; background: var(--acc); color: #050505; }
+  .ssp-flag > p { margin-top: 12px; font-size: 15px; line-height: 1.55; color: var(--text-secondary); }
+  .ssp-flag > p b { color: var(--text-primary); }
+  .ssp-flag s { --s: 1; position: relative; text-decoration: none; color: color-mix(in srgb, var(--text-muted) calc(var(--s) * 100%), var(--text-primary)); }
+  .ssp-flag s::after { content: ''; position: absolute; left: -2px; right: -2px; top: 54%; height: 2px; border-radius: 2px; background: #ff5f57; transform: scaleX(var(--s)); transform-origin: left; }
+  .ssp-flag mark { background: color-mix(in srgb, var(--acc) 22%, transparent); color: var(--text-primary); padding: 0 4px; border-radius: 4px; font-weight: 700; }
+  .ssp-flag__rec { margin-top: 12px; padding: 11px 13px; border-radius: 10px; background: rgba(255, 255, 255, 0.04); font-size: 14.5px; color: var(--text-secondary); }
+  .ssp-flag__rec span { display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+  .ssp-flag__rec strong { color: var(--acc); }
+  .ssp-flag__btns { display: flex; gap: 8px; margin-top: 12px; }
+  .ssp-flag__btns span { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); }
+  .ssp-flag__btns span.on { background: var(--acc); color: #050505; }
+
+  @media (max-width: 600px) {
+    .ssp-item { padding: 6px 8px 7px; min-width: 84px; max-width: 34%; }
+    .ssp-item b { font-size: 10.5px; }
+    .ssp-item small { font-size: 8.5px; }
+    .ssp-bars { height: 14px; }
+    .ssp-node text { font-size: 12px; }
+    .ssp-log ol { font-size: 11px; min-height: 180px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ssp-line, .ssp-glow, .ssp-clash polygon { animation: none; }
+  }
+</style>

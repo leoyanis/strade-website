@@ -1,0 +1,323 @@
+---
+// One little scene per "How to use it" step. Drawn on a fixed 360x240 canvas that the
+// sticky viewer scales to fit; motion/steps.ts plays each scene when its step is active.
+import type { StepArt } from '../../data/resources';
+
+interface Props {
+  art: StepArt;
+}
+const { art } = Astro.props;
+const L = 'abcdefgh';
+// Where the files land in the "pile" scene (x %, y %, rotation).
+const pile = [
+  [10, 60, -9], [44, 66, 6], [22, 40, 4], [58, 42, -6], [30, 80, -3], [62, 20, 8], [8, 22, 5], [46, 22, -4],
+];
+---
+
+<div class:list={['art-in', `art-${art.kind}`]}>
+  {art.kind === 'zip' && (
+    <Fragment>
+      <div class="az-card az-zip">
+        <span class="az-ico az-ico--zip"><i></i></span>
+        <span class="az-meta"><b>{art.file}</b><small>Zip archive</small></span>
+      </div>
+      <svg class="az-arrow" viewBox="0 0 24 34" aria-hidden="true"><path d="M12 2v26M5 21l7 8 7-8" /></svg>
+      <div class="az-card az-folder">
+        <span class="az-ico az-ico--folder"></span>
+        <span class="az-meta"><b>{art.folder}/</b><small>Folder</small></span>
+      </div>
+      <div class="az-child"><span class="ic-doc"></span>SKILL.md</div>
+    </Fragment>
+  )}
+
+  {art.kind === 'cmd' && (
+    <Fragment>
+      <div class="ac-tree">
+        <div class="ac-row" style="--d:0"><i class="ic-folder"></i>your-project</div>
+        <div class="ac-row" style="--d:1"><i class="ic-folder"></i>.claude</div>
+        <div class="ac-row" style="--d:2"><i class="ic-folder"></i>skills</div>
+        <div class="ac-row is-new" style="--d:3"><i class="ic-folder"></i>{art.folder}</div>
+        <div class="ac-row is-new" style="--d:4"><i class="ic-doc"></i>SKILL.md</div>
+      </div>
+      <div class="ac-term">
+        <span class="ac-prompt">›</span><span class="ac-cmd" data-text={art.cmd}>{art.cmd}</span><i class="ac-caret"></i>
+        <kbd class="ac-enter">↵</kbd>
+      </div>
+    </Fragment>
+  )}
+
+  {art.kind === 'chips' && (
+    <Fragment>
+      <div class="ach-msg">
+        <span class="ach-label">{art.label}</span>
+        <p class="ach-q" data-text={art.q}>{art.q}</p>
+        <ul class="ach-opts">
+          {art.items.map((it, i) => (
+            <li class:list={[i === art.picked && 'is-picked']}><kbd>{L[i]}</kbd><span>{it}</span></li>
+          ))}
+        </ul>
+      </div>
+      <div class="art-reply">{L[art.picked]}</div>
+      {art.progress && (
+        <div class="ach-prog" data-total={art.progress}>
+          <span>Question <b>1</b> of {art.progress}</span>
+          <span class="ach-dots">{Array.from({ length: art.progress }, () => <i></i>)}</span>
+        </div>
+      )}
+    </Fragment>
+  )}
+
+  {art.kind === 'review' && (
+    <Fragment>
+      <div class="ar-card">
+        <header><b>{art.label}</b>{art.note && <small>{art.note}</small>}</header>
+        <ul>
+          {art.rows.map((r) => (
+            <li class:list={[r.warn && 'is-warn', r.fix && 'has-fix']}>
+              <i class="ar-ic"><b class="ar-ic__bad">{r.warn ? '!' : ''}</b><b class="ar-ic__ok">✓</b></i>
+              <span>{r.text}</span>
+              {r.fix && <em>{r.fix}</em>}
+            </li>
+          ))}
+        </ul>
+        {art.action && <span class="ar-btn">{art.action}</span>}
+      </div>
+      {art.reply && <div class="art-reply">{art.reply}</div>}
+    </Fragment>
+  )}
+
+  {art.kind === 'files' && (
+    <div class:list={['af', `af--n${art.files.length}`]}>
+      {art.files.map((f, i) => (
+        <div class="af-file" style={`--i:${i}`}>
+          <span class="af-name"><i class="ic-doc"></i>{f.name}</span>
+          {f.lines && <ul>{f.lines.map((l) => <li>{l}</li>)}</ul>}
+          {f.swatches && <p class="af-sw"><i></i><i></i><i></i><i></i><i></i></p>}
+          {f.code && <code>{f.code.map((c) => <span>{c}</span>)}</code>}
+        </div>
+      ))}
+    </div>
+  )}
+
+  {art.kind === 'slider' && (
+    <Fragment>
+      <div class="as-card">
+        <header><b>{art.label}</b><small>Settings</small></header>
+        <div class="as-seg" style={`--n:${art.options.length}`}>
+          <i class="as-thumb"></i>
+          {art.options.map((o) => <span>{o}</span>)}
+        </div>
+        <p class="as-hint"><i>✦</i> Thinking harder</p>
+      </div>
+      {art.reply && <div class="art-reply">{art.reply}</div>}
+    </Fragment>
+  )}
+
+  {art.kind === 'pile' && (
+    <Fragment>
+      <div class="ap-zone">
+        <span class="ap-label">{art.label}</span>
+        <span class="ap-count"><b>0</b> files</span>
+      </div>
+      {art.items.map((it, i) => {
+        const [x, y, r] = pile[i % pile.length];
+        return <span class="ap-chip" style={`--x:${x}%;--y:${y}%;--r:${r}deg`}><i class="ic-doc"></i>{it}</span>;
+      })}
+    </Fragment>
+  )}
+
+  {art.kind === 'phone' && (
+    <Fragment>
+      <div class="aph-phone">
+        <div class="aph-screen">
+          <small>Good morning</small>
+          <strong>Hi, Sam</strong>
+          <div class="aph-hero"><span>This week</span><b>12 workouts</b></div>
+          <div class="aph-row"><i></i><span></span></div>
+          <div class="aph-row"><i></i><span></span></div>
+          <div class="aph-btn">Start workout</div>
+        </div>
+      </div>
+      <div class="aph-side">
+        <div class="aph-q"><b>Claude</b>{art.q}</div>
+        <div class="aph-tools">
+          <span class="aph-sw"><i></i><i></i><i></i></span>
+          <span class="aph-rad"><small>Corners</small><span><i></i></span></span>
+        </div>
+        <div class="art-reply">{art.reply}</div>
+      </div>
+    </Fragment>
+  )}
+</div>
+
+<style is:global>
+  /* ================================================================
+     STEP SCENES (fixed 360x240 canvas, scaled by the viewer)
+     ================================================================ */
+  .art-in {
+    position: absolute; left: 50%; top: 50%; width: 360px; height: 240px;
+    transform: translate(-50%, -50%) scale(var(--k, 1)); transform-origin: 50% 50%;
+    font-size: 13px; color: var(--text-primary);
+  }
+  .art-in .ic-doc, .art-in .ic-folder { display: inline-block; flex-shrink: 0; }
+  .ic-doc { width: 11px; height: 14px; border-radius: 2px; background: rgba(255, 255, 255, 0.16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); position: relative; }
+  .ic-doc::after { content: ''; position: absolute; left: 2.5px; right: 2.5px; top: 4px; height: 1.5px; background: rgba(255, 255, 255, 0.45); box-shadow: 0 3px 0 rgba(255, 255, 255, 0.35); }
+  .ic-folder { width: 15px; height: 11px; border-radius: 2px 3px 3px 3px; background: color-mix(in srgb, var(--acc) 55%, #3a3a3a); position: relative; margin-top: 2px; }
+  .ic-folder::before { content: ''; position: absolute; left: 0; top: -3px; width: 7px; height: 4px; border-radius: 2px 2px 0 0; background: inherit; }
+  .art-reply {
+    position: absolute; right: 8px; bottom: 6px; padding: 7px 14px; border-radius: 14px 14px 4px 14px;
+    background: var(--acc); color: #050505; font-weight: 700; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px;
+    box-shadow: 0 12px 30px -10px var(--acc);
+  }
+
+  /* ---------- zip ---------- */
+  .art-zip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .az-card {
+    width: 250px; display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px;
+    background: #15181b; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 30px -16px #000;
+  }
+  .az-folder { box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 50%, transparent), 0 14px 34px -14px color-mix(in srgb, var(--acc) 45%, transparent); }
+  .az-ico { width: 30px; height: 36px; border-radius: 5px; flex-shrink: 0; position: relative; }
+  .az-ico--zip { background: #2a2e33; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); overflow: hidden; }
+  .az-ico--zip i { position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; margin-left: -3px; background: repeating-linear-gradient(180deg, #d9d9d9 0 3px, transparent 3px 6px); transform-origin: top; }
+  .az-ico--folder { width: 36px; height: 28px; margin-top: 4px; border-radius: 4px 6px 6px 6px; background: var(--acc); }
+  .az-ico--folder::before { content: ''; position: absolute; left: 0; top: -6px; width: 15px; height: 8px; border-radius: 4px 4px 0 0; background: var(--acc); }
+  .az-meta { display: flex; flex-direction: column; min-width: 0; }
+  .az-meta b { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .az-meta small { font-size: 11px; color: var(--text-muted); }
+  .az-arrow { width: 16px; height: 26px; fill: none; stroke: var(--acc); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .az-child {
+    display: flex; align-items: center; gap: 8px; margin-top: 6px; padding: 6px 12px; border-radius: 8px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* ---------- cmd ---------- */
+  .art-cmd { display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 0 26px; }
+  .ac-tree { display: flex; flex-direction: column; gap: 5px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; }
+  .ac-row { display: flex; align-items: center; gap: 9px; padding: 3px 8px; margin-left: calc(var(--d) * 18px); border-radius: 6px; color: var(--text-secondary); width: max-content; max-width: calc(100% - var(--d) * 18px); }
+  .ac-row.is-new { color: var(--text-primary); background: color-mix(in srgb, var(--acc) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent); }
+  .ac-term {
+    display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-radius: 10px;
+    background: #050607; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px;
+  }
+  .ac-prompt { color: var(--acc); font-weight: 700; }
+  .ac-cmd { color: var(--text-primary); white-space: nowrap; }
+  .ac-caret { width: 7px; height: 15px; background: var(--acc); animation: ql-blink 1s steps(2) infinite; }
+  .ac-enter { margin-left: auto; font-family: inherit; font-size: 12px; padding: 2px 7px; border-radius: 5px; background: rgba(255, 255, 255, 0.08); color: var(--text-secondary); }
+
+  /* ---------- chips (a question from Claude) ---------- */
+  .art-chips { padding: 6px 12px; }
+  .ach-msg { max-width: 300px; }
+  .ach-label { display: inline-block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--acc); }
+  .ach-q { font-size: 15px; font-weight: 600; margin-top: 4px; min-height: 21px; }
+  .ach-opts { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
+  .ach-opts li { --on: 0; display: flex; align-items: center; gap: 9px; padding: 6px 10px 6px 6px; border-radius: 8px; font-size: 12.5px; color: var(--text-secondary); background: color-mix(in srgb, var(--acc) calc(var(--on) * 16%), rgba(255, 255, 255, 0.04)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) calc(var(--on) * 50%), transparent); }
+  .ach-opts kbd { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 5px; flex-shrink: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
+  .ach-opts li.is-picked { --on: 1; color: var(--text-primary); }
+  .ach-opts li.is-picked kbd { background: var(--acc); color: #050505; }
+  .ach-prog { position: absolute; left: 12px; bottom: 8px; display: flex; flex-direction: column; gap: 5px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; color: var(--text-muted); }
+  .ach-prog b { color: var(--text-primary); }
+  .ach-dots { display: flex; gap: 4px; }
+  .ach-dots i { width: 18px; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); }
+  .ach-dots i.on { background: var(--acc); box-shadow: 0 0 8px var(--acc); }
+
+  /* ---------- review (plan / findings) ---------- */
+  .art-review { padding: 4px 8px; }
+  .ar-card { padding: 14px 16px; border-radius: 14px; background: #121416; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 40px -20px #000; max-width: 344px; }
+  .ar-card header { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+  .ar-card header b { font-size: 14px; }
+  .ar-card header small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; color: var(--acc); }
+  .ar-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .ar-card li { --ok: 0; display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--text-primary); white-space: nowrap; }
+  .ar-ic {
+    position: relative; width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%;
+    background: color-mix(in srgb, var(--acc) calc(var(--ok) * 100%), rgba(255, 255, 255, 0.08));
+  }
+  .ar-card li.is-warn .ar-ic { background: color-mix(in srgb, var(--acc) calc(var(--ok) * 100%), #ff5f57); }
+  .ar-ic b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 10.5px; font-weight: 800; font-style: normal; }
+  .ar-ic__bad { color: #fff; opacity: calc(1 - var(--ok)); }
+  .ar-ic__ok { color: #050505; opacity: var(--ok); }
+  .ar-card li em {
+    margin-left: auto; font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9.5px; padding: 2px 7px; border-radius: 99px;
+    background: color-mix(in srgb, var(--acc) 16%, transparent); color: var(--acc); opacity: var(--ok);
+  }
+  .ar-btn { display: inline-block; margin-top: 12px; padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; background: var(--acc); color: #050505; }
+
+  /* ---------- files ---------- */
+  .af { position: absolute; inset: 0; }
+  .af-file {
+    position: absolute; padding: 12px 14px; border-radius: 12px; background: #15181b;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 18px 36px -16px #000;
+  }
+  .af--n1 .af-file { left: 40px; right: 40px; top: 30px; bottom: 30px; padding: 18px 20px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 45%, transparent), 0 24px 50px -20px color-mix(in srgb, var(--acc) 40%, transparent); }
+  .af--n2 .af-file, .af--n3 .af-file { width: 210px; min-height: 104px; left: calc(14px + var(--i) * 64px); top: calc(8px + var(--i) * 56px); rotate: calc(-3deg + var(--i) * 2.5deg); }
+  .af--n3 .af-file:last-child { box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 50%, transparent), 0 18px 36px -16px #000; }
+  .af-name { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600; }
+  .af-file ul { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-top: 9px; font-size: 11.5px; color: var(--text-secondary); }
+  .af--n1 .af-file ul { gap: 10px; margin-top: 16px; font-size: 14px; color: var(--text-primary); }
+  .af--n1 .af-file li:first-child { color: var(--acc); }
+  .af--n1 .af-file::after { content: '✓'; position: absolute; right: 18px; bottom: 6px; font-size: 64px; font-weight: 800; line-height: 1; color: var(--acc); opacity: 0.14; }
+  .af-sw { display: flex; gap: 6px; margin-top: 10px; }
+  .af-sw i { width: 24px; height: 24px; border-radius: 7px; background: #8a8a8a; }
+  .af-sw i:nth-child(1) { background: var(--acc); }
+  .af-sw i:nth-child(2) { background: #7b6bff; }
+  .af-sw i:nth-child(3) { background: #f6f5f3; }
+  .af-sw i:nth-child(4) { background: #111; box-shadow: inset 0 0 0 1px #333; }
+  .af-file code { display: flex; flex-direction: column; margin-top: 9px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-secondary); background: none; padding: 0; white-space: nowrap; }
+
+  /* ---------- slider ---------- */
+  .art-slider { display: flex; align-items: center; justify-content: center; }
+  .as-card { width: 310px; padding: 16px; border-radius: 14px; background: #121416; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 40px -20px #000; margin-top: -20px; }
+  .as-card header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .as-card header b { font-size: 14px; }
+  .as-card header small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; color: var(--text-muted); }
+  .as-seg { --x: 0; position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr); padding: 3px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); }
+  .as-seg span { position: relative; z-index: 1; text-align: center; padding: 7px 0; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); }
+  .as-seg span:last-child { color: var(--text-primary); }
+  .as-thumb { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: calc(3px + var(--x) * (100% - 6px) / var(--n)); width: calc((100% - 6px) / var(--n)); border-radius: 8px; background: var(--acc); box-shadow: 0 0 calc(var(--x) * 6px) var(--acc); }
+  .as-hint { margin-top: 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+  .as-hint i { font-style: normal; color: var(--acc); display: inline-block; }
+
+  /* ---------- pile ---------- */
+  .ap-zone {
+    position: absolute; inset: 6px 10px; border-radius: 16px; border: 1.5px dashed color-mix(in srgb, var(--acc) 45%, transparent);
+    background: color-mix(in srgb, var(--acc) 4%, transparent);
+  }
+  .ap-label { position: absolute; left: 14px; top: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--acc); }
+  .ap-count { position: absolute; right: 14px; top: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-muted); }
+  .ap-count b { color: var(--text-primary); }
+  .ap-chip {
+    position: absolute; left: var(--x); top: var(--y); rotate: var(--r);
+    display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 9px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; white-space: nowrap;
+    background: #1a1d21; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 20px -10px #000;
+  }
+
+  /* ---------- phone (tweak the preview) ---------- */
+  .art-phone { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .aph-phone { --ph: var(--acc); --rr: 10px; width: 112px; height: 226px; padding: 5px; border-radius: 22px; background: linear-gradient(150deg, #2a2c30, #0d0e10); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 24px 50px -20px color-mix(in srgb, var(--ph) 60%, transparent); flex-shrink: 0; }
+  .aph-screen { height: 100%; border-radius: 18px; background: #f6f5f3; color: #111; padding: 16px 8px 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
+  .aph-screen small { font-size: 6.5px; color: #8a8a8a; }
+  .aph-screen strong { font-size: 11px; letter-spacing: -0.02em; margin-top: -4px; }
+  .aph-hero { border-radius: var(--rr); padding: 7px; color: #fff; background: var(--ph); display: flex; flex-direction: column; }
+  .aph-hero span { font-size: 5.5px; opacity: 0.8; }
+  .aph-hero b { font-size: 9px; }
+  .aph-row { display: flex; align-items: center; gap: 5px; padding: 5px; border-radius: calc(var(--rr) * 0.7); background: #fff; }
+  .aph-row i { width: 14px; height: 14px; border-radius: calc(var(--rr) * 0.45); background: color-mix(in srgb, var(--ph) 25%, #fff); }
+  .aph-row span { height: 4px; width: 40px; border-radius: 3px; background: #ddd; }
+  .aph-btn { margin-top: auto; text-align: center; font-size: 6.5px; font-weight: 700; color: #fff; padding: 6px; border-radius: var(--rr); background: var(--ph); }
+  .aph-side { position: relative; width: 190px; height: 210px; }
+  .aph-q { padding: 10px 12px; border-radius: 12px; background: #121416; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08); font-size: 13px; font-weight: 600; }
+  .aph-q b { display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--acc); margin-bottom: 3px; }
+  .aph-tools { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); }
+  .aph-sw { display: flex; gap: 8px; }
+  .aph-sw i { width: 22px; height: 22px; border-radius: 50%; box-shadow: 0 0 0 2px #0d0f11, 0 0 0 calc(2px + var(--sel, 0) * 2px) rgba(255, 255, 255, 0.9); }
+  .aph-sw i:nth-child(1) { background: #ff5ca8; }
+  .aph-sw i:nth-child(2) { background: #7b6bff; }
+  .aph-sw i:nth-child(3) { background: #ff8a3d; }
+  .aph-rad { display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: var(--text-muted); }
+  .aph-rad > span { position: relative; flex: 1; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); }
+  .aph-rad > span i { position: absolute; top: 50%; left: var(--r, 20%); width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; }
+  .aph-side .art-reply { right: 0; bottom: 0; }
+</style>

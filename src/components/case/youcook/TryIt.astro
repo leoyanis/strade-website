@@ -1,0 +1,117 @@
+---
+interface Props { appStore: string; playStore: string; site: string }
+const { appStore, playStore, site } = Astro.props;
+---
+
+<section class="try" id="yc-try">
+  <img class="try__burst try__burst--l" src="/images/work/youcook/burst.webp" alt="" width="960" height="960" loading="lazy" />
+  <img class="try__burst try__burst--r" src="/images/work/youcook/burst-r.webp" alt="" width="960" height="960" loading="lazy" />
+  <div class="try__inner">
+    <img class="try__icon" src="/images/work/youcook/app-icon.webp" alt="YouCook app icon" width="256" height="256" loading="lazy" />
+    <h2 class="try__title">Hungry? <span>Try it.</span></h2>
+    <p class="try__lede">YouCook is free to download on iOS and Android.</p>
+    <div class="try__stores">
+      <a href={appStore} target="_blank" rel="noopener" class="try__badge">
+        <img src="/images/work/youcook/badge-appstore.webp" alt="Download YouCook on the App Store" width="402" height="120" loading="lazy" />
+      </a>
+      <a href={playStore} target="_blank" rel="noopener" class="try__badge">
+        <img src="/images/work/youcook/badge-play.webp" alt="Get YouCook on Google Play" width="401" height="120" loading="lazy" />
+      </a>
+    </div>
+    <a href={site} target="_blank" rel="noopener" class="try__site">Visit youcookapp.com <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
+
+<style>
+  .try {
+    position: relative;
+    overflow: clip;
+    background: linear-gradient(180deg, #fff 0%, var(--yc-surface) 100%);
+    padding: clamp(90px, 11vw, 150px) 0 clamp(110px, 13vw, 180px);
+    text-align: center;
+  }
+  .try__burst {
+    position: absolute;
+    bottom: -6%;
+    width: min(54vw, 640px);
+    height: auto;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .try__burst--l { left: -8%; }
+  .try__burst--r { right: -8%; }
+  .try__inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 var(--yc-gutter); display: flex; flex-direction: column; align-items: center; }
+  .try__icon {
+    width: 116px;
+    height: 116px;
+    border-radius: 28px;
+    box-shadow: 0 24px 40px -16px rgba(23, 133, 126, 0.65), 0 0 0 6px #fff;
+    margin-bottom: 30px;
+  }
+  .try__title {
+    font-size: clamp(48px, 7vw, 92px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--yc-ink-strong);
+    margin: 0 0 16px;
+  }
+  .try__title span { color: var(--yc-coral); }
+  .try__lede { font-size: clamp(18px, 1.6vw, 21px); font-weight: 600; color: #555; margin: 0 0 28px; }
+  .try__stores { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .try__badge { display: block; border-radius: 12px; transition: transform 0.3s var(--yc-ease); background: #fff; }
+  .try__badge:hover { transform: translateY(-3px); }
+  .try__badge img { display: block; height: 56px; width: auto; }
+  .try__site {
+    margin-top: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: var(--yc-coral);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 14px 26px -12px rgba(255, 107, 107, 0.8);
+    transition: box-shadow 0.3s, background 0.3s;
+  }
+  .try__site:hover { background: #ff5a5a; box-shadow: 0 18px 30px -12px rgba(255, 107, 107, 0.9); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .try__icon { animation: yc-icon-bob 5s ease-in-out infinite; }
+  }
+  @keyframes yc-icon-bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+
+  @media (max-width: 700px) {
+    .try { display: flex; flex-direction: column; padding-bottom: 0; }
+    .try__burst--r { display: none; }
+    .try__burst--l {
+      position: relative;
+      order: 2;
+      left: auto;
+      bottom: auto;
+      width: 116%;
+      max-width: none;
+      margin: 6px -8% -30%;
+      opacity: 1;
+    }
+    .try__badge img { height: 48px; }
+  }
+</style>
+
+<script>
+  import { loadMotion } from './motion';
+
+  (async () => {
+    const root = document.getElementById('yc-try');
+    if (!root) return;
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap, ScrollTrigger } = m;
+    gsap.timeline({ scrollTrigger: { trigger: root, start: 'top 75%', once: true } })
+      .from(root.querySelectorAll('.try__burst'), { yPercent: 30, scale: 0.6, autoAlpha: 0, duration: 1.3, ease: 'expo.out', transformOrigin: '50% 100%' })
+      .from(root.querySelectorAll('.try__inner > *'), { y: 30, autoAlpha: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out' }, 0.2);
+    m.refresh();
+  })();
+</script>

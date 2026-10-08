@@ -1,0 +1,219 @@
+---
+// The lesson and the check, as two paper sheets on the evening desk. The lesson is the live
+// sample's (kleus.ai/try): it asks for a guess before it tells. The result is the live check
+// screen's open layout: the score ring, the band, then each answer quoted back with what
+// landed and what was missing. Examples, not user data.
+const CIRC = 2 * Math.PI * 60;
+const SCORE = 93;
+const CHOICES = [
+  'He banned all newspapers and declared permanent martial law',
+  'He held a national vote asking citizens to approve a constitution that named him top leader',
+  'He immediately declared himself king and reinstated the old nobility',
+];
+const RIGHT = 1;
+---
+
+<div class="sheets" data-kl-check>
+  <article class="sheet sheet--lesson" aria-label="Example lesson" data-sheet>
+    <p class="lsn__meta"><b>Lesson 1</b> · about 5 min</p>
+    <h3 class="lsn__title">How did the revolution that executed a king end up crowning an emperor?</h3>
+    <p class="lsn__prose">
+      In 1793 the Revolution executed Louis XVI to end monarchy forever. Eleven years later France crowned
+      Napoleon, legally, step by step.
+    </p>
+    <p class="lsn__q">After taking power by force, how did Napoleon persuade ordinary French citizens to accept his new government?</p>
+    <div class="lsn__choices" role="radiogroup" aria-label="Your guess" data-choices>
+      {CHOICES.map((c, i) => (
+        <button type="button" class="lsn__choice" role="radio" aria-checked="false" data-choice={i} data-right={i === RIGHT ? '' : undefined}>
+          <span class="lsn__mark" aria-hidden="true">{i + 1}</span>
+          <span>{c}</span>
+        </button>
+      ))}
+    </div>
+    <p class="lsn__hint" data-hint aria-live="polite">Guess first. Every lesson asks before it tells.</p>
+  </article>
+
+  <article class="sheet sheet--result" aria-label="Example check result" data-sheet>
+    <div class="res__head">
+      <div class="res__ring">
+        <svg viewBox="0 0 132 132" aria-hidden="true">
+          <circle class="res__track" cx="66" cy="66" r="60" />
+          <circle class="res__prog" cx="66" cy="66" r="60" style={`stroke-dasharray:${CIRC.toFixed(2)};stroke-dashoffset:${(CIRC * (1 - SCORE / 100)).toFixed(2)}`} data-ring={CIRC.toFixed(2)} />
+        </svg>
+        <b class="res__num" data-count={SCORE}>{SCORE}</b>
+      </div>
+      <div class="res__headtext">
+        <span class="res__band">Solid</span>
+        <span class="res__title">You've got this.</span>
+      </div>
+      <span class="res__out" aria-hidden="true">/100</span>
+    </div>
+
+    <p class="res__label">Your 2 answers</p>
+
+    <div class="res__q res__q--open" data-row>
+      <div class="res__qtop">
+        <span class="res__meta">
+          <span class="res__verdict"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" /></svg>Solid</span>
+          <span class="res__sep" aria-hidden="true"></span>
+          <span class="res__concept">Justifying hereditary imperial rule</span>
+        </span>
+        <span class="res__score" data-count="85">85</span>
+      </div>
+      <p class="res__question">How did Napoleon convince French citizens that crowning him as a hereditary emperor would protect the gains of the Revolution rather than destroy them?</p>
+      <div class="res__answer">
+        <span class="res__small">What you answered</span>
+        <p>He argued that if he died the old royal family would come back and take everyone's land, so a hereditary line was the only way to keep what the revolution had given them.</p>
+      </div>
+      <span class="res__small res__small--fb">Feedback</span>
+      <p class="res__mark res__mark--good" data-fb>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" /></svg>
+        <span><b>What landed:</b> The land argument, and that the threat was framed as protection rather than power.</span>
+      </p>
+      <p class="res__mark res__mark--gap" data-fb>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16.2v.1" /></svg>
+        <span><b>What was missing:</b> The vote. Parliament and a national plebiscite gave the crown legal cover, which is why it held where a decree would not have.</span>
+      </p>
+    </div>
+
+    <div class="res__q" data-row>
+      <div class="res__qtop">
+        <span class="res__meta">
+          <span class="res__verdict"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" /></svg>Solid</span>
+          <span class="res__sep" aria-hidden="true"></span>
+          <span class="res__concept">Military coercion at 18 Brumaire</span>
+        </span>
+        <span class="res__score" data-count="100">100</span>
+      </div>
+      <p class="res__question">Walk me through how Napoleon used his soldiers during the coup of 18 Brumaire to dismantle the existing government and put the Consulate in its place.</p>
+    </div>
+  </article>
+</div>
+
+<script>
+  // The guess: pick one, see whether it was right, get the lesson's own hint.
+  const root = document.querySelector<HTMLElement>('[data-kl-check]');
+  if (root) {
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-choice]'));
+    const hint = root.querySelector<HTMLElement>('[data-hint]')!;
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const right = btn.hasAttribute('data-right');
+        buttons.forEach((b) => {
+          b.setAttribute('aria-checked', String(b === btn));
+          b.classList.toggle('is-on', b === btn && !right);
+          b.classList.toggle('is-right', b.hasAttribute('data-right') && (b === btn || !right));
+        });
+        hint.textContent = right
+          ? 'Right. Dictators often use public votes to give legal cover to a military takeover.'
+          : 'Close, but no. Dictators often use public votes to give legal cover to a military takeover.';
+        hint.classList.add('is-shown');
+      });
+    });
+  }
+</script>
+
+<style>
+  .sheets {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+    align-items: start;
+    max-width: 1080px; margin: 0 auto;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .sheet {
+    position: relative;
+    border-radius: 20px;
+    color: #1B1A18;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), 0 0 0 1px rgb(0 0 0 / 0.25), 0 2px 4px rgb(0 0 0 / 0.25), 0 50px 90px -30px rgb(0 0 0 / 0.75);
+  }
+  .sheet--lesson {
+    z-index: 1;
+    margin: 64px -44px 0 0;
+    padding: 30px 74px 26px 30px;
+    background: linear-gradient(180deg, #FCFBF8 0%, #F7F5F1 62%);
+    transform: rotate(-2.4deg);
+  }
+  .sheet--result {
+    z-index: 2;
+    padding: 26px 26px 24px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 100%);
+    transform: rotate(1.3deg);
+  }
+
+  /* ---------- the lesson ---------- */
+  .lsn__meta { margin: 0 0 8px; font-size: 13px; color: #8A8781; }
+  .lsn__meta b { font-weight: 500; color: #B8741B; }
+  .lsn__title { margin: 0; font-size: 21px; font-weight: 600; line-height: 1.3; letter-spacing: -0.012em; text-wrap: balance; }
+  .lsn__prose, .lsn__q { font-family: 'Newsreader', Georgia, serif; font-size: 18px; line-height: 1.6; color: #1B1A18; }
+  .lsn__prose { margin: 16px 0 0; }
+  .lsn__q { margin: 12px 0 16px; font-weight: 500; }
+  .lsn__choices { display: flex; flex-direction: column; gap: 9px; }
+  .lsn__choice {
+    display: flex; align-items: flex-start; gap: 12px; width: 100%;
+    padding: 11px 13px; border-radius: 12px;
+    border: 1px solid #DCD9D4; background: #F0EEE9;
+    font-family: 'Newsreader', Georgia, serif; font-size: 16px; line-height: 1.42; text-align: left;
+    color: #575652; cursor: pointer;
+    transition: border-color 0.16s, background 0.16s, transform 0.16s, color 0.16s;
+  }
+  .lsn__choice:hover { border-color: #C4C2BC; color: #1B1A18; }
+  .lsn__choice:active { transform: scale(0.99); }
+  .lsn__choice:focus-visible { outline: 2px solid #B8741B; outline-offset: 2px; }
+  .lsn__mark {
+    flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%;
+    display: grid; place-items: center;
+    border: 1.5px solid #C4C2BC; font-size: 12px; color: #8A8781;
+  }
+  .lsn__choice.is-on { border-color: #DDB96A; background: #FBF2E4; color: #1B1A18; }
+  .lsn__choice.is-right { border-color: #4A6741; background: color-mix(in srgb, #4A6741 12%, #F7F5F1); color: #1B1A18; }
+  .lsn__choice.is-right .lsn__mark { background: #4A6741; border-color: #4A6741; color: #fff; }
+  .lsn__hint { margin: 14px 0 0; font-size: 13.5px; line-height: 1.5; color: #8A8781; }
+  .lsn__hint.is-shown { color: #4A6741; font-weight: 500; }
+
+  /* ---------- the result ---------- */
+  .res__head { position: relative; display: flex; align-items: center; gap: 18px; padding-bottom: 20px; margin-bottom: 18px; border-bottom: 1px solid #E5E2DD; }
+  .res__ring { position: relative; width: 84px; height: 84px; flex: none; }
+  .res__ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .res__track { fill: none; stroke: #DFDCD7; stroke-width: 8; }
+  .res__prog { fill: none; stroke: #4A6741; stroke-width: 8; stroke-linecap: round; }
+  .res__num { position: absolute; inset: 0; display: grid; place-items: center; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: #4A6741; font-variant-numeric: tabular-nums; }
+  .res__headtext { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .res__band { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; padding: 5px 13px; border-radius: 6px; color: #4A6741; background: rgb(74 103 65 / 0.12); }
+  .res__title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .res__out { position: absolute; right: 0; top: 2px; font-family: 'Fraunces', Georgia, serif; font-size: 15px; color: #B5B2AC; }
+  .res__label { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #8A8781; }
+  .res__q { padding: 15px 17px 16px; border-radius: 12px; background: #F7F5F1; border: 1px solid #DCD9D4; --q: #4A6741; }
+  .res__q + .res__q { margin-top: 10px; }
+  .res__qtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+  .res__meta { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .res__verdict { display: inline-flex; align-items: center; gap: 6px; flex: none; font-size: 13px; font-weight: 600; color: var(--q); }
+  .res__verdict svg, .res__mark svg { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  .res__sep { width: 3px; height: 3px; border-radius: 50%; background: #C4C2BC; flex: none; }
+  .res__concept { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #8A8781; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .res__score { font-size: 15px; font-weight: 600; color: var(--q); font-variant-numeric: tabular-nums; flex: none; }
+  .res__question { margin: 0; font-size: 15.5px; font-weight: 500; line-height: 1.42; }
+  .res__answer { margin-top: 13px; padding: 11px 13px 12px; border-radius: 10px; background: #F0EEE9; }
+  .res__answer p { margin: 0; font-size: 14px; line-height: 1.55; color: #575652; }
+  .res__small { display: block; margin-bottom: 5px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8781; }
+  .res__small--fb { margin: 16px 0 9px; }
+  .res__mark { display: flex; align-items: flex-start; gap: 9px; margin: 0; font-size: 14px; line-height: 1.5; color: #575652; }
+  .res__mark + .res__mark { margin-top: 8px; }
+  .res__mark b { font-weight: 600; color: #1B1A18; }
+  .res__mark svg { margin-top: 2px; }
+  .res__mark--good svg { color: #4A6741; }
+  .res__mark--gap svg { color: #B8741B; stroke-width: 2.1; }
+
+  @media (max-width: 899px) {
+    .sheets { grid-template-columns: minmax(0, 1fr); max-width: 560px; row-gap: 22px; }
+    .sheet--lesson { margin: 0; padding: 24px 20px 22px; transform: rotate(-1.2deg); }
+    .sheet--result { padding: 22px 18px 20px; transform: rotate(0.8deg); }
+    .lsn__title { font-size: 19px; }
+    .lsn__prose, .lsn__q { font-size: 17px; }
+    .res__ring { width: 70px; height: 70px; }
+    .res__num { font-size: 24px; }
+    .res__title { font-size: 19px; }
+    .res__q { padding: 13px 14px 14px; }
+  }
+</style>

@@ -1,0 +1,314 @@
+---
+// Recreated from the app's step screen ("Step 1 of 4 · Heat Oil & Garlic").
+const steps = [
+  'Place a skillet over medium heat.',
+  'Add 10g olive oil to the skillet.',
+  'When the oil shimmers, add 5g minced garlic.',
+  'Stir until fragrant, about 30 seconds.',
+];
+---
+
+<section class="cook" id="yc-cook">
+  <div class="cook__grid">
+    <div class="cook__copy" data-yc-reveal>
+      <p class="yc-eyebrow yc-eyebrow--light">Cook mode</p>
+      <h2 class="cook__title">Follow along.<br />Don’t think.</h2>
+      <p class="cook__lede">Clear steps, precise timing, no guesswork. Just execute.</p>
+      <ul class="cook__points">
+        <li><span>👣</span>One step at a time, with every amount spelled out</li>
+        <li><span>⏱️</span>Timers built into the steps that need them</li>
+        <li><span>✨</span>The AI chef one tap away if you get stuck</li>
+      </ul>
+    </div>
+
+    <div class="cook__stage">
+      <div class="cook__device">
+      <div class="cphone" role="img" aria-label="YouCook cook mode: step-by-step instructions for heating oil and garlic, with a 30 second timer">
+        <div class="cphone__island" aria-hidden="true"></div>
+        <div class="cphone__status" aria-hidden="true"><span>17:00</span><span class="cphone__icons">●●● ᯤ ▮</span></div>
+        <div class="cm" aria-hidden="true">
+          <div class="cm__bar">
+            <span class="cm__x">✕</span>
+            <span class="cm__count">Step <b>1</b><small>of</small>4</span>
+            <span class="cm__ai">✦</span>
+            <span class="cm__book">📖</span>
+            <span class="cm__next">Next</span>
+          </div>
+          <p class="cm__title">Heat Oil &amp; Garlic</p>
+          <p class="cm__sub">Warm oil and infuse garlic.</p>
+          <p class="cm__label">Ingredients Needed:</p>
+          <div class="cm__ing"><span>🧄 Garlic</span><span>5g</span></div>
+          <div class="cm__ing"><span>🫒 Olive oil</span><span>10g</span></div>
+          <ol class="cm__steps">
+            {steps.map((s, i) => (
+              <li class="cm__step" style={`--i:${i}`}>
+                <b>{i + 1}. Step {i + 1}</b>
+                <span>{s}</span>
+                {i === 3 && <em class="cm__mini">⏱ <span class="cm__mini-t">0:30</span></em>}
+                <i class="cm__check">✓</i>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+
+      <div class="timer" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <circle class="timer__track" cx="60" cy="60" r="52" />
+          <circle class="timer__ring" cx="60" cy="60" r="52" pathLength="100" />
+        </svg>
+        <span class="timer__num">0:30</span>
+        <span class="timer__label">Stir until<br />fragrant</span>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cook {
+    position: relative;
+    overflow: clip;
+    color: #fff;
+    background:
+      var(--yc-pattern-light),
+      linear-gradient(165deg, #f7ab2c 0%, #f39c0d 45%, #dc7d05 100%);
+    background-size: clamp(380px, 38vw, 560px), auto;
+    padding: clamp(80px, 10vw, 140px) 0;
+  }
+  .cook__grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--yc-gutter);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+  .cook__title {
+    font-size: clamp(42px, 5.4vw, 74px);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.035em;
+    margin: 0 0 20px;
+    color: #fff;
+    text-shadow: 0 2px 0 rgba(150, 70, 0, 0.18);
+  }
+  .cook__lede { font-size: clamp(19px, 1.7vw, 23px); font-weight: 600; line-height: 1.45; margin: 0 0 26px; color: #fff; }
+  .cook__points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .cook__points li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .cook__points li span {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 18px;
+  }
+
+  /* ---------- the phone ---------- */
+  .cook__stage { position: relative; display: flex; justify-content: center; padding: 10px 0 70px; }
+  .cook__device { position: relative; }
+  .cphone {
+    position: relative;
+    width: min(320px, 78vw);
+    aspect-ratio: 9 / 19;
+    border-radius: 48px;
+    background: #f4f4f4;
+    box-shadow:
+      0 0 0 10px #1c1c1e,
+      0 0 0 11.5px #4a4a4c,
+      0 50px 90px -30px rgba(110, 50, 0, 0.65);
+    container-type: inline-size;
+    font-family: var(--yc-font);
+    color: #222;
+  }
+  .cphone__island { position: absolute; top: 3.8cqw; left: 50%; width: 30%; height: 8.6cqw; border-radius: 99px; background: #000; transform: translateX(-50%); z-index: 2; }
+  .cphone__status {
+    display: flex;
+    justify-content: space-between;
+    padding: 5.4cqw 9cqw 0 10cqw;
+    font-size: 4.6cqw;
+    font-weight: 700;
+    color: #111;
+  }
+  .cphone__icons { font-size: 3cqw; letter-spacing: 0.5px; opacity: 0.8; }
+  .cm { padding: 6cqw 5.5cqw 0; font-size: 3.9cqw; }
+  .cm__bar {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+    padding: 2cqw 2cqw 2cqw 2cqw;
+    border-radius: 99px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    margin: 0 -1cqw 4cqw;
+  }
+  .cm__x { width: 9cqw; height: 9cqw; border-radius: 50%; display: grid; place-items: center; background: #333; color: #fff; font-size: 4cqw; }
+  .cm__count { flex: 1; font-size: 5.2cqw; font-weight: 500; }
+  .cm__count b { font-weight: 600; }
+  .cm__count small { font-size: 3cqw; margin: 0 1cqw; color: #666; }
+  .cm__ai { width: 7.5cqw; height: 7.5cqw; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 3.6cqw; background: linear-gradient(135deg, #4c8de0, #8f6fe0); }
+  .cm__book { font-size: 4.6cqw; }
+  .cm__next { padding: 2cqw 4cqw; border-radius: 99px; background: var(--yc-teal); color: #fff; font-weight: 700; font-size: 4cqw; }
+  .cm__title { margin: 0; font-size: 6.6cqw; font-weight: 500; }
+  .cm__sub { margin: 1cqw 0 3cqw; font-size: 4.2cqw; }
+  .cm__label { margin: 0 0 1.6cqw; font-size: 4.2cqw; font-weight: 500; }
+  .cm__ing {
+    display: flex;
+    justify-content: space-between;
+    padding: 2cqw 3cqw;
+    margin-bottom: 1.8cqw;
+    border-radius: 2.6cqw;
+    border: 1px solid #9a9a9a;
+    background: #fff;
+    font-size: 4.1cqw;
+  }
+  .cm__steps { list-style: none; margin: 4cqw 0 0; padding: 0; display: flex; flex-direction: column; gap: 3.2cqw; }
+  .cm__step {
+    --on: 0;
+    --done: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6cqw;
+    padding: 2.8cqw 11cqw 3cqw 3.6cqw;
+    border-radius: 4.6cqw;
+    background: #fdfdfd;
+    border: 1.5px solid color-mix(in srgb, var(--yc-teal) calc(var(--on) * 100%), #8d8d8d);
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, calc(0.08 + var(--on) * 0.12)),
+      0 0 0 calc(var(--on) * 4px) rgba(80, 158, 151, 0.2);
+    transform: translateX(calc(var(--on) * 6cqw + var(--i) * 0.8cqw)) scale(calc(1 + var(--on) * 0.07));
+    transform-origin: left center;
+  }
+  .cm__step b { font-size: 4.4cqw; font-weight: 600; }
+  .cm__step > span { font-size: 3.5cqw; color: #444; line-height: 1.35; }
+  .cm__check {
+    position: absolute;
+    right: 3cqw;
+    top: 2.8cqw;
+    width: 6.2cqw;
+    height: 6.2cqw;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-style: normal;
+    font-size: 3.6cqw;
+    font-weight: 700;
+    color: #fff;
+    background: color-mix(in srgb, var(--yc-teal) calc(var(--done) * 100%), #3a3a3a);
+    transform: scale(calc(1 + var(--pop, 0) * 0.35));
+  }
+  .cm__mini {
+    position: absolute;
+    right: 3cqw;
+    bottom: 2.6cqw;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 3.3cqw;
+    color: #b45309;
+    background: #fff4e0;
+    border-radius: 99px;
+    padding: 0.6cqw 2cqw;
+  }
+
+  /* ---------- timer ---------- */
+  .timer {
+    position: absolute;
+    left: -116px;
+    bottom: -58px;
+    width: 168px;
+    height: 168px;
+    border-radius: 50%;
+    background: #fff;
+    color: #222;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    box-shadow: 0 30px 50px -20px rgba(110, 50, 0, 0.6);
+    z-index: 3;
+  }
+  .timer svg { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); transform: rotate(-90deg); }
+  .timer__track { fill: none; stroke: #ffe7c7; stroke-width: 9; }
+  .timer__ring { fill: none; stroke: var(--yc-coral); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc((1 - var(--left, 1)) * 100); }
+  .timer__num { position: relative; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .timer__label { position: relative; font-size: 12.5px; font-weight: 700; color: #8a6a4a; text-align: center; line-height: 1.2; }
+
+  @media (max-width: 900px) {
+    .cook__grid { grid-template-columns: minmax(0, 1fr); }
+    .cook__stage { padding-top: 20px; }
+    .timer { width: 128px; height: 128px; left: -18px; bottom: -54px; }
+    .timer__num { font-size: 32px; }
+    .timer__label { font-size: 11px; }
+  }
+</style>
+
+<script>
+  import { loadMotion } from './motion';
+
+  (async () => {
+    const root = document.getElementById('yc-cook');
+    if (!root) return;
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap, ScrollTrigger } = m;
+
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('.cm__step'));
+    const checks = cards.map((c) => c.querySelector<HTMLElement>('.cm__check')!);
+    const count = root.querySelector<HTMLElement>('.cm__count b')!;
+    const next = root.querySelector<HTMLElement>('.cm__next')!;
+    const timer = root.querySelector<HTMLElement>('.timer')!;
+    const num = root.querySelector<HTMLElement>('.timer__num')!;
+    const mini = root.querySelector<HTMLElement>('.cm__mini-t')!;
+    const clock = { s: 30 };
+    const draw = () => {
+      const t = `0:${String(Math.max(0, Math.ceil(clock.s))).padStart(2, '0')}`;
+      num.textContent = t;
+      mini.textContent = t;
+      timer.style.setProperty('--left', String(clock.s / 30));
+    };
+
+    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.6 });
+    tl.set(cards, { '--on': 0, '--done': 0 })
+      .set(clock, { s: 30, onComplete: draw })
+      .call(() => { count.textContent = '1'; });
+    cards.forEach((card, i) => {
+      const at = i * 1.5 + 0.3;
+      tl.to(card, { '--on': 1, duration: 0.45, ease: 'back.out(2)' }, at)
+        .call(() => { count.textContent = String(i + 1); }, undefined, at);
+      if (i < 3) {
+        tl.to(card, { '--done': 1, duration: 0.25 }, at + 1.0)
+          .fromTo(checks[i], { '--pop': 1 }, { '--pop': 0, duration: 0.4, ease: 'power2.out' }, at + 1.0)
+          .to(card, { '--on': 0, duration: 0.35 }, at + 1.25);
+      }
+    });
+    const t4 = 3 * 1.5 + 0.3;
+    tl.fromTo(timer, { scale: 1 }, { scale: 1.08, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut' }, t4 + 0.2)
+      .to(clock, { s: 25, duration: 5, ease: 'none', onUpdate: draw }, t4 + 0.4)
+      .to(clock, { s: 0, duration: 1.3, ease: 'power2.in', onUpdate: draw }, '>')
+      .to(cards[3], { '--done': 1, duration: 0.25 }, '>')
+      .fromTo(checks[3], { '--pop': 1 }, { '--pop': 0, duration: 0.4 }, '<')
+      .to(cards[3], { '--on': 0, duration: 0.35 }, '>0.2')
+      .to(next, { scale: 1.15, duration: 0.25, yoyo: true, repeat: 3, ease: 'power1.inOut' }, '<')
+      .to({}, { duration: 1.2 });
+
+    ScrollTrigger.create({
+      trigger: root,
+      start: 'top 70%',
+      end: 'bottom 20%',
+      onToggle: (self) => (self.isActive ? tl.play() : tl.pause()),
+    });
+    m.refresh();
+  })();
+</script>

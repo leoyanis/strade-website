@@ -1,0 +1,143 @@
+---
+// Design System Interviewer preview: interview -> one-screen preview -> the system files.
+// motion/ds-preview.ts plays it on a loop; without JS it shows all three panels finished.
+const Arrow = '<svg viewBox="0 0 60 24" fill="none"><path class="fp-ds__dash" d="M2 12h52" stroke="currentColor" stroke-width="2" stroke-dasharray="4 6"/><path class="fp-ds__head" d="M46 4l8 8-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+---
+
+<div class="fp fp-ds" data-fx="ds-preview" role="img" aria-label="Three steps: Claude asks if the app should feel like a native Apple app, a phone shows a branded preview screen, then the design system files: DESIGN_SYSTEM.md, design-system.html and theme tokens.">
+  <div class="fp-ds__panel fp-ds__p1" aria-hidden="true">
+    <span class="fp-ds__label"><b>1</b>The interview</span>
+    <div class="fp-win">
+      <div class="fp-win__bar"><i></i><i></i><i></i><span>claude</span></div>
+      <div class="fp-chat">
+        <div class="fp-msg is-ai">
+          <b>Claude</b>
+          <p class="fp-type">Do you want it to feel like a native Apple app?</p>
+          <ul class="fp-opts">
+            <li class="is-picked"><kbd>A</kbd>Apple native, branded</li>
+            <li><kbd>B</kbd>Liquid Glass</li>
+            <li><kbd>C</kbd>My own look</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="fp-ds__arrow fp-ds__a1" aria-hidden="true" set:html={Arrow} />
+
+  <div class="fp-ds__panel fp-ds__p2" aria-hidden="true">
+    <span class="fp-ds__label"><b>2</b>The preview</span>
+    <div class="fp-ds__phonewrap">
+      <div class="fp-phone">
+        <div class="fp-phone__screen">
+          <div class="fp-phone__status"><span>9:41</span><i></i></div>
+          <div class="fp-app">
+            <small>Good morning</small>
+            <strong>Hi, Sam</strong>
+            <div class="fp-app__hero">
+              <span>This week</span>
+              <b>12 workouts</b>
+              <em><i style="--w:72%"></i></em>
+            </div>
+            <div class="fp-app__row"><i></i><span><b>Upper body</b><small>Today · 40 min</small></span></div>
+            <div class="fp-app__row"><i></i><span><b>Mobility</b><small>Tomorrow · 15 min</small></span></div>
+            <div class="fp-app__btn">Start workout</div>
+          </div>
+          <div class="fp-phone__tabs"><i class="on"></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="fp-ds__arrow fp-ds__a2" aria-hidden="true" set:html={Arrow} />
+
+  <div class="fp-ds__panel fp-ds__p3" aria-hidden="true">
+    <span class="fp-ds__label"><b>3</b>The system</span>
+    <div class="fp-files">
+      <div class="fp-file">
+        <span>DESIGN_SYSTEM.md</span>
+        <p><b># Rules</b><i style="--w:90%"></i><i style="--w:70%"></i><i style="--w:80%"></i></p>
+      </div>
+      <div class="fp-file">
+        <span>design-system.html</span>
+        <p class="fp-file__sw"><i></i><i></i><i></i><i></i><i></i></p>
+      </div>
+      <div class="fp-file">
+        <span>theme tokens</span>
+        <code>--accent: brand;<br />--radius: 14px;<br />--font: SF Pro;</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .fp-ds { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 0.8fr) 56px minmax(0, 1fr); align-items: center; gap: 8px; }
+  .fp-ds__panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; align-self: stretch; }
+  .fp-ds__panel > :last-child { margin-block: auto; }
+  .fp-ds__label { display: inline-flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
+  .fp-ds__label b { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 6px; background: var(--acc); color: #050505; font-size: 11px; }
+  .fp-ds__arrow { color: var(--acc); padding-top: 30px; }
+  .fp-ds__arrow svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .fp-ds__dash { animation: fp-dash 1.1s linear infinite; }
+  @keyframes fp-dash { to { stroke-dashoffset: -20; } }
+
+  /* phone: accent cycles to show "tweak it until you love it" */
+  @property --ph { syntax: '<color>'; initial-value: #ff5ca8; inherits: true; }
+  .fp-phone {
+    --ph: var(--acc);
+    width: min(230px, 100%); margin-inline: auto; aspect-ratio: 9 / 18.5; padding: 9px; border-radius: 38px;
+    background: linear-gradient(150deg, #2a2c30, #0d0e10);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 40px 80px -30px color-mix(in srgb, var(--ph) 60%, transparent);
+    animation: fp-theme 9s ease-in-out infinite;
+  }
+  @keyframes fp-theme { 0%, 28% { --ph: #ff5ca8; } 36%, 61% { --ph: #7b6bff; } 69%, 94% { --ph: #ff8a3d; } 100% { --ph: #ff5ca8; } }
+  .fp-phone__screen { position: relative; height: 100%; border-radius: 30px; overflow: hidden; background: #f6f5f3; color: #111; display: flex; flex-direction: column; }
+  .fp-phone__status { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 0; font-size: 10px; font-weight: 700; }
+  .fp-phone__status i { width: 54px; height: 15px; border-radius: 10px; background: #111; position: absolute; left: 50%; top: 7px; transform: translateX(-50%); }
+  .fp-app { flex: 1; padding: 18px 14px 0; display: flex; flex-direction: column; gap: 9px; }
+  .fp-app > small { font-size: 10px; color: #8a8a8a; }
+  .fp-app > strong { font-size: 19px; letter-spacing: -0.03em; margin-top: -8px; }
+  .fp-app__hero { border-radius: 16px; padding: 12px; color: #fff; background: linear-gradient(140deg, var(--ph), color-mix(in srgb, var(--ph) 55%, #000)); display: flex; flex-direction: column; gap: 2px; }
+  .fp-app__hero span { font-size: 9.5px; opacity: 0.8; }
+  .fp-app__hero b { font-size: 16px; letter-spacing: -0.02em; }
+  .fp-app__hero em { display: block; height: 5px; border-radius: 4px; background: rgba(255, 255, 255, 0.3); margin-top: 6px; overflow: hidden; }
+  .fp-app__hero em i { display: block; height: 100%; width: var(--w); background: #fff; border-radius: 4px; transform-origin: left; }
+  .fp-app__row { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+  .fp-app__row > i { width: 26px; height: 26px; border-radius: 8px; background: color-mix(in srgb, var(--ph) 20%, #fff); flex-shrink: 0; }
+  .fp-app__row b { display: block; font-size: 11px; }
+  .fp-app__row small { display: block; font-size: 9px; color: #8a8a8a; }
+  .fp-app__btn { margin-top: auto; margin-bottom: 8px; text-align: center; font-size: 11px; font-weight: 700; color: #fff; padding: 9px; border-radius: 12px; background: var(--ph); }
+  .fp-phone__tabs { display: flex; justify-content: space-around; padding: 9px 12px 14px; background: #fff; }
+  .fp-phone__tabs i { width: 16px; height: 16px; border-radius: 5px; background: #d9d9d9; }
+  .fp-phone__tabs i.on { background: var(--ph); }
+
+  .fp-files { position: relative; height: 330px; }
+  .fp-file {
+    position: absolute; left: 0; right: 0; padding: 14px 16px; border-radius: 12px; min-height: 120px;
+    background: #121416; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 40px -18px #000;
+  }
+  .fp-file:nth-child(1) { top: 0; rotate: -3deg; }
+  .fp-file:nth-child(2) { top: 100px; rotate: 2deg; }
+  .fp-file:nth-child(3) { top: 200px; rotate: -1deg; box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 45%, transparent), 0 20px 40px -18px #000; }
+  .fp-file > span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .fp-file p { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .fp-file p b { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--acc); }
+  .fp-file p i { display: block; height: 5px; width: var(--w); border-radius: 3px; background: rgba(255, 255, 255, 0.1); transform-origin: left; }
+  .fp-file__sw { flex-direction: row !important; gap: 6px !important; }
+  .fp-file__sw i { width: 26px !important; height: 26px !important; border-radius: 7px !important; }
+  .fp-file__sw i:nth-child(1) { background: var(--acc) !important; }
+  .fp-file__sw i:nth-child(2) { background: #7b6bff !important; }
+  .fp-file__sw i:nth-child(3) { background: #f6f5f3 !important; }
+  .fp-file__sw i:nth-child(4) { background: #111 !important; box-shadow: inset 0 0 0 1px #333; }
+  .fp-file__sw i:nth-child(5) { background: #8a8a8a !important; }
+  .fp-file code { display: block; margin-top: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; line-height: 1.6; color: var(--text-secondary); background: none; padding: 0; white-space: normal; }
+
+  @media (max-width: 900px) {
+    .fp-ds { grid-template-columns: minmax(0, 1fr); gap: 4px; max-width: 420px; margin-inline: auto; }
+    .fp-ds__arrow { width: 44px; margin: 4px auto; padding: 0; transform: rotate(90deg); }
+    .fp-files { height: 320px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fp-phone, .fp-ds__dash { animation: none; }
+  }
+</style>

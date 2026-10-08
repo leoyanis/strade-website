@@ -6,15 +6,61 @@
     {
       "source": "/fonts/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/development",
+      "destination": "/work",
+      "permanent": true
+    },
+    {
+      "source": "/consulting",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(de|es|ro)",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(de|es|ro)/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/case-studies/studentventure",
+      "destination": "/work/vaultt",
+      "permanent": true
+    },
+    {
+      "source": "/case-studies/:slug",
+      "destination": "/work/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/work/studentventure",
+      "destination": "/work/vaultt",
+      "permanent": true
     }
   ]
 }

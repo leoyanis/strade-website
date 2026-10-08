@@ -1,0 +1,73 @@
+---
+// Ship-Safe hero preview: Claude interviews you, then the report card ticks off the fixes.
+// motion/ship-preview.ts types it out on a loop; without JS it shows the finished chat.
+---
+
+<div class="fp fp-ship" data-fx="ship-preview" role="img" aria-label="Claude asks who uses the app and whether it takes money, then reports three fixes: secret key moved out of the app, database locked to each user's own data, Stripe payments can't be faked.">
+  <div class="fp-ship__tilt" aria-hidden="true">
+    <div class="fp-win">
+      <div class="fp-win__bar"><i></i><i></i><i></i><span>claude · /ship-safe</span></div>
+      <div class="fp-chat">
+        <div class="fp-msg is-ai fp-m1">
+          <b>Claude</b>
+          <p class="fp-type">Who’s using this right now?</p>
+          <ul class="fp-opts">
+            <li><kbd>a</kbd>Just me</li>
+            <li><kbd>b</kbd>A few test users</li>
+            <li class="is-picked"><kbd>c</kbd>Real customers</li>
+          </ul>
+        </div>
+        <div class="fp-msg is-me fp-m2"><p>c</p></div>
+        <div class="fp-msg is-ai fp-m3">
+          <b>Claude</b>
+          <p class="fp-type">Does it take money?</p>
+          <ul class="fp-opts">
+            <li><kbd>a</kbd>No</li>
+            <li><kbd>b</kbd>One-off payments</li>
+            <li><kbd>c</kbd>Subscriptions</li>
+          </ul>
+          <span class="fp-caret"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fp-report">
+      <header>
+        <span>SECURITY-REPORT.md</span>
+        <em><b>3</b> fixed</em>
+      </header>
+      <ul>
+        <li><i>✓</i>Secret key moved out of the app</li>
+        <li><i>✓</i>Database locked to each user’s own data</li>
+        <li><i>✓</i>Stripe payments can’t be faked</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .fp-ship { max-width: 520px; margin-inline: auto; width: 100%; }
+  .fp-ship__tilt { position: relative; padding: 0 0 96px; transform-style: preserve-3d; }
+  .fp-ship .fp-win { transform: rotate(-1.2deg); }
+  .fp-report {
+    position: absolute; right: -14px; bottom: 0; width: min(330px, 82%);
+    padding: 16px 18px; border-radius: 14px; background: #0b0d0c;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent), 0 24px 60px -18px #000, 0 0 50px -20px var(--acc);
+    transform: rotate(1.6deg) translateZ(40px);
+  }
+  .fp-report header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .fp-report header span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; color: var(--text-secondary); }
+  .fp-report header em { font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600; color: #050505; background: var(--acc); padding: 2px 8px; border-radius: 99px; }
+  .fp-report header em b { font-weight: 700; }
+  .fp-report ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .fp-report li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.35; color: var(--text-primary); }
+  .fp-report li i {
+    font-style: normal; flex-shrink: 0; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%;
+    font-size: 11px; font-weight: 800; color: #050505; background: var(--acc);
+  }
+  @media (max-width: 600px) {
+    .fp-ship__tilt { padding-bottom: 0; }
+    .fp-ship .fp-win { transform: none; }
+    .fp-report { position: relative; right: auto; width: 92%; margin: -18px 0 0 auto; transform: rotate(1.6deg); }
+  }
+</style>

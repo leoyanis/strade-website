@@ -1,0 +1,171 @@
+---
+// Shared shell for the Fallow legal pages (privacy policy, terms of use).
+//
+// Both URLs are fetched by Apple during App Review and are referenced from inside the
+// app (Fallow/Views/PaywallView.swift -> LegalLinks). They must render their full text
+// with JavaScript disabled, so nothing in here may depend on a script running. In
+// particular, do not add the reveal-* classes from global.css: those start at opacity 0
+// and are only revealed by the IntersectionObserver in Base.astro.
+//
+// Slotted content is scoped to the *page*, not to this layout, so the shared typography
+// below is written as `.legal-doc :global(...)` to reach it.
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Canonical path, no trailing slash. */
+  path: string;
+  /** Small cyan eyebrow above the heading. */
+  label?: string;
+  heading: string;
+  /** Machine-readable date for <time datetime>, e.g. '2026-08-04'. */
+  lastUpdatedISO: string;
+  /** Human-readable date, e.g. '4 August 2026'. */
+  lastUpdated: string;
+}
+
+const {
+  title,
+  description,
+  path,
+  label = 'Fallow',
+  heading,
+  lastUpdatedISO,
+  lastUpdated,
+} = Astro.props;
+
+const LEGAL_PAGES = [
+  { href: '/fallow/privacy-policy', text: 'Privacy Policy' },
+  { href: '/fallow/terms-of-use', text: 'Terms of Use' },
+];
+---
+
+<Base
+  title={title}
+  description={description}
+  locale="en"
+  path={path}
+  noAlternates
+>
+  <section class="legal-hero">
+    <div class="container legal-inner">
+      <span class="label">{label}</span>
+      <h1>{heading}</h1>
+      <p class="legal-updated">
+        Last updated: <time datetime={lastUpdatedISO}>{lastUpdated}</time>
+      </p>
+    </div>
+  </section>
+
+  <section class="legal-body">
+    <div class="container legal-inner legal-doc">
+      <slot />
+    </div>
+  </section>
+
+  <footer id="footer">
+    <div class="container legal-inner">
+      <div class="footer-row">
+        <a href="/" class="footer-logo">Strade</a>
+        <div class="footer-links">
+          {LEGAL_PAGES.map(p => (
+            <a href={p.href} aria-current={p.href === path ? 'page' : undefined}>{p.text}</a>
+          ))}
+          <a href="/contact">Contact</a>
+        </div>
+        <p class="footer-copy">&copy; 2026 Strade</p>
+      </div>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  .legal-hero {
+    padding: 128px 0 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .legal-hero h1 {
+    font-size: clamp(36px, 5vw, 56px);
+  }
+  .legal-updated {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .legal-body {
+    padding: 24px 0 96px;
+    position: relative;
+    z-index: 2;
+  }
+  .legal-inner {
+    max-width: 760px;
+  }
+
+  /* Slotted page content lives under a different style scope, hence :global(). */
+  .legal-doc :global(.legal-lede) {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    padding: 24px 28px;
+    background: var(--bg-surface);
+    border-left: 2px solid var(--cyan);
+    border-radius: 8px;
+  }
+
+  .legal-doc :global(h2) {
+    font-size: clamp(20px, 2.4vw, 26px);
+    margin: 48px 0 14px;
+  }
+
+  .legal-doc :global(p) {
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .legal-doc :global(p + p) {
+    margin-top: 14px;
+  }
+
+  .legal-doc :global(ul) {
+    list-style: none;
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .legal-doc :global(li) {
+    position: relative;
+    padding-left: 20px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .legal-doc :global(li)::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 12px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    opacity: 0.6;
+  }
+  .legal-doc :global(ul + p) {
+    margin-top: 14px;
+  }
+
+  .footer-links a[aria-current='page'] {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 767px) {
+    .legal-hero { padding: 104px 0 32px; }
+    .legal-doc :global(.legal-lede) { font-size: 16px; padding: 20px 22px; }
+    .legal-doc :global(h2) { margin: 36px 0 12px; }
+    .footer-row { flex-direction: column; align-items: flex-start; }
+  }
+</style>

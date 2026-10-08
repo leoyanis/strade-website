@@ -1,0 +1,260 @@
+---
+// "What it checks", pinned: a scanner sweeps a diagram of a typical AI-built app, phase by phase.
+// Holes light up red, then get fixed. motion/ship-scan.ts scrubs it with scroll on desktop
+// and loops it on phones. Without JS it shows the finished, all-clear state.
+import { pad } from './inline';
+
+interface Props {
+  heading: string;
+  cards: { tag: string; title: string; text: string }[];
+  note?: string;
+}
+const { heading, cards, note } = Astro.props;
+
+const icons: Record<string, string> = {
+  app: '<rect x="6" y="2.5" width="12" height="19" rx="2.6"/><path d="M10 5.5h4"/>',
+  server: '<rect x="3.5" y="4" width="17" height="6.5" rx="1.6"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="1.6"/><path d="M7 7.25h.01M7 16.75h.01"/>',
+  db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/>',
+  pay: '<rect x="2.5" y="5" width="19" height="14" rx="2.4"/><path d="M2.5 9.5h19M6 15h4"/>',
+  ai: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>',
+};
+const nodes = [
+  { id: 'app', label: 'Your app', x: 50, y: 11 },
+  { id: 'server', label: 'Server', x: 50, y: 45 },
+  { id: 'db', label: 'Database', x: 17, y: 84 },
+  { id: 'pay', label: 'Payments', x: 50, y: 84 },
+  { id: 'ai', label: 'AI model', x: 83, y: 84 },
+];
+// One badge per hole. x/y in % of the map; phase = the card it belongs to.
+const holes = [
+  { phase: 0, node: 'app', x: 81, y: 11, bad: 'Key in the app', good: 'Key on the server' },
+  { phase: 0, node: 'server', x: 19, y: 45, bad: 'ID swapping', good: 'Caller checked' },
+  { phase: 0, node: 'db', x: 17, y: 65, bad: 'Open database', good: 'Own data only' },
+  { phase: 1, node: 'app', x: 19, y: 11, bad: 'Script injection', good: 'Inputs cleaned' },
+  { phase: 1, node: 'server', x: 81, y: 45, bad: 'Spam signups', good: 'Rate limited' },
+  { phase: 1, node: 'pay', x: 50, y: 65, bad: 'Fake payments', good: 'Payments verified' },
+  { phase: 1, node: 'ai', x: 83, y: 65, bad: 'Runaway AI bill', good: 'Spend capped' },
+  { phase: 2, node: 'app', x: 81, y: 11, bad: 'Password only', good: 'Two-factor login' },
+  { phase: 2, node: 'server', x: 19, y: 45, bad: 'Readable data', good: 'Fields encrypted' },
+  { phase: 2, node: 'db', x: 17, y: 65, bad: 'Shared team data', good: 'Teams isolated' },
+  { phase: 2, node: 'ai', x: 83, y: 65, bad: 'AI acts alone', good: 'Asks first' },
+];
+const wires = ['M50 11 L50 45', 'M50 45 C50 66 17 64 17 84', 'M50 45 L50 84', 'M50 45 C50 66 83 64 83 84'];
+const total = holes.length;
+---
+
+<section class="sk-sec ss" id="checks" data-fx="ship-scan">
+  <div class="ss__pin">
+    <div class="container ss__grid">
+      <h2 class="sk-h ss__h"><span class="sk-h__t">{heading}</span></h2>
+
+      <div class="ss__side">
+        <ol class="ss-phases">
+          {cards.map((c, i) => (
+            <li class="ss-ph" data-i={i}>
+              <span class="ss-ph__n">
+                <b>{pad(i + 1)}</b>
+                <svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ss-ph__ring" cx="22" cy="22" r="20" pathLength="100" /></svg>
+              </span>
+              <span class="ss-ph__t"><em>{c.tag}</em><strong>{c.title}</strong><span>{c.text}</span></span>
+            </li>
+          ))}
+        </ol>
+        {note && <p class="sk-cards__note">{note}</p>}
+      </div>
+
+      <div class="ss__stage" role="img" aria-label={`A security scan of an app built with AI: ${holes.map((h) => `${h.bad.toLowerCase()}, fixed: ${h.good.toLowerCase()}`).join('; ')}.`}>
+        <div class="ss-hud" aria-hidden="true">
+          <span class="ss-hud__l"><i></i>Security scan</span>
+          <span class="ss-hud__p">Phase <b>3</b>/3</span>
+          <span class="ss-hud__c"><b>{total}</b> fixed</span>
+          <span class="ss-segs"><i><b></b></i><i><b></b></i><i><b></b></i></span>
+        </div>
+
+        <div class="ss-map" aria-hidden="true">
+          <svg class="ss-wires" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {wires.map((d) => <path class="ss-wire" d={d} />)}
+            {wires.map((d) => <path class="ss-wire is-flow" d={d} />)}
+          </svg>
+
+          {nodes.map((n) => (
+            <div class="ss-node" data-node={n.id} style={`--x:${n.x}%;--y:${n.y}%`}>
+              <svg class="ss-node__ic" viewBox="0 0 24 24" set:html={icons[n.id]} />
+              <span class="ss-node__l">{n.label}</span>
+              <span class="ss-node__tick">✓ <b>{holes.filter((h) => h.node === n.id).length}</b></span>
+              {n.id === 'db' && (
+                <svg class="ss-lock" viewBox="0 0 24 24"><path class="ss-lock__shackle" d="M8 11V8a4 4 0 0 1 8 0v3" /><rect x="5" y="11" width="14" height="10" rx="2.4" /></svg>
+              )}
+              {n.id === 'ai' && <span class="ss-meter"><i></i><b></b></span>}
+            </div>
+          ))}
+
+          <span class="ss-key">
+            <svg viewBox="0 0 24 24"><circle cx="7.5" cy="12" r="4" /><path d="M11.5 12H21M18 12v3M15 12v2.5" /></svg>
+            sk_live_••••
+          </span>
+
+          {holes.map((h) => (
+            <span class="ss-badge" data-phase={h.phase} data-node={h.node} style={`--x:${h.x}%;--y:${h.y}%`}>
+              <span class="ss-badge__bad"><i>!</i>{h.bad}</span>
+              <span class="ss-badge__good"><i>✓</i>{h.good}</span>
+            </span>
+          ))}
+
+          <span class="ss-beam"></span>
+          <span class="ss-stamp">Safe to ship</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* ================================================================
+     SHIP-SAFE: pinned security scan
+     ================================================================ */
+  .ss { padding: 64px 0 16px; }
+  .ss__pin { position: relative; }
+  .ss__grid { display: grid; gap: 22px; grid-template-areas: 'h' 'stage' 'list'; }
+  .ss__h { grid-area: h; margin-bottom: 0; }
+  .ss__side { grid-area: list; }
+  .ss__stage { grid-area: stage; width: 100%; max-width: 600px; justify-self: center; }
+  @media (min-width: 901px) {
+    .ss__grid { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); grid-template-rows: auto 1fr; grid-template-areas: 'h stage' 'list stage'; column-gap: 56px; row-gap: 26px; }
+    .ss__stage { align-self: center; }
+    .ss.is-pinned { padding: 0; }
+    .ss.is-pinned .ss__pin { height: 100vh; display: flex; align-items: center; padding: 76px 0 20px; }
+    .ss.is-pinned .ss__stage { width: min(100%, 600px, calc((100vh - 190px) / 0.9)); }
+    .ss.is-pinned .ss__h { align-self: end; }
+  }
+
+  /* phases list (the three cards, as steps) */
+  .ss-phases { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .ss-ph {
+    --on: 1; --p: 1;
+    display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px 16px 14px; position: relative;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--acc) calc(var(--on) * 10%), transparent), transparent 85%);
+    clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
+    transition: background 0.4s;
+  }
+  .ss-ph::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 0; width: 2px; background: var(--acc); opacity: var(--on); transition: opacity 0.4s; }
+  .ss.is-live .ss-ph { --on: 0; --p: 0; }
+  .ss.is-live .ss-ph.is-on { --on: 1; }
+  .ss-ph__n { position: relative; flex: none; width: 44px; height: 44px; display: grid; place-items: center; }
+  .ss-ph__n b {
+    position: relative; z-index: 1; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; font-weight: 600;
+    background: color-mix(in srgb, var(--acc) calc(var(--on) * 100%), #15181b); color: color-mix(in srgb, #050505 calc(var(--on) * 100%), var(--acc));
+    transition: background 0.4s, color 0.4s;
+  }
+  .ss-ph__n svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ss-ph__ring { fill: none; stroke: var(--acc); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--p) * 100); }
+  .ss-ph__t { display: flex; flex-direction: column; gap: 3px; padding-top: 1px; }
+  .ss-ph__t em { font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--acc); }
+  .ss-ph__t strong { font-size: 20px; letter-spacing: -0.02em; line-height: 1.2; color: color-mix(in srgb, var(--text-primary) calc(50% + var(--on) * 50%), #555); transition: color 0.4s; }
+  .ss-ph__t > span { font-size: 15px; line-height: 1.55; color: var(--text-secondary); opacity: calc(0.55 + var(--on) * 0.45); transition: opacity 0.4s; }
+  .ss__side .sk-cards__note { margin-top: 18px; }
+
+  /* stage */
+  .ss__stage {
+    position: relative; border-radius: 20px; padding: 14px 14px 10px;
+    background:
+      radial-gradient(70% 50% at 50% 0%, color-mix(in srgb, var(--acc) 10%, transparent), transparent 70%),
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+      #0b0d0f;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 40px 90px -40px color-mix(in srgb, var(--acc) 40%, transparent);
+  }
+  .ss-hud { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 6px 14px; padding: 2px 4px 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; color: var(--text-secondary); }
+  .ss-hud__l { display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc); font-weight: 600; }
+  .ss-hud__l i { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); animation: ql-blink 1.2s steps(2) infinite; }
+  .ss-hud b { color: var(--text-primary); font-weight: 600; }
+  .ss-hud__c b { color: var(--acc); }
+  .ss-segs { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .ss-segs i { height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+  .ss-segs b { --s: 1; display: block; height: 100%; background: var(--acc); box-shadow: 0 0 8px var(--acc); transform: scaleX(var(--s)); transform-origin: left; }
+
+  .ss-map { position: relative; aspect-ratio: 1 / 0.86; overflow: hidden; border-radius: 12px; }
+  .ss-wires { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .ss-wire { fill: none; stroke: rgba(255, 255, 255, 0.13); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+  .ss-wire.is-flow { stroke: var(--acc); stroke-dasharray: 3 9; opacity: 0.55; animation: ss-flow 1.4s linear infinite; }
+  @keyframes ss-flow { to { stroke-dashoffset: -24; } }
+
+  .ss-node {
+    --bad: 0; --ok: 1;
+    position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; z-index: 2;
+    width: 25%; min-width: 88px; padding: 9px 10px 8px; border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+    background: #111417;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, #ff4d4f calc(var(--bad) * 100%), color-mix(in srgb, var(--acc) calc(var(--ok) * 60%), rgba(255, 255, 255, 0.12))),
+      0 0 calc(var(--bad) * 28px) rgba(255, 77, 79, 0.45),
+      0 0 calc(var(--ok) * 22px) color-mix(in srgb, var(--acc) 22%, transparent),
+      0 14px 30px -14px #000;
+  }
+  .ss-node__ic { width: 20px; height: 20px; fill: none; stroke: color-mix(in srgb, #ff4d4f calc(var(--bad) * 100%), var(--text-primary)); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .ss-node__l { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
+  .ss-node__tick {
+    position: absolute; right: -8px; top: -9px; padding: 1px 6px; border-radius: 99px; font-size: 10px; font-weight: 700;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--acc); color: #050505;
+    transition: opacity 0.3s;
+  }
+  .ss-lock { position: absolute; left: -9px; top: -10px; width: 22px; height: 22px; padding: 3px; border-radius: 50%; background: #111417; fill: none; stroke-width: 2; stroke-linecap: round; stroke: color-mix(in srgb, #ff4d4f calc(var(--bad) * 100%), var(--acc)); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
+  .ss-lock__shackle { --open: 0; transform: translateY(calc(var(--open) * -3px)) rotate(calc(var(--open) * -24deg)); transform-origin: 16px 11px; transform-box: view-box; }
+  .ss-meter { --m: 0.42; --hot: 0; position: relative; width: 78%; height: 4px; margin-top: 2px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); }
+  .ss-meter i { position: absolute; inset: 0 auto 0 0; width: calc(var(--m) * 100%); border-radius: 3px; background: color-mix(in srgb, #ff4d4f calc(var(--hot) * 100%), var(--acc)); }
+  .ss-meter b { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 2px; border-radius: 1px; background: var(--text-primary); opacity: calc(1 - var(--hot)); }
+
+  .ss-key {
+    --ok: 1;
+    position: absolute; left: 50%; top: 56%; translate: -50% -50%; z-index: 3;
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px 4px 6px; border-radius: 99px; white-space: nowrap;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; color: var(--text-primary);
+    background: #15181b; box-shadow: 0 0 0 1px color-mix(in srgb, #ff4d4f calc((1 - var(--ok)) * 100%), var(--acc));
+  }
+  .ss-key svg { width: 14px; height: 14px; fill: none; stroke: color-mix(in srgb, #ff4d4f calc((1 - var(--ok)) * 100%), var(--acc)); stroke-width: 2; stroke-linecap: round; }
+
+  .ss-badge {
+    --ok: 1;
+    position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; z-index: 4;
+    display: grid; white-space: nowrap; border-radius: 99px; font-size: 11.5px; font-weight: 600;
+    background: color-mix(in srgb, var(--acc) calc(var(--ok) * 100%), #ff4d4f);
+    color: color-mix(in srgb, #050505 calc(var(--ok) * 100%), #fff);
+    box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--acc) calc(var(--ok) * 100%), #ff4d4f);
+  }
+  .ss-badge > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 11px 5px 6px; }
+  .ss-badge i { width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; font-style: normal; font-size: 10px; font-weight: 800; background: rgba(0, 0, 0, 0.18); }
+  .ss-badge__bad { opacity: calc(1 - var(--ok)); }
+  .ss-badge__good { opacity: var(--ok); }
+  /* without JS: only the last phase's badges show, all fixed */
+  .ss-badge:not([data-phase='2']) { opacity: 0; }
+
+  .ss-beam {
+    position: absolute; left: 0; right: 0; top: -30%; height: 22%; z-index: 5; pointer-events: none; opacity: 0;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--acc) 18%, transparent) 70%, color-mix(in srgb, var(--acc) 60%, transparent) 98%, transparent);
+  }
+  .ss-beam::after { content: ''; position: absolute; left: 0; right: 0; bottom: 1px; height: 1.5px; background: var(--acc); box-shadow: 0 0 14px var(--acc); }
+  .ss-stamp {
+    position: absolute; left: 50%; top: 48%; z-index: 6; translate: -50% -50%; rotate: -9deg;
+    padding: 10px 22px; border-radius: 10px; border: 3px solid var(--acc); white-space: nowrap;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: clamp(18px, 3.4vw, 28px); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--acc); background: rgba(5, 8, 6, 0.86); box-shadow: 0 0 40px -6px var(--acc), inset 0 0 24px -10px var(--acc);
+  }
+  .ss:not(.is-live) .ss-stamp { opacity: 0; }
+
+  @media (max-width: 600px) {
+    .ss__stage { padding: 10px 10px 6px; border-radius: 16px; }
+    .ss-hud { font-size: 10px; gap: 4px 10px; }
+    .ss-node { padding: 7px 6px 6px; min-width: 74px; border-radius: 10px; }
+    .ss-node__l { font-size: 10.5px; }
+    .ss-node__ic { width: 16px; height: 16px; }
+    .ss-badge { font-size: 9.5px; }
+    .ss-badge > span { padding: 4px 8px 4px 4px; gap: 4px; }
+    .ss-badge i { width: 13px; height: 13px; font-size: 8.5px; }
+    .ss-key { font-size: 9px; }
+    .ss-ph__t strong { font-size: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ss-wire.is-flow, .ss-hud__l i { animation: none; }
+  }
+</style>

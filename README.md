@@ -1,43 +1,50 @@
-# Astro Starter Kit: Minimal
+# strade.tech — Yanis Schweizer
+
+Personal-brand site: homepage, the quest log (`/work`), a branded case study per project (`/work/<slug>`), and free resources for the Instagram DM automation (`/free/<slug>`). Astro 6 + GSAP. Deployed on Vercel.
+
+## Run it
+
+Needs Node 22+ (`nvm use 22`).
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # static build into dist/
+npm run og       # regenerate link-preview images in public/og/
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Where things live
 
-## 🚀 Project Structure
+| What | File |
+| --- | --- |
+| Links (cal.com booking, Instagram, LinkedIn, email), tagline | `src/data/site.ts` |
+| Every project: facts, metrics, brand colours, main/side quest, bragging stats | `src/data/work.ts` |
+| Free resources (DM landing pages) | `src/data/resources.ts` (+ files in `public/free/<slug>/`) |
+| Homepage (4 acts: space → stripes → blueprint → finale) | `src/pages/index.astro`, `src/styles/home.css` |
+| Quest log | `src/pages/work/index.astro`, `src/components/QuestPanel.astro`, `src/styles/quests.css` |
+| Branded case studies | `src/pages/work/<slug>.astro` (+ `src/components/case/<slug>/`) |
+| Nav, footer, SEO tags | `src/layouts/Base.astro` |
+| Redirects (old URLs) | `vercel.json` |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Add a free resource (for a DM keyword)
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+1. Put any files in `public/free/<slug>/`.
+2. Add an entry to `RESOURCES` in `src/data/resources.ts` (copy `ship-safe`). Set `keyword` to the word people comment, and the page will greet them with it.
+3. Set `published: true`. Drafts only show in `npm run dev`.
+4. Run `npm run og <slug>` to make its link preview, then deploy.
+5. Point the DM automation at `https://strade.tech/free/<slug>`.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Add or update a project
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- Edit its entry in `src/data/work.ts` (`tier: 'main' | 'side'`, `status`, `metrics`, `brand`…). The quest log, homepage tiles, "next quest" links and previews all read from it.
+- A new project also needs a page at `src/pages/work/<slug>.astro`. Copy a side-quest page as a starting point.
+- Old projects without a live site go in `ARCHIVED` in the same file. They render as "Archived" side quests with a generated animation.
+- Bragging numbers (tokens, Claude Code hours, users) are in `STATS`.
 
-Any static assets, like images, can be placed in the `public/` directory.
+Run `npm run og` after changes so link previews stay current.
 
-## 🧞 Commands
+## Rules baked into the content
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Yanis is the face. The company name (Strade SMIP SRL) only appears in the footer and on legal pages.
+- The white-label outreach build never names the end client. Matteo Caruso may be named.
+- Leads that didn't close are never shown as work.

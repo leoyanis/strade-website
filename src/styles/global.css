@@ -216,7 +216,7 @@ a { color: inherit; text-decoration: none; }
   position: relative; z-index: 2;
 }
 .hero-inner {
-  max-width: 640px; padding: 0 24px; position: relative;
+  max-width: 780px; padding: 0 24px; position: relative;
 }
 .hero-label {
   font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
@@ -228,10 +228,11 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.04em; line-height: 1.05;
   color: var(--text-primary); margin-bottom: 24px; position: relative;
 }
+.hero-line { white-space: nowrap; }
 .hero-h1 .char { display: inline-block; will-change: transform, opacity; }
 .hero-body {
   font-size: 16px; color: var(--text-secondary);
-  max-width: 400px; margin: 0 auto 0; line-height: 1.7;
+  max-width: 520px; margin: 0 auto 0; line-height: 1.7;
 }
 .hero-glow {
   position: absolute; width: 500px; height: 500px; border-radius: 50%;
@@ -256,6 +257,192 @@ a { color: inherit; text-decoration: none; }
 @keyframes scroll-pulse {
   0%, 100% { opacity: 0.2; transform: scaleY(0.8); }
   50% { opacity: 1; transform: scaleY(1); }
+}
+
+/* ================================================================
+   HERO CTA BUTTON
+   ================================================================ */
+.hero-cta {
+  margin-top: 32px;
+  font-size: 16px;
+  padding: 14px 32px;
+}
+
+/* ================================================================
+   SERVICES SECTION (What We Do - 3 cards)
+   ================================================================ */
+#services { padding: 140px 0 100px; position: relative; z-index: 2; }
+.services-header { text-align: center; margin-bottom: 64px; }
+.services-header .label { margin-bottom: 14px; }
+.services-header h2 { max-width: 480px; margin: 0 auto; }
+
+.services-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+}
+.services-grid-2 {
+  grid-template-columns: repeat(2, 1fr); max-width: 800px; margin: 0 auto;
+}
+.service-card {
+  padding: 36px 28px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.4s, transform 0.4s var(--ease-out-expo);
+}
+.service-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+}
+.svc-icon { display: block; margin-bottom: 20px; }
+.svc-title {
+  font-size: 20px; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 12px; letter-spacing: -0.01em;
+}
+.svc-char { display: inline-block; will-change: transform, opacity; }
+.svc-body {
+  font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+  margin-bottom: 20px;
+}
+.svc-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (max-width: 767px) {
+  #services { padding: 80px 0 60px; }
+  .services-grid { grid-template-columns: 1fr; gap: 20px; }
+  .service-card { padding: 28px 20px; }
+}
+
+/* ================================================================
+   TESTIMONIAL SECTION
+   ================================================================ */
+#testimonial {
+  padding: 100px 0; position: relative; z-index: 2;
+}
+.testimonial-block {
+  max-width: 680px; margin: 0 auto; text-align: left;
+  padding: 40px 48px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  position: relative;
+}
+.testimonial-block::before {
+  content: '\201C';
+  position: absolute; top: 24px; left: 28px;
+  font-size: 64px; line-height: 1; color: var(--cyan);
+  opacity: 0.2; font-family: Georgia, serif;
+}
+.testimonial-quote {
+  font-size: 16px; line-height: 1.8; color: var(--text-secondary);
+  font-style: italic; margin: 0 0 28px;
+}
+.testimonial-attribution {
+  display: flex; align-items: center; gap: 16px;
+}
+.testimonial-photo {
+  width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.testimonial-name {
+  display: block; font-size: 15px; font-weight: 600;
+  color: var(--text-primary); letter-spacing: -0.01em;
+}
+.testimonial-role {
+  display: block; font-size: 13px; color: var(--text-muted); margin-top: 2px;
+}
+.testimonial-linkedin {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text-muted); margin-top: 4px;
+  transition: color 0.3s;
+}
+.testimonial-linkedin:hover { color: var(--text-primary); }
+@media (max-width: 767px) {
+  #testimonial { padding: 60px 0; }
+  .testimonial-block { padding: 28px 24px; }
+  .testimonial-block::before { top: 12px; left: 16px; font-size: 48px; }
+  .testimonial-quote { font-size: 15px; }
+}
+
+/* ================================================================
+   YOUCOOK SECTION
+   ================================================================ */
+#youcook { padding: 140px 0; position: relative; z-index: 2; }
+
+.yc-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+@media (max-width: 767px) { .yc-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+.yc-text .label { margin-bottom: 14px; }
+.yc-text h2 { margin-bottom: 18px; }
+.yc-text p { color: var(--text-secondary); margin-bottom: 24px; max-width: 440px; line-height: 1.7; }
+.yc-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+
+.yc-mockup-wrap {
+  display: flex; justify-content: center; align-items: center;
+  position: relative; height: 420px;
+}
+.yc-mockup-img {
+  max-width: 220px; width: 100%;
+  border-radius: 20px;
+  border: none !important;
+  position: absolute;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+}
+.yc-img-back {
+  transform: translateX(-32px) rotate(-4deg);
+  z-index: 1;
+  opacity: 0.7;
+}
+.yc-img-front {
+  transform: translateX(32px) rotate(3deg);
+  z-index: 2;
+  animation: float-y 3.5s ease-in-out infinite;
+}
+@keyframes float-y {
+  0%, 100% { transform: translateX(32px) rotate(3deg) translateY(-4px); }
+  50% { transform: translateX(32px) rotate(3deg) translateY(4px); }
+}
+
+/* ================================================================
+   CAPABILITIES SECTION
+   ================================================================ */
+#capabilities { padding: 100px 0; position: relative; z-index: 2; }
+.cap-header { text-align: center; margin-bottom: 56px; }
+.cap-header .label { margin-bottom: 14px; }
+.cap-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+}
+.cap-item {
+  padding: 28px 20px;
+}
+.cap-icon { display: block; margin-bottom: 16px; }
+.cap-item h4 {
+  font-size: 16px; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 8px; letter-spacing: -0.01em;
+}
+.cap-item p {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.6;
+}
+@media (max-width: 767px) {
+  .cap-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .cap-item { padding: 20px 0; }
+}
+
+/* ================================================================
+   FOUNDER LANGUAGE BADGES
+   ================================================================ */
+.founder-langs {
+  display: flex; gap: 10px; margin-top: 20px;
+}
+.lang-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
 }
 
 /* ================================================================
@@ -457,12 +644,13 @@ a { color: inherit; text-decoration: none; }
 .sv-signal-chip.show-tooltip .sv-tooltip { display: block; }
 .sv-tooltip-label { font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
 
-/* SV CTA phase (absolute overlay) */
+/* SV CTA phase (fixed overlay, centered in viewport) */
 .sv-cta-phase {
-  position: absolute; inset: 0;
+  position: fixed; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; pointer-events: none; gap: 12px;
   opacity: 0; /* GSAP animates */
+  z-index: 20;
 }
 .sv-cta-stat {
   font-size: clamp(56px, 9vw, 96px); font-weight: 700;
@@ -470,17 +658,16 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 4px;
 }
 .sv-cta-text {
-  font-size: clamp(20px, 2.8vw, 32px); font-weight: 500;
-  letter-spacing: -0.02em; line-height: 1.3;
+  font-size: clamp(18px, 2.5vw, 28px); font-weight: 500;
+  letter-spacing: -0.02em; line-height: 1.4;
   color: var(--text-secondary); max-width: 540px;
 }
-.sv-cta-punch {
-  font-size: clamp(16px, 2vw, 22px); font-weight: 600;
-  color: var(--text-primary); letter-spacing: -0.01em;
-  margin-top: 4px;
+.sv-cta-flow {
+  font-size: clamp(14px, 1.8vw, 18px); font-weight: 600;
+  color: var(--cyan); letter-spacing: 0.04em;
+  margin-top: 8px;
 }
-.sv-cta-punch span { color: var(--cyan); }
-.sv-cta-sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; letter-spacing: 0.02em; }
+.sv-cta-sub { font-size: 15px; color: var(--text-muted); margin-top: 12px; letter-spacing: 0.01em; font-style: italic; }
 
 /* Mobile: condensed layout with animated reveals */
 @media (max-width: 767px) {
@@ -508,7 +695,7 @@ a { color: inherit; text-decoration: none; }
     pointer-events: auto !important;
     padding: 48px 0 16px;
   }
-  .sv-cta-stat, .sv-cta-text, .sv-cta-punch, .sv-cta-sub {
+  .sv-cta-stat, .sv-cta-text, .sv-cta-flow, .sv-cta-sub {
     opacity: 1 !important; transform: none !important;
   }
 
@@ -526,61 +713,15 @@ a { color: inherit; text-decoration: none; }
   .sv-chip { font-size: 12px; padding: 5px 12px; }
 }
 
-/* ================================================================
-   YOUCOOK SECTION
-   ================================================================ */
-#youcook { padding: 140px 0; position: relative; z-index: 2; }
-
-.yc-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
-}
-@media (max-width: 767px) { .yc-grid { grid-template-columns: 1fr; gap: 40px; } }
-
-.yc-text .label { margin-bottom: 14px; }
-.yc-text h2 { margin-bottom: 18px; }
-.yc-text p { color: var(--text-secondary); margin-bottom: 24px; max-width: 400px; line-height: 1.7; }
-.yc-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
-
-.yc-mockup-wrap {
-  display: flex; justify-content: flex-start; align-items: center;
-}
-.yc-mockup-img {
-  max-width: 280px; width: 100%;
-  aspect-ratio: 519 / 1024;
-  border-radius: 20px;
-  animation: float-y 3.5s ease-in-out infinite;
-  border: none !important;
-}
-@keyframes float-y {
-  0%, 100% { transform: translateY(-4px) rotate(0.3deg); }
-  50% { transform: translateY(4px) rotate(-0.3deg); }
-}
-
-/* ================================================================
-   NOTELESS SECTION
-   ================================================================ */
-#noteless { padding: 100px 0 140px; position: relative; z-index: 2; }
-
-.nl-inner {
-  max-width: 720px; margin: 0 auto; text-align: center; padding: 0 24px;
-}
-.nl-inner .label { margin-bottom: 14px; }
-.nl-inner h3 { font-size: 30px; margin-bottom: 28px; }
-.nl-mockup-img {
-  max-width: 400px; width: 100%; margin: 0 auto 36px;
-  display: block;
-  border: none !important;
-}
-.nl-inner p {
-  color: var(--text-secondary); margin-bottom: 28px;
-  max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.7;
-}
-.nl-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 32px; }
+/* YouCook old styles removed - now using card treatment above */
 
 /* ================================================================
    PROCESS SECTION
    ================================================================ */
-#process { padding: 140px 0; position: relative; z-index: 2; }
+#process {
+  min-height: 100vh; position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+}
 
 .process-header { text-align: center; margin-bottom: 80px; }
 .process-header .label { margin-bottom: 14px; }
@@ -654,7 +795,7 @@ a { color: inherit; text-decoration: none; }
 /* ================================================================
    CTA SECTION
    ================================================================ */
-#cta { padding: 140px 0; position: relative; z-index: 2; text-align: center; }
+#cta { padding: 200px 0; position: relative; z-index: 2; text-align: center; }
 
 .cta-inner { max-width: 640px; margin: 0 auto; padding: 0 24px; }
 .cta-inner h2 { margin-bottom: 20px; font-size: clamp(28px, 4vw, 44px); }
@@ -726,33 +867,26 @@ img { max-width: 100%; height: auto; }
   /* ---- Hero ---- */
   #hero { height: auto; min-height: 100svh; padding: 0 0 48px; }
   .hero-inner { max-width: 100%; padding: 0 20px; }
+  .hero-line { white-space: normal; }
   .hero-h1 { font-size: clamp(36px, 10vw, 48px); }
   .hero-body { font-size: 15px; }
   .hero-glow { width: 300px; height: 300px; }
   .scroll-indicator { bottom: 24px; }
 
   /* ---- Section spacing ---- */
+  #process { min-height: auto; padding: 80px 0; display: block; }
   #youcook { padding: 80px 0; }
-  #noteless { padding: 60px 0 80px; }
-  #process { padding: 80px 0; }
+  #capabilities { padding: 60px 0; }
   #founder { padding: 80px 0; }
-  #cta { padding: 80px 0; }
+  #cta { padding: 120px 0; }
 
   /* ---- Container ---- */
   .container { padding: 0 20px; }
 
   /* ---- YouCook ---- */
-  .yc-mockup-wrap { justify-content: center; }
-  .yc-mockup-img {
-    max-width: 220px;
-    animation: float-y 4s ease-in-out infinite;
-  }
+  .yc-mockup-wrap { height: 340px; }
+  .yc-mockup-img { max-width: 180px; }
   .yc-text p { max-width: 100%; }
-
-  /* ---- Noteless ---- */
-  .nl-inner { padding: 0 20px; }
-  .nl-inner h3 { font-size: 24px; }
-  .nl-mockup-img { max-width: 300px; }
 
   /* ---- Process ---- */
   .process-header { margin-bottom: 40px; }

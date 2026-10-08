@@ -1,0 +1,43 @@
+---
+// "How to use it": the steps scroll past a sticky viewer that plays each step's scene.
+// Without JS (or with reduced motion) it is a plain numbered list; motion/steps.ts adds .is-live.
+import StepArt from './StepArt.astro';
+import type { ResourceStep } from '../../data/resources';
+import { inline, pad } from './inline';
+
+interface Props {
+  heading: string;
+  steps: ResourceStep[];
+}
+const { heading, steps } = Astro.props;
+---
+
+<section class="sk-sec sk-how" id="how" data-fx="steps">
+  <div class="container sk-how__grid">
+    <h2 class="sk-h sk-how__h"><span class="sk-h__t">{heading}</span></h2>
+
+    <div class="sk-how__side" aria-hidden="true">
+      <div class="sk-how__view">
+        <div class="sk-how__top">
+          <span class="sk-how__step">Step <span class="sk-how__n"><b>01</b></span> / {pad(steps.length)}</span>
+          <span class="sk-how__dots">{steps.map(() => <i></i>)}</span>
+        </div>
+        <div class="sk-how__stage">
+          {steps.map((s, i) => s.art && (
+            <div class="sk-how__art" data-i={i}><StepArt art={s.art} /></div>
+          ))}
+        </div>
+        <div class="sk-how__prog"><i></i></div>
+      </div>
+    </div>
+
+    <ol class="sk-steps">
+      {steps.map((s, i) => (
+        <li data-i={i}>
+          <span class="sk-steps__n" aria-hidden="true">{pad(i + 1)}</span>
+          <p set:html={inline(s.text)} />
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

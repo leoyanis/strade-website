@@ -1,0 +1,39 @@
+---
+// Section marker from the Kleus design system: "§ I", a kicker, then an engraved dotted rule.
+interface Props {
+  n: string;
+  label: string;
+  dark?: boolean;
+}
+const { n, label, dark = false } = Astro.props;
+---
+
+<p class:list={['mk', dark && 'mk--dark']} data-kl-mark>
+  <span class="mk__sec">§ <span class="mk__n">{n}</span></span>
+  <span class="mk__label">{label}</span>
+  <span class="mk__rule" aria-hidden="true"></span>
+</p>
+
+<style>
+  .mk {
+    display: flex; align-items: center; gap: 14px;
+    margin: 0 0 28px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    color: #575652;
+  }
+  .mk__sec { font-size: 15px; white-space: nowrap; }
+  .mk__n { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 17px; letter-spacing: 0.02em; }
+  .mk__label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    text-shadow: 0 1px 0 rgb(255 255 255 / 0.56);
+  }
+  .mk__rule {
+    flex: 1; height: 2px; min-width: 24px;
+    background-image: radial-gradient(circle, rgb(27 26 24 / 0.28) 0.75px, transparent 1.1px);
+    background-size: 6px 2px; background-repeat: repeat-x; background-position: left center;
+    transform-origin: left center;
+  }
+  .mk--dark { color: #9C9A97; }
+  .mk--dark .mk__label { text-shadow: none; }
+  .mk--dark .mk__rule { background-image: radial-gradient(circle, rgb(229 228 226 / 0.3) 0.75px, transparent 1.1px); }
+</style>

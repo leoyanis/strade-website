@@ -1,0 +1,1039 @@
+---
+// Fallow: branded side-quest case study.
+// The look follows the app and its App Store art: night fields in gold scratchboard, a light serif
+// (Apple's New York in the app, so `ui-serif` first, Newsreader elsewhere), parchment ink, antique gold.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import Phone from '../../components/case/side-dark/Phone.astro';
+import { getProject } from '../../data/work';
+
+const p = getProject('fallow')!;
+const img = (f: string) => `/images/work/fallow/${f}`;
+const fonts =
+  'https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..500&display=swap';
+
+// Dial geometry: midnight at the top, clockwise, like the app's DayDial.
+const C = 200;
+const R = 148;
+const pt = (h: number, r = R) => {
+  const a = ((h / 24) * 360 - 90) * (Math.PI / 180);
+  return [C + r * Math.cos(a), C + r * Math.sin(a)].map((n) => +n.toFixed(2));
+};
+const arc = (from: number, to: number, r = R) => {
+  const [x1, y1] = pt(from, r);
+  const [x2, y2] = pt(to, r);
+  const span = (((to - from) % 24) + 24) % 24;
+  return `M${x1} ${y1} A${r} ${r} 0 ${span > 12 ? 1 : 0} 1 ${x2} ${y2}`;
+};
+const windowArc = arc(19, 22);
+const shieldArc = arc(22, 19);
+const travelArc = arc(19.5, 19);
+const nowPt = pt(19.5);
+const ticks = Array.from({ length: 24 }, (_, h) => {
+  const [x1, y1] = pt(h, R + 22);
+  const [x2, y2] = pt(h, R + (h % 6 === 0 ? 34 : 28));
+  return { x1, y1, x2, y2, major: h % 6 === 0 };
+});
+const labels = [0, 6, 12, 18].map((h) => {
+  const [x, y] = pt(h, R - 40);
+  return { x, y, t: h === 0 ? '12a' : h === 12 ? '12p' : String(h) };
+});
+
+// A seeded field of grass blades for the closing section (stable between renders).
+let seed = 7;
+const rand = () => {
+  seed = (seed * 16807) % 2147483647;
+  return (seed - 1) / 2147483646;
+};
+const blades = Array.from({ length: 150 }, (_, i) => {
+  const x = (i / 150) * 1440 + rand() * 12;
+  const h = 50 + rand() * 150 * (0.55 + 0.45 * Math.sin((i / 150) * Math.PI));
+  const lean = (rand() - 0.5) * 50;
+  const w = 0.8 + rand() * 1.6;
+  return {
+    d: `M${x.toFixed(1)} 240 Q${(x + lean * 0.3).toFixed(1)} ${(240 - h * 0.6).toFixed(1)} ${(x + lean).toFixed(1)} ${(240 - h).toFixed(1)}`,
+    w: w.toFixed(2),
+    o: (0.25 + rand() * 0.6).toFixed(2),
+  };
+});
+
+// Stars for the hero sky.
+const stars = Array.from({ length: 26 }, () => ({
+  x: (rand() * 100).toFixed(1),
+  y: (rand() * 46).toFixed(1),
+  s: (rand() < 0.2 ? 10 + rand() * 8 : 2 + rand() * 3).toFixed(1),
+  d: (rand() * 8).toFixed(1),
+}));
+
+const quotes = [
+  ['It is not that we have a short time to live, but that we waste much of it.', 'Seneca'],
+  ['Life is long, if you know how to use it.', 'Seneca'],
+  ['He who is everywhere is nowhere.', 'Seneca'],
+  ['The cost of a thing is the amount of life you exchange for it.', 'Henry David Thoreau'],
+  ['As if you could kill time without injuring eternity.', 'Henry David Thoreau'],
+  ['Confine yourself to the present.', 'Marcus Aurelius'],
+  ['The soul becomes dyed with the colour of its thoughts.', 'Marcus Aurelius'],
+  ['Very little is needed to make a happy life.', 'Marcus Aurelius'],
+  ['All of humanity’s problems stem from an inability to sit quietly in a room alone.', 'Blaise Pascal'],
+  ['My experience is what I agree to attend to.', 'William James'],
+  ['To do two things at once is to do neither.', 'Publilius Syrus'],
+  ['Nothing is worth more than this day.', 'Johann Wolfgang von Goethe'],
+  ['Attention is the rarest and purest form of generosity.', 'Simone Weil'],
+  ['Nature does not hurry, yet everything is accomplished.', 'Lao Tzu'],
+  ['A field left fallow returns richer.', 'Proverb'],
+];
+const buttonLabels = [
+  'Go back to living', 'Not now', 'The field is resting', 'Let it lie fallow',
+  'Another time', 'Enough for today', 'Close this', 'Return',
+];
+
+const interlude = 'A field left fallow recovers. So does your attention.'.split(' ');
+
+const gallery = [
+  { src: 'cover.webp', alt: 'App Store screenshot: The app blocker you set once', cap: 'The hook' },
+  { src: 'g1.webp', alt: 'App Store screenshot: Need quiet right now? Quick block', cap: 'Quick block' },
+  { src: 'g2.webp', alt: 'App Store screenshot: One free window. You choose the hours', cap: 'Schedule' },
+  { src: 'g3.webp', alt: 'App Store screenshot: It can’t be talked out of. Lock settings', cap: 'Locks' },
+  { src: 'g4.webp', alt: 'App Store screenshot: A field left fallow recovers. So does your attention', cap: 'Brand' },
+];
+
+const targets = [
+  ['Fallow', 'The screens, and the only place an edit is ever made.'],
+  ['Monitor', 'Applies and lifts the shields at the edges of the free window.'],
+  ['Shield configuration', 'Draws the block screen: the art, the quote, the one button.'],
+  ['Shield action', 'Answers every press of that button with “close”.'],
+];
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/fallow"
+  noAlternates
+  bare
+  navTheme={p.brand.light ? 'light' : 'dark'}
+  ogImage="/og/work-fallow.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={fonts} />
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="fw-mark" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="47.25" fill="none" stroke="currentColor" stroke-width="5.5"></circle>
+        <circle cx="50" cy="31.46" r="5.36" fill="currentColor"></circle>
+        <g stroke="currentColor" stroke-width="4.68" stroke-linecap="round">
+          <line x1="17.09" y1="47.94" x2="82.91" y2="47.94"></line>
+          <line x1="18.35" y1="60.3" x2="81.65" y2="60.3"></line>
+          <line x1="23.83" y1="72.66" x2="76.17" y2="72.66"></line>
+        </g>
+      </symbol>
+      <symbol id="fw-spark" viewBox="0 0 20 20"><path d="M10 0 L11.2 8.8 L20 10 L11.2 11.2 L10 20 L8.8 11.2 L0 10 L8.8 8.8 Z" fill="currentColor"></path></symbol>
+    </defs>
+  </svg>
+
+  <div class="fw">
+    <!-- ============================== HERO ============================== -->
+    <section class="fw-hero" aria-labelledby="fw-title">
+      <div class="fw-hero__art" aria-hidden="true">
+        <img src={img('night-3.webp')} alt="" width="1080" height="1920" fetchpriority="high" data-hero-art />
+      </div>
+      <div class="fw-hero__sky" aria-hidden="true">
+        {stars.map((s) => (
+          <svg class="fw-star" style={`left:${s.x}%;top:${s.y}%;width:${s.s}px;height:${s.s}px;animation-delay:-${s.d}s`}><use href="#fw-spark"></use></svg>
+        ))}
+      </div>
+
+      <div class="fw-wrap fw-hero__inner">
+        <h1 id="fw-title" class="fw-hero__title">
+          <span class="fw-brand" data-hero-in>
+            <svg class="fw-brand__mark" aria-hidden="true"><use href="#fw-mark"></use></svg>
+            <span>Fallow</span>
+          </span>
+          <span class="fw-display fw-hero__line" data-hero-in>The app blocker<br />you set once.</span>
+        </h1>
+        <p class="fw-hero__lede" data-hero-in>{p.summary}</p>
+        <ul class="fw-chips" data-hero-in>
+          <li>{p.client}</li>
+          <li>{p.year}</li>
+          <li class="is-status"><i aria-hidden="true"></i>Launching on the App Store</li>
+        </ul>
+
+        <div class="fw-hero__phone" data-hero-phone>
+          <div class="fw-hero__glow" aria-hidden="true"></div>
+          <Phone
+            src={img('home.webp')}
+            alt="Fallow’s home screen: a gold ring around the word Blocked, 4h 20m left, a quote, and Quick block"
+            priority
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== INTERLUDE ============================== -->
+    <section class="fw-interlude" aria-label="A field left fallow recovers. So does your attention.">
+      <div class="fw-interlude__art" aria-hidden="true">
+        <img src={img('night-2.webp')} alt="" width="1080" height="1920" loading="lazy" decoding="async" data-parallax />
+      </div>
+      <div class="fw-wrap fw-interlude__inner">
+        <svg class="fw-interlude__mark" aria-hidden="true"><use href="#fw-mark"></use></svg>
+        <p class="fw-display fw-interlude__text" aria-hidden="true">
+          {interlude.map((w, i) => (
+            <Fragment><span class="fw-word" data-word>{w}</span>{i === 4 && <br />}{' '}</Fragment>
+          ))}
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================== PROBLEM ============================== -->
+    <section class="fw-problem">
+      <div class="fw-wrap fw-problem__grid">
+        <div class="fw-problem__text">
+          <p class="fw-over" data-reveal>The problem</p>
+          <h2 class="fw-display fw-h2" data-reveal>Most blockers come with a way out.</h2>
+          <p data-reveal>
+            Most app blockers have an “ignore for 15 minutes” button, which means they don’t really block anything.
+          </p>
+          <p data-reveal>
+            I wanted one where putting apps away is instant and taking them back costs you something.
+          </p>
+        </div>
+
+        <div class="fw-escape" data-reveal>
+          <div class="fw-escape__sheet">
+            <p class="fw-escape__t">Time limit</p>
+            <p class="fw-escape__s">You’ve reached your limit for today.</p>
+            <span class="fw-escape__btn">OK</span>
+            <span class="fw-escape__btn fw-escape__btn--out">
+              Ignore for 15 minutes
+              <svg class="fw-escape__strike" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4 12 C 80 6, 200 16, 296 8" pathLength="1"></path></svg>
+            </span>
+          </div>
+          <p class="fw-escape__cap fw-display">Fallow doesn’t have that button.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== THE RULE ============================== -->
+    <section class="fw-rule" aria-labelledby="fw-rule-h">
+      <div class="fw-wrap">
+        <header class="fw-rule__head">
+          <p class="fw-over" data-reveal>The rule</p>
+          <h2 id="fw-rule-h" class="fw-display fw-h2" data-reveal>
+            One free window. <em>You choose the hours once.</em>
+          </h2>
+          <p class="fw-rule__lede" data-reveal>
+            Everything outside your daily free window is shielded. Putting more away lands instantly. Taking
+            something back costs you a full cycle.
+          </p>
+        </header>
+
+        <div class="fw-rule__grid">
+          <figure class="fw-dial" aria-label="A 24-hour dial. The free window runs from 19:00 to 22:00. Everything else is shielded.">
+            <svg viewBox="0 0 400 400" class="fw-dial__svg" data-dial-svg data-travel-d={travelArc}>
+              <circle cx={C} cy={C} r={R} class="fw-dial__base"></circle>
+              <path d={shieldArc} class="fw-dial__shield"></path>
+              <path d={windowArc} class="fw-dial__window"></path>
+              {ticks.map((t) => (
+                <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} class:list={['fw-dial__tick', t.major && 'is-major']}></line>
+              ))}
+              {labels.map((l) => (
+                <text x={l.x} y={l.y} class="fw-dial__lab" text-anchor="middle" dominant-baseline="central">{l.t}</text>
+              ))}
+              <circle cx={nowPt[0]} cy={nowPt[1]} r="9" class="fw-dial__now" data-now></circle>
+            </svg>
+            <div class="fw-dial__centre">
+              <p class="fw-display fw-dial__big" data-dial-big>3h</p>
+              <p class="fw-dial__small" data-dial-small>open</p>
+            </div>
+            <figcaption class="fw-dial__legend">
+              <span><i class="is-window"></i>Free window, 19:00 to 22:00</span>
+              <span><i class="is-shield"></i>Shielded</span>
+            </figcaption>
+          </figure>
+
+          <div class="fw-rule__cases">
+            <div class="fw-case" data-case="tighten">
+              <p class="fw-case__k">Tightening</p>
+              <p class="fw-case__d">Adding apps, a shorter window, switching a lock on.</p>
+              <p class="fw-display fw-case__when">Ask any time. <em>It lands now.</em></p>
+              <button type="button" class="fw-case__btn" data-play="tighten">Put more away</button>
+            </div>
+            <div class="fw-case" data-case="loosen">
+              <p class="fw-case__k">Loosening</p>
+              <p class="fw-case__d">Removing apps, a longer window, switching a lock off.</p>
+              <p class="fw-display fw-case__when">Ask inside the window. <em>It lands when the window next opens.</em></p>
+              <button type="button" class="fw-case__btn" data-play="loosen">Take something back</button>
+            </div>
+            <p class="fw-rule__example" data-reveal>
+              Ask at 19:30 tonight and tonight’s block still runs on the old, stricter rules. You get the change at
+              19:00 tomorrow.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== SHIELD ============================== -->
+    <section class="fw-shield" aria-labelledby="fw-shield-h">
+      <div class="fw-wrap fw-shield__grid">
+        <div class="fw-shield__device" data-reveal>
+          <div class="fw-shield__screen" data-shield>
+            <div class="fw-shield__bg" aria-hidden="true"></div>
+            <div class="fw-shield__content" data-shield-content>
+              <div class="fw-medal" aria-hidden="true">
+                <img src={img('field-1.webp')} alt="" width="480" height="480" loading="lazy" decoding="async" data-medal />
+              </div>
+              <p class="fw-shield__title" data-shield-title>Fallow</p>
+              <p class="fw-shield__quote" data-shield-quote>Confine yourself to the present.</p>
+              <p class="fw-shield__by" data-shield-by>– Marcus Aurelius</p>
+            </div>
+            <button type="button" class="fw-shield__btn" data-shield-btn>Go back to living</button>
+          </div>
+        </div>
+
+        <div class="fw-shield__text">
+          <p class="fw-over" data-reveal>The shield</p>
+          <h2 id="fw-shield-h" class="fw-display fw-h2" data-reveal>What you see instead of the app.</h2>
+          <p data-reveal>
+            Open a blocked app and Fallow’s shield appears. It rotates through 15 quotes and 8 labels for its one
+            button, and never shows the same pair twice in a row. The art in the medallion rotates too.
+          </p>
+          <p data-reveal>
+            The button only ever closes the app. There is no second button to sneak through. Every time the shield
+            appears, Fallow counts one impulse caught, and once there are a few, the shield sometimes says so.
+          </p>
+          <button type="button" class="fw-ghostbtn" data-shield-next>Show another</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== LOCKS ============================== -->
+    <section class="fw-locks" aria-labelledby="fw-locks-h">
+      <div class="fw-wrap fw-locks__grid">
+        <div class="fw-locks__text">
+          <p class="fw-over" data-reveal>Cool-off locks</p>
+          <h2 id="fw-locks-h" class="fw-display fw-h2" data-reveal>It can’t be talked out of.</h2>
+          <p data-reveal>Loosening always costs a day. And while a block is running, the usual escape routes are closed too.</p>
+          <button type="button" class="fw-lock" data-lock aria-label="A padlock that stays shut">
+            <svg viewBox="0 0 120 150" aria-hidden="true">
+              <path class="fw-lock__shackle" d="M30 66 V44 a30 30 0 0 1 60 0 V66" data-shackle></path>
+              <rect class="fw-lock__body" x="14" y="64" width="92" height="76" rx="16"></rect>
+              <circle class="fw-lock__hole" cx="60" cy="96" r="7"></circle>
+              <path class="fw-lock__hole" d="M60 101 v14"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="fw-settings" data-reveal>
+          <p class="fw-settings__label">While blocked</p>
+          <div class="fw-settings__card">
+            <div class="fw-setrow">
+              <div>
+                <p class="fw-setrow__t">Prevent app deletion</p>
+                <p class="fw-setrow__d">Apps can’t be deleted off the Home Screen while the block is active, including Fallow.</p>
+              </div>
+              <span class="fw-toggle is-on" data-toggle aria-hidden="true"><i></i></span>
+            </div>
+            <div class="fw-setrow">
+              <div>
+                <p class="fw-setrow__t">Lock clock changes</p>
+                <p class="fw-setrow__d">Forces automatic date and time, so the schedule can’t be stepped around.</p>
+              </div>
+              <span class="fw-toggle is-on" data-toggle aria-hidden="true"><i></i></span>
+            </div>
+            <div class="fw-setrow">
+              <div>
+                <p class="fw-setrow__t">Cool-off timer</p>
+                <p class="fw-setrow__d">Any loosening request only submits after a 30-second wait, long enough to notice you don’t mean it.</p>
+              </div>
+              <span class="fw-toggle is-on" data-toggle aria-hidden="true"><i></i></span>
+            </div>
+          </div>
+          <p class="fw-settings__note">Switching a lock on takes effect immediately. Switching one off is a loosening.</p>
+          <p class="fw-settings__door">
+            <span>One door stays open.</span> iOS always lets the owner switch Screen Time itself off, and every shield
+            goes with it. Fallow says so plainly, and suggests asking someone you trust to set a Screen Time passcode.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== GALLERY ============================== -->
+    <section class="fw-gallery" aria-labelledby="fw-gallery-h">
+      <div class="fw-wrap fw-gallery__head">
+        <div>
+          <p class="fw-over" data-reveal>The listing</p>
+          <h2 id="fw-gallery-h" class="fw-display fw-h2" data-reveal>Same quiet voice, all the way to the App Store.</h2>
+        </div>
+        <p data-reveal>Fallow is listed as <span>Fallow | Focus App Blocker</span>. These are its App Store screenshots.</p>
+      </div>
+      <div class="fw-gallery__rail">
+        <ul class="fw-gallery__list">
+          {gallery.map((g, i) => (
+            <li class="fw-gallery__item">
+              <figure class="fw-store">
+                <img src={img(g.src)} alt={g.alt} width="739" height="1600" loading="lazy" decoding="async" />
+              </figure>
+              <p class="fw-gallery__cap"><span>{String(i + 1).padStart(2, '0')}</span>{g.cap}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== HOW ============================== -->
+    <section class="fw-how" aria-labelledby="fw-how-h">
+      <div class="fw-wrap">
+        <header class="fw-how__head">
+          <p class="fw-over" data-reveal>How I built it</p>
+          <h2 id="fw-how-h" class="fw-display fw-h2" data-reveal>Native Swift, on Apple’s own Screen Time frameworks.</h2>
+          <p data-reveal>
+            I built Fallow fully native, on FamilyControls, ManagedSettings and DeviceActivity. It ships as four
+            targets: the app and three extensions. They share one App Group, and that is the only channel between
+            them. Nothing is passed at runtime.
+          </p>
+        </header>
+
+        <div class="fw-orbit" data-reveal>
+          <div class="fw-orbit__core">
+            <svg aria-hidden="true"><use href="#fw-mark"></use></svg>
+            <p>App Group</p>
+            <span>shared settings</span>
+          </div>
+          <svg class="fw-orbit__lines" viewBox="0 0 600 600" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M300 300 L110 110"></path>
+            <path d="M300 300 L490 110"></path>
+            <path d="M300 300 L110 490"></path>
+            <path d="M300 300 L490 490"></path>
+          </svg>
+          {targets.map(([t, d], i) => (
+            <div class={`fw-orbit__node n${i}`}>
+              <p class="fw-orbit__t">{t}</p>
+              <p class="fw-orbit__d">{d}</p>
+            </div>
+          ))}
+        </div>
+
+        <div class="fw-how__grid">
+          <div class="fw-seal" data-reveal>
+            <svg class="fw-seal__ring" viewBox="0 0 200 200" aria-hidden="true">
+              <defs><path id="fw-seal-path" d="M100 100 m-78 0 a78 78 0 1 1 156 0 a78 78 0 1 1 -156 0"></path></defs>
+              <text><textPath href="#fw-seal-path" startOffset="0" textLength="486" lengthAdjust="spacing">FAMILY CONTROLS · DISTRIBUTION ENTITLEMENT · APPROVED ·</textPath></text>
+            </svg>
+            <svg class="fw-seal__mark" aria-hidden="true"><use href="#fw-mark"></use></svg>
+          </div>
+          <div class="fw-how__notes">
+            <p class="fw-how__big fw-display" data-reveal>
+              Apple only grants the Family Controls distribution entitlement after a manual review. <em>Fallow’s was approved.</em>
+            </p>
+            <div class="fw-notes">
+              <div data-reveal>
+                <p class="fw-notes__k">Nothing leaves your phone</p>
+                <p>Fallow never even sees which apps you picked. It only gets opaque tokens from iOS.</p>
+              </div>
+              <div data-reveal>
+                <p class="fw-notes__k">Paying never traps you</p>
+                <p>The purchase only gates loosening. Anything that tightens works forever, and a running block keeps running whether anyone pays or not.</p>
+              </div>
+              <div data-reveal>
+                <p class="fw-notes__k">One place for the rules</p>
+                <p>Every edit, from any screen, goes through a single function that decides whether it tightens or loosens.</p>
+              </div>
+            </div>
+            <ul class="fw-stack" aria-label="Stack">
+              <li>Swift</li><li>SwiftUI</li><li>FamilyControls</li><li>ManagedSettings</li><li>DeviceActivity</li><li>StoreKit 2</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== CLOSE ============================== -->
+    <section class="fw-close">
+      <div class="fw-wrap fw-close__inner">
+        <svg class="fw-close__mark" aria-hidden="true"><use href="#fw-mark"></use></svg>
+        <h2 class="fw-display fw-close__q" data-reveal>What is your peace worth?</h2>
+        <p class="fw-close__p" data-reveal>
+          Fallow is launching on the App Store as <span>Fallow | Focus App Blocker</span>.
+        </p>
+      </div>
+      <svg class="fw-field" viewBox="0 0 1440 240" preserveAspectRatio="none" aria-hidden="true">
+        {blades.map((b) => (
+          <path d={b.d} stroke-width={b.w} style={`opacity:${b.o}`} data-blade></path>
+        ))}
+      </svg>
+    </section>
+  </div>
+
+  <CaseNext current="fallow" />
+  <script is:inline define:vars={{ quotes, buttonLabels }}>
+    window.__fallowShield = { quotes, buttonLabels };
+  </script>
+</Base>
+
+
+<style>
+  :global(body) { background: #0F0C08; }
+  :global(#scroll-progress) { background: #C9A24A; }
+
+  .fw {
+    --night: #0F0C08;
+    --night-2: #14110c;
+    --surface: #1A150E;
+    --card: #211b13;
+    --line: #3A352C;
+    --ink: #EDE3D1;
+    --soft: #9C8E76;
+    --gold: #C9A24A;
+    --amber: #C9963F;
+    --sage: #88A57C;
+    --serif: ui-serif, 'Newsreader', 'New York', Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+    --slow: cubic-bezier(.22, .61, .36, 1);
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow-x: clip;
+  }
+  .fw-wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; position: relative; }
+  .fw-display { font-family: var(--serif); font-weight: 300; letter-spacing: -0.015em; font-optical-sizing: auto; }
+  .fw-display em { font-style: italic; color: var(--gold); }
+  .fw-over { font-size: 11.5px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }
+  .fw-h2 { margin-top: 18px; font-size: clamp(36px, 5.2vw, 66px); line-height: 1.06; max-width: 16ch; }
+
+  /* ============================== HERO ============================== */
+  .fw-hero { position: relative; z-index: 2; padding: 128px 0 0; text-align: center; isolation: isolate; }
+  .fw-hero__art { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+  .fw-hero__art img {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 72%;
+    opacity: .9;
+  }
+  .fw-hero__art::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, var(--night) 0%, rgba(15,12,8,.92) 18%, rgba(15,12,8,.55) 48%, rgba(15,12,8,.35) 70%, var(--night) 100%),
+      radial-gradient(60% 40% at 50% 30%, rgba(15,12,8,.7), transparent 70%);
+  }
+  .fw-hero__sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+  .fw-star { position: absolute; color: #e8cf8f; opacity: .7; animation: fw-twinkle 7s ease-in-out infinite; }
+  @keyframes fw-twinkle { 0%, 100% { opacity: .2; transform: scale(.8); } 50% { opacity: .9; transform: scale(1); } }
+  .fw-hero__inner { display: flex; flex-direction: column; align-items: center; }
+  .fw-hero__title { display: flex; flex-direction: column; align-items: center; gap: 30px; font-weight: 400; }
+  .fw-brand { display: inline-flex; align-items: center; gap: 12px; font: 600 15px var(--sans); letter-spacing: .36em; text-transform: uppercase; color: var(--ink); padding-left: .36em; }
+  .fw-brand__mark { width: 34px; height: 34px; color: var(--gold); }
+  .fw-hero__line { font-size: clamp(48px, 7.4vw, 104px); line-height: 1.02; color: var(--ink); }
+  .fw-hero__lede { margin-top: 26px; max-width: 540px; font-size: 18px; line-height: 1.6; color: #c9bda6; }
+  .fw-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 30px; padding: 0; list-style: none; }
+  .fw-chips li {
+    display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid rgba(201,162,74,.28); background: rgba(26,21,14,.6); color: #d6c9b0; font-size: 13px;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .fw-chips .is-status { color: var(--gold); }
+  .fw-chips .is-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+  .fw-hero__phone { position: relative; width: min(330px, 76vw); margin-top: 64px; margin-bottom: -120px; }
+  .fw-hero__glow {
+    position: absolute; left: 50%; top: 34%; width: 160%; aspect-ratio: 1; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(201,150,63,.32) 0%, rgba(201,150,63,.08) 38%, transparent 66%);
+    pointer-events: none;
+  }
+  .fw-hero__phone :global(.sd-phone) {
+    --ph-bezel: #16120c; --ph-ring: rgba(201,162,74,.5);
+    --ph-shadow: 0 0 40px rgba(201,150,63,.25), 0 60px 120px -40px rgba(0,0,0,.95);
+  }
+
+  /* ============================== INTERLUDE ============================== */
+  .fw-interlude { position: relative; z-index: 1; padding: 260px 0 200px; overflow: hidden; isolation: isolate; text-align: center; }
+  .fw-interlude__art { position: absolute; inset: -12% 0; z-index: -1; }
+  .fw-interlude__art img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; opacity: .55; }
+  .fw-interlude__art::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, var(--night) 0%, rgba(15,12,8,.35) 30%, rgba(15,12,8,.45) 70%, var(--night) 100%);
+  }
+  .fw-interlude__inner { display: flex; flex-direction: column; align-items: center; }
+  .fw-interlude__mark { width: 54px; height: 54px; color: var(--gold); margin-bottom: 40px; }
+  .fw-interlude__text { font-size: clamp(40px, 6vw, 84px); line-height: 1.12; max-width: 15ch; color: var(--ink); }
+
+  /* ============================== PROBLEM ============================== */
+  .fw-problem { padding: 140px 0 120px; }
+  .fw-problem__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; align-items: center; }
+  .fw-problem__text p:not(.fw-over) { margin-top: 22px; font-size: 18px; line-height: 1.65; color: #c9bda6; max-width: 470px; }
+  .fw-problem__text .fw-h2 { max-width: 13ch; }
+  .fw-escape { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+  .fw-escape__sheet {
+    width: min(360px, 100%); padding: 26px 22px 20px; border-radius: 26px; text-align: center;
+    background: rgba(40, 36, 30, .72); border: 1px solid rgba(255,255,255,.07);
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.8);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+  .fw-escape__t { font-size: 19px; font-weight: 600; color: #f2ede4; }
+  .fw-escape__s { margin-top: 6px; font-size: 14px; color: #a49d90; }
+  .fw-escape__btn {
+    position: relative; display: flex; align-items: center; justify-content: center; height: 48px; margin-top: 12px;
+    border-radius: 14px; background: rgba(255,255,255,.08); color: #8fb6ff; font-size: 16px; font-weight: 500;
+  }
+  .fw-escape__btn:first-of-type { margin-top: 22px; }
+  .fw-escape__btn--out { color: #f2ede4; }
+  .fw-escape__strike { position: absolute; left: 6%; top: 50%; width: 88%; height: 20px; transform: translateY(-50%); overflow: visible; }
+  .fw-escape__strike path { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+  .fw-escape__cap { font-size: 26px; font-style: italic; color: var(--gold); text-align: center; }
+
+  /* ============================== RULE ============================== */
+  .fw-rule { padding: 140px 0; background: var(--night-2); border-top: 1px solid rgba(201,162,74,.12); border-bottom: 1px solid rgba(201,162,74,.12); }
+  .fw-rule__head { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .fw-rule__head .fw-h2 { max-width: 18ch; }
+  .fw-rule__lede { margin-top: 24px; max-width: 580px; font-size: 18px; line-height: 1.65; color: #c9bda6; }
+  .fw-rule__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; align-items: center; margin-top: 80px; }
+  .fw-dial { position: relative; width: min(460px, 100%); justify-self: center; }
+  .fw-dial__svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .fw-dial__base { fill: none; stroke: #2a241b; stroke-width: 26; }
+  .fw-dial__shield { fill: none; stroke: #3a3020; stroke-width: 26; stroke-dasharray: 2 5; }
+  .fw-dial__window { fill: none; stroke: var(--sage); stroke-width: 26; filter: drop-shadow(0 0 12px rgba(136,165,124,.45)); }
+  .fw-dial__tick { stroke: #5d523f; stroke-width: 1.4; stroke-linecap: round; }
+  .fw-dial__tick.is-major { stroke: var(--soft); stroke-width: 2; }
+  .fw-dial__lab { fill: var(--soft); font: 500 13px var(--sans); }
+  .fw-dial__travel { fill: none; stroke: var(--gold); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; }
+  .fw-dial__now { fill: var(--night-2); stroke: var(--ink); stroke-width: 3; }
+  .fw-dial__pulse { fill: none; stroke: var(--gold); stroke-width: 2; }
+  .fw-dial__dot { fill: var(--gold); }
+  .fw-dial__centre { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
+  .fw-dial__big { font-size: clamp(48px, 6vw, 72px); line-height: 1; color: var(--ink); }
+  .fw-dial__small { margin-top: 6px; font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--soft); }
+  .fw-dial__legend { display: flex; justify-content: center; gap: 22px; margin-top: 26px; font-size: 13.5px; color: var(--soft); flex-wrap: wrap; }
+  .fw-dial__legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .fw-dial__legend i { width: 18px; height: 6px; border-radius: 3px; }
+  .fw-dial__legend .is-window { background: var(--sage); }
+  .fw-dial__legend .is-shield { background: repeating-linear-gradient(90deg, #4a3d27 0 2px, transparent 2px 5px); border: 1px solid #4a3d27; }
+
+  .fw-rule__cases { display: flex; flex-direction: column; gap: 18px; }
+  .fw-case {
+    padding: 26px 26px 24px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line);
+    transition: border-color .6s var(--slow), box-shadow .6s var(--slow);
+  }
+  .fw-case.is-active { border-color: rgba(201,162,74,.6); box-shadow: 0 0 0 1px rgba(201,162,74,.25), 0 20px 60px -30px rgba(201,150,63,.5); }
+  .fw-case__k { font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--soft); }
+  .fw-case__d { margin-top: 8px; font-size: 15px; color: var(--soft); }
+  .fw-case__when { margin-top: 14px; font-size: 27px; line-height: 1.2; color: var(--ink); }
+  .fw-case__btn {
+    margin-top: 18px; height: 40px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--line); background: transparent;
+    color: var(--ink); font: 500 14px var(--sans); cursor: pointer; transition: background .3s, border-color .3s;
+  }
+  .fw-case__btn:hover { background: rgba(201,162,74,.08); border-color: rgba(201,162,74,.5); }
+  .fw-rule__example { margin-top: 10px; padding: 4px 0 0 20px; border-left: 2px solid var(--gold); font-size: 16px; line-height: 1.65; color: #c9bda6; }
+
+  /* ============================== SHIELD ============================== */
+  .fw-shield { padding: 150px 0; position: relative; }
+  .fw-shield__grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 80px; align-items: center; }
+  .fw-shield__device {
+    justify-self: center; width: min(330px, 100%); padding: 10px; border-radius: 52px; background: #16120c;
+    box-shadow: 0 0 0 1px rgba(201,162,74,.45), 0 0 50px rgba(201,150,63,.22), 0 60px 120px -40px rgba(0,0,0,.9);
+  }
+  .fw-shield__screen {
+    position: relative; overflow: hidden; border-radius: 43px; aspect-ratio: 390 / 844; isolation: isolate;
+    display: flex; flex-direction: column; align-items: center; padding: 0 24px 34px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+  .fw-shield__bg { position: absolute; inset: -20px; z-index: -1; background: url('/images/work/fallow/night-1.webp') center 70% / cover; filter: blur(14px) saturate(.8); }
+  .fw-shield__bg::after { content: ''; position: absolute; inset: 0; background: rgba(20,19,15,.88); }
+  .fw-shield__content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-top: 10px; min-height: 0; }
+  .fw-medal {
+    width: 112px; height: 112px; border-radius: 50%; overflow: hidden; border: 4px solid var(--amber);
+    box-shadow: 0 0 30px rgba(201,150,63,.25);
+  }
+  .fw-medal img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fw-shield__title { margin-top: 26px; font-size: 21px; font-weight: 600; color: #F2E9D7; }
+  .fw-shield__quote { margin-top: 12px; font-size: 15px; line-height: 1.45; color: #A29780; max-width: 250px; }
+  .fw-shield__by { margin-top: 14px; font-size: 14px; color: #A29780; }
+  .fw-shield__btn {
+    width: 100%; height: 52px; border: 0; border-radius: 14px; background: var(--amber); color: #18140C;
+    font: 600 16px -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; cursor: pointer;
+  }
+  .fw-shield__text p:not(.fw-over) { margin-top: 22px; font-size: 18px; line-height: 1.65; color: #c9bda6; max-width: 520px; }
+  .fw-ghostbtn {
+    margin-top: 30px; height: 44px; padding: 0 20px; border-radius: 12px; border: 1px solid rgba(201,162,74,.45);
+    background: rgba(201,162,74,.06); color: var(--gold); font: 500 14.5px var(--sans); cursor: pointer;
+    transition: background .3s;
+  }
+  .fw-ghostbtn:hover { background: rgba(201,162,74,.14); }
+
+  /* ============================== LOCKS ============================== */
+  .fw-locks { padding: 140px 0; background: var(--night-2); border-top: 1px solid rgba(201,162,74,.12); border-bottom: 1px solid rgba(201,162,74,.12); }
+  .fw-locks__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 80px; align-items: center; }
+  .fw-locks__text p:not(.fw-over) { margin-top: 22px; font-size: 18px; line-height: 1.65; color: #c9bda6; max-width: 440px; }
+  .fw-lock { margin-top: 44px; width: 120px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .fw-lock svg { width: 100%; height: auto; overflow: visible; }
+  .fw-lock__shackle { fill: none; stroke: var(--gold); stroke-width: 10; stroke-linecap: round; transition: transform .25s var(--slow); }
+  .fw-lock__body { fill: #1f1910; stroke: var(--gold); stroke-width: 3; }
+  .fw-lock__hole { fill: var(--gold); stroke: var(--gold); stroke-width: 5; stroke-linecap: round; }
+  .fw-settings__label { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); padding: 0 6px 10px; }
+  .fw-settings__card { border-radius: 22px; background: #262320; border: 1px solid #3A352C; padding: 4px 20px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.7); }
+  .fw-setrow { display: flex; gap: 18px; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .fw-setrow + .fw-setrow { border-top: 1px solid #3A352C; }
+  .fw-setrow__t { font-size: 16.5px; color: #EDE4D2; }
+  .fw-setrow__d { margin-top: 5px; font-size: 13.5px; line-height: 1.45; color: #9A9079; max-width: 380px; }
+  .fw-toggle { flex: none; position: relative; width: 52px; height: 32px; border-radius: 999px; background: #4a443a; transition: background .5s var(--slow); }
+  .fw-toggle i { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transition: transform .5s var(--slow); }
+  .fw-toggle.is-on { background: var(--amber); }
+  .fw-toggle.is-on i { transform: translateX(20px); }
+  .fw-settings__note { margin-top: 14px; padding: 0 6px; font-size: 13.5px; color: var(--soft); }
+  .fw-settings__door { margin-top: 26px; padding: 16px 18px; border-radius: 16px; border: 1px dashed rgba(201,162,74,.35); font-size: 14px; line-height: 1.6; color: #c9bda6; }
+  .fw-settings__door span { font-family: var(--serif); font-size: 18px; color: var(--ink); margin-right: 4px; }
+
+  /* ============================== GALLERY ============================== */
+  .fw-gallery { padding: 140px 0 130px; }
+  .fw-gallery__head { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 48px; align-items: end; }
+  .fw-gallery__head > p { font-size: 17px; line-height: 1.65; color: #c9bda6; padding-bottom: 8px; }
+  .fw-gallery__head > p span { color: var(--gold); white-space: nowrap; }
+  .fw-gallery__rail { margin-top: 70px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .fw-gallery__rail::-webkit-scrollbar { display: none; }
+  .fw-gallery__list {
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 22px; max-width: 1188px;
+    margin: 0 auto; padding: 0 24px 40px; list-style: none;
+  }
+  .fw-gallery__item { display: flex; flex-direction: column; }
+  .fw-gallery__item:nth-child(even) { margin-top: 56px; }
+  .fw-store {
+    position: relative; margin: 0; border-radius: 22px; overflow: hidden; aspect-ratio: 739 / 1600; background: #16120c;
+    box-shadow: 0 0 0 1px rgba(201,162,74,.28), 0 0 40px rgba(201,150,63,.1), 0 40px 80px -36px rgba(0,0,0,.95);
+  }
+  .fw-store img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .fw-gallery__cap { margin-top: 16px; display: flex; gap: 10px; align-items: baseline; font-size: 13.5px; color: var(--soft); }
+  .fw-gallery__cap span { font-family: var(--serif); font-size: 15px; color: var(--gold); font-style: italic; }
+
+  /* ============================== HOW ============================== */
+  .fw-how { padding: 140px 0 120px; background: var(--night-2); border-top: 1px solid rgba(201,162,74,.12); }
+  .fw-how__head { max-width: 760px; }
+  .fw-how__head p:not(.fw-over) { margin-top: 24px; font-size: 18px; line-height: 1.65; color: #c9bda6; }
+  .fw-how__head .fw-h2 { max-width: 20ch; }
+  .fw-orbit { position: relative; width: min(760px, 100%); aspect-ratio: 1.5; margin: 80px auto 0; }
+  .fw-orbit__lines { position: absolute; inset: 12% 14%; width: 72%; height: 76%; overflow: visible; }
+  .fw-orbit__lines path { fill: none; stroke: rgba(201,162,74,.4); stroke-width: 1.2; stroke-dasharray: 3 6; vector-effect: non-scaling-stroke; animation: fw-flow 2.8s linear infinite; }
+  @keyframes fw-flow { to { stroke-dashoffset: -18; } }
+  .fw-orbit__core {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1;
+    width: 170px; height: 170px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(circle, #241d12, #17130d 70%); border: 1px solid rgba(201,162,74,.5);
+    box-shadow: 0 0 60px rgba(201,150,63,.18);
+  }
+  .fw-orbit__core svg { width: 44px; height: 44px; color: var(--gold); }
+  .fw-orbit__core p { margin-top: 10px; font-family: var(--serif); font-size: 20px; font-weight: 400; }
+  .fw-orbit__core span { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); margin-top: 2px; }
+  .fw-orbit__node {
+    position: absolute; width: 230px; padding: 18px 18px 16px; border-radius: 18px; background: var(--surface);
+    border: 1px solid var(--line); z-index: 1;
+  }
+  .fw-orbit__node.n0 { left: 0; top: 0; }
+  .fw-orbit__node.n1 { right: 0; top: 0; }
+  .fw-orbit__node.n2 { left: 0; bottom: 0; }
+  .fw-orbit__node.n3 { right: 0; bottom: 0; }
+  .fw-orbit__t { font-family: var(--serif); font-size: 21px; font-weight: 400; color: var(--ink); }
+  .fw-orbit__d { margin-top: 6px; font-size: 13.5px; line-height: 1.5; color: var(--soft); }
+
+  .fw-how__grid { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 72px; align-items: start; margin-top: 110px; }
+  .fw-seal { position: relative; width: 240px; aspect-ratio: 1; margin: 0 auto; }
+  .fw-seal__ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: fw-spin 60s linear infinite; }
+  .fw-seal__ring text { fill: var(--gold); font: 600 11px var(--sans); letter-spacing: .12em; }
+  .fw-seal::before { content: ''; position: absolute; inset: 22%; border-radius: 50%; border: 1px solid rgba(201,162,74,.35); }
+  .fw-seal__mark { position: absolute; inset: 31%; width: 38%; height: 38%; color: var(--gold); }
+  @keyframes fw-spin { to { transform: rotate(360deg); } }
+  .fw-how__big { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.2; max-width: 24ch; }
+  .fw-notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 44px; }
+  .fw-notes > div { padding-top: 18px; border-top: 1px solid rgba(201,162,74,.35); }
+  .fw-notes__k { font-family: var(--serif); font-size: 20px; color: var(--ink); }
+  .fw-notes p:not(.fw-notes__k) { margin-top: 8px; font-size: 14.5px; line-height: 1.6; color: var(--soft); }
+  .fw-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 40px; padding: 0; list-style: none; }
+  .fw-stack li { height: 32px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--line); color: #c9bda6; font-size: 13px; }
+
+  /* ============================== CLOSE ============================== */
+  .fw-close { position: relative; padding: 170px 0 0; text-align: center; overflow: hidden; }
+  .fw-close__inner { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; }
+  .fw-close__mark { width: 70px; height: 70px; color: var(--gold); }
+  .fw-close__q { margin-top: 34px; font-size: clamp(46px, 7.4vw, 108px); line-height: 1.02; max-width: 12ch; }
+  .fw-close__p { margin-top: 28px; font-size: 18px; color: #c9bda6; max-width: 520px; line-height: 1.6; }
+  .fw-close__p span { color: var(--gold); white-space: nowrap; }
+  .fw-field { display: block; width: 100%; height: 240px; margin-top: 60px; }
+  .fw-field path { fill: none; stroke: var(--gold); stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 100%; }
+
+  /* ============================== RESPONSIVE ============================== */
+  @media (max-width: 1023px) {
+    .fw-problem__grid, .fw-rule__grid, .fw-shield__grid, .fw-locks__grid { grid-template-columns: 1fr; gap: 56px; }
+    .fw-how__grid { grid-template-columns: 1fr; gap: 48px; }
+    .fw-notes { grid-template-columns: 1fr; }
+    .fw-shield__text { order: -1; }
+    .fw-gallery__head { grid-template-columns: 1fr; gap: 18px; }
+    .fw-gallery__rail { scroll-snap-type: x mandatory; scroll-padding: 0 24px; }
+    .fw-gallery__list { display: flex; gap: 18px; max-width: none; width: max-content; }
+    .fw-gallery__item { width: 250px; scroll-snap-align: start; }
+    .fw-gallery__item:nth-child(even) { margin-top: 0; }
+  }
+  @media (max-width: 767px) {
+    .fw-wrap { padding: 0 20px; }
+    .fw-hero { padding-top: 112px; }
+    .fw-hero__title { gap: 22px; }
+    .fw-brand { font-size: 13px; }
+    .fw-brand__mark { width: 28px; height: 28px; }
+    .fw-hero__line { font-size: clamp(42px, 12.4vw, 56px); }
+    .fw-hero__lede { font-size: 16.5px; }
+    .fw-chips li { height: 30px; font-size: 12.5px; padding: 0 12px; }
+    .fw-hero__phone { width: min(270px, 70vw); margin-top: 48px; margin-bottom: -90px; }
+    .fw-interlude { padding: 200px 0 130px; }
+    .fw-interlude__mark { width: 44px; height: 44px; margin-bottom: 28px; }
+    .fw-problem, .fw-rule, .fw-shield, .fw-locks, .fw-gallery, .fw-how { padding-top: 96px; padding-bottom: 96px; }
+    .fw-problem__text p:not(.fw-over), .fw-rule__lede, .fw-shield__text p:not(.fw-over), .fw-locks__text p:not(.fw-over), .fw-how__head p:not(.fw-over) { font-size: 16.5px; }
+    .fw-rule__grid { margin-top: 52px; }
+    .fw-case { padding: 22px 20px 20px; }
+    .fw-case__when { font-size: 23px; }
+    .fw-shield__device { width: min(290px, 100%); }
+    .fw-lock { width: 96px; margin-top: 32px; }
+    .fw-setrow__t { font-size: 15.5px; }
+    .fw-gallery__head { grid-template-columns: 1fr; gap: 18px; }
+    .fw-gallery__head > p { font-size: 16px; }
+    .fw-gallery__rail { margin-top: 40px; scroll-snap-type: x mandatory; scroll-padding: 0 20px; }
+    .fw-gallery__list { display: flex; gap: 16px; padding: 0 20px 24px; max-width: none; width: max-content; }
+    .fw-gallery__item { width: 62vw; max-width: 250px; scroll-snap-align: start; }
+    .fw-gallery__item:nth-child(even) { margin-top: 0; }
+    .fw-orbit { aspect-ratio: auto; display: flex; flex-direction: column; gap: 12px; margin-top: 52px; }
+    .fw-orbit__lines { display: none; }
+    .fw-orbit__core { position: relative; left: auto; top: auto; transform: none; margin: 0 auto 8px; width: 156px; height: 156px; order: -1; }
+    .fw-orbit__core span { letter-spacing: .08em; font-size: 10.5px; }
+    .fw-orbit__node { position: relative; width: auto; inset: auto !important; }
+    .fw-orbit::before { content: ''; position: absolute; left: 50%; top: 156px; bottom: 0; width: 1px; background: linear-gradient(rgba(201,162,74,.5), transparent); z-index: 0; }
+    .fw-how__grid { margin-top: 72px; }
+    .fw-seal { width: 200px; }
+    .fw-close { padding-top: 120px; }
+    .fw-close__p { font-size: 16.5px; }
+    .fw-close__p span { white-space: normal; }
+    .fw-field { height: 150px; margin-top: 40px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fw-star, .fw-orbit__lines path, .fw-seal__ring { animation: none !important; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const root = document.querySelector<HTMLElement>('.fw');
+    if (!root) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const data = (window as unknown as { __fallowShield?: { quotes: [string, string][]; buttonLabels: string[] } }).__fallowShield;
+
+    // ---------- the shield: rotate a quote + button label, never the same pair twice ----------
+    const shield = root.querySelector<HTMLElement>('[data-shield]');
+    const content = root.querySelector<HTMLElement>('[data-shield-content]');
+    const qEl = root.querySelector<HTMLElement>('[data-shield-quote]');
+    const byEl = root.querySelector<HTMLElement>('[data-shield-by]');
+    const titleEl = root.querySelector<HTMLElement>('[data-shield-title]');
+    const btnEl = root.querySelector<HTMLButtonElement>('[data-shield-btn]');
+    const medal = root.querySelector<HTMLImageElement>('[data-medal]');
+    let qi = 5, bi = 0, shown = 0;
+    const next = () => {
+      if (!data || !qEl || !byEl || !btnEl || !titleEl) return;
+      qi = (qi + 1 + Math.floor(Math.random() * (data.quotes.length - 1))) % data.quotes.length;
+      bi = (bi + 1 + Math.floor(Math.random() * (data.buttonLabels.length - 1))) % data.buttonLabels.length;
+      shown++;
+      const swap = () => {
+        qEl.textContent = data.quotes[qi][0];
+        byEl.textContent = `– ${data.quotes[qi][1]}`;
+        btnEl.textContent = data.buttonLabels[bi];
+        titleEl.textContent = shown > 2 && qi % 4 === 0 ? `Saved you ${shown + 1} times today` : 'Fallow';
+        if (medal) medal.src = shown % 2 ? '/images/work/fallow/field-2.webp' : '/images/work/fallow/field-1.webp';
+      };
+      if (reduce || !content) { swap(); return; }
+      content.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
+        swap();
+        content.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 1100, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
+        btnEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, fill: 'forwards' });
+      };
+    };
+    root.querySelector('[data-shield-next]')?.addEventListener('click', next);
+    // the one button only ever closes the app
+    btnEl?.addEventListener('click', () => {
+      if (!shield) return;
+      if (reduce) { next(); return; }
+      shield.animate(
+        [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.86)', opacity: 0 }, { transform: 'scale(.86)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
+        { duration: 1700, easing: 'cubic-bezier(.22,.61,.36,1)' },
+      );
+      setTimeout(next, 700);
+    });
+
+    // ---------- the padlock stays shut ----------
+    const lock = root.querySelector<HTMLElement>('[data-lock]');
+    const shackle = root.querySelector<SVGPathElement>('[data-shackle]');
+    const tug = () => {
+      if (reduce || !shackle || !lock) return;
+      shackle.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-9px)' }, { transform: 'translateY(0)' }], { duration: 360, easing: 'ease-out' });
+      lock.animate(
+        [{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(0)' }],
+        { duration: 420, delay: 300, easing: 'ease-in-out' },
+      );
+    };
+    lock?.addEventListener('click', tug);
+    lock?.addEventListener('mouseenter', tug);
+
+    if (reduce) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      const slow = 'power2.out';
+
+      // ---------- hero: a slow dawn ----------
+      gsap.from('[data-hero-in]', { opacity: 0, y: 18, duration: 1.8, stagger: 0.22, ease: slow, delay: 0.15 });
+      gsap.from('[data-hero-phone]', { opacity: 0, y: 90, duration: 2.2, ease: 'power3.out', delay: 0.7 });
+      gsap.from('[data-hero-art]', { scale: 1.08, opacity: 0, duration: 3.2, ease: slow });
+      gsap.to('[data-hero-art]', {
+        yPercent: 8, ease: 'none',
+        scrollTrigger: { trigger: '.fw-hero', start: 'top top', end: 'bottom top', scrub: 1 },
+      });
+
+      // ---------- interlude: words surface as you read ----------
+      gsap.fromTo('[data-word]', { opacity: 0.12 }, {
+        opacity: 1, stagger: 0.5, ease: 'none',
+        scrollTrigger: { trigger: '.fw-interlude', start: 'top 70%', end: 'center 45%', scrub: 1.2 },
+      });
+      gsap.fromTo('[data-parallax]', { yPercent: -6 }, {
+        yPercent: 6, ease: 'none',
+        scrollTrigger: { trigger: '.fw-interlude', start: 'top bottom', end: 'bottom top', scrub: 1 },
+      });
+
+      // ---------- reveals ----------
+      root.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        gsap.from(el, { opacity: 0, y: 22, duration: 1.6, ease: slow, scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+      });
+
+      // ---------- the escape hatch gets struck out ----------
+      gsap.fromTo('.fw-escape__strike path', { strokeDashoffset: 1 }, {
+        strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut',
+        scrollTrigger: { trigger: '.fw-escape', start: 'top 70%', once: true },
+      });
+
+      // ---------- the dial (its moving parts only exist under JS) ----------
+      const dialSvg = root.querySelector<SVGSVGElement>('[data-dial-svg]');
+      const nowEl = root.querySelector<SVGCircleElement>('[data-now]');
+      const NS = 'http://www.w3.org/2000/svg';
+      const make = <T extends SVGElement>(tag: string, attrs: Record<string, string>) => {
+        const el = document.createElementNS(NS, tag) as T;
+        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+        return el;
+      };
+      const cx = nowEl?.getAttribute('cx') ?? '0';
+      const cy = nowEl?.getAttribute('cy') ?? '0';
+      const travel = dialSvg ? make<SVGPathElement>('path', { d: dialSvg.dataset.travelD ?? '', class: 'fw-dial__travel', pathLength: '1' }) : null;
+      const pulse = make<SVGCircleElement>('circle', { cx, cy, r: '9', class: 'fw-dial__pulse' });
+      const dot = make<SVGCircleElement>('circle', { cx, cy, r: '6', class: 'fw-dial__dot' });
+      if (dialSvg && nowEl && travel) {
+        gsap.set(travel, { strokeDashoffset: 1, opacity: 0.9 });
+        gsap.set([pulse, dot], { opacity: 0 });
+        dialSvg.insertBefore(travel, nowEl);
+        dialSvg.append(pulse, dot);
+      }
+      const big = root.querySelector<HTMLElement>('[data-dial-big]');
+      const small = root.querySelector<HTMLElement>('[data-dial-small]');
+      const cases = root.querySelectorAll<HTMLElement>('[data-case]');
+      const C = 200, R = 148;
+      const at = (h: number) => {
+        const a = ((h / 24) * 360 - 90) * (Math.PI / 180);
+        return { cx: C + R * Math.cos(a), cy: C + R * Math.sin(a) };
+      };
+      let dialTl: gsap.core.Timeline | null = null;
+      const setCase = (k: string | null) => cases.forEach((c) => c.classList.toggle('is-active', c.dataset.case === k));
+      const say = (a: string, b: string) => {
+        if (!big || !small) return;
+        gsap.to([big, small], {
+          opacity: 0, duration: 0.4, onComplete: () => {
+            big.textContent = a; small.textContent = b;
+            gsap.to([big, small], { opacity: 1, duration: 0.8 });
+          },
+        });
+      };
+      const playTighten = () => {
+        dialTl?.kill();
+        setCase('tighten');
+        if (travel) gsap.set(travel, { strokeDashoffset: 1 });
+        if (dot) gsap.set(dot, { opacity: 0 });
+        say('Now', 'applied');
+        dialTl = gsap.timeline();
+        if (pulse) {
+          dialTl.fromTo(pulse, { attr: { r: 9 }, opacity: 0.9 }, { attr: { r: 46 }, opacity: 0, duration: 1.6, ease: 'power2.out' })
+            .fromTo(pulse, { attr: { r: 9 }, opacity: 0.9 }, { attr: { r: 46 }, opacity: 0, duration: 1.6, ease: 'power2.out' }, '-=0.9');
+        }
+        dialTl.call(() => say('3h', 'open'), [], '+=1.2');
+      };
+      const playLoosen = () => {
+        dialTl?.kill();
+        setCase('loosen');
+        say('19:30', 'asked tonight');
+        const o = { h: 19.5 };
+        if (travel) gsap.set(travel, { strokeDashoffset: 1, opacity: 0.9 });
+        if (dot) gsap.set(dot, { opacity: 1, attr: at(19.5) });
+        dialTl = gsap.timeline({ delay: 0.6 });
+        if (travel) dialTl.to(travel, { strokeDashoffset: 0, duration: 5.5, ease: 'power1.inOut' }, 0);
+        dialTl.to(o, {
+          h: 19 + 24, duration: 5.5, ease: 'power1.inOut',
+          onUpdate: () => { if (dot) gsap.set(dot, { attr: at(o.h % 24) }); },
+        }, 0)
+          .call(() => say('19:00', 'tomorrow, it lands'), [], 2.6)
+          .to(dot, { opacity: 0, duration: 0.8 }, '+=0.8')
+          .to(travel, { opacity: 0, duration: 1.6, ease: 'power1.inOut' }, '+=1.2')
+          .call(() => say('3h', 'open'), [], '<')
+          .set(travel, { strokeDashoffset: 1, opacity: 0.9 });
+      };
+      root.querySelector('[data-play="tighten"]')?.addEventListener('click', playTighten);
+      root.querySelector('[data-play="loosen"]')?.addEventListener('click', playLoosen);
+      ScrollTrigger.create({
+        trigger: '.fw-dial', start: 'top 65%', once: true,
+        onEnter: () => { playTighten(); gsap.delayedCall(4.2, playLoosen); },
+      });
+
+      // ---------- the shield rotates while it's on screen ----------
+      let timer: number | undefined;
+      ScrollTrigger.create({
+        trigger: '.fw-shield', start: 'top 60%', end: 'bottom 30%',
+        onToggle: (self) => {
+          window.clearInterval(timer);
+          if (self.isActive) timer = window.setInterval(next, 6500);
+        },
+      });
+
+      // ---------- the toggles switch on as the card arrives ----------
+      const toggles = root.querySelectorAll<HTMLElement>('[data-toggle]');
+      toggles.forEach((t) => t.classList.remove('is-on'));
+      ScrollTrigger.create({
+        trigger: '.fw-settings', start: 'top 75%', once: true,
+        onEnter: () => toggles.forEach((t, i) => setTimeout(() => t.classList.add('is-on'), 500 + i * 650)),
+      });
+      ScrollTrigger.create({ trigger: '.fw-lock', start: 'top 80%', once: true, onEnter: () => setTimeout(tug, 600) });
+
+      // ---------- gallery drifts ----------
+      if (window.innerWidth >= 1024) {
+        root.querySelectorAll<HTMLElement>('.fw-gallery__item').forEach((el, i) => {
+          gsap.fromTo(el, { y: 30 + (i % 2) * 24 }, {
+            y: -16 - (i % 2) * 24, ease: 'none',
+            scrollTrigger: { trigger: '.fw-gallery', start: 'top bottom', end: 'bottom top', scrub: 1.2 },
+          });
+        });
+      }
+
+      // ---------- the orbit nodes settle in ----------
+      gsap.from('.fw-orbit__node', {
+        opacity: 0, scale: 0.94, duration: 1.4, stagger: 0.18, ease: slow,
+        scrollTrigger: { trigger: '.fw-orbit', start: 'top 75%', once: true },
+      });
+
+      // ---------- the field regrows as you reach the end ----------
+      gsap.fromTo('[data-blade]', { scaleY: 0 }, {
+        scaleY: 1, ease: 'none', stagger: { each: 0.004, from: 'random' },
+        scrollTrigger: { trigger: '.fw-close', start: 'top 85%', end: 'bottom bottom', scrub: 1.5 },
+      });
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* the page is complete without motion */
+    }
+  })();
+</script>

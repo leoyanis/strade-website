@@ -1,0 +1,26 @@
+---
+// The Vaultt mark redrawn as SVG: a 3x3 grid of rounded right triangles.
+// `tone="mono"` paints everything with currentColor (for watermarks).
+interface Props { class?: string; tone?: 'brand' | 'mono' }
+const { class: cls = '', tone = 'brand' } = Astro.props;
+const d = 3.2; // half the rounding stroke
+const k = d * (1 + Math.SQRT2);
+const tri = (x0: number, y0: number, x1: number, y1: number) =>
+  `M${(x0 + k).toFixed(2)} ${(y0 + d).toFixed(2)}H${(x1 - d).toFixed(2)}V${(y1 - k).toFixed(2)}Z`;
+const BLUE = tone === 'mono' ? 'currentColor' : '#2F80EE';
+const PALE = tone === 'mono' ? 'currentColor' : '#E8F1FF';
+const shapes = [
+  { p: tri(0, 0, 51, 51), c: BLUE },
+  { p: tri(57, 0, 161, 107), c: BLUE },
+  { p: tri(0, 57, 51, 108), c: BLUE },
+  { p: tri(57, 57, 107, 107), c: PALE, o: tone === 'mono' ? 0.45 : 1 },
+  { p: tri(0, 110, 51, 161), c: PALE, o: tone === 'mono' ? 0.45 : 1 },
+  { p: tri(57, 110, 107, 161), c: BLUE },
+  { p: tri(110, 110, 161, 161), c: BLUE },
+];
+---
+<svg class={cls} viewBox="0 0 161 161" aria-hidden="true" focusable="false">
+  {shapes.map((s) => (
+    <path d={s.p} fill={s.c} stroke={s.c} stroke-width={d * 2} stroke-linejoin="round" opacity={s.o ?? 1} />
+  ))}
+</svg>

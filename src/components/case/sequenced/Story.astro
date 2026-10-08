@@ -1,0 +1,211 @@
+---
+// One Instagram story page (9:16) rendered in the studio's house style.
+// Everything is sized in container-query units, so the same page works as a thumbnail or a hero.
+import type { StoryPage } from './pages';
+
+interface Props {
+  page: StoryPage;
+  class?: string;
+  /** Adds the empty "layout is loading" skeleton used by the build animation. */
+  build?: boolean;
+  /** Which layer-split variant to render (used by the exploded view). */
+  split?: 'pills' | 'text' | 'marks';
+}
+
+const { page, class: cls = '', build = false, split } = Astro.props;
+const ghostSize = page.ghost ? (104 / (0.66 * page.ghost.length)).toFixed(2) : '0';
+const SUBJECT =
+  'M100 20C78 20 64 38 64 62C64 80 72 94 84 100L84 118C52 124 26 140 16 170L6 220L194 220L184 170C174 140 148 124 116 118L116 100C128 94 136 80 136 62C136 38 122 20 100 20Z';
+---
+
+<div class:list={['st', `st--${page.scene}`, cls, split && `st--split-${split}`]} data-page={page.id} data-arch={page.archetype}>
+  <div class="st__photo" data-layer="photo">
+    <div class="st__scene"></div>
+  </div>
+  <div class="st__fade" data-layer="fade"></div>
+  {page.ghost && (
+    <div class="st__ghost" data-layer="ghost" style={`--gs:${ghostSize}cqw;top:${page.ghostY ?? 46}%`} aria-hidden="true">{page.ghost}</div>
+  )}
+  {page.subject && (
+    <svg class={`st__subj st__subj--${page.subject}`} data-layer="cutout" viewBox="0 0 200 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <path d={SUBJECT} />
+    </svg>
+  )}
+  <div class="st__top" data-layer="top">
+    {page.top.map((b) => <p class={`st__b st__b--${b.role}`} style={b.align ? `text-align:${b.align}` : undefined} set:html={b.html} />)}
+  </div>
+  {page.bottom && (
+    <div class="st__bot" data-layer="bottom">
+      {page.bottom.map((b) => <p class={`st__b st__b--${b.role}`} style={b.align ? `text-align:${b.align}` : undefined} set:html={b.html} />)}
+    </div>
+  )}
+  {page.marks?.map((m) => (
+    <svg
+      class:list={['st__mark', `st__mark--${m.kind}`, m.white && 'is-white']}
+      data-layer="mark"
+      style={`left:${m.x}%;top:${m.y}%;width:${m.w}%;${m.rot ? `transform:rotate(${m.rot}deg)` : ''}`}
+      viewBox={m.kind === 'arrow-cta' ? '0 0 200 700' : m.kind === 'arrow-curve' ? '0 0 440 240' : m.kind === 'hook' ? '0 0 130 150' : '0 0 180 180'}
+      aria-hidden="true"
+    >
+      {m.kind === 'arrow-cta' && (
+        <g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M118 8 C205 210 8 430 92 676" /><path pathLength="1" d="M98.9 646.8 L92 676 L70.2 655.4" />
+        </g>
+      )}
+      {m.kind === 'arrow-curve' && (
+        <g fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M424 22 C304 28 168 76 60 206" /><path pathLength="1" d="M56 118 L58 208 L148 196" />
+        </g>
+      )}
+      {m.kind === 'hook' && (
+        <g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M98 10 C116 62 92 112 28 122" /><path pathLength="1" d="M50 96 L26 122 L52 142" />
+        </g>
+      )}
+      {m.kind === 'sparkle' && (
+        <g fill="currentColor">
+          <path d="M88 12 C97.6 82.4 97.6 82.4 168 92 C97.6 101.6 97.6 101.6 88 172 C78.4 101.6 78.4 101.6 8 92 C78.4 82.4 78.4 82.4 88 12 Z" />
+          <path d="M152 12 C154.16 27.84 154.16 27.84 170 30 C154.16 32.16 154.16 32.16 152 48 C149.84 32.16 149.84 32.16 134 30 C149.84 27.84 149.84 27.84 152 12 Z" />
+        </g>
+      )}
+    </svg>
+  ))}
+  {page.aside && <p class="st__aside" data-layer="aside">{page.aside}</p>}
+  {build && (
+    <div class="st__skel" aria-hidden="true">
+      <span class="st__skel-tag">{page.archetype}</span>
+      <span class="st__skel-bar st__skel-bar--1"></span>
+      <span class="st__skel-bar st__skel-bar--2"></span>
+      <span class="st__skel-bar st__skel-bar--3"></span>
+    </div>
+  )}
+</div>
+
+<style>
+  .st {
+    --rim: rgba(255, 196, 120, 0.42);
+    position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; isolation: isolate;
+    container-type: inline-size; background: #000; color: #fff;
+    font-family: 'Inter', system-ui, sans-serif; font-variation-settings: 'opsz' 14; letter-spacing: -0.068em;
+    -webkit-font-smoothing: antialiased;
+  }
+  .st__photo, .st__fade, .st__scene, .st__skel { position: absolute; inset: 0; }
+  .st__scene { transform-origin: 50% 40%; }
+
+  /* -------- abstract "photos": moody, muted, darkened by black only -------- */
+  .st--a .st__scene {
+    background:
+      radial-gradient(4% 2.25% at 18% 31%, rgba(255, 200, 120, 0.9), transparent 72%),
+      radial-gradient(6.5% 3.65% at 74% 21%, rgba(255, 172, 86, 0.6), transparent 72%),
+      radial-gradient(3% 1.7% at 57% 38%, rgba(140, 210, 255, 0.65), transparent 72%),
+      radial-gradient(9% 5% at 88% 44%, rgba(255, 120, 92, 0.4), transparent 72%),
+      radial-gradient(5% 2.8% at 31% 50%, rgba(255, 214, 150, 0.5), transparent 72%),
+      radial-gradient(2.5% 1.4% at 9% 45%, rgba(255, 236, 190, 0.8), transparent 72%),
+      radial-gradient(3.5% 2% at 67% 54%, rgba(255, 190, 110, 0.55), transparent 72%),
+      radial-gradient(80% 42% at 50% 36%, rgba(58, 66, 104, 0.7), transparent 72%),
+      linear-gradient(180deg, #0c0f18 0%, #161a29 46%, #08090c 100%);
+  }
+  .st--b .st__scene {
+    background:
+      radial-gradient(42% 28% at 52% 0%, rgba(255, 236, 205, 0.55), transparent 75%),
+      conic-gradient(from 168deg at 52% -4%, transparent 0deg, rgba(255, 226, 180, 0.22) 12deg, rgba(255, 226, 180, 0.08) 22deg, transparent 30deg),
+      radial-gradient(70% 18% at 50% 92%, rgba(120, 100, 80, 0.35), transparent 70%),
+      linear-gradient(180deg, #1b1916 0%, #0f0e0c 60%, #050505 100%);
+  }
+  .st--c .st__scene {
+    background:
+      radial-gradient(60% 20% at 50% 70%, rgba(255, 140, 96, 0.65), transparent 70%),
+      radial-gradient(90% 34% at 50% 76%, rgba(196, 70, 120, 0.55), transparent 72%),
+      linear-gradient(180deg, #0a0816 0%, #251537 38%, #5b2350 62%, #1a0c19 80%, #050405 100%);
+  }
+  .st--c { --rim: rgba(255, 150, 120, 0.6); }
+  .st--d .st__scene {
+    background:
+      repeating-linear-gradient(100deg, transparent 0 2.2%, rgba(120, 230, 255, 0.05) 2.2% 2.5%),
+      radial-gradient(10% 5.6% at 24% 30%, rgba(0, 220, 255, 0.55), transparent 72%),
+      radial-gradient(14% 7.9% at 78% 62%, rgba(0, 255, 196, 0.35), transparent 72%),
+      radial-gradient(7% 4% at 60% 24%, rgba(160, 120, 255, 0.45), transparent 72%),
+      radial-gradient(80% 40% at 50% 50%, rgba(10, 60, 80, 0.75), transparent 75%),
+      linear-gradient(180deg, #03080c 0%, #071820 50%, #020405 100%);
+  }
+  .st--e .st__scene {
+    background:
+      radial-gradient(70% 26% at 50% 98%, rgba(255, 176, 92, 0.55), transparent 72%),
+      radial-gradient(44% 22% at 80% 18%, rgba(255, 120, 60, 0.18), transparent 72%),
+      linear-gradient(180deg, #050505 0%, #12100c 45%, #2a1a0c 82%, #120a04 100%);
+  }
+  .st__subj { position: absolute; bottom: -1%; height: auto; fill: #050506; stroke: var(--rim); stroke-width: 1; stroke-opacity: 0.75; filter: drop-shadow(0 0 2.4cqw rgba(0, 0, 0, 0.9)); }
+  .st__subj--low { left: 6%; width: 88%; }
+  .st__subj--high { left: -14%; width: 128%; }
+
+  /* house fades: black only, top and bottom, plus the night-mode dim */
+  .st__fade {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.92) 6%, rgba(0, 0, 0, 0.68) 16%, rgba(0, 0, 0, 0.36) 25%, rgba(0, 0, 0, 0) 37%),
+      linear-gradient(0deg, #000 6%, rgba(0, 0, 0, 0.84) 15%, rgba(0, 0, 0, 0.58) 25%, rgba(0, 0, 0, 0.28) 35%, rgba(0, 0, 0, 0) 48%),
+      rgba(0, 0, 0, 0.28);
+  }
+
+  .st__ghost {
+    position: absolute; left: 50%; transform: translate(-50%, -50%);
+    font-size: var(--gs); font-weight: 700; line-height: 0.82; letter-spacing: -0.068em; white-space: nowrap;
+    color: rgba(255, 255, 255, 0.36); text-transform: uppercase; pointer-events: none;
+  }
+
+  .st__top, .st__bot { position: absolute; left: 10%; right: 10%; }
+  .st__top { top: 7.5%; }
+  .st__bot { bottom: 9.5%; }
+  .st__b { margin: 0; font-weight: 400; }
+  .st__b :global(b) { font-weight: 600; }
+  .st__b--k { font-size: 4.3cqw; line-height: 1.22; margin-bottom: 1.6cqw; }
+  .st__b--d { font-size: 14.2cqw; font-weight: 700; line-height: 0.98; }
+  .st__b--h { font-size: 8.6cqw; font-weight: 700; line-height: 1.08; margin-bottom: 1.4cqw; }
+  .st__b--p { font-size: 4.9cqw; line-height: 1.36; margin-bottom: 3.4cqw; }
+  .st__b--s { font-size: 6.2cqw; font-weight: 700; line-height: 1.3; }
+  .st__b--x { font-size: 3cqw; color: #9a9a9a; margin-top: 2cqw; }
+
+  .st__b :global(.a) { font-style: normal; color: var(--acc, #ffbd59); font-weight: 700; }
+  .st__b :global(mark) {
+    color: var(--acc-ink, #000); font-weight: 700; border-radius: 0.11em; padding: 0.01em 0.2em 0.06em;
+    background: linear-gradient(var(--acc, #ffbd59), var(--acc, #ffbd59)) no-repeat 0 0 / var(--sw, 100%) 100%;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .st__b :global(u) { text-decoration: none; position: relative; white-space: nowrap; }
+  .st__b :global(u)::after {
+    content: ''; position: absolute; left: -3%; right: -3%; bottom: -0.17em; height: 0.24em; background: var(--acc, #ffbd59);
+    -webkit-mask: url(/images/work/sequenced/marks/underline-marker.svg) center / 100% 100% no-repeat;
+    mask: url(/images/work/sequenced/marks/underline-marker.svg) center / 100% 100% no-repeat;
+    clip-path: inset(0 calc(100% - var(--draw, 100%)) 0 0);
+  }
+  .st__b :global(.a u)::after { background: #fff; }
+  .st__b :global(.ell) { position: relative; display: inline-block; }
+  .st__b :global(.ell)::after {
+    content: ''; position: absolute; left: -22%; right: -22%; top: -38%; bottom: -34%; background: var(--acc, #ffbd59);
+    -webkit-mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / 100% 100% no-repeat;
+    mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / 100% 100% no-repeat;
+    clip-path: inset(0 calc(100% - var(--draw, 100%)) 0 0);
+  }
+  .st__b :global(.box) {
+    display: inline-block; padding: 0.12em 0.34em 0.18em; border-radius: 0.24em;
+    outline: max(1.5px, 0.42cqw) dashed var(--acc, #ffbd59); outline-offset: 0;
+  }
+
+  .st__mark { position: absolute; height: auto; color: var(--acc, #ffbd59); overflow: visible; }
+  .st__mark.is-white { color: #fff; }
+  .st__mark path { stroke-dasharray: 1; stroke-dashoffset: var(--off, 0); }
+
+  .st__aside { position: absolute; left: 0; right: 0; bottom: 4.2%; margin: 0; text-align: center; font-size: 3cqw; color: #9a9a9a; letter-spacing: -0.04em; }
+
+  /* build skeleton (hidden unless a parent turns it on) */
+  .st__skel { display: none; z-index: 5; border: 1.5px dashed rgba(255, 255, 255, 0.28); border-radius: inherit; background: #0b0b0b; }
+  .st__skel-tag {
+    position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+    font: 600 max(10px, 4.6cqw) / 1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0;
+    color: var(--acc, #ffbd59); background: rgba(255, 189, 89, 0.1); border: 1px solid rgba(255, 189, 89, 0.35);
+    padding: 0.55em 0.8em; border-radius: 999px; white-space: nowrap;
+  }
+  .st__skel-bar { position: absolute; left: 12%; height: 3.2%; border-radius: 3px; background: rgba(255, 255, 255, 0.07); }
+  .st__skel-bar--1 { top: 9%; width: 70%; }
+  .st__skel-bar--2 { top: 15%; width: 52%; }
+  .st__skel-bar--3 { bottom: 10%; width: 64%; }
+</style>

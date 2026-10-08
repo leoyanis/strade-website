@@ -1,0 +1,212 @@
+---
+const shots = [
+  'App Store screenshot: Open app, start cooking',
+  'App Store screenshot: Step by step, just follow along',
+  'App Store screenshot: Your week, planned in seconds',
+  'App Store screenshot: Your meals run themselves',
+  'App Store screenshot: One tap shopping list',
+  'App Store screenshot: Stuck? Talk to the recipe',
+];
+---
+
+<section class="store" id="yc-store">
+  <div class="store__head" data-yc-reveal>
+    <p class="yc-eyebrow yc-eyebrow--light">Shipped and marketed</p>
+    <h2 class="store__title">I didn’t stop at the code.</h2>
+    <p class="store__lede">
+      I published YouCook on the App Store and Google Play, designed the store screenshots below,
+      built youcookapp.com in Next.js and ran the Meta ads myself.
+    </p>
+    <ul class="store__jobs" aria-label="What I did">
+      <li>Product design</li><li>Flutter app</li><li>Backend + AI</li><li>Store listings</li><li>Website</li><li>Meta ads</li>
+    </ul>
+  </div>
+
+  <div class="rail" tabindex="0" aria-label="YouCook App Store screenshots and a Meta ad">
+    <ul class="rail__track">
+      {shots.slice(0, 2).map((alt, i) => (
+        <li class="rail__item">
+          <img src={`/images/work/youcook/store/s${i + 1}.webp`} alt={alt} width="440" height="952" loading="lazy" />
+        </li>
+      ))}
+      <!-- The clip sits third so it is on screen while the rail drifts on desktop; phones show it first. -->
+      <li class="rail__item rail__item--video">
+        <video
+          class="rail__video"
+          muted
+          loop
+          playsinline
+          preload="none"
+          poster="/images/work/youcook/preview-poster.webp"
+          width="500"
+          height="1080"
+          aria-label="Clip from my YouCook app preview video: picking a recipe, cooking it step by step and collecting recipes"
+        >
+          <source src="/images/work/youcook/preview.mp4" type="video/mp4" />
+        </video>
+        <span class="rail__rec" aria-hidden="true"><i></i>App preview</span>
+      </li>
+      {shots.slice(2).map((alt, i) => (
+        <li class="rail__item">
+          <img src={`/images/work/youcook/store/s${i + 3}.webp`} alt={alt} width="440" height="952" loading="lazy" />
+        </li>
+      ))}
+      <li class="rail__item rail__item--ad">
+        <img src="/images/work/youcook/store/ad.webp" alt="Meta ad creative: a YouCook reminder on a lock screen, Time to start dinner" width="520" height="650" loading="lazy" />
+        <span class="rail__cap">A Meta ad I made</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .store {
+    position: relative;
+    overflow: clip;
+    color: #fff;
+    background:
+      var(--yc-pattern-light),
+      linear-gradient(165deg, #14a595 0%, #0d9383 45%, #075a57 100%);
+    background-size: clamp(380px, 38vw, 560px), auto;
+    padding: clamp(80px, 10vw, 140px) 0 clamp(80px, 9vw, 120px);
+  }
+  .store__head { max-width: 1200px; margin: 0 auto 52px; padding: 0 var(--yc-gutter); }
+  .store__title {
+    font-size: clamp(40px, 5.4vw, 72px);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    margin: 0 0 18px;
+    color: #fff;
+  }
+  .store__lede { font-size: clamp(17px, 1.5vw, 20px); font-weight: 500; line-height: 1.6; color: rgba(255, 255, 255, 0.9); max-width: 640px; margin: 0 0 24px; }
+  .store__jobs { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
+  .store__jobs li {
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+  }
+  .store__jobs li::before { content: '✓ '; color: #b9f5e8; }
+
+  .rail {
+    position: relative;
+    outline: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail.is-scrubbed { overflow: visible; }
+  .rail__track {
+    list-style: none;
+    margin: 0;
+    padding: 10px max(var(--yc-gutter), calc((100vw - 1200px) / 2 + var(--yc-gutter))) 30px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    width: max-content;
+  }
+  .rail__item { flex: none; width: 250px; }
+  .rail__item img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 26px;
+    box-shadow: 0 30px 50px -24px rgba(0, 40, 35, 0.7);
+  }
+  .rail__item:nth-child(even) { transform: translateY(18px); }
+  .rail__item--video { position: relative; }
+  .rail__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 500 / 1080;
+    border-radius: 26px;
+    background: #efefef;
+    box-shadow: 0 30px 50px -24px rgba(0, 40, 35, 0.7), 0 0 0 4px rgba(255, 255, 255, 0.9);
+  }
+  .rail__rec {
+    position: absolute;
+    left: 50%;
+    bottom: -14px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--yc-teal-deep);
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 10px 20px -10px rgba(0, 40, 35, 0.6);
+  }
+  .rail__rec i { width: 8px; height: 8px; border-radius: 50%; background: var(--yc-coral); }
+  .rail__item--ad { width: 300px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .rail__item--ad img { border-radius: 22px; }
+  .rail__cap {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--yc-teal-deep);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .rail { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+    .rail__track { padding: 10px var(--yc-gutter) 30px; gap: 14px; }
+    .rail__item { width: 200px; scroll-snap-align: center; }
+    .rail__item--ad { width: 250px; }
+    .rail__item--video { order: -1; }
+    .rail__item:nth-child(even) { transform: none; }
+  }
+</style>
+
+<script>
+  // The app preview clip only plays while it's on screen, and never for reduced motion.
+  {
+    const video = document.querySelector<HTMLVideoElement>('#yc-store .rail__video');
+    if (video && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) {
+          video.preload = 'auto';
+          video.play().catch(() => {});
+        } else video.pause();
+      }, { threshold: 0.35 }).observe(video);
+    }
+  }
+</script>
+
+<script>
+  import { loadMotion } from './motion';
+
+  (async () => {
+    const root = document.getElementById('yc-store');
+    if (!root) return;
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap, ScrollTrigger } = m;
+    const track = root.querySelector<HTMLElement>('.rail__track')!;
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 901px)', () => {
+      const rail = root.querySelector<HTMLElement>('.rail')!;
+      rail.classList.add('is-scrubbed');
+      // Desktop: the rail drifts sideways as you scroll past (no pinning).
+      gsap.fromTo(track, { x: 0 }, {
+        x: () => Math.min(0, window.innerWidth - track.scrollWidth),
+        ease: 'none',
+        scrollTrigger: { trigger: root, start: 'top 75%', end: 'bottom 15%', scrub: 0.6, invalidateOnRefresh: true },
+      });
+      return () => rail.classList.remove('is-scrubbed');
+    });
+    gsap.from(root.querySelectorAll('.rail__item'), {
+      y: 60, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out',
+      scrollTrigger: { trigger: track, start: 'top 85%', once: true },
+    });
+    m.refresh();
+  })();
+</script>

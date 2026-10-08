@@ -8,17 +8,5 @@ export default defineConfig({
     plugins: [tailwindcss()],
     cacheDir: './node_modules/.vite',
   },
-  integrations: [
-    sitemap({
-      i18n: {
-        defaultLocale: 'en',
-        locales: {
-          en: 'en',
-          de: 'de',
-          es: 'es',
-          ro: 'ro',
-        },
-      },
-    }),
-  ],
+  integrations: [sitemap()],
 });

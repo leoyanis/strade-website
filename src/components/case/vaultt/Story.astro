@@ -1,0 +1,123 @@
+---
+// The problem, the belief (lights up word by word on scroll) and the journey timeline.
+const steps = [
+  { when: 'Early 2025', title: 'Kickoff', body: 'Liam brings the idea. I design the product and choose the stack.' },
+  { when: '~3 months in', title: 'v1 goes live', body: 'StudentVenture launches as an app and a website, built solo on FlutterFlow and Firebase.' },
+  { when: 'Mid-2025 on', title: 'Fractional CTO', body: 'I stay on. New features ship every week while the user base keeps growing.' },
+  { when: '2026', title: 'The rebuild', body: 'A hand-maintained Flutter codebase on Supabase, an admin console and an accelerator intake flow.' },
+  { when: '2026', title: 'Vaultt', body: 'StudentVenture becomes Vaultt, and the iOS app goes into App Store beta.' },
+  { when: 'Now', title: '12.4k users', body: 'Still building, together.', now: true },
+];
+---
+
+<section class="vt-story vt-section" id="vt-story">
+  <div class="vt-wrap">
+    <div class="vt-problem">
+      <p class="vt-tag"><span class="no">01</span> The problem</p>
+      <p class="vt-problem__text" data-rise>
+        Great young talent without a polished CV was invisible to companies.
+        <span class="lt">Liam had the vision and the network. He needed a real product to prove the idea, not another landing page, and someone to make every product and technical call, then ship it.</span>
+      </p>
+      <p class="vt-problem__me" data-rise><span class="vt-problem__line" aria-hidden="true"></span>That was my job.</p>
+    </div>
+
+    <div class="vt-belief">
+      <p class="vt-tag"><span class="no">02</span> The belief</p>
+      <p class="vt-belief__text" id="vt-belief-text">
+        What you can create now <span class="ac">matters more than a degree or a CV.</span> Stop writing about your work. <span class="hl">Start showing it.</span>
+      </p>
+      <p class="vt-belief__src">The idea behind Vaultt, as it reads on vaultt.io</p>
+    </div>
+
+    <div class="vt-journey" id="vt-journey">
+      <div class="vt-journey__head">
+        <p class="vt-tag"><span class="no">03</span> The journey</p>
+        <p class="vt-journey__note">Dates are approximate</p>
+      </div>
+      <div class="vt-journey__track">
+        <span class="vt-journey__rail" aria-hidden="true"><span class="vt-journey__fill"></span></span>
+        <ol class="vt-journey__list">
+          {steps.map((s) => (
+            <li class:list={['vt-journey__step', s.now && 'is-now']}>
+              <span class="vt-journey__node" aria-hidden="true"></span>
+              <span class="vt-journey__when">{s.when}</span>
+              <strong class="vt-journey__title">{s.title}</strong>
+              <span class="vt-journey__body">{s.body}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-story { padding-bottom: clamp(80px, 10vw, 140px); }
+
+  .vt-problem { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px 40px; align-items: start; }
+  .vt-problem .vt-tag { padding-top: 12px; }
+  .vt-problem__text {
+    font-family: var(--vt-display); font-weight: 600;
+    font-size: clamp(27px, 3.3vw, 46px); line-height: 1.12; letter-spacing: -0.03em; color: var(--vt-light);
+    text-wrap: pretty;
+  }
+  .vt-problem__text .lt { color: var(--vt-faint); }
+  .vt-problem__me {
+    grid-column: 2; display: flex; align-items: center; gap: 16px;
+    font-family: var(--vt-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-blue);
+  }
+  .vt-problem__line { width: 56px; height: 1px; background: var(--vt-blue); }
+
+  .vt-belief { margin-top: clamp(110px, 14vw, 200px); }
+  .vt-belief__text {
+    margin-top: 28px;
+    font-family: var(--vt-display); font-weight: 700;
+    font-size: clamp(38px, 6.2vw, 96px); line-height: 1.02; letter-spacing: -0.042em;
+    color: var(--vt-light); max-width: 1100px; text-wrap: balance;
+  }
+  .vt-belief__text .ac { color: var(--vt-blue); }
+  .vt-belief__text .hl { position: relative; white-space: nowrap; }
+  .vt-belief__text .hl::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0.02em; height: 0.08em; border-radius: 999px;
+    background: var(--vt-blue); transform-origin: left; transform: scaleX(var(--hl, 1));
+  }
+  .vt-w { display: inline; }
+  .vt-belief__src {
+    margin-top: 28px; font-family: var(--vt-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-faint);
+  }
+
+  /* journey */
+  .vt-journey { margin-top: clamp(110px, 14vw, 190px); }
+  .vt-journey__head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .vt-journey__note { font-family: var(--vt-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-faint); }
+  .vt-journey__track { position: relative; margin-top: 44px; }
+  .vt-journey__list {
+    position: relative;
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 22px;
+  }
+  .vt-journey__rail { position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--vt-line-2); border-radius: 2px; overflow: hidden; }
+  .vt-journey__fill { position: absolute; inset: 0; background: linear-gradient(90deg, var(--vt-blue-deep), var(--vt-blue)); transform-origin: left; transform: scaleX(var(--p, 1)); }
+  .vt-journey__step { position: relative; display: flex; flex-direction: column; gap: 8px; padding-top: 34px; }
+  .vt-journey__node {
+    position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--vt-navy); border: 2px solid var(--vt-blue);
+  }
+  .vt-journey__step.is-now .vt-journey__node { background: var(--vt-blue); box-shadow: 0 0 0 6px rgba(111, 168, 255, 0.18), 0 0 24px rgba(111, 168, 255, 0.7); }
+  .vt-journey__when { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-blue); }
+  .vt-journey__title { font-family: var(--vt-display); font-size: 22px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: var(--vt-light); }
+  .vt-journey__step.is-now .vt-journey__title { color: var(--vt-blue); }
+  .vt-journey__body { font-size: 14.5px; line-height: 1.55; color: var(--vt-soft); }
+
+  @media (max-width: 960px) {
+    .vt-problem { grid-template-columns: 1fr; gap: 20px; }
+    .vt-problem .vt-tag { padding-top: 0; }
+    .vt-problem__me { grid-column: 1; }
+    .vt-journey__list { grid-template-columns: 1fr; gap: 30px; padding-left: 34px; }
+    .vt-journey__rail { left: 7px; right: auto; top: 6px; bottom: 6px; width: 2px; height: auto; }
+    .vt-journey__fill { background: linear-gradient(180deg, var(--vt-blue-deep), var(--vt-blue)); transform-origin: top; transform: scaleY(var(--p, 1)); }
+    .vt-journey__step { padding-top: 0; }
+    .vt-journey__node { left: -34px; top: 1px; }
+    .vt-journey__title { font-size: 21px; }
+    .vt-journey__body { font-size: 15px; max-width: 460px; }
+  }
+</style>

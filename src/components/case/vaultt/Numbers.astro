@@ -1,0 +1,78 @@
+---
+// Full-bleed light-blue band with giant navy counters. Real numbers only (src/data/work.ts).
+import VaulttMark from './VaulttMark.astro';
+const stats = [
+  { n: '12.4', dec: 1, suffix: 'k', unit: '', label: 'users on the platform' },
+  { n: '3', dec: 0, suffix: '', unit: 'months', label: 'from kickoff to a live v1' },
+  { n: '65', dec: 0, suffix: '', unit: '', label: 'database tables' },
+  { n: '23', dec: 0, suffix: '', unit: '', label: 'server functions' },
+];
+---
+
+<section class="vt-num" id="vt-numbers" aria-label="Vaultt by the numbers">
+  <VaulttMark class="vt-num__mark" tone="mono" />
+  <div class="vt-wrap">
+    <div class="vt-num__head">
+      <span>By the numbers</span>
+      <span>2025 – now</span>
+    </div>
+    <div class="vt-num__grid">
+      {stats.map((s) => (
+        <div class="vt-num__item">
+          <p class="vt-num__val">
+            <span data-count={s.n} data-dec={s.dec}>{s.n}</span>{s.suffix && <span>{s.suffix}</span>}{s.unit && <span class="vt-num__unit">{s.unit}</span>}
+          </p>
+          <p class="vt-num__lab">{s.label}</p>
+        </div>
+      ))}
+    </div>
+    <p class="vt-num__foot">
+      <span>One Flutter codebase</span><i aria-hidden="true"></i><span>Web + iOS (App Store beta)</span><i aria-hidden="true"></i><span>Row-level security on every table</span>
+    </p>
+  </div>
+</section>
+
+<style is:global>
+  .vt-num {
+    position: relative; overflow: hidden;
+    background: var(--vt-blue); color: var(--vt-navy);
+    padding: clamp(60px, 8vw, 112px) 0 clamp(56px, 7vw, 96px);
+  }
+  .vt-num__mark {
+    position: absolute; right: -7%; top: 50%; width: min(52vw, 700px); height: auto;
+    transform: translateY(-50%); color: #0C2748; opacity: 0.08; pointer-events: none;
+  }
+  .vt-num__head {
+    display: flex; justify-content: space-between; gap: 16px;
+    font-family: var(--vt-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(12, 39, 72, 0.72); padding-bottom: 18px; border-bottom: 1px solid rgba(12, 39, 72, 0.2);
+  }
+  .vt-num__grid { display: grid; grid-template-columns: 1.45fr 1fr 1fr 1fr; }
+  .vt-num__item { padding: 34px 26px 6px; border-left: 1px solid rgba(12, 39, 72, 0.2); min-width: 0; }
+  .vt-num__item:first-child { padding-left: 0; border-left: 0; }
+  .vt-num__val {
+    display: flex; align-items: baseline; flex-wrap: nowrap;
+    font-family: var(--vt-display); font-weight: 800;
+    font-size: clamp(54px, 7.2vw, 120px); line-height: 0.9; letter-spacing: -0.055em;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .vt-num__item:first-child .vt-num__val { font-size: clamp(64px, 9.4vw, 150px); }
+  .vt-num__unit { font-size: 0.3em; letter-spacing: -0.01em; margin-left: 0.32em; font-weight: 700; }
+  .vt-num__lab { margin-top: 14px; font-size: 15px; font-weight: 500; line-height: 1.4; color: rgba(12, 39, 72, 0.8); max-width: 220px; }
+  .vt-num__foot {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 44px;
+    font-family: var(--vt-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(12, 39, 72, 0.78);
+  }
+  .vt-num__foot i { width: 5px; height: 5px; border-radius: 50%; background: var(--vt-navy); opacity: 0.55; }
+
+  @media (max-width: 860px) {
+    .vt-num__grid { grid-template-columns: 1fr 1fr; }
+    .vt-num__item { padding: 26px 0 4px; border-left: 0; border-bottom: 1px solid rgba(12, 39, 72, 0.16); padding-bottom: 22px; }
+    .vt-num__item:nth-child(even) { padding-left: 18px; border-left: 1px solid rgba(12, 39, 72, 0.16); }
+    .vt-num__item:first-child .vt-num__val, .vt-num__val { font-size: clamp(50px, 14.5vw, 96px); }
+    .vt-num__lab { font-size: 14px; margin-top: 10px; }
+    .vt-num__foot { margin-top: 28px; font-size: 10px; }
+    .vt-num__mark { width: 90vw; right: -30%; top: 30%; }
+  }
+</style>

@@ -1,0 +1,190 @@
+---
+---
+
+<section class="lesson" id="yc-lesson">
+  <div class="lesson__grid">
+    <div class="lesson__head" data-yc-reveal>
+      <p class="yc-eyebrow">What I learned</p>
+      <h2 class="lesson__title">Downloads are cheap.<br /><span>Paying is the real test.</span></h2>
+    </div>
+    <div class="lesson__side">
+      <p class="lesson__lede">I’d rather learn this on my own product than on a client’s budget.</p>
+      <div class="stickers" aria-hidden="true">
+        <div class="stk2 stk2--easy">
+          <span class="stk2__tag">Easy</span>
+          <b>£0.60</b>
+          <span>per download<br />on Meta ads</span>
+        </div>
+        <div class="stk2 stk2--hard">
+          <span class="stk2__tag">The real test</span>
+          <b>💳</b>
+          <span>getting people<br />to pay</span>
+        </div>
+      </div>
+    </div>
+
+    <figure class="note">
+      <span class="note__tape note__tape--l" aria-hidden="true"></span>
+      <span class="note__tape note__tape--r" aria-hidden="true"></span>
+      <figcaption class="note__hand">Note to self</figcaption>
+      <p class="note__line">Getting downloads was cheap: about <b>£0.60 each</b> on Meta ads.</p>
+      <p class="note__line">Getting people to pay was much harder.</p>
+      <p class="note__big"><mark>Validate the moment someone pays before building everything around it.</mark></p>
+      <p class="note__line note__line--soft">That lesson shapes how I scope every client product now.</p>
+      <p class="note__sig">— Yanis</p>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .lesson {
+    position: relative;
+    overflow: clip;
+    background: #fff;
+    padding: clamp(90px, 11vw, 160px) 0;
+  }
+  .lesson::before {
+    content: '';
+    position: absolute;
+    right: -10%;
+    top: 12%;
+    width: min(70vw, 860px);
+    aspect-ratio: 1;
+    border-radius: 47% 53% 42% 58% / 52% 41% 59% 48%;
+    background: radial-gradient(circle at 50% 50%, #ffe7e2 0%, #fff1ee 55%, rgba(255, 245, 243, 0) 72%);
+    pointer-events: none;
+  }
+  .lesson__grid {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--yc-gutter);
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(36px, 5vw, 64px) clamp(40px, 6vw, 90px);
+    align-items: center;
+  }
+  .lesson__head { grid-column: 1 / -1; }
+  .lesson__lede { font-size: clamp(17px, 1.45vw, 19.5px); font-weight: 500; line-height: 1.6; color: #555; margin: 0; max-width: 420px; }
+  .lesson__title {
+    font-size: clamp(40px, 5.2vw, 70px);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--yc-ink-strong);
+    margin: 0;
+  }
+  .lesson__title span { color: var(--yc-coral); }
+
+  .stickers { display: flex; gap: 22px; margin-top: 44px; flex-wrap: wrap; padding-left: 8px; }
+  .stk2 {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 22px 36px -16px rgba(80, 30, 20, 0.45);
+  }
+  .stk2::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255, 255, 255, 0.55);
+  }
+  .stk2 b { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+  .stk2 > span:last-child { font-size: 13px; font-weight: 700; line-height: 1.25; opacity: 0.95; }
+  .stk2__tag {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-4deg);
+    white-space: nowrap;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: #222;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .stk2--easy { background: #22a35a; transform: rotate(-8deg); }
+  .stk2--hard { background: var(--yc-coral); transform: rotate(7deg) translateY(16px); }
+
+  /* the note */
+  .note {
+    position: relative;
+    margin: 0;
+    padding: 50px clamp(26px, 4vw, 48px) 40px clamp(64px, 7vw, 86px);
+    border-radius: 6px 6px 18px 18px;
+    background:
+      linear-gradient(90deg, transparent calc(clamp(64px, 7vw, 86px) - 20px), rgba(255, 107, 107, 0.45) calc(clamp(64px, 7vw, 86px) - 20px) calc(clamp(64px, 7vw, 86px) - 18px), transparent calc(clamp(64px, 7vw, 86px) - 18px)),
+      repeating-linear-gradient(180deg, #fffdf8 0 37px, #dfe8f1 37px 38px);
+    background-position: 0 0, 0 12px;
+    box-shadow: 0 50px 80px -40px rgba(80, 30, 20, 0.45), 0 2px 0 rgba(0, 0, 0, 0.03);
+    transform: rotate(1.6deg);
+  }
+  .note__tape {
+    position: absolute;
+    top: -14px;
+    width: 120px;
+    height: 32px;
+    background: rgba(255, 138, 116, 0.55);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+  .note__tape--l { left: 30px; transform: rotate(-7deg); }
+  .note__tape--r { right: 30px; transform: rotate(6deg); background: rgba(80, 158, 151, 0.5); }
+  .note__hand { margin: 0 0 4px; font-family: var(--yc-hand); font-size: 38px; font-weight: 700; color: var(--yc-salmon); line-height: 38px; }
+  .note__line { margin: 0; font-size: clamp(17px, 1.5vw, 20px); font-weight: 600; line-height: 38px; color: #3a3a3a; }
+  .note__line b { color: #1f8a4c; font-weight: 700; white-space: nowrap; }
+  .note__line--soft { color: #777; font-weight: 500; }
+  .note__big { margin: 0; font-size: clamp(21px, 2vw, 27px); font-weight: 700; line-height: 38px; color: #222; letter-spacing: -0.01em; }
+  .note__big mark {
+    color: inherit;
+    padding: 0 2px;
+    background: linear-gradient(rgba(255, 107, 107, 0.32), rgba(255, 107, 107, 0.32)) no-repeat 0 72% / calc(var(--mk, 1) * 100%) 0.62em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .note__sig { margin: 4px 0 0; text-align: right; font-family: var(--yc-hand); font-size: 34px; font-weight: 700; color: #444; line-height: 38px; }
+
+  @media (max-width: 860px) {
+    .lesson__grid { grid-template-columns: minmax(0, 1fr); }
+    .stickers { margin-top: 30px; justify-content: center; gap: 14px; }
+    .stk2 { width: 146px; height: 146px; }
+    .stk2 b { font-size: 34px; }
+    .note { transform: rotate(0.8deg); }
+  }
+</style>
+
+<script>
+  import { loadMotion } from './motion';
+
+  (async () => {
+    const root = document.getElementById('yc-lesson');
+    if (!root) return;
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap, ScrollTrigger } = m;
+    const note = root.querySelector('.note')!;
+    const mark = root.querySelector('.note__big mark')!;
+    gsap.set(mark, { '--mk': 0 });
+    gsap.timeline({ scrollTrigger: { trigger: note, start: 'top 78%', once: true } })
+      .from(note, { y: 80, rotate: -6, autoAlpha: 0, duration: 1.1, ease: 'power3.out' })
+      .from(root.querySelectorAll('.note__tape'), { scaleX: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }, 0.6)
+      .from(root.querySelectorAll('.note__line, .note__big, .note__sig'), { autoAlpha: 0, x: -12, duration: 0.5, stagger: 0.18 }, 0.7)
+      .to(mark, { '--mk': 1, duration: 0.9, ease: 'power2.inOut' }, 1.6);
+    gsap.from(root.querySelectorAll('.stk2'), {
+      scale: 0.3, autoAlpha: 0, duration: 0.8, stagger: 0.15, ease: 'back.out(2)',
+      scrollTrigger: { trigger: root.querySelector('.stickers'), start: 'top 88%', once: true },
+    });
+    m.refresh();
+  })();
+</script>

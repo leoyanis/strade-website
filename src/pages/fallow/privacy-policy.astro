@@ -1,0 +1,145 @@
+---
+// Fallow privacy policy. Shell, styling and the no-JavaScript constraint live in
+// layouts/Legal.astro. This URL is hardcoded in the app as LegalLinks.privacy and is
+// submitted to App Store Connect.
+//
+// Keep the entity and contact details in step with terms-of-use.astro.
+import Legal from '../../layouts/Legal.astro';
+
+const CONTACT_EMAIL = 'support@strade.tech';
+const LEGAL_ENTITY = 'Strade SMIP SRL, established in Romania';
+
+const APPLE_PRIVACY = 'https://www.apple.com/legal/privacy/';
+// Romania's data protection supervisory authority.
+const ROMANIAN_DPA = 'https://www.dataprotection.ro/';
+---
+
+<Legal
+  title="Fallow Privacy Policy | Strade"
+  description="Fallow collects no data. No server, no account, no analytics. Everything the app stores stays on your device."
+  path="/fallow/privacy-policy"
+  heading="Privacy Policy"
+  lastUpdatedISO="2026-08-04"
+  lastUpdated="4 August 2026"
+>
+
+  <p class="legal-lede">
+    Fallow does not collect your data. There is no server, no account and no analytics.
+    Everything the app stores stays on your device.
+  </p>
+
+  <h2>What Fallow is</h2>
+  <p>
+    Fallow is an iOS app blocker built on Apple's Screen Time frameworks (FamilyControls,
+    ManagedSettings and DeviceActivity). You choose which apps to block and a daily free
+    window. Outside that window, the apps you picked are shielded.
+  </p>
+
+  <h2>The short version</h2>
+  <ul>
+    <li>Fallow has no server and no backend.</li>
+    <li>There are no accounts. No sign up, no login, no email collection.</li>
+    <li>The app contains no networking code at all. It cannot send your data anywhere.</li>
+    <li>No analytics, no crash reporting, no advertising, no third party SDKs of any kind.</li>
+    <li>Every framework the app uses is Apple's own.</li>
+  </ul>
+
+  <h2>What is stored, and where</h2>
+  <p>
+    Fallow ships as one app plus three app extensions. They share a private App Group
+    container on your device so the extensions can read your settings. That container holds:
+  </p>
+  <ul>
+    <li>Your encoded app selection.</li>
+    <li>Your free window start and end times.</li>
+    <li>Two lock toggles.</li>
+    <li>Some display state the app uses to draw its own screens.</li>
+  </ul>
+  <p>
+    That is the complete list. It is written with UserDefaults inside the App Group, it
+    stays on your device, and none of it is transmitted anywhere.
+  </p>
+
+  <h2>Your app selection is opaque, even to us</h2>
+  <p>
+    When you pick apps to block, Apple's FamilyControls framework hands Fallow a set of
+    opaque tokens rather than app names or bundle identifiers. Those tokens are not
+    reversible by the developer. Fallow never learns which apps you chose. Neither do we.
+  </p>
+
+  <h2>Screen Time permission</h2>
+  <p>
+    Fallow requests Screen Time authorization for the individual using the device
+    (AuthorizationCenter, individual authorization). It is a self control tool, not a
+    parental control tool. No data about anyone else is involved, and Fallow does not
+    request or receive access to another person's device.
+  </p>
+
+  <h2>No tracking</h2>
+  <p>
+    Fallow's privacy manifest declares tracking as false and an empty list of collected
+    data types. Its only declared required reason API is UserDefaults, under reason CA92.1,
+    which covers reading information from the app's own App Group. The App Store privacy
+    label for Fallow is "Data Not Collected", and this policy says the same thing.
+  </p>
+
+  <h2>Purchases and subscriptions</h2>
+  <p>
+    Fallow sells two things: a yearly auto renewable subscription that opens with a one
+    week free trial, and a one time non consumable Lifetime Unlock.
+  </p>
+  <ul>
+    <li>
+      All payments are processed by Apple through the App Store. Fallow never sees,
+      receives or stores payment details, card numbers, billing addresses or Apple Account
+      identifiers.
+    </li>
+    <li>
+      Purchase status is read through StoreKit from the signed transactions already on your
+      device. The only network communication involved is between your device and Apple.
+    </li>
+    <li>
+      Subscriptions are managed and cancelled in your Apple Account settings, not in Fallow.
+      The developer cannot cancel or refund on your behalf, so please go to Apple for that.
+    </li>
+  </ul>
+  <p>
+    Apple's handling of your payment information is covered by
+    <a href={APPLE_PRIVACY} class="text-link" target="_blank" rel="noopener">Apple's Privacy Policy</a>.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    Fallow is not directed at children under 13. It collects nothing from anyone, children
+    included.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    Under the UK GDPR, the EU GDPR and the CCPA you have rights to access, export, correct
+    and delete the personal data a company holds about you. In Fallow's case there is
+    nothing to act on, because no personal data is collected or processed by the developer.
+    The settings described above are on your own device, under your own control, and
+    deleting the app deletes the App Group container and everything in it.
+  </p>
+  <p>
+    The data controller, in the sense the GDPR uses that word, is {LEGAL_ENTITY}. If you
+    ever disagree with how that is handled, you can complain to the
+    <a href={ROMANIAN_DPA} class="text-link" target="_blank" rel="noopener">Romanian supervisory authority</a>,
+    or to the one in your own country if you live elsewhere in the EU.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    If Fallow ever changes what it stores or how it works, this policy is updated before
+    that version ships, and the date at the top changes with it. The current version took
+    effect on <time datetime="2026-08-04">4 August 2026</time>.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about privacy in Fallow can go to
+    <a href={`mailto:${CONTACT_EMAIL}`} class="text-link">{CONTACT_EMAIL}</a>.
+  </p>
+
+</Legal>

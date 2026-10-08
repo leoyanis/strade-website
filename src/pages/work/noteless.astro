@@ -1,0 +1,919 @@
+---
+// Noteless: branded side-quest case study.
+// v2's own design system: ink near-black with grain, a light system display face, JetBrains Mono for data,
+// and a warm amber accent that is deliberately not blue. The blue lives on in the icon and in v1.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import { getProject } from '../../data/work';
+
+const p = getProject('noteless')!;
+const img = (f: string) => `/images/work/noteless/${f}`;
+const fonts = 'https://fonts.googleapis.com/css2?family=Inter:wght@300&family=JetBrains+Mono:wght@400;500&display=swap';
+const playUrl = 'https://play.google.com/store/apps/details?id=com.noteless';
+
+// The conversation in the recreated window (adapted from the v2 mockup).
+const chat = [
+  { t: 'user', text: 'Let’s work on the go-to-market strategy. Developer communities first, then enterprise.' },
+  { t: 'ai', text: 'Writing that down. I’ll structure it as a phased approach.' },
+  { t: 'tool', verb: 'Created', path: 'Strategy/Go-to-Market.md', step: 'write' },
+  { t: 'ai', text: 'Phase 1 targets developer communities, Phase 2 moves to enterprise. Which communities should we start with?' },
+  { t: 'user', text: 'Flutter first, since that’s our own stack. Then React and Swift.' },
+  { t: 'ai', text: 'Updating the note with these specifics.' },
+  { t: 'tool', verb: 'Updated', path: 'Strategy/Go-to-Market.md', detail: 'patch_note · +4 lines', step: 'patch' },
+  { t: 'ai', text: 'Done. Target communities are in Phase 1. Nothing else in the note changed.' },
+];
+
+// The note: `p` = written by write_note, `x` = inserted later by patch_note.
+const note = [
+  { k: 'h1', s: 'p', text: 'Go-to-Market Strategy' },
+  { k: 'h2', s: 'p', text: 'Phase 1 · Developer communities' },
+  { k: 'h3', s: 'x', text: 'Target communities' },
+  { k: 'li', s: 'x', text: 'Flutter / Dart: our own stack, highest credibility', b: 'Flutter / Dart' },
+  { k: 'li', s: 'x', text: 'React: the largest frontend community', b: 'React' },
+  { k: 'li', s: 'x', text: 'Swift / iOS: quality-conscious developers', b: 'Swift / iOS' },
+  { k: 'h3', s: 'p', text: 'Channels' },
+  { k: 'li', s: 'p', text: 'Open-source contributions and packages' },
+  { k: 'li', s: 'p', text: 'Technical blog posts' },
+  { k: 'li', s: 'p', text: 'Conference talks and workshops' },
+  { k: 'h2', s: 'p', text: 'Phase 2 · Enterprise' },
+  { k: 'p', s: 'p', text: 'Lean on the case studies from Phase 1.' },
+];
+
+const tools = [
+  ['read_note', 'Read one note'],
+  ['write_note', 'Create a note, or overwrite it'],
+  ['patch_note', 'Change part of a note in place'],
+  ['delete_note', 'Delete one note'],
+  ['list_tree', 'See the folders and notes'],
+  ['search_notes', 'Full-text search'],
+  ['manage_folder', 'Create, rename, move, delete'],
+  ['update_project_metadata', 'Rename and describe the project'],
+  ['set_chat_title', 'Title the conversation'],
+];
+const ops = ['insert', 'replace', 'delete', 'append', 'prepend', 'find_replace'];
+const bars = [92, 78, 0, 84, 66, 88, 0, 72, 90, 58, 0, 80];
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/noteless"
+  noAlternates
+  bare
+  navTheme={p.brand.light ? 'light' : 'dark'}
+  ogImage="/og/work-noteless.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={fonts} />
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="nl-i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4z"></path></symbol>
+      <symbol id="nl-i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></symbol>
+      <symbol id="nl-i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></symbol>
+      <symbol id="nl-i-notes" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M3 15h18"></path></symbol>
+      <symbol id="nl-i-note" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></symbol>
+      <symbol id="nl-i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></symbol>
+      <symbol id="nl-i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"></circle><path d="M10.7 12.3L21 2"></path><path d="M16 7l3 3"></path><path d="M19 4l2 2"></path></symbol>
+      <symbol id="nl-i-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6"></path><path d="M4 4v4.5h4.5"></path></symbol>
+      <symbol id="nl-i-play" viewBox="0 0 24 24"><path d="M3 20.5v-17a1 1 0 0 1 1.5-.86l14.5 8.5a1 1 0 0 1 0 1.72l-14.5 8.5A1 1 0 0 1 3 20.5z"></path></symbol>
+    </defs>
+  </svg>
+
+  <div class="nl">
+    <!-- ============================== HERO ============================== -->
+    <section class="nl-hero" aria-labelledby="nl-title">
+      <div class="nl-hero__glow" aria-hidden="true"></div>
+      <div class="nl-wrap nl-hero__inner">
+        <img class="nl-hero__mark" src={img('mark.webp')} alt="" width="200" height="266" data-hero-in />
+        <h1 id="nl-title" class="nl-hero__title" data-hero-in>
+          <span class="nl-hero__name">Noteless</span>
+          <span class="nl-hero__line">You talk.<br />It builds.</span>
+        </h1>
+        <p class="nl-hero__lede" data-hero-in>{p.summary}</p>
+        <ul class="nl-chips" data-hero-in>
+          <li>{p.client}</li>
+          <li class="nl-mono">{p.year.replace(' – ', '–')}</li>
+          <li class="is-live"><i aria-hidden="true"></i>{p.status} on Google Play</li>
+        </ul>
+
+        <div class="nl-composer nl-hero__composer" data-hero-in aria-hidden="true">
+          <span class="nl-composer__text"><span data-type>Brainstorm something…</span><i class="nl-caret"></i></span>
+          <span class="nl-composer__send" data-send><svg><use href="#nl-i-send"></use></svg></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== SIGNATURE: THE NOTE WRITES ITSELF ============================== -->
+    <section class="nl-sig" aria-labelledby="nl-sig-h">
+      <div class="nl-wrap">
+        <header class="nl-head nl-head--center">
+          <p class="nl-label" data-reveal>What it does</p>
+          <h2 id="nl-sig-h" class="nl-h2" data-reveal>Chat on the left. <span>The note on the right writes itself.</span></h2>
+        </header>
+
+        <div class="nl-win" id="nl-win" role="group" aria-label="A recreation of Noteless v2: a chat with the assistant next to the note it is writing.">
+          <div class="nl-win__bar">
+            <span class="nl-win__lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="nl-win__title"><svg aria-hidden="true"><use href="#nl-i-back"></use></svg>SaaS Landing Page</span>
+            <span class="nl-tokens nl-mono" aria-label="Tokens and cost for this chat">
+              <span>↑<b data-tok-in>2.3k</b></span><span>↓<b data-tok-out>890</b></span><span class="nl-tokens__cost">$<b data-tok-cost>0.003</b></span>
+            </span>
+          </div>
+          <div class="nl-win__body">
+            <div class="nl-chat">
+              <div class="nl-tabs" aria-hidden="true">
+                <span class="is-on"><svg><use href="#nl-i-chat"></use></svg>Chat</span>
+                <span><svg><use href="#nl-i-notes"></use></svg>Notes</span>
+              </div>
+              <div class="nl-chat__scroll">
+                <div class="nl-chat__feed" data-feed>
+                  {chat.map((m, i) =>
+                    m.t === 'tool' ? (
+                      <p class="nl-tool" data-msg={i} data-step={m.step}>
+                        <span class="nl-tool__icon"><svg aria-hidden="true"><use href="#nl-i-check"></use></svg><i class="nl-spin" aria-hidden="true"></i></span>
+                        <span class="nl-tool__verb">{m.verb}</span>
+                        <span class="nl-tool__path nl-mono">{m.path}</span>
+                        {m.detail && <span class="nl-tool__detail nl-mono">{m.detail}</span>}
+                      </p>
+                    ) : (
+                      <p class:list={['nl-msg', m.t === 'user' ? 'nl-msg--user' : 'nl-msg--ai']} data-msg={i}>{m.text}</p>
+                    ),
+                  )}
+                </div>
+              </div>
+              <div class="nl-composer nl-composer--sm" aria-hidden="true">
+                <span class="nl-composer__text">Brainstorm something…</span>
+                <span class="nl-composer__send"><svg><use href="#nl-i-send"></use></svg></span>
+              </div>
+            </div>
+
+            <div class="nl-note">
+              <div class="nl-note__top">
+                <span class="nl-note__crumb nl-mono">Strategy <i>/</i> <b>Go-to-Market.md</b></span>
+                <span class="nl-note__ver nl-mono" data-ver>v2</span>
+              </div>
+              <div class="nl-note__doc" data-doc>
+                {note.map((l) => {
+                  const Tag = l.k === 'li' || l.k === 'p' ? 'p' : l.k;
+                  return (
+                    <Tag class:list={['nl-nl', `nl-nl--${l.k}`, l.s === 'x' && 'is-patch']} data-line={l.s}>
+                      {l.b ? (<Fragment><b>{l.b}</b>{l.text.slice(l.b.length)}</Fragment>) : l.text}
+                    </Tag>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nl-sig__foot">
+          <p data-reveal>
+            You brainstorm in the chat. The assistant creates notes, organises them into folders, and edits them as the
+            conversation moves. You never copy anything across.
+          </p>
+          <button type="button" class="nl-replay" data-replay>
+            <svg aria-hidden="true"><use href="#nl-i-replay"></use></svg>Replay
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== PATCH, DON'T REWRITE ============================== -->
+    <section class="nl-patch" aria-labelledby="nl-patch-h">
+      <div class="nl-wrap nl-patch__grid">
+        <div class="nl-patch__text">
+          <p class="nl-label" data-reveal>The key decision</p>
+          <h2 id="nl-patch-h" class="nl-h2" data-reveal>Patch the line. <span>Don’t rewrite the note.</span></h2>
+          <p data-reveal>
+            This was the call I cared about most. The assistant edits notes through small, precise tools instead of
+            rewriting whole documents. To change one line, it patches that line. That keeps it fast, and it keeps the
+            bill small.
+          </p>
+          <ul class="nl-ops" aria-label="patch_note operations" data-reveal>
+            {ops.map((o) => <li class="nl-mono">{o}</li>)}
+          </ul>
+        </div>
+
+        <div class="nl-compare" data-compare>
+          <div class="nl-cmp">
+            <p class="nl-cmp__k nl-mono">write_note</p>
+            <p class="nl-cmp__t">Rewrite the whole note</p>
+            <div class="nl-cmp__doc" aria-hidden="true">
+              {bars.map((w) => <i class:list={[w === 0 && 'is-gap', 'is-hit']} style={`width:${w || 30}%`}></i>)}
+            </div>
+            <div class="nl-cmp__meter" aria-hidden="true"><span>tokens</span><b><i data-meter="write" style="width:100%"></i></b></div>
+          </div>
+          <div class="nl-cmp nl-cmp--good">
+            <p class="nl-cmp__k nl-mono">patch_note</p>
+            <p class="nl-cmp__t">Change one line</p>
+            <div class="nl-cmp__doc" aria-hidden="true">
+              {bars.map((w, i) => <i class:list={[w === 0 && 'is-gap', i === 4 && 'is-hit']} style={`width:${w || 30}%`}></i>)}
+            </div>
+            <div class="nl-cmp__meter" aria-hidden="true"><span>tokens</span><b><i data-meter="patch" style="width:11%"></i></b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nl-wrap">
+        <div class="nl-manifest" data-reveal>
+          <p class="nl-manifest__head nl-mono"><span>tools</span><span>{tools.length} registered</span></p>
+          <ul>
+            {tools.map(([n, d]) => (
+              <li class:list={[n === 'patch_note' && 'is-key']}><span class="nl-mono">{n}</span><span>{d}</span></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== EVOLUTION v1 → v2 ============================== -->
+    <section class="nl-evo" aria-labelledby="nl-evo-h" data-evo>
+      <div class="nl-wrap">
+        <header class="nl-head">
+          <p class="nl-label nl-evo__label" data-reveal>Two versions</p>
+          <h2 id="nl-evo-h" class="nl-h2" data-reveal>From a smart notepad <span class="nl-evo__accent">to an assistant that writes.</span></h2>
+        </header>
+
+        <div class="nl-evo__rail" aria-hidden="true"><i data-rail></i></div>
+
+        <article class="nl-era nl-era--v1">
+          <div class="nl-era__media">
+            <div class="nl-era__video">
+              <video
+                src={img('v1-magic-rewrite.mp4')}
+                poster={img('v1-magic-rewrite-poster.webp')}
+                muted
+                playsinline
+                loop
+                preload="none"
+                width="640"
+                height="640"
+                data-video
+                aria-label="Noteless v1: selecting text and opening Magic rewrite: re-phrase, expand, summarise or a custom instruction"
+              ></video>
+              <button type="button" class="nl-era__play" data-video-play aria-label="Play the v1 demo"><svg><use href="#nl-i-play"></use></svg></button>
+            </div>
+            <img class="nl-era__phones" src={img('cover.webp')} alt="Four phones running Noteless v1: rewrite options, a selected passage, the assistant chat and usage" width="1500" height="1500" loading="lazy" decoding="async" />
+          </div>
+          <div class="nl-era__text">
+            <p class="nl-era__tag nl-mono"><span>v1</span>2024 · Android</p>
+            <h3 class="nl-era__h">A smart notepad.</h3>
+            <ul class="nl-era__list">
+              <li>A ChatGPT-powered assistant right next to your notes.</li>
+              <li>Magic rewrite: rephrase, expand or summarise a selection, or give it your own instruction.</li>
+              <li>Re-organise a whole note with one instruction.</li>
+              <li>Image-to-text and speech-to-text. Dictation lands right where your cursor is.</li>
+              <li>Read-aloud that runs on the phone, in real time.</li>
+            </ul>
+            <p class="nl-era__note">Built in Godot, and live on Google Play.</p>
+          </div>
+        </article>
+
+        <article class="nl-era nl-era--v2">
+          <div class="nl-era__text">
+            <p class="nl-era__tag nl-mono"><span>v2</span>2026 · rebuilt in Flutter</p>
+            <h3 class="nl-era__h">An assistant that writes the notes.</h3>
+            <ul class="nl-era__list">
+              <li>Chat with an assistant while it writes and edits your notes for you.</li>
+              <li>Bring your own API key, with Anthropic, OpenAI and Kimi supported.</li>
+              <li>Notes in a project tree, stored locally in SQLite.</li>
+              <li>Token and cost tracking, so you always know what you’re spending.</li>
+            </ul>
+            <p class="nl-era__note">The warm amber is on purpose: notes should feel like paper, not a dashboard.</p>
+          </div>
+          <div class="nl-era__media nl-era__media--v2">
+            <img class="nl-shot nl-shot--a" src={img('g1.webp')} alt={p.gallery?.[0]?.alt ?? 'Chat that writes notes'} width="1029" height="1600" loading="lazy" decoding="async" />
+            <img class="nl-shot nl-shot--b" src={img('g2.webp')} alt={p.gallery?.[1]?.alt ?? 'Generated go-to-market note'} width="1029" height="1600" loading="lazy" decoding="async" />
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================== BYOK + COST ============================== -->
+    <section class="nl-byok" aria-labelledby="nl-byok-h">
+      <div class="nl-wrap nl-byok__grid">
+        <div class="nl-byok__text">
+          <p class="nl-label" data-reveal>Bring your own key</p>
+          <h2 id="nl-byok-h" class="nl-h2" data-reveal>Your key. Your bill. <span>Every token counted.</span></h2>
+          <p data-reveal>
+            Noteless runs on your own API key. You pay the provider directly, and every request is logged with its input
+            and output tokens and an estimated cost, by chat, project and provider.
+          </p>
+          <div class="nl-meter" data-reveal>
+            <p class="nl-meter__k">The counter in every project header</p>
+            <p class="nl-meter__v nl-mono" data-bigtok>
+              <span>↑<b>2.3k</b><small>in</small></span><span>↓<b>890</b><small>out</small></span><span class="is-cost">$<b>0.003</b><small>cost</small></span>
+            </p>
+          </div>
+        </div>
+
+        <div class="nl-settings" data-reveal>
+          <p class="nl-settings__label">Providers</p>
+          <ul class="nl-providers">
+            <li>
+              <span class="nl-providers__ic"><svg aria-hidden="true"><use href="#nl-i-key"></use></svg></span>
+              <span class="nl-providers__name">Anthropic<small class="nl-mono">key ••••••••</small></span>
+              <span class="nl-pill is-on nl-mono">active</span>
+            </li>
+            <li>
+              <span class="nl-providers__ic"><svg aria-hidden="true"><use href="#nl-i-key"></use></svg></span>
+              <span class="nl-providers__name">OpenAI<small class="nl-mono">key ••••••••</small></span>
+              <span class="nl-pill is-on nl-mono">active</span>
+            </li>
+            <li>
+              <span class="nl-providers__ic"><svg aria-hidden="true"><use href="#nl-i-key"></use></svg></span>
+              <span class="nl-providers__name">Moonshot · Kimi<small class="nl-mono">key ••••••••</small></span>
+              <span class="nl-pill nl-mono">inactive</span>
+            </li>
+          </ul>
+          <p class="nl-settings__add">+ Add provider</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== HOW ============================== -->
+    <section class="nl-how" aria-labelledby="nl-how-h">
+      <div class="nl-wrap">
+        <header class="nl-head">
+          <p class="nl-label" data-reveal>How I built it</p>
+          <h2 id="nl-how-h" class="nl-h2" data-reveal>One contract for every model. <span>Strict tools for every edit.</span></h2>
+          <p class="nl-how__lede" data-reveal>
+            For v2 I wrote the spec and the design system first, then had AI write the Flutter code against them. I made
+            the calls. It did the typing.
+          </p>
+        </header>
+        <ol class="nl-how__list">
+          <li data-reveal>
+            <span class="nl-mono">01</span>
+            <h3>One provider contract</h3>
+            <p>Anthropic, OpenAI and OpenAI-compatible providers like Kimi all plug into the same interface. Switching models never touches your notes.</p>
+          </li>
+          <li data-reveal>
+            <span class="nl-mono">02</span>
+            <h3>Tools, not free text</h3>
+            <p>The assistant can only change notes through a fixed set of tools with strict inputs. It asks before anything destructive.</p>
+          </li>
+          <li data-reveal>
+            <span class="nl-mono">03</span>
+            <h3>Local first</h3>
+            <p>Projects, notes and chats live in SQLite on the device. API keys sit in the platform’s secure storage.</p>
+          </li>
+          <li data-reveal>
+            <span class="nl-mono">04</span>
+            <h3>Checked on every screen size</h3>
+            <p>Golden tests cover the main screens in light and dark, on phone, tablet and desktop layouts.</p>
+          </li>
+        </ol>
+        <ul class="nl-stack" aria-label="Stack">
+          <li>Flutter</li><li>Dart</li><li>SQLite</li><li>Anthropic</li><li>OpenAI</li><li>Kimi</li><li>Markdown + LaTeX</li><li>Godot (v1)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== CLOSE ============================== -->
+    <section class="nl-close">
+      <div class="nl-close__glow" aria-hidden="true"></div>
+      <div class="nl-wrap nl-close__inner">
+        <img src={img('wordmark.webp')} alt="Noteless" width="720" height="178" loading="lazy" class="nl-close__word" />
+        <p class="nl-close__p" data-reveal>v1 is live on Google Play. v2 is the 2026 rebuild.</p>
+        <a class="nl-close__btn" href={playUrl} target="_blank" rel="noopener" data-reveal>
+          Noteless on Google Play <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <CaseNext current="noteless" />
+</Base>
+
+<style>
+  :global(body) { background: #0E0E10; }
+  :global(#scroll-progress) { background: #D4A574; }
+
+  .nl {
+    --bg: #0E0E10;
+    --elev: #141418;
+    --card: #1A1A20;
+    --hover: #20202A;
+    --note: #17171C;
+    --border: rgba(255,255,255,.06);
+    --border-2: rgba(255,255,255,.1);
+    --text: #E8E8ED;
+    --sub: #87879E;
+    --ter: #5f5f78;
+    --accent: #D4A574;
+    --accent-soft: rgba(212,165,116,.10);
+    --accent-glow: rgba(212,165,116,.20);
+    --success: #6FCF97;
+    --bubble: #2A2538;
+    --bubble-b: rgba(212,165,116,.15);
+    --v1: #3B6BF8;
+    --cyan: #4fd1e8;
+    --ui: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+    --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --spring: cubic-bezier(.34, 1.56, .64, 1);
+    position: relative;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ui);
+    overflow-x: clip;
+  }
+  .nl::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 30;
+    background-image: var(--grain); background-size: 256px 256px; opacity: .035;
+  }
+  .nl-wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; position: relative; }
+  .nl-mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .nl-label { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--sub); }
+  .nl-h2 {
+    margin-top: 16px; font-size: clamp(34px, 5vw, 62px); line-height: 1.06; font-weight: 300; letter-spacing: -0.035em;
+    max-width: 17ch;
+  }
+  .nl-h2 span { color: var(--sub); }
+  .nl-head { margin-bottom: 64px; }
+  .nl-head--center { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .nl-head--center .nl-h2 { max-width: 20ch; }
+
+  /* ============================== HERO ============================== */
+  .nl-hero { position: relative; padding: 140px 0 140px; text-align: center; overflow: hidden; min-height: min(100svh, 980px); display: flex; align-items: center; }
+  .nl-hero__glow {
+    position: absolute; left: 50%; bottom: -260px; width: 1300px; height: 900px; transform: translateX(-50%); pointer-events: none;
+    background: radial-gradient(ellipse at center bottom, rgba(212,165,116,.22) 0%, rgba(212,165,116,.09) 26%, rgba(160,125,90,.04) 48%, transparent 72%);
+  }
+  .nl-hero__inner { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .nl-hero__mark { width: 52px; height: auto; filter: drop-shadow(0 6px 24px rgba(79,140,248,.35)); }
+  .nl-hero__title { margin-top: 26px; display: flex; flex-direction: column; align-items: center; font-weight: 300; }
+  .nl-hero__name { font-size: 13px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--sub); padding-left: .3em; }
+  .nl-hero__line { margin-top: 18px; font-size: clamp(60px, 10.5vw, 150px); line-height: .94; letter-spacing: -0.055em; font-weight: 300; }
+  .nl-hero__lede { margin-top: 30px; max-width: 520px; font-size: 18px; line-height: 1.6; color: var(--sub); }
+  .nl-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 28px; padding: 0; list-style: none; }
+  .nl-chips li {
+    display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 8px;
+    background: var(--card); border: 1px solid var(--border-2); color: var(--sub); font-size: 12.5px;
+  }
+  .nl-chips .is-live { color: var(--text); }
+  .nl-chips .is-live i { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+  .nl-composer {
+    display: flex; align-items: center; gap: 12px; padding: 0 8px 0 18px; height: 56px; border-radius: 16px;
+    background: var(--card); border: 1px solid var(--border-2); box-shadow: 0 20px 60px -30px rgba(0,0,0,.8);
+    text-align: left;
+  }
+  .nl-composer__text { flex: 1; min-width: 0; font-size: 15px; color: var(--ter); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; }
+  .nl-composer__text.is-typing { color: var(--text); }
+  .nl-caret { display: inline-block; width: 1.5px; height: 18px; margin-left: 1px; background: var(--accent); animation: nl-blink 1.1s steps(1) infinite; }
+  @keyframes nl-blink { 50% { opacity: 0; } }
+  .nl-composer__send {
+    width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; color: var(--ter);
+    background: var(--hover); transition: background .3s, color .3s, transform .3s var(--spring);
+  }
+  .nl-composer__send svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .nl-composer__send.is-ready { background: var(--accent); color: #1a1208; transform: scale(1.06); }
+  .nl-hero__composer { margin-top: 56px; width: min(560px, 100%); }
+
+  /* ============================== SIGNATURE WINDOW ============================== */
+  .nl-sig { padding: 60px 0 120px; position: relative; }
+  .nl-win {
+    position: relative; border-radius: 16px; overflow: hidden; background: var(--elev);
+    border: 1px solid var(--border-2);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 50px 120px -40px rgba(0,0,0,.9), 0 0 120px -50px rgba(212,165,116,.25);
+  }
+  .nl-win__bar { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 16px; border-bottom: 1px solid var(--border); }
+  .nl-win__lights { display: flex; gap: 7px; }
+  .nl-win__lights i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a44; }
+  .nl-win__title { flex: 1; display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 500; letter-spacing: -0.01em; }
+  .nl-win__title svg { width: 17px; height: 17px; fill: none; stroke: var(--accent); stroke-width: 1.6; }
+  .nl-tokens { display: inline-flex; gap: 10px; font-size: 11px; color: var(--sub); letter-spacing: .02em; }
+  .nl-tokens b { font-weight: 400; }
+  .nl-tokens__cost { color: var(--accent); }
+  .nl-tokens__cost b { font-weight: 500; }
+  .nl-win__body { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); height: 600px; }
+  .nl-chat { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); background: var(--bg); position: relative; }
+  .nl-tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--border); height: 42px; align-items: stretch; flex: none; }
+  .nl-tabs span { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; font-size: 13px; color: var(--ter); }
+  .nl-tabs span.is-on { color: var(--text); font-weight: 500; }
+  .nl-tabs span.is-on::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 22px; height: 2px; border-radius: 2px; background: var(--accent); transform: translateX(-50%); }
+  .nl-tabs svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+  .nl-chat__scroll { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; -webkit-mask: linear-gradient(transparent 0, #000 56px); mask: linear-gradient(transparent 0, #000 56px); }
+  .nl-chat__feed { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 14px; }
+  .nl-msg { font-size: 14px; line-height: 1.55; }
+  .nl-msg--ai { color: var(--text); }
+  .nl-msg--user {
+    align-self: flex-end; max-width: 86%; padding: 10px 14px; border-radius: 14px 14px 4px 14px;
+    background: var(--bubble); border: 1px solid var(--bubble-b);
+  }
+  .nl-tool { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ter); opacity: .85; flex-wrap: wrap; }
+  .nl-tool__icon { position: relative; width: 13px; height: 13px; display: grid; place-items: center; }
+  .nl-tool__icon svg { width: 13px; height: 13px; fill: none; stroke: var(--success); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .nl-spin { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--accent); border-top-color: transparent; opacity: 0; animation: nl-spin 0.9s linear infinite; }
+  @keyframes nl-spin { to { transform: rotate(360deg); } }
+  .nl-tool.is-busy svg { opacity: 0; }
+  .nl-tool.is-busy .nl-spin { opacity: 1; }
+  .nl-tool__verb { color: var(--sub); }
+  .nl-tool__path { font-size: 11px; }
+  .nl-tool__detail { font-size: 10px; padding: 2px 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+  .nl-composer--sm { margin: 0 14px 14px; height: 46px; border-radius: 13px; padding: 0 6px 0 14px; flex: none; box-shadow: none; }
+  .nl-composer--sm .nl-composer__text { font-size: 13.5px; }
+  .nl-composer--sm .nl-composer__send { width: 34px; height: 34px; border-radius: 9px; }
+
+  .nl-note { position: relative; background: var(--note); min-height: 0; overflow: hidden; display: flex; flex-direction: column; isolation: isolate; }
+  .nl-note::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: var(--grain); background-size: 200px; opacity: .06; pointer-events: none; }
+  .nl-note__top { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px 0; flex: none; }
+  .nl-note__crumb { font-size: 11px; color: var(--ter); }
+  .nl-note__crumb i { font-style: normal; margin: 0 4px; }
+  .nl-note__crumb b { font-weight: 400; color: var(--sub); }
+  .nl-note__ver { font-size: 10px; color: var(--sub); padding: 2px 7px; border-radius: 6px; border: 1px solid var(--border-2); transition: color .4s, border-color .4s; }
+  .nl-note__ver.is-bumped { color: var(--accent); border-color: rgba(212,165,116,.5); }
+  .nl-note__doc { padding: 18px 28px 28px; }
+  .nl-nl { position: relative; }
+  .nl-nl--h1 { font-size: 30px; font-weight: 300; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 18px; }
+  .nl-nl--h2 { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; margin: 18px 0 10px; }
+  .nl-nl--h3 { font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sub); margin: 14px 0 6px; }
+  .nl-nl--li { font-size: 14px; line-height: 1.75; color: #c9c9d4; padding-left: 16px; }
+  .nl-nl--li::before { content: '·'; position: absolute; left: 4px; color: var(--sub); }
+  .nl-nl--li b { color: var(--text); font-weight: 600; }
+  .nl-nl--p { font-size: 14px; line-height: 1.75; color: #c9c9d4; }
+  .nl-nl.is-patch::after {
+    content: ''; position: absolute; left: -14px; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--accent);
+    opacity: .9;
+  }
+  .nl-nl.is-flash { background: linear-gradient(90deg, rgba(212,165,116,.16), rgba(212,165,116,0) 85%); border-radius: 4px; }
+
+  .nl-sig__foot { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; margin-top: 28px; }
+  .nl-sig__foot p { max-width: 620px; font-size: 16.5px; line-height: 1.65; color: var(--sub); }
+  .nl-replay {
+    flex: none; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 10px;
+    border: 1px solid var(--border-2); background: var(--card); color: var(--sub); font: 500 13px var(--ui); cursor: pointer;
+    transition: color .2s, border-color .2s;
+  }
+  .nl-replay:hover { color: var(--text); border-color: rgba(212,165,116,.4); }
+  .nl-replay svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ============================== PATCH ============================== */
+  .nl-patch { padding: 130px 0; background: var(--elev); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .nl-patch__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; align-items: center; }
+  .nl-patch__text > p:not(.nl-label) { margin-top: 22px; font-size: 17.5px; line-height: 1.65; color: var(--sub); max-width: 480px; }
+  .nl-ops { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; padding: 0; list-style: none; }
+  .nl-ops li { font-size: 12px; padding: 6px 10px; border-radius: 7px; background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(212,165,116,.18); }
+  .nl-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .nl-cmp { padding: 20px; border-radius: 16px; background: var(--note); border: 1px solid var(--border-2); }
+  .nl-cmp__k { font-size: 12px; color: var(--sub); }
+  .nl-cmp--good .nl-cmp__k { color: var(--accent); }
+  .nl-cmp__t { margin-top: 4px; font-size: 16px; font-weight: 500; }
+  .nl-cmp__doc { display: flex; flex-direction: column; gap: 8px; margin: 22px 0 22px; }
+  .nl-cmp__doc i { display: block; height: 7px; border-radius: 4px; background: #2a2a34; transition: background .35s; }
+  .nl-cmp__doc i.is-gap { visibility: hidden; height: 4px; }
+  .nl-cmp__doc i.is-hit { background: rgba(212,165,116,.75); }
+  .nl-cmp__meter { display: flex; align-items: center; gap: 10px; font: 11px var(--mono); color: var(--ter); }
+  .nl-cmp__meter b { flex: 1; height: 6px; border-radius: 3px; background: #24242c; overflow: hidden; }
+  .nl-cmp__meter b i { display: block; height: 100%; border-radius: 3px; background: #8a6c4c; }
+  .nl-cmp--good .nl-cmp__meter b i { background: var(--accent); }
+  .nl-manifest { margin-top: 80px; border-radius: 16px; border: 1px solid var(--border-2); background: var(--bg); overflow: hidden; }
+  .nl-manifest__head { display: flex; justify-content: space-between; padding: 14px 20px; font-size: 11.5px; color: var(--sub); border-bottom: 1px solid var(--border); }
+  .nl-manifest ul { list-style: none; margin: 0; padding: 6px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .nl-manifest li { display: flex; flex-direction: column; gap: 3px; padding: 12px 20px; }
+  .nl-manifest li .nl-mono { font-size: 13px; color: var(--text); }
+  .nl-manifest li span:last-child { font-size: 13px; color: var(--sub); }
+  .nl-manifest li.is-key .nl-mono { color: var(--accent); }
+
+  /* ============================== EVOLUTION ============================== */
+  .nl-evo { padding: 140px 0 120px; position: relative; }
+  .nl-evo .nl-evo__accent {
+    background: linear-gradient(90deg, #5b84ff 0%, var(--cyan) 38%, var(--accent) 78%); -webkit-background-clip: text; background-clip: text;
+    color: transparent; background-size: 200% 100%; background-position: 100% 0;
+  }
+  .nl-evo__rail { position: absolute; left: 50%; top: 330px; bottom: 120px; width: 1px; background: var(--border-2); transform: translateX(-50%); }
+  .nl-evo__rail i { position: absolute; left: 0; top: 0; width: 1px; height: 100%; background: linear-gradient(var(--v1), var(--cyan) 45%, var(--accent)); transform-origin: top; }
+  .nl-era { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 96px; align-items: center; padding: 40px 0; }
+  .nl-era + .nl-era { margin-top: 90px; }
+  .nl-era__tag { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: var(--sub); }
+  .nl-era__tag span { padding: 3px 8px; border-radius: 6px; font-weight: 500; }
+  .nl-era--v1 .nl-era__tag span { background: rgba(59,107,248,.16); color: #8fb0ff; }
+  .nl-era--v2 .nl-era__tag span { background: var(--accent-soft); color: var(--accent); }
+  .nl-era__h { margin-top: 16px; font-size: clamp(30px, 3.6vw, 44px); font-weight: 300; letter-spacing: -0.03em; line-height: 1.08; }
+  .nl-era__list { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .nl-era__list li { position: relative; padding-left: 22px; font-size: 16px; line-height: 1.55; color: #c3c3cf; }
+  .nl-era__list li::before { content: ''; position: absolute; left: 0; top: .62em; width: 8px; height: 8px; border-radius: 2px; }
+  .nl-era--v1 .nl-era__list li::before { background: var(--v1); box-shadow: 0 0 10px rgba(59,107,248,.6); }
+  .nl-era--v2 .nl-era__list li::before { background: var(--accent); box-shadow: 0 0 10px rgba(212,165,116,.5); }
+  .nl-era__note { margin-top: 24px; font-size: 14px; color: var(--sub); font-style: italic; }
+  .nl-era__media { position: relative; }
+  .nl-era__video {
+    position: relative; width: 78%; aspect-ratio: 1; border-radius: 26px; overflow: hidden; background: #111;
+    box-shadow: 0 0 0 1px rgba(59,107,248,.35), 0 0 90px -20px rgba(59,107,248,.45), 0 40px 80px -30px rgba(0,0,0,.9);
+  }
+  .nl-era__video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .nl-era__play {
+    position: absolute; right: 14px; bottom: 14px; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+    display: grid; place-items: center; background: rgba(59,107,248,.9); color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,.4);
+    transition: opacity .3s;
+  }
+  .nl-era__play svg { width: 16px; height: 16px; fill: currentColor; margin-left: 2px; }
+  .nl-era__play.is-hidden { opacity: 0; pointer-events: none; }
+  .nl-era__phones { position: absolute; right: -12%; bottom: -24%; width: 50%; height: auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,.7)); }
+  .nl-era__media--v2 { height: 560px; }
+  .nl-shot {
+    position: absolute; width: 58%; height: auto; border-radius: 18px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 40px 80px -30px rgba(0,0,0,.95);
+  }
+  .nl-shot--a { left: 0; top: 0; }
+  .nl-shot--b { right: 0; top: 70px; box-shadow: 0 0 0 1px rgba(212,165,116,.4), 0 0 80px -30px rgba(212,165,116,.5), 0 40px 80px -30px rgba(0,0,0,.95); }
+
+  /* ============================== BYOK ============================== */
+  .nl-byok { padding: 130px 0; background: var(--elev); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .nl-byok__grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 80px; align-items: center; }
+  .nl-byok__text > p:not(.nl-label) { margin-top: 22px; font-size: 17.5px; line-height: 1.65; color: var(--sub); max-width: 500px; }
+  .nl-meter { margin-top: 40px; padding: 22px 24px; border-radius: 16px; background: var(--bg); border: 1px solid var(--border-2); max-width: 500px; }
+  .nl-meter__k { font-size: 12px; color: var(--sub); }
+  .nl-meter__v { margin-top: 12px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .nl-meter__v span { display: inline-flex; align-items: baseline; gap: 2px; font-size: clamp(26px, 2.5vw, 34px); color: var(--text); letter-spacing: -0.03em; }
+  .nl-meter__v b { font-weight: 400; }
+  .nl-meter__v small { margin-left: 8px; font-size: 11px; color: var(--ter); letter-spacing: .04em; }
+  .nl-meter__v .is-cost { color: var(--accent); }
+  .nl-settings { position: relative; padding: 24px; border-radius: 18px; background: var(--bg); border: 1px solid var(--border-2); }
+  .nl-settings__label { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--sub); }
+  .nl-providers { list-style: none; margin: 14px 0 0; padding: 0; }
+  .nl-providers li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .nl-providers__ic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--card); color: var(--sub); flex: none; }
+  .nl-providers__ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+  .nl-providers__name { flex: 1; display: flex; flex-direction: column; font-size: 15px; font-weight: 500; }
+  .nl-providers__name small { font-size: 10.5px; font-weight: 400; color: var(--ter); margin-top: 2px; letter-spacing: .04em; }
+  .nl-pill { font-size: 10.5px; padding: 3px 8px; border-radius: 6px; color: var(--ter); border: 1px solid var(--border-2); }
+  .nl-pill.is-on { color: var(--success); background: rgba(111,207,151,.1); border-color: rgba(111,207,151,.25); }
+  .nl-settings__add { margin-top: 14px; font-size: 13.5px; color: var(--sub); }
+
+  /* ============================== HOW ============================== */
+  .nl-how { padding: 140px 0 110px; }
+  .nl-how__lede { margin-top: 22px; max-width: 560px; font-size: 17.5px; line-height: 1.65; color: var(--sub); }
+  .nl-how__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; }
+  .nl-how__list li { padding-top: 18px; border-top: 1px solid var(--border-2); }
+  .nl-how__list .nl-mono { font-size: 12px; color: var(--accent); }
+  .nl-how__list h3 { margin-top: 12px; font-size: 19px; font-weight: 500; letter-spacing: -0.015em; }
+  .nl-how__list p { margin-top: 8px; font-size: 14.5px; line-height: 1.6; color: var(--sub); }
+  .nl-stack { list-style: none; margin: 56px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .nl-stack li { font: 12px var(--mono); padding: 7px 11px; border-radius: 8px; border: 1px solid var(--border-2); color: var(--sub); background: var(--card); }
+
+  /* ============================== CLOSE ============================== */
+  .nl-close { position: relative; padding: 140px 0 150px; text-align: center; overflow: hidden; }
+  .nl-close__glow { position: absolute; left: 50%; bottom: -320px; width: 1100px; height: 700px; transform: translateX(-50%); background: radial-gradient(ellipse at center bottom, rgba(79,140,248,.18), rgba(79,209,232,.06) 40%, transparent 70%); pointer-events: none; }
+  .nl-close__inner { display: flex; flex-direction: column; align-items: center; }
+  .nl-close__word { width: min(420px, 78vw); height: auto; }
+  .nl-close__p { margin-top: 30px; font-size: 18px; color: var(--sub); }
+  .nl-close__btn {
+    margin-top: 28px; display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 22px; border-radius: 14px;
+    background: var(--text); color: #101014; font-size: 15.5px; font-weight: 600; transition: transform .3s var(--spring), box-shadow .3s;
+  }
+  .nl-close__btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px -12px rgba(79,140,248,.55); }
+
+  /* ============================== RESPONSIVE ============================== */
+  @media (max-width: 1023px) {
+    .nl-patch__grid, .nl-byok__grid { grid-template-columns: 1fr; gap: 56px; }
+    .nl-era { grid-template-columns: 1fr; gap: 56px; }
+    .nl-era--v2 .nl-era__text { order: -1; }
+    .nl-evo__rail { display: none; }
+    .nl-how__list { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .nl-wrap { padding: 0 20px; }
+    .nl-hero { padding: 116px 0 90px; min-height: 0; }
+    .nl-hero__line { font-size: clamp(56px, 17vw, 76px); }
+    .nl-hero__lede { font-size: 16.5px; }
+    .nl-hero__composer { margin-top: 40px; height: 52px; }
+    .nl-composer__text { font-size: 14px; }
+    .nl-sig { padding: 40px 0 90px; }
+    .nl-head { margin-bottom: 40px; }
+    .nl-win { border-radius: 22px; }
+    .nl-win__bar { height: 46px; gap: 10px; padding: 0 14px; }
+    .nl-win__lights { display: none; }
+    .nl-win__title { font-size: 14px; }
+    .nl-tokens { gap: 7px; font-size: 10px; }
+    .nl-win__body { grid-template-columns: 1fr; grid-template-rows: auto auto; height: auto; }
+    .nl-note { order: -1; height: 330px; border-bottom: 1px solid var(--border); }
+    .nl-note__top { padding: 14px 18px 0; }
+    .nl-note__doc { padding: 12px 18px 18px; }
+    .nl-nl--h1 { font-size: 24px; margin-bottom: 10px; }
+    .nl-nl--h2 { font-size: 15.5px; margin: 12px 0 6px; }
+    .nl-nl--h3 { margin: 10px 0 4px; }
+    .nl-nl--li, .nl-nl--p { font-size: 13px; line-height: 1.65; }
+    .nl-chat { border-right: 0; height: 430px; }
+    .nl-chat__feed { padding: 14px 16px 12px; gap: 12px; }
+    .nl-msg { font-size: 13.5px; }
+    .nl-sig__foot { flex-direction: column; gap: 18px; }
+    .nl-sig__foot p { font-size: 16px; }
+    .nl-patch, .nl-byok { padding: 90px 0; }
+    .nl-patch__text > p:not(.nl-label), .nl-byok__text > p:not(.nl-label) { font-size: 16px; }
+    .nl-compare { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .nl-cmp { padding: 14px; }
+    .nl-cmp__t { font-size: 14px; }
+    .nl-cmp__doc { gap: 6px; margin: 16px 0; }
+    .nl-manifest { margin-top: 56px; }
+    .nl-manifest ul { grid-template-columns: 1fr; }
+    .nl-manifest li { flex-direction: row; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 16px; }
+    .nl-manifest li span:last-child { text-align: right; font-size: 12.5px; }
+    .nl-manifest li .nl-mono { font-size: 12px; }
+    .nl-evo { padding: 96px 0 80px; }
+    .nl-era + .nl-era { margin-top: 70px; }
+    .nl-era { gap: 40px; padding: 0; }
+    .nl-era__list li { font-size: 15px; }
+    .nl-era__video { width: 100%; }
+    .nl-era__phones { display: none; }
+    .nl-era__media--v2 { height: auto; aspect-ratio: 1 / .98; }
+    .nl-shot { width: 60%; border-radius: 12px; }
+    .nl-shot--b { top: 40px; }
+    .nl-meter__v { gap: 18px; }
+    .nl-how { padding: 96px 0 80px; }
+    .nl-how__list { grid-template-columns: 1fr; gap: 24px; }
+    .nl-close { padding: 100px 0 110px; }
+    .nl-close__p { font-size: 16.5px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nl-caret, .nl-spin { animation: none !important; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const root = document.querySelector<HTMLElement>('.nl');
+    if (!root) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---------- v1 video: play on tap, and quietly when on screen ----------
+    const video = root.querySelector<HTMLVideoElement>('[data-video]');
+    const playBtn = root.querySelector<HTMLElement>('[data-video-play]');
+    const playVideo = () => {
+      if (!video) return;
+      video.play().then(() => playBtn?.classList.add('is-hidden')).catch(() => {});
+    };
+    playBtn?.addEventListener('click', playVideo);
+    if (video && !reduce && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => {
+        es.forEach((e) => {
+          if (e.isIntersecting) playVideo();
+          else video.pause();
+        });
+      }, { threshold: 0.5 });
+      io.observe(video);
+    }
+
+    if (reduce) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ---------- hero ----------
+      gsap.from('[data-hero-in]', { opacity: 0, y: 16, duration: 1, stagger: 0.09, ease: 'power3.out', delay: 0.1 });
+      const typeEl = root.querySelector<HTMLElement>('[data-type]');
+      const send = root.querySelector<HTMLElement>('[data-send]');
+      if (typeEl) {
+        const msg = 'An AI note-taking app for brainstorming…';
+        const holder = typeEl.parentElement!;
+        const o = { n: 0 };
+        gsap.timeline({ delay: 1.4 })
+          .call(() => { holder.classList.add('is-typing'); typeEl.textContent = ''; })
+          .to(o, {
+            n: msg.length, duration: 2.4, ease: 'none',
+            onUpdate: () => { typeEl.textContent = msg.slice(0, Math.round(o.n)); },
+          })
+          .call(() => send?.classList.add('is-ready'), [], '+=0.2');
+      }
+
+      // ---------- reveals ----------
+      root.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        gsap.from(el, { opacity: 0, y: 22, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+      });
+
+      // ---------- the window: chat on the left, the note writes itself ----------
+      const win = root.querySelector<HTMLElement>('#nl-win');
+      if (win) {
+        const msgs = Array.from(win.querySelectorAll<HTMLElement>('[data-msg]'));
+        const written = Array.from(win.querySelectorAll<HTMLElement>('[data-line="p"]'));
+        const patched = Array.from(win.querySelectorAll<HTMLElement>('[data-line="x"]'));
+        const ver = win.querySelector<HTMLElement>('[data-ver]')!;
+        const tIn = win.querySelector<HTMLElement>('[data-tok-in]')!;
+        const tOut = win.querySelector<HTMLElement>('[data-tok-out]')!;
+        const tCost = win.querySelector<HTMLElement>('[data-tok-cost]')!;
+        const originals = msgs.map((m) => m.textContent ?? '');
+        const tokens = (a: string, b: string, c: string) => { tIn.textContent = a; tOut.textContent = b; tCost.textContent = c; };
+
+        // stream an assistant message word by word
+        const stream = (tl: gsap.core.Timeline, el: HTMLElement, idx: number, at: string | number) => {
+          const words = originals[idx].split(' ');
+          const o = { n: 0 };
+          tl.set(el, { display: '' }, at)
+            .fromTo(el, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.25 }, '<')
+            .to(o, { n: words.length, duration: Math.min(1.6, 0.07 * words.length), ease: 'none', onUpdate: () => { el.textContent = words.slice(0, Math.ceil(o.n)).join(' '); } }, '<');
+        };
+        const showUser = (tl: gsap.core.Timeline, el: HTMLElement, at: string | number) => {
+          tl.set(el, { display: '' }, at).fromTo(el, { opacity: 0, y: 10, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, '<');
+        };
+        const showTool = (tl: gsap.core.Timeline, el: HTMLElement, at: string | number) => {
+          tl.set(el, { display: '' }, at)
+            .call(() => el.classList.add('is-busy'), [], '<')
+            .fromTo(el, { opacity: 0, y: 4 }, { opacity: 0.85, y: 0, duration: 0.3 }, '<')
+            .call(() => el.classList.remove('is-busy'), [], '+=0.9');
+        };
+        const writeLine = (tl: gsap.core.Timeline, el: HTMLElement, at: string | number, flash = false) => {
+          tl.set(el, { display: '' }, at)
+            .fromTo(el, { opacity: 0, clipPath: 'inset(0 100% 0 0)' }, { opacity: 1, clipPath: 'inset(0 0% 0 0)', duration: 0.45, ease: 'power2.out', clearProps: 'clipPath' }, '<');
+          if (flash) {
+            tl.call(() => el.classList.add('is-flash'), [], '<');
+            tl.call(() => el.classList.remove('is-flash'), [], '+=1.6');
+          }
+        };
+
+        let tl: gsap.core.Timeline | null = null;
+        const reset = () => {
+          tl?.kill();
+          // only the plain messages are streamed; tool lines keep their markup
+          msgs.forEach((m, i) => { if (m.classList.contains('nl-msg')) m.textContent = originals[i] ?? ''; });
+          gsap.set(msgs, { display: 'none', opacity: 0 });
+          gsap.set([...written, ...patched], { display: 'none', opacity: 0 });
+          ver.textContent = 'v1';
+          ver.classList.remove('is-bumped');
+          tokens('0', '0', '0.000');
+        };
+        reset();
+        const play = () => {
+          reset();
+          tl = gsap.timeline({ delay: 0.3 });
+          showUser(tl, msgs[0], 0);
+          tl.call(() => tokens('0.4k', '0', '0.000'), [], '+=0.3');
+          stream(tl, msgs[1], 1, '+=0.5');
+          showTool(tl, msgs[2], '+=0.3');
+          tl.call(() => tokens('1.1k', '420', '0.001'), [], '<');
+          written.forEach((el, i) => writeLine(tl!, el, i === 0 ? '-=0.5' : '+=0.05'));
+          stream(tl, msgs[3], 3, '+=0.2');
+          showUser(tl, msgs[4], '+=0.8');
+          stream(tl, msgs[5], 5, '+=0.6');
+          showTool(tl, msgs[6], '+=0.3');
+          tl.call(() => { tokens('2.3k', '890', '0.003'); ver.textContent = 'v2'; ver.classList.add('is-bumped'); }, [], '<');
+          patched.forEach((el, i) => writeLine(tl!, el, i === 0 ? '-=0.6' : '+=0.12', true));
+          stream(tl, msgs[7], 7, '+=0.5');
+        };
+        ScrollTrigger.create({ trigger: win, start: 'top 65%', once: true, onEnter: play });
+        root.querySelector('[data-replay]')?.addEventListener('click', play);
+      }
+
+      // ---------- rewrite vs patch ----------
+      const cmp = root.querySelector<HTMLElement>('[data-compare]');
+      if (cmp) {
+        const docs = cmp.querySelectorAll<HTMLElement>('.nl-cmp__doc');
+        const hitsW = docs[0].querySelectorAll('i:not(.is-gap)');
+        const hitP = docs[1].querySelectorAll('i.is-hit');
+        const mW = cmp.querySelector<HTMLElement>('[data-meter="write"]');
+        const mP = cmp.querySelector<HTMLElement>('[data-meter="patch"]');
+        const run = () => {
+          const t = gsap.timeline();
+          t.set([...hitsW, ...hitP], { backgroundColor: '#2a2a34' })
+            .set([mW, mP], { width: '0%' })
+            .to(hitsW, { backgroundColor: 'rgba(212,165,116,.75)', duration: 0.18, stagger: 0.07 }, 0.2)
+            .to(mW, { width: '100%', duration: 0.9, ease: 'power1.inOut' }, 0.2)
+            .to(hitP, { backgroundColor: 'rgba(212,165,116,.95)', duration: 0.25 }, 0.4)
+            .to(mP, { width: '11%', duration: 0.4, ease: 'power2.out' }, 0.4);
+        };
+        ScrollTrigger.create({ trigger: cmp, start: 'top 75%', once: true, onEnter: run });
+        cmp.addEventListener('click', run);
+      }
+
+      // ---------- v1 → v2: the accent warms up as you scroll ----------
+      const evo = root.querySelector<HTMLElement>('[data-evo]');
+      if (evo) {
+        gsap.fromTo('.nl-evo__accent', { backgroundPosition: '0% 0' }, {
+          backgroundPosition: '100% 0', ease: 'none',
+          scrollTrigger: { trigger: evo, start: 'top 60%', end: 'bottom 60%', scrub: 0.8 },
+        });
+        gsap.fromTo('[data-rail]', { scaleY: 0 }, {
+          scaleY: 1, ease: 'none',
+          scrollTrigger: { trigger: evo, start: 'top 55%', end: 'bottom 70%', scrub: 0.8 },
+        });
+        gsap.from('.nl-shot--a', { y: 60, rotate: -3, opacity: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.nl-era__media--v2', start: 'top 80%', once: true } });
+        gsap.from('.nl-shot--b', { y: 90, rotate: 3, opacity: 0, duration: 1.2, delay: 0.15, ease: 'power3.out', scrollTrigger: { trigger: '.nl-era__media--v2', start: 'top 80%', once: true } });
+        gsap.from('.nl-era__phones', { y: 50, opacity: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.nl-era--v1', start: 'top 75%', once: true } });
+      }
+
+      // ---------- the big token counter ticks up ----------
+      const big = root.querySelectorAll<HTMLElement>('[data-bigtok] b');
+      if (big.length === 3) {
+        const o = { a: 0, b: 0, c: 0 };
+        gsap.to(o, {
+          a: 2.3, b: 890, c: 0.003, duration: 1.6, ease: 'power2.out',
+          onUpdate: () => {
+            big[0].textContent = `${o.a.toFixed(1)}k`;
+            big[1].textContent = String(Math.round(o.b));
+            big[2].textContent = o.c.toFixed(3);
+          },
+          scrollTrigger: { trigger: '[data-bigtok]', start: 'top 85%', once: true },
+        });
+      }
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* the page is complete without motion */
+    }
+  })();
+</script>

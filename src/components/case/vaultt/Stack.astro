@@ -1,0 +1,157 @@
+---
+// Under the hood: v1 → v2 stack shift, and an animated architecture diagram.
+const v1 = ['FlutterFlow', 'Firebase', 'Cloud Functions'];
+const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edge functions', 'Next.js', 'OpenAI'];
+---
+
+<section class="vt-stack vt-section" id="vt-stack">
+  <div class="vt-wrap">
+    <header class="vt-head">
+      <p class="vt-tag"><span class="no">08</span> Under the hood</p>
+      <h2 class="vt-h2">Built for speed first. <span class="lt">Then rebuilt to last.</span></h2>
+      <p class="vt-lede">
+        v1 went live in three months on FlutterFlow and Firebase. As it grew, I moved it to a hand-maintained Flutter codebase
+        on Supabase: <strong>65 tables, 23 server functions and row-level security on every table.</strong>
+      </p>
+    </header>
+
+    <div class="vt-shift" id="vt-shift">
+      <div class="vt-shift__row is-v1">
+        <span class="vt-shift__k">v1 · 2025</span>
+        <div class="vt-shift__chips">
+          {v1.map((c) => <span class="vt-shift__chip"><span>{c}</span><i class="vt-shift__strike" aria-hidden="true"></i></span>)}
+        </div>
+      </div>
+      <div class="vt-shift__arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7" /></svg></div>
+      <div class="vt-shift__row is-now">
+        <span class="vt-shift__k">Now</span>
+        <div class="vt-shift__chips">
+          {now.map((c) => <span class="vt-shift__chip">{c}</span>)}
+        </div>
+      </div>
+    </div>
+
+    <div class="vt-arch" id="vt-arch" role="img" aria-label="Architecture: the Flutter app for iOS and web, the Next.js admin console and the Next.js accelerator intake all talk to Supabase (Postgres with 65 tables, row-level security on every table, 23 server functions), which calls the AI for the hiring brief and ranked search.">
+      <div class="vt-arch__row is-clients" aria-hidden="true">
+        <div class="vt-node" data-a="1">
+          <span class="vt-node__k">App</span>
+          <strong>Vaultt</strong>
+          <span class="vt-node__s">Flutter · iOS + web</span>
+        </div>
+        <div class="vt-node" data-a="1">
+          <span class="vt-node__k">Team</span>
+          <strong>Admin console</strong>
+          <span class="vt-node__s">Next.js</span>
+        </div>
+        <div class="vt-node" data-a="1">
+          <span class="vt-node__k">Intake</span>
+          <strong>Accelerator form</strong>
+          <span class="vt-node__s">Next.js</span>
+        </div>
+      </div>
+
+      <div class="vt-arch__wires is-top" aria-hidden="true">
+        <span class="vt-wire"><i></i></span><span class="vt-wire"><i></i></span><span class="vt-wire"><i></i></span>
+      </div>
+
+      <div class="vt-arch__core" aria-hidden="true" data-a="2">
+        <div class="vt-arch__core-head"><span class="vt-node__k">Data + logic</span><strong>Supabase</strong></div>
+        <div class="vt-arch__cells">
+          <div class="vt-cell"><b><span data-count="65">65</span></b><span>Postgres tables</span></div>
+          <div class="vt-cell"><b><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></b><span>Row-level security on every table</span></div>
+          <div class="vt-cell"><b><span data-count="23">23</span></b><span>Server functions</span></div>
+        </div>
+      </div>
+
+      <div class="vt-arch__wires is-bottom" aria-hidden="true">
+        <span class="vt-wire is-ai"><i></i></span>
+      </div>
+
+      <div class="vt-arch__row is-ai" aria-hidden="true">
+        <div class="vt-node is-ai" data-a="3">
+          <span class="vt-node__k">AI</span>
+          <strong>Hiring brief <span class="vt-node__arrow">→</span> ranked search</strong>
+          <span class="vt-node__s">OpenAI · called from server functions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-stack { background: radial-gradient(80% 50% at 50% 100%, rgba(47, 128, 238, 0.12), transparent 70%), var(--vt-navy); }
+
+  .vt-shift { display: flex; flex-direction: column; gap: 14px; padding: 26px; border-radius: 20px; border: 1px solid var(--vt-line); background: rgba(10, 33, 64, 0.45); }
+  .vt-shift__row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .vt-shift__k { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); }
+  .is-now .vt-shift__k { color: var(--vt-blue); }
+  .vt-shift__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vt-shift__chip {
+    position: relative; font-family: var(--vt-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+    padding: 9px 14px; border-radius: 99px; border: 1px solid var(--vt-line-2); color: var(--vt-light); background: rgba(232, 241, 255, 0.03);
+  }
+  .is-v1 .vt-shift__chip { color: var(--vt-faint); border-style: dashed; }
+  .vt-shift__strike { position: absolute; left: 10px; right: 10px; top: 50%; height: 1.5px; background: rgba(232, 241, 255, 0.5); transform-origin: left; transform: scaleX(var(--s, 1)); }
+  .is-now .vt-shift__chip { border-color: rgba(111, 168, 255, 0.5); background: var(--vt-glow); }
+  .vt-shift__arrow { width: 110px; display: flex; justify-content: flex-start; padding-left: 4px; color: var(--vt-blue); }
+  .vt-shift__arrow svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* architecture */
+  .vt-arch { margin-top: clamp(56px, 7vw, 88px); display: flex; flex-direction: column; align-items: stretch; }
+  .vt-arch__row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .vt-arch__row.is-ai { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .vt-node {
+    position: relative; display: flex; flex-direction: column; gap: 6px; padding: 20px 22px;
+    border-radius: 16px; border: 1px solid var(--vt-line-2);
+    background: linear-gradient(160deg, var(--vt-panel), var(--vt-navy-3));
+    box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.85);
+  }
+  .vt-node strong { font-family: var(--vt-display); font-size: 22px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; }
+  .vt-node__k { font-family: var(--vt-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vt-blue); }
+  .vt-node__s { font-family: var(--vt-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--vt-soft); }
+  .vt-node.is-ai { width: min(100%, 560px); align-items: center; text-align: center; border-color: rgba(111, 168, 255, 0.6); background: linear-gradient(160deg, #1A4380, #0F2D57); box-shadow: 0 0 0 4px rgba(111, 168, 255, 0.07), 0 30px 80px -30px rgba(111, 168, 255, 0.5); }
+  .vt-node__arrow { color: var(--vt-blue); }
+
+  .vt-arch__wires { position: relative; height: 64px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .vt-arch__wires.is-bottom { grid-template-columns: 1fr; }
+  .vt-wire { position: relative; justify-self: center; width: 2px; height: 100%; background: rgba(111, 168, 255, 0.22); border-radius: 2px; overflow: hidden; transform-origin: top; }
+  .vt-wire i { position: absolute; left: -2px; width: 6px; height: 18px; border-radius: 6px; background: linear-gradient(180deg, transparent, var(--vt-blue), transparent); top: -20px; opacity: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-wire i { animation: vt-pulse-down 2.1s linear infinite; opacity: 1; }
+    .vt-arch__wires.is-top .vt-wire:nth-child(2) i { animation-delay: -0.7s; }
+    .vt-arch__wires.is-top .vt-wire:nth-child(3) i { animation-delay: -1.4s; }
+    .vt-wire.is-ai i { animation-duration: 1.6s; }
+  }
+  @keyframes vt-pulse-down { to { top: 100%; } }
+
+  .vt-arch__core {
+    position: relative; padding: 22px; border-radius: 22px;
+    border: 1px solid rgba(111, 168, 255, 0.4);
+    background: linear-gradient(180deg, rgba(47, 128, 238, 0.14), rgba(10, 33, 64, 0.6));
+    box-shadow: 0 50px 100px -60px rgba(47, 128, 238, 0.6);
+  }
+  .vt-arch__core-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 0 4px 16px; }
+  .vt-arch__core-head strong { font-family: var(--vt-display); font-size: clamp(28px, 3vw, 40px); font-weight: 800; letter-spacing: -0.035em; order: -1; }
+  .vt-arch__cells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .vt-cell { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 14px; background: rgba(6, 20, 40, 0.55); border: 1px solid var(--vt-line); }
+  .vt-cell b { font-family: var(--vt-display); font-size: clamp(36px, 4vw, 54px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; color: var(--vt-blue); min-height: 1em; display: flex; align-items: center; }
+  .vt-cell b svg { width: 0.8em; height: 0.8em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-cell > span { font-size: 14.5px; line-height: 1.4; color: var(--vt-soft); }
+
+  @media (max-width: 767px) {
+    .vt-shift { padding: 18px; }
+    .vt-shift__row { grid-template-columns: 1fr; gap: 10px; }
+    .vt-shift__arrow { width: auto; }
+    .vt-shift__chip { font-size: 11px; padding: 8px 12px; }
+    .vt-arch__row.is-clients { grid-template-columns: 1fr; gap: 10px; }
+    .vt-arch__wires.is-top { grid-template-columns: 1fr; height: 48px; }
+    .vt-arch__wires.is-top .vt-wire:nth-child(n + 2) { display: none; }
+    .vt-arch__wires { height: 48px; }
+    .vt-node { padding: 16px 18px; }
+    .vt-node strong { font-size: 20px; }
+    .vt-arch__cells { grid-template-columns: 1fr; }
+    .vt-cell { flex-direction: row; align-items: center; gap: 14px; padding: 14px 16px; }
+    .vt-cell b { font-size: 34px; min-width: 52px; }
+    .vt-arch__core { padding: 16px; }
+  }
+</style>

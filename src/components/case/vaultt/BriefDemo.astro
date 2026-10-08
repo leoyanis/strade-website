@@ -1,0 +1,371 @@
+---
+// The AI hiring brief, rebuilt in Vaultt's look. Desktop: pinned and scroll-driven
+// (chat types itself → brief assembles → ranked matches). Mobile / no JS: the three phases stacked.
+const chips1 = ['Full-time', 'Part-time', 'Project-based', 'Internship'];
+const chips2 = ['£20–25k', '£25–30k', '£30–35k', 'Flexible'];
+const signals = [
+  {
+    name: 'Content & copy', c: '#6FA8FF',
+    cal: [[3, 'Compelling copy across formats'], [2, 'Clear, structured content'], [1, 'Basic drafting with direction']],
+  },
+  { name: 'Analytics & reporting', c: '#B9D4FF' },
+  { name: 'Campaign execution', c: '#2F80EE' },
+  { name: 'Learning mindset', c: '#7FE0B0' },
+];
+const people = [
+  {
+    init: 'SM', name: 'Sarah M.', sub: 'University of Leeds · Content & analytics', rank: 1,
+    tags: [[3, 'Content & copy'], [2, 'Analytics'], [2, 'Campaigns']],
+    note: 'Ran a society’s content calendar and wrote its weekly report on what worked.',
+  },
+  {
+    init: 'JT', name: 'James T.', sub: 'University of Bristol · Digital marketing', rank: 2,
+    tags: [[2, 'Content & copy'], [3, 'Analytics'], [2, 'Campaigns']],
+    note: 'Built reporting dashboards for three student campaigns.',
+  },
+  {
+    init: 'PK', name: 'Priya K.', sub: 'UCL · Brand & communications', rank: 3,
+    tags: [[3, 'Content & copy'], [1, 'Analytics'], [2, 'Campaigns']],
+    note: '',
+  },
+];
+const USER_TEXT = 'I need an entry-level marketer who can write copy and run basic analytics';
+const steps = [
+  { n: '01', t: 'Describe the hire', d: 'Type it the way you would say it out loud. No job-spec template.' },
+  { n: '02', t: 'The AI writes the brief', d: 'Two quick questions, then a brief with the signals that matter.' },
+  { n: '03', t: 'Ranked by real fit', d: 'People ranked on their actual work, and every score has a reason.' },
+];
+---
+
+<section class="vt-demo" id="vt-demo">
+  <div class="vt-wrap">
+    <header class="vt-head vt-demo__head">
+      <p class="vt-tag"><span class="no">05</span> The AI hiring brief</p>
+      <h2 class="vt-h2">One vague sentence in. <span class="lt">A ranked shortlist out.</span></h2>
+      <p class="vt-lede">
+        On the company side, hiring starts with a chat, not a form. The AI asks what a good recruiter would ask,
+        writes the brief, then ranks real people by fit and shows its reasoning.
+      </p>
+    </header>
+  </div>
+
+  <div class="vt-demo__pin" id="vt-demo-pin">
+    <div class="vt-wrap vt-demo__layout">
+      <div class="vt-demo__steps" aria-hidden="true">
+        <span class="vt-demo__prog"><i></i></span>
+        <ol class="vt-demo__list">
+          {steps.map((s, i) => (
+            <li class:list={['vt-demo__step', i === 0 && 'is-on']} data-step={i + 1}>
+              <span class="vt-demo__n">{s.n}</span>
+              <strong>{s.t}</strong>
+              <p>{s.d}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div class="vt-win" role="img" aria-label="Demo: a company describes a hire in a chat, the AI writes a hiring brief with matching signals, then ranks three candidates by fit with its reasoning.">
+        <div class="vt-win__bar">
+          <span class="vt-win__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="vt-win__title"><img src="/images/work/vaultt/icon.webp" alt="" width="16" height="16" />Vaultt · Find talent</span>
+          <span class="vt-win__ai">AI</span>
+        </div>
+
+        <div class="vt-win__body" aria-hidden="true">
+          <!-- phase 1: chat -->
+          <div class="vt-chat">
+            <p class="vt-phase-label"><span>01</span> Describe the hire</p>
+            <div class="vt-chat__thread">
+              <div class="vt-msg is-ai is-hello"><span class="vt-msg__av"></span><span>Hi! Who are you looking for?</span></div>
+              <div class="vt-msg is-user" id="vt-msg-user">{USER_TEXT}</div>
+              <div class="vt-msg is-ai" id="vt-ai-1"><span class="vt-msg__av"></span><span>Got it. What kind of engagement?</span></div>
+              <div class="vt-chips" id="vt-chips-1">
+                {chips1.map((c) => (
+                  <span class:list={['vt-chip', c === 'Part-time' && 'is-picked']}><span class="vt-chip__sel"></span><span class="vt-chip__t">{c}</span></span>
+                ))}
+              </div>
+              <div class="vt-msg is-ai" id="vt-ai-2"><span class="vt-msg__av"></span><span>And the salary range?</span></div>
+              <div class="vt-chips" id="vt-chips-2">
+                {chips2.map((c) => (
+                  <span class:list={['vt-chip', c === '£25–30k' && 'is-picked']}><span class="vt-chip__sel"></span><span class="vt-chip__t">{c}</span></span>
+                ))}
+              </div>
+            </div>
+            <div class="vt-chat__input">
+              <span class="vt-chat__field" id="vt-field" data-text={USER_TEXT}>
+                <span class="vt-chat__typed" id="vt-typed"></span><span class="vt-caret"></span><span class="vt-chat__ph">Describe who you need…</span>
+              </span>
+              <span class="vt-chat__send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" /></svg></span>
+            </div>
+          </div>
+
+          <!-- phase 2: brief -->
+          <div class="vt-brief">
+            <p class="vt-phase-label"><span>02</span> The AI writes the brief</p>
+            <div class="vt-brief__ghost">
+              <span class="vt-brief__ghost-k">Hiring brief</span>
+              <i style="width:72%"></i><i style="width:92%"></i><i style="width:58%"></i>
+              <span class="vt-brief__ghost-k is-sub">Matching signals</span>
+              <i style="width:64%"></i><i style="width:48%"></i><i style="width:70%"></i>
+              <span class="vt-brief__ghost-note">The brief writes itself once the AI has what it needs</span>
+            </div>
+            <div class="vt-brief__card" id="vt-brief-card">
+              <div class="vt-brief__top"><span class="vt-brief__label">Hiring brief</span><span class="vt-brief__gen">✦ Written by AI</span></div>
+              <h3 class="vt-brief__title" id="vt-bt">Marketing Specialist <span>· Part-time</span></h3>
+              <p class="vt-brief__overview" id="vt-bo">Entry-level marketer with strong copywriting and basic analytics. Part-time, £25–30k.</p>
+              <p class="vt-brief__sig-label" id="vt-bsl">Matching signals</p>
+              <ul class="vt-brief__signals">
+                {signals.map((s, i) => (
+                  <li class="vt-sig" data-sig={i}>
+                    <i style={`--c:${s.c}`}></i>
+                    <div>
+                      <strong>{s.name}</strong>
+                      {s.cal && (
+                        <div class="vt-cal" id="vt-cal">
+                          {s.cal.map(([n, t]) => (
+                            <span class="vt-cal__row"><span class="vt-stars" data-n={n}><i></i><i></i><i></i></span>{t}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <!-- phase 3: ranked results -->
+          <div class="vt-results">
+            <p class="vt-phase-label"><span>03</span> Ranked by real fit</p>
+            <div class="vt-results__bar">
+              <span class="vt-results__role">Marketing Specialist</span>
+              <span class="vt-results__count"><b id="vt-count">3</b> top matches · ranked by fit</span>
+            </div>
+            <div class="vt-rcards">
+              {people.map((p, i) => (
+                <article class:list={['vt-rcard', i === 0 && 'is-top']} data-card={i}>
+                  <div class="vt-rcard__top">
+                    <span class="vt-rcard__av">{p.init}</span>
+                    <div class="vt-rcard__who"><strong>{p.name}</strong><span>{p.sub}</span></div>
+                    <span class="vt-rcard__rank">#{p.rank} fit</span>
+                  </div>
+                  <div class="vt-rcard__tags">
+                    {p.tags.map(([n, t], k) => (
+                      <span class:list={['vt-rtag', i === 0 && k === 0 && 'has-reason']}>
+                        <span class="vt-stars" data-n={n}><i></i><i></i><i></i></span>{t}
+                      </span>
+                    ))}
+                  </div>
+                  {i === 0 && (
+                    <div class="vt-reason" id="vt-reason">
+                      <span class="vt-reason__label">AI reasoning · Content &amp; copy</span>
+                      Sarah’s portfolio shows copy across blog posts and social campaigns, with the results attached to each one.
+                    </div>
+                  )}
+                  {p.note && <p class="vt-rcard__note">“{p.note}”</p>}
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vt-wrap">
+    <p class="vt-demo__foot">
+      <span class="vt-demo__foot-k">Why it matters</span>
+      A keyword search finds people who wrote “marketing” on a profile. This finds people whose work shows they can do the job.
+    </p>
+  </div>
+</section>
+
+<style is:global>
+  .vt-demo { position: relative; padding: clamp(96px, 12vw, 160px) 0 clamp(80px, 10vw, 130px); background: linear-gradient(180deg, var(--vt-navy) 0%, var(--vt-navy-2) 100%); }
+  .vt-demo__head { max-width: 860px; }
+
+  .vt-demo__pin { position: relative; }
+  .vt-demo__layout { display: flex; justify-content: center; }
+  .vt-demo__steps { display: none; }
+
+  /* window */
+  .vt-win {
+    position: relative; width: 100%; max-width: 760px;
+    background: linear-gradient(170deg, #0F2D55 0%, var(--vt-navy-2) 60%);
+    border: 1px solid var(--vt-line-2); border-radius: 18px; overflow: hidden;
+    box-shadow: 0 60px 120px -60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(111, 168, 255, 0.05) inset;
+  }
+  .vt-win__bar { display: flex; align-items: center; gap: 14px; height: 46px; padding: 0 16px; border-bottom: 1px solid var(--vt-line); background: rgba(10, 33, 64, 0.6); }
+  .vt-win__dots { display: flex; gap: 6px; }
+  .vt-win__dots i { width: 10px; height: 10px; border-radius: 50%; background: rgba(232, 241, 255, 0.14); }
+  .vt-win__title { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--vt-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-soft); }
+  .vt-win__title img { width: 16px; height: 16px; display: block; }
+  .vt-win__ai { font-family: var(--vt-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--vt-navy); background: var(--vt-blue); border-radius: 99px; padding: 4px 9px; }
+
+  .vt-win__body { display: flex; flex-direction: column; }
+  .vt-chat, .vt-brief, .vt-results { padding: 22px; }
+  .vt-brief, .vt-results { border-top: 1px solid var(--vt-line); }
+  .vt-phase-label {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    font-family: var(--vt-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-blue);
+  }
+  .vt-phase-label span { color: var(--vt-faint); }
+
+  /* chat */
+  .vt-chat { display: flex; flex-direction: column; gap: 14px; }
+  .vt-chat__thread { display: flex; flex-direction: column; gap: 10px; }
+  .vt-msg { max-width: 88%; padding: 11px 15px; border-radius: 16px; font-size: 14.5px; line-height: 1.48; }
+  .vt-msg.is-user { align-self: flex-end; background: var(--vt-blue); color: var(--vt-navy); font-weight: 500; border-bottom-right-radius: 5px; box-shadow: 0 12px 30px -16px rgba(111, 168, 255, 0.8); }
+  .vt-msg.is-ai { align-self: flex-start; display: flex; gap: 10px; align-items: flex-start; background: var(--vt-panel); border: 1px solid var(--vt-line); color: var(--vt-light); border-bottom-left-radius: 5px; }
+  .vt-msg__av { width: 22px; height: 22px; flex-shrink: 0; border-radius: 7px; background: var(--vt-navy-2) url('/images/work/vaultt/icon.webp') center / 72% no-repeat; margin-top: -1px; }
+  .vt-chips { display: flex; flex-wrap: wrap; gap: 7px; padding-left: 4px; }
+  .vt-chip {
+    position: relative; display: inline-flex; isolation: isolate;
+    font-family: var(--vt-mono); font-size: 11.5px; line-height: 1; letter-spacing: 0.02em;
+    padding: 9px 13px; border-radius: 20px; color: var(--vt-soft);
+    background: rgba(232, 241, 255, 0.05); border: 1px solid var(--vt-line);
+  }
+  .vt-chip__sel { position: absolute; inset: -1px; z-index: -1; border-radius: inherit; border: 1px solid var(--vt-blue); background: rgba(111, 168, 255, 0.2); opacity: 0; }
+  .vt-chip.is-picked .vt-chip__sel { opacity: 1; }
+  .vt-chip.is-picked .vt-chip__t { color: var(--vt-light); }
+
+  .vt-chat__input {
+    display: flex; align-items: flex-end; gap: 10px; margin-top: auto;
+    padding: 9px 9px 9px 15px; border-radius: 16px; background: rgba(10, 33, 64, 0.85); border: 1px solid var(--vt-line-2);
+  }
+  .vt-chat__field { position: relative; flex: 1; min-height: 42px; font-size: 14px; line-height: 1.5; color: var(--vt-light); padding-top: 2px; }
+  .vt-chat__ph { position: absolute; left: 0; top: 2px; color: var(--vt-faint); pointer-events: none; }
+  .vt-chat__field.has-text .vt-chat__ph { display: none; }
+  .vt-caret { display: none; width: 2px; height: 1.15em; margin-left: 1px; background: var(--vt-blue); vertical-align: -0.22em; }
+  .vt-chat__field.is-typing .vt-caret { display: inline-block; animation: vt-blink 1s steps(1) infinite; }
+  @keyframes vt-blink { 50% { opacity: 0; } }
+  .vt-chat__send { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; background: var(--vt-blue); color: var(--vt-navy); }
+  .vt-chat__send svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* brief */
+  .vt-brief__ghost { display: none; }
+  .vt-demo.is-pinned .vt-brief__ghost {
+    position: absolute; left: 0; right: 22px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 11px; padding: 22px;
+    border-radius: 14px; border: 1.5px dashed rgba(232, 241, 255, 0.14);
+  }
+  .vt-brief__ghost i { display: block; height: 10px; border-radius: 6px; background: rgba(232, 241, 255, 0.07); }
+  .vt-brief__ghost-k { font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); }
+  .vt-brief__ghost-k.is-sub { margin-top: 10px; }
+  .vt-brief__ghost-note { margin-top: 10px; font-size: 12.5px; line-height: 1.5; color: var(--vt-faint); }
+  .vt-brief__card {
+    width: 100%;
+    background: linear-gradient(160deg, var(--vt-panel), var(--vt-navy-3));
+    border: 1px solid var(--vt-line-2); border-radius: 14px; padding: 20px 20px 10px;
+    box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.85);
+  }
+  .vt-brief__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .vt-brief__label { font-family: var(--vt-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-blue); }
+  .vt-brief__gen { font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-faint); }
+  .vt-brief__title { margin-top: 12px; font-family: var(--vt-display); font-size: 22px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; color: var(--vt-light); }
+  .vt-brief__title span { color: var(--vt-faint); white-space: nowrap; }
+  .vt-brief__overview { margin-top: 8px; font-size: 13.5px; line-height: 1.55; color: var(--vt-soft); }
+  .vt-brief__sig-label { margin-top: 16px; padding-bottom: 6px; font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); }
+  .vt-brief__signals { display: flex; flex-direction: column; }
+  .vt-sig { display: flex; gap: 11px; padding: 10px 0; border-top: 1px solid var(--vt-line); }
+  .vt-sig > i { width: 9px; height: 9px; margin-top: 5px; flex-shrink: 0; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); }
+  .vt-sig strong { font-size: 14px; font-weight: 600; color: var(--vt-light); }
+  .vt-cal { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; overflow: hidden; }
+  .vt-cal__row { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--vt-soft); }
+
+  .vt-stars { display: inline-flex; gap: 2px; flex-shrink: 0; }
+  .vt-stars i {
+    width: 9px; height: 9px; background: var(--vt-blue); opacity: 0.22;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+  .vt-stars[data-n='1'] i:nth-child(-n + 1),
+  .vt-stars[data-n='2'] i:nth-child(-n + 2),
+  .vt-stars[data-n='3'] i { opacity: 1; }
+
+  /* results */
+  .vt-results__bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding: 8px 8px 8px 8px; border-radius: 999px; background: rgba(10, 33, 64, 0.85); border: 1px solid var(--vt-line-2);
+  }
+  .vt-results__role { font-family: var(--vt-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vt-blue); background: var(--vt-glow); border: 1px solid rgba(111, 168, 255, 0.4); border-radius: 99px; padding: 7px 12px; }
+  .vt-results__count { font-family: var(--vt-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-faint); padding-right: 10px; }
+  .vt-results__count b { color: var(--vt-light); font-weight: 600; }
+  .vt-rcards { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  .vt-rcard.is-top { z-index: 3; }
+  .vt-rcard { position: relative; padding: 14px 16px; border-radius: 14px; background: var(--vt-navy-3); border: 1px solid var(--vt-line); }
+  .vt-rcard.is-top { border-color: rgba(111, 168, 255, 0.55); background: linear-gradient(160deg, #143563, var(--vt-navy-3)); box-shadow: 0 24px 50px -30px rgba(111, 168, 255, 0.45); }
+  .vt-rcard__top { display: flex; align-items: center; gap: 12px; }
+  .vt-rcard__av {
+    width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--vt-sans); font-size: 13px; font-weight: 700; color: var(--vt-navy);
+    background: linear-gradient(135deg, #CFE1FF, #6FA8FF);
+  }
+  .vt-rcard:nth-child(2) .vt-rcard__av { background: linear-gradient(135deg, #B9F2D6, #5FCFA0); }
+  .vt-rcard:nth-child(3) .vt-rcard__av { background: linear-gradient(135deg, #E3D4FF, #A98BFF); }
+  .vt-rcard__who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .vt-rcard__who strong { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--vt-light); }
+  .vt-rcard__who span { font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--vt-faint); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vt-rcard__rank { font-family: var(--vt-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-blue); white-space: nowrap; }
+  .vt-rcard__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+  .vt-rtag {
+    position: relative; display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--vt-soft);
+    background: rgba(232, 241, 255, 0.06); border-radius: 14px; padding: 6px 9px;
+  }
+  .vt-rtag.has-reason { background: rgba(111, 168, 255, 0.16); color: var(--vt-light); }
+  .vt-rtag .vt-stars i { width: 8px; height: 8px; }
+  .vt-rcard__note { margin-top: 10px; font-size: 13px; line-height: 1.5; font-style: italic; color: var(--vt-faint); }
+
+  .vt-reason {
+    position: relative; z-index: 5; margin-top: 12px;
+    display: block; padding: 13px 15px; border-radius: 12px;
+    background: #0B2242; border: 1px solid rgba(111, 168, 255, 0.5);
+    box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.9);
+    font-family: var(--vt-sans); font-size: 12.5px; line-height: 1.55; letter-spacing: 0; text-transform: none; color: var(--vt-soft);
+  }
+  .vt-reason::before { content: ''; position: absolute; top: -6px; left: 22px; width: 10px; height: 10px; background: #0B2242; border-left: 1px solid rgba(111, 168, 255, 0.5); border-top: 1px solid rgba(111, 168, 255, 0.5); transform: rotate(45deg); }
+  .vt-reason__label { display: block; margin-bottom: 5px; font-family: var(--vt-mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-blue); }
+
+  /* pinned: the reasoning floats as a popover under the first tag, over the next card */
+  .vt-demo.is-pinned .vt-reason { position: absolute; left: 14px; top: 92px; width: 310px; margin-top: 0; }
+
+  .vt-demo__foot {
+    margin: clamp(48px, 6vw, 72px) auto 0; max-width: 760px;
+    display: flex; flex-direction: column; gap: 10px;
+    font-family: var(--vt-display); font-weight: 600; font-size: clamp(20px, 2vw, 26px); line-height: 1.3; letter-spacing: -0.02em; color: var(--vt-light);
+  }
+  .vt-demo__foot-k { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-blue); }
+
+  /* ---------- pinned desktop mode ---------- */
+  .vt-demo.is-pinned .vt-demo__pin { height: 100vh; max-height: 980px; min-height: 640px; display: flex; align-items: center; }
+  .vt-demo.is-pinned .vt-demo__layout { width: 100%; display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: clamp(40px, 5vw, 72px); align-items: center; }
+  .vt-demo.is-pinned .vt-win { max-width: none; }
+  .vt-demo.is-pinned .vt-phase-label { display: none; }
+  .vt-demo.is-pinned .vt-win__body { position: relative; display: block; height: min(560px, calc(100vh - 210px)); }
+  .vt-demo.is-pinned .vt-chat { position: absolute; top: 0; bottom: 0; left: 0; width: 55%; }
+  .vt-demo.is-pinned .vt-brief { position: absolute; top: 0; bottom: 0; right: 0; width: 45%; padding-left: 0; border-top: 0; display: flex; align-items: center; }
+  .vt-demo.is-pinned .vt-results { position: absolute; inset: 0; border-top: 0; padding: 26px 34px; }
+  .vt-demo.is-pinned .vt-demo__steps { position: relative; display: block; padding-left: 30px; }
+  .vt-demo__list { display: flex; flex-direction: column; gap: 40px; }
+  .vt-demo__prog { position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; border-radius: 2px; background: var(--vt-line-2); overflow: hidden; }
+  .vt-demo__prog i { position: absolute; inset: 0; background: var(--vt-blue); transform-origin: top; transform: scaleY(var(--p, 0)); }
+  .vt-demo__step { display: flex; flex-direction: column; gap: 6px; opacity: 0.32; transition: opacity 0.35s var(--vt-ease); }
+  .vt-demo__step.is-on { opacity: 1; }
+  .vt-demo__n { font-family: var(--vt-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.12em; color: var(--vt-blue); }
+  .vt-demo__step strong { font-family: var(--vt-display); font-size: 25px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: var(--vt-light); }
+  .vt-demo__step p { font-size: 15px; line-height: 1.55; color: var(--vt-soft); }
+
+  @media (max-width: 600px) {
+    .vt-demo__layout { margin: 0 -6px; }
+    .vt-win { border-radius: 16px; }
+    .vt-win__bar { height: 40px; padding: 0 12px; }
+    .vt-win__title { font-size: 9.5px; }
+    .vt-chat, .vt-brief, .vt-results { padding: 18px 14px; }
+    .vt-msg { font-size: 14px; max-width: 92%; }
+    .vt-chip { font-size: 10.5px; padding: 8px 11px; }
+    .vt-results__count { font-size: 9px; }
+    .vt-rcard { padding: 13px 13px; }
+    .vt-rcard__rank { font-size: 9.5px; }
+    .vt-rtag { font-size: 9px; padding: 5px 8px; }
+  }
+</style>

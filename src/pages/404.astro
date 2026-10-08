@@ -3,20 +3,25 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base
-  title="404 | Strade"
+  title="Lost quest | Yanis Schweizer"
   description="This page does not exist."
   locale="en"
   path="/404"
+  noAlternates
 >
   <section class="not-found">
     <div class="nf-dot-rain" id="nf-dots" aria-hidden="true"></div>
     <div class="container nf-content">
-      <span class="label">404</span>
-      <h1>This page does not exist.</h1>
+      <span class="label">404 · quest not found</span>
+      <h1>This page wandered off.</h1>
       <p style="color:var(--text-secondary);margin:16px 0 32px">
-        Let's get you back on track.
+        Probably a link from an old post. Here's where the good stuff lives:
       </p>
-      <a href="/" class="btn-primary">Go home &#8594;</a>
+      <div class="hero-actions" style="justify-content:flex-start">
+        <a href="/" class="btn-primary hero-cta">Go home &#8594;</a>
+        <a href="/free" class="btn-ghost">Free stuff</a>
+        <a href="/work" class="btn-ghost">My work</a>
+      </div>
     </div>
   </section>
 </Base>

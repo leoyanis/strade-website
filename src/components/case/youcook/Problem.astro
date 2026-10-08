@@ -1,0 +1,138 @@
+---
+interface Props { problem: string }
+const { problem } = Astro.props;
+// work.ts opens with the question itself, which is already the headline here.
+const lede = problem.replace(/^.*?\?\W* is /, 'It’s ');
+// Copy from youcookapp.com's comparison block.
+const no = ['Spend hours looking for recipes online', 'Figure out you’re missing ingredients', 'Get frustrated and quit'];
+const yes = ['Uses ingredients you have at home', 'Fits your diet and preferences', 'Tastes amazing every time'];
+---
+
+<section class="problem" id="yc-problem">
+  <div class="problem__grid">
+    <div class="problem__copy" data-yc-reveal>
+      <p class="yc-eyebrow">The problem</p>
+      <h2 class="problem__title"><span class="q">“</span>What can I cook with what I have?<span class="q">”</span></h2>
+      <p class="problem__lede">{lede}</p>
+      <p class="problem__lede problem__lede--soft">
+        Tired of spending hours searching for the perfect recipe online, just to find out you’re missing one of the ingredients?
+        That’s the moment I built YouCook for.
+      </p>
+    </div>
+
+    <div class="vs">
+      <div class="vs__card vs__card--no">
+        <p class="vs__head"><span class="vs__ico" aria-hidden="true">✕</span>You no longer have to</p>
+        <ul>
+          {no.map((t) => (
+            <li><span class="vs__x" aria-hidden="true">✕</span><span><span class="vs__strike">{t}</span></span></li>
+          ))}
+        </ul>
+      </div>
+      <div class="vs__card vs__card--yes">
+        <p class="vs__head"><span class="vs__ico" aria-hidden="true">✓</span>YouCook generates the perfect recipe for you</p>
+        <ul>
+          {yes.map((t) => (
+            <li><span class="vs__tick" aria-hidden="true">✓</span><span>{t}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .problem {
+    position: relative;
+    background: #fff;
+    padding: clamp(72px, 10vw, 140px) 0 clamp(80px, 10vw, 150px);
+  }
+  .problem__grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--yc-gutter);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(40px, 6vw, 88px);
+    align-items: center;
+  }
+  .problem__title {
+    font-family: var(--yc-font);
+    font-size: clamp(38px, 4.3vw, 58px);
+    font-weight: 700;
+    line-height: 1.06;
+    text-wrap: balance;
+    letter-spacing: -0.03em;
+    color: var(--yc-ink-strong);
+    margin: 0 0 22px;
+  }
+  .problem__title .q { color: var(--yc-coral); }
+  .problem__lede {
+    font-size: clamp(17px, 1.4vw, 19px);
+    font-weight: 500;
+    line-height: 1.65;
+    color: #555;
+    max-width: 520px;
+    margin: 0;
+  }
+  .problem__lede--soft { margin-top: 14px; color: #777; }
+
+  .vs { position: relative; padding: 8px 0 0; }
+  .vs__card {
+    position: relative;
+    border-radius: 24px;
+    padding: 26px 28px 28px;
+    box-shadow: 0 30px 60px -30px rgba(60, 20, 10, 0.28);
+    width: 88%;
+  }
+  .vs__card--no {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1.5px solid #fecaca;
+    transform: rotate(-3deg);
+    z-index: 1;
+  }
+  .vs__card--yes {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1.5px solid #bbf7d0;
+    transform: rotate(2deg);
+    margin: -12px 0 0 auto;
+    z-index: 2;
+  }
+  .vs__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: clamp(17px, 1.5vw, 20px);
+    font-weight: 700;
+    color: #333;
+    line-height: 1.3;
+    margin: 0 0 18px;
+  }
+  .vs__ico {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .vs__card--no .vs__ico { background: #ef4444; }
+  .vs__card--yes .vs__ico { background: #22c55e; }
+  .vs ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+  .vs li { display: flex; align-items: flex-start; gap: 12px; font-size: clamp(15.5px, 1.3vw, 17px); font-weight: 600; color: #444; line-height: 1.4; }
+  .vs__x { color: #ef4444; font-weight: 700; width: 18px; flex: none; }
+  .vs__tick { color: #16a34a; font-weight: 700; width: 18px; flex: none; display: inline-block; }
+  .vs__strike {
+    color: #8a5a5a;
+    background: linear-gradient(#ef4444, #ef4444) no-repeat 0 58% / calc(var(--strike, 1) * 100%) 2.5px;
+  }
+
+  @media (max-width: 860px) {
+    .problem__grid { grid-template-columns: minmax(0, 1fr); }
+    .vs__card { width: 94%; padding: 22px 20px 24px; }
+    .vs__card--yes { margin-top: -8px; }
+  }
+</style>

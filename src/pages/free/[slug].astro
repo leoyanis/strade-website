@@ -1,0 +1,315 @@
+---
+// Landing page for a free resource. This is where the Instagram DM automation
+// sends people, so it is built for a phone first: who it's from, what it is,
+// the download right away, then the content, then follow / work / book.
+import fs from 'node:fs';
+import path from 'node:path';
+import Base from '../../layouts/Base.astro';
+import QuestPanel from '../../components/QuestPanel.astro';
+import ShipSafePreview from '../../components/free/ShipSafePreview.astro';
+import DesignSystemPreview from '../../components/free/DesignSystemPreview.astro';
+import SsotPreview from '../../components/free/SsotPreview.astro';
+import ShipSafeScan from '../../components/free/ShipSafeScan.astro';
+import StyleMorph from '../../components/free/StyleMorph.astro';
+import HowTo from '../../components/free/HowTo.astro';
+import { inline, pad } from '../../components/free/inline';
+import { visibleResources, type Resource } from '../../data/resources';
+import { getProject } from '../../data/work';
+import { SITE } from '../../data/site';
+import '../../styles/quests.css';
+import '../../styles/free.css';
+
+export function getStaticPaths() {
+  return visibleResources().map((r) => ({ params: { slug: r.slug }, props: { r } }));
+}
+
+const { r } = Astro.props as { r: Resource };
+const related = (r.related ?? []).map((s) => getProject(s)).filter((p) => p !== undefined);
+const more = visibleResources().filter((x) => x.slug !== r.slug).slice(0, 3);
+const ogPath = `/og/free-${r.slug}.png`;
+const hasOg = fs.existsSync(path.join(process.cwd(), 'public', ogPath));
+const [primary, ...secondary] = r.downloads ?? [];
+
+// Skill-style pages (structured `sections`) get the wide hero, a custom preview and scroll motion.
+const isSkill = !!r.sections?.length;
+const previewBeside = r.preview === 'ship-safe';
+const hasStyles = !!r.sections?.some((x) => x.type === 'chips' && x.stage === 'style-morph');
+// Shows the hero instantly if the motion script never arrives.
+const introScript = `if(!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement;d.classList.add('sk-intro');setTimeout(function(){d.classList.remove('sk-intro')},2600)}`;
+const DownloadIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 10l6 6 6-6M5 20h14"/></svg>';
+---
+
+<Base
+  title={`${r.title} | Free from Yanis Schweizer`}
+  description={r.summary}
+  path={`/free/${r.slug}`}
+  noAlternates
+  ogImage={hasOg ? ogPath : '/og/free.png'}
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  {hasStyles && <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Roboto:wght@400;500;700&display=swap" />}
+  {isSkill && <script slot="head" is:inline set:html={introScript} />}
+
+  {isSkill && (
+    <div class="sk" style={`--acc:${r.accent ?? '#00e5ff'}`}>
+      <section class:list={['sk-hero', previewBeside && 'has-side']} data-fx="hero">
+        <div class="sk-hero__bg" aria-hidden="true"></div>
+        <div class="container sk-hero__grid">
+          <div class="sk-hero__text">
+            <a class="free-from" href={SITE.instagram} target="_blank" rel="noopener">
+              <img src={SITE.avatar} alt="" width="44" height="44" />
+              <span><strong>From Yanis Schweizer</strong><span>{SITE.instagramHandle}</span></span>
+            </a>
+            {r.keyword && <span class="free-keyword">You commented “{r.keyword}”. Here it is.</span>}
+            <span class="sk-eyebrow"><span class="sk-eyebrow__t">{r.eyebrow ?? `Free ${r.kind.toLowerCase()}`}</span></span>
+            <h1 class="sk-title">{r.title}</h1>
+            <p class="sk-sub">{r.summary}</p>
+            {primary && (
+              <div class="sk-get">
+                <a class="btn-primary" href={primary.href} download={primary.download ? '' : undefined}>
+                  {primary.label}
+                  <Fragment set:html={DownloadIcon} />
+                </a>
+                {secondary.map((d) => (
+                  <a class="btn-ghost" href={d.href} download={d.download ? '' : undefined}>{d.label}</a>
+                ))}
+                {r.note && (r.note.href
+                  ? <a class="sk-note" href={r.note.href}>{r.note.text} <span aria-hidden="true">↓</span></a>
+                  : <span class="sk-note">{r.note.text}</span>)}
+                <small>Free. No email needed.</small>
+              </div>
+            )}
+          </div>
+          {previewBeside && <div class="sk-hero__preview"><ShipSafePreview /></div>}
+        </div>
+      </section>
+
+      {r.preview === 'design-system' && (
+        <section class="sk-preview">
+          <div class="container"><DesignSystemPreview /></div>
+        </section>
+      )}
+      {r.preview === 'ssot' && <SsotPreview />}
+
+      {r.sections!.map((sec) => {
+        if (sec.type === 'cards' && sec.stage === 'ship-safe-scan') return <ShipSafeScan heading={sec.heading} cards={sec.cards} note={sec.note} />;
+        if (sec.type === 'chips' && sec.stage === 'style-morph') return <StyleMorph heading={sec.heading} items={sec.items} />;
+        if (sec.type === 'steps') return <HowTo heading={sec.heading} steps={sec.steps} />;
+        return (
+        <section class="sk-sec" data-fx={sec.type}>
+          <div class="container">
+            {sec.type === 'cards' && (
+              <>
+                <h2 class="sk-h"><span class="sk-h__t">{sec.heading}</span></h2>
+                <div class="sk-cards">
+                  {sec.cards.map((c, i) => (
+                    <article class="sk-card">
+                      <span class="sk-card__num" aria-hidden="true">{pad(i + 1)}</span>
+                      <span class="sk-card__tag">{c.tag}</span>
+                      <h3>{c.title}</h3>
+                      <p>{c.text}</p>
+                    </article>
+                  ))}
+                </div>
+                {sec.note && <p class="sk-cards__note">{sec.note}</p>}
+              </>
+            )}
+            {sec.type === 'chips' && (
+              <>
+                <h2 class="sk-h"><span class="sk-h__t">{sec.heading}</span></h2>
+                <ul class="sk-chips">
+                  {sec.items.map((c, i) => <li style={`--i:${i}`}>{c}</li>)}
+                </ul>
+              </>
+            )}
+            {sec.type === 'works' && (
+              <div class="sk-works">
+                <h2 class="sk-h sk-h--small">{sec.heading}</h2>
+                {sec.groups.map((g) => (
+                  <p>{g.map((w, i) => <>{i > 0 && <span class="sk-dot" aria-hidden="true">·</span>}<span>{w}</span></>)}</p>
+                ))}
+              </div>
+            )}
+            {sec.type === 'callout' && (
+              <div class:list={['sk-callout', `is-${sec.tone ?? 'promise'}`]}>
+                {sec.heading && <span class="sk-callout__h">{sec.heading}</span>}
+                <p set:html={inline(sec.text)} />
+              </div>
+            )}
+          </div>
+        </section>
+        );
+      })}
+
+      <section class="sk-sec sk-end" data-fx="end">
+        <div class="free-wrap">
+          <p class="sk-credit">
+            Made by Yanis Schweizer, <a href={SITE.instagram} target="_blank" rel="noopener">{SITE.instagramHandle}</a>
+          </p>
+          <div class="free-follow">
+            <img src={SITE.avatar} alt="Yanis Schweizer" width="64" height="64" loading="lazy" />
+            <h2>Want more like this?</h2>
+            <p>I post what I build and how I build it with AI, plus more free stuff like this.</p>
+            <div class="social-row">
+              <a class="social-btn is-ig" href={SITE.instagram} target="_blank" rel="noopener">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                Follow {SITE.instagramHandle}
+              </a>
+              <a class="social-btn" href={SITE.booking} target="_blank" rel="noopener">Rather have me build it? Book a call</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  )}
+
+  {!isSkill && (
+  <>
+  <section class="free-hero">
+    <div class="free-wrap">
+      <a class="free-from" href={SITE.instagram} target="_blank" rel="noopener">
+        <img src={SITE.avatar} alt="" width="44" height="44" />
+        <span><strong>From Yanis Schweizer</strong><span>{SITE.instagramHandle} · free {r.kind.toLowerCase()}</span></span>
+      </a>
+      {r.keyword && <span class="free-keyword">You commented “{r.keyword}”. Here it is.</span>}
+      <h1 class="free-title">{r.title}</h1>
+      <p class="free-summary">{r.summary}</p>
+
+      {r.inside && r.inside.length > 0 && (
+        <div class="free-inside">
+          <h2>What you get</h2>
+          <ul>
+            {r.inside.map((i) => (
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>{i}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {primary && (
+        <div class="free-get">
+          <a class="btn-primary" href={primary.href} download={primary.download ? '' : undefined}>
+            {primary.label}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 10l6 6 6-6M5 20h14"/></svg>
+          </a>
+          {secondary.map((d) => (
+            <a class="btn-ghost free-get__alt" href={d.href} download={d.download ? '' : undefined}>{d.label}</a>
+          ))}
+          <small>Free. No email needed.</small>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {r.body && r.body.length > 0 && (
+    <section class="free-content">
+      <div class="free-wrap">
+        {r.body.map((b, i) => (
+          <div class="free-block">
+            {b.heading && <h2><span class="free-block__n">{String(i + 1).padStart(2, '0')}</span>{b.heading}</h2>}
+            {b.text && <p>{b.text}</p>}
+            {b.list && <ul>{b.list.map((li) => <li>{li}</li>)}</ul>}
+            {b.copy && (
+              <div class="copy-box">
+                <button class="copy-btn" type="button" data-copy>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                  <span>{b.copy.label ?? 'Copy'}</span>
+                </button>
+                <pre>{b.copy.text}</pre>
+              </div>
+            )}
+          </div>
+        ))}
+
+        <div class="free-follow">
+          <img src={SITE.avatar} alt="Yanis Schweizer" width="64" height="64" loading="lazy" />
+          <h2>Want more like this?</h2>
+          <p>I post what I build and how I build it with AI, plus more free stuff like this.</p>
+          <div class="social-row">
+            <a class="social-btn is-ig" href={SITE.instagram} target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+              Follow {SITE.instagramHandle}
+            </a>
+            <a class="social-btn" href={SITE.booking} target="_blank" rel="noopener">Rather have me build it? Book a call</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  </>
+  )}
+
+  {related.length > 0 && (
+    <section class="free-related" data-fx="more">
+      <div class="container">
+        <div class="ql-title">
+          <h2>See it in real work</h2>
+          <span class="ql-title__line"></span>
+        </div>
+        <div class="sq">
+          {related.map((p, i) => <QuestPanel project={p!} index={i} variant="side" />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {more.length > 0 && (
+    <section class="free-related" data-fx="more">
+      <div class="container">
+        <div class="ql-title">
+          <h2>More free stuff</h2>
+          <span class="ql-title__line"></span>
+        </div>
+        <div class="res-grid">
+          {more.map((m) => (
+            <a class="res-card" href={`/free/${m.slug}`} style={m.accent ? `--acc:${m.accent}` : undefined}>
+              <span class="res-kind">{m.kind}{!m.published && <span class="res-draft">draft</span>}</span>
+              <h3>{m.title}</h3>
+              <p>{m.summary}</p>
+              <span class="res-go">Get it free <i aria-hidden="true">→</i></span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<script>
+  import { initFreePage } from '../../components/free/motion';
+  initFreePage();
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const text = btn.parentElement?.querySelector('pre')?.textContent ?? '';
+      const label = btn.querySelector('span');
+      const original = label?.textContent ?? 'Copy';
+      try {
+        await navigator.clipboard.writeText(text);
+        if (label) label.textContent = 'Copied';
+      } catch {
+        // Fallback: select the text so a long-press / Cmd+C works.
+        const pre = btn.parentElement?.querySelector('pre');
+        if (pre) {
+          const range = document.createRange();
+          range.selectNodeContents(pre);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+        if (label) label.textContent = 'Selected, press copy';
+      }
+      btn.classList.add('is-done');
+      setTimeout(() => {
+        btn.classList.remove('is-done');
+        if (label) label.textContent = original;
+      }, 1800);
+    });
+  });
+</script>

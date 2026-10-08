@@ -4,7 +4,7 @@ import { t, type Locale, getLocalizedPath } from '../i18n/utils';
 interface Props { locale: Locale; }
 const { locale } = Astro.props;
 
-const CALENDLY = 'https://calendly.com/yanis-schweizer';
+const CALENDLY = 'https://cal.com/yanis-schweizer-lfdylj/discovery-call?overlayCalendar=true';
 const LINKEDIN = 'https://linkedin.com/in/yanis-schweizer';
 const EMAIL = 'yanis@strade.tech';
 ---
@@ -25,7 +25,7 @@ const EMAIL = 'yanis@strade.tech';
         <p class="footer-heading">{t(locale, 'footer.services')}</p>
         <ul>
           <li><a href={getLocalizedPath('/consulting', locale)} class="footer-link">{t(locale, 'footer.consulting')}</a></li>
-          <li><a href={getLocalizedPath('/development', locale)} class="footer-link">{t(locale, 'footer.development')}</a></li>
+          <li><a href={'/work'} class="footer-link">{t(locale, 'footer.development')}</a></li>
           <li><a href={CALENDLY} target="_blank" rel="noopener" class="footer-link">{t(locale, 'footer.free_audit')}</a></li>
         </ul>
       </div>

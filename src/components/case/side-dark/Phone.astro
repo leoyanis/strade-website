@@ -1,0 +1,81 @@
+---
+// A plain device frame for a phone screenshot. Each page styles it through CSS variables:
+//   --ph-bezel   frame colour            --ph-ring   outer hairline
+//   --ph-shadow  drop shadow             --ph-radius corner radius as a fraction of width (cqw)
+//   --ph-pad     bezel thickness (cqw)
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  loading?: 'lazy' | 'eager';
+  priority?: boolean;
+  class?: string;
+  style?: string;
+}
+const {
+  src,
+  alt,
+  width = 780,
+  height = 1688,
+  loading = 'lazy',
+  priority = false,
+  class: className,
+  style,
+} = Astro.props;
+---
+
+<figure class:list={['sd-phone', className]} style={style}>
+  <div class="sd-phone__body">
+    <div class="sd-phone__screen">
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={priority ? 'eager' : loading}
+        decoding="async"
+        fetchpriority={priority ? 'high' : undefined}
+      />
+      <slot />
+    </div>
+  </div>
+</figure>
+
+<style>
+  .sd-phone {
+    --ph-bezel: #0d0d0d;
+    --ph-ring: rgba(255, 255, 255, 0.1);
+    --ph-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+    --ph-radius: 15;
+    --ph-pad: 3.2;
+    position: relative;
+    margin: 0;
+    container-type: inline-size;
+  }
+  .sd-phone__body {
+    position: relative;
+    padding: calc(var(--ph-pad) * 1cqw);
+    border-radius: calc(var(--ph-radius) * 1cqw);
+    background: var(--ph-bezel);
+    box-shadow:
+      0 0 0 1px var(--ph-ring),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      var(--ph-shadow);
+  }
+  .sd-phone__screen {
+    position: relative;
+    overflow: hidden;
+    border-radius: calc((var(--ph-radius) - var(--ph-pad)) * 1cqw);
+    aspect-ratio: 390 / 844;
+    background: #000;
+    isolation: isolate;
+  }
+  .sd-phone__screen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+</style>

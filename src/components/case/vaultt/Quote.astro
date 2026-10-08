@@ -1,0 +1,82 @@
+---
+// Liam's testimonial, verbatim from src/data/work.ts, on a full-bleed light band.
+interface Props { t: { quote: string; name: string; role: string; photo?: string; href?: string } }
+const { t } = Astro.props;
+// Highlight one phrase without changing a single word of the quote.
+const mark = 'turned ideas into reality within months';
+const i = t.quote.indexOf(mark);
+const parts = i >= 0 ? [t.quote.slice(0, i), t.quote.slice(i, i + mark.length), t.quote.slice(i + mark.length)] : [t.quote, '', ''];
+---
+
+<section class="vt-quote" id="vt-quote">
+  <div class="vt-wrap">
+    <p class="vt-tag vt-quote__tag"><span class="no">10</span> In Liam's words</p>
+    <figure class="vt-quote__fig">
+      <span class="vt-quote__mark" aria-hidden="true">“</span>
+      <blockquote class="vt-quote__text">
+        <p>{parts[0]}{parts[1] && <mark>{parts[1]}</mark>}{parts[2]}</p>
+      </blockquote>
+      <figcaption class="vt-quote__by">
+        <img src="/images/work/vaultt/liam.webp" alt="Liam Jeffery" width="440" height="440" loading="lazy" decoding="async" />
+        <span class="vt-quote__who"><strong>{t.name}</strong><span>{t.role}</span></span>
+        {t.href && (
+          <a class="vt-quote__li" href={t.href} target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>
+            LinkedIn
+          </a>
+        )}
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style is:global>
+  .vt-quote {
+    position: relative; overflow: hidden;
+    background: var(--vt-light); color: var(--vt-navy);
+    padding: clamp(96px, 12vw, 170px) 0;
+  }
+  .vt-quote::after {
+    content: ''; position: absolute; right: -10%; top: -30%; width: 60%; height: 120%; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(111, 168, 255, 0.35), transparent 70%);
+  }
+  .vt-quote__tag { color: var(--vt-blue-deep); }
+  .vt-quote__tag .no { color: rgba(12, 39, 72, 0.45); }
+  .vt-quote__fig {
+    position: relative; z-index: 1; margin: 40px 0 0; max-width: 1120px;
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 clamp(18px, 3vw, 40px);
+  }
+  .vt-quote__mark {
+    grid-row: 1 / span 2; align-self: start;
+    font-family: var(--vt-display); font-weight: 800; font-size: clamp(120px, 13vw, 210px); line-height: 0.72;
+    color: var(--vt-blue); pointer-events: none; margin-top: 0.04em;
+  }
+  .vt-quote__text { position: relative; }
+  .vt-quote__text p {
+    font-family: var(--vt-display); font-weight: 600;
+    font-size: clamp(24px, 2.75vw, 40px); line-height: 1.24; letter-spacing: -0.025em; text-wrap: pretty;
+  }
+  .vt-quote__text mark {
+    color: var(--vt-navy); background: linear-gradient(transparent 58%, rgba(111, 168, 255, 0.55) 58%);
+    background-repeat: no-repeat; background-size: calc(var(--m, 1) * 100%) 100%;
+    padding: 0 0.04em;
+  }
+  .vt-quote__by { grid-column: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 40px; }
+  .vt-quote__by img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px var(--vt-light), 0 0 0 5px var(--vt-blue); }
+  .vt-quote__who { display: flex; flex-direction: column; margin-right: 8px; }
+  .vt-quote__who strong { font-size: 18px; font-weight: 700; }
+  .vt-quote__who span { font-family: var(--vt-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(12, 39, 72, 0.62); margin-top: 3px; }
+  .vt-quote__li {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600;
+    color: var(--vt-navy); padding: 10px 16px; border-radius: 99px; border: 1px solid rgba(12, 39, 72, 0.2);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .vt-quote__li:hover { background: var(--vt-navy); color: var(--vt-light); border-color: var(--vt-navy); }
+  .vt-quote__li svg { width: 15px; height: 15px; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; }
+  @media (max-width: 600px) {
+    .vt-quote__fig { grid-template-columns: 1fr; }
+    .vt-quote__mark { grid-row: auto; font-size: 110px; margin-bottom: -18px; }
+    .vt-quote__text p { font-size: 22px; line-height: 1.3; }
+    .vt-quote__by { grid-column: 1; margin-top: 30px; }
+  }
+</style>

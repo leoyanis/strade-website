@@ -1,0 +1,213 @@
+---
+import Base from '../../layouts/Base.astro';
+import QuestPanel from '../../components/QuestPanel.astro';
+import { MAIN_QUESTS, SIDE_QUESTS, STATS, visibleArchived } from '../../data/work';
+import { SITE } from '../../data/site';
+import '../../styles/quests.css';
+
+const archived = visibleArchived();
+const fmt = (n: number, d: number) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const fills = ['92%', '78%', '34%', '64%'];
+---
+
+<Base
+  title="My work | Yanis Schweizer"
+  description="Everything I've built: the main quests (Vaultt, Kleus, YouCook) and every side quest, from shipped apps to builds in progress."
+  path="/work"
+  noAlternates
+  ogImage="/og/work.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" />
+
+  <section class="ql-hero">
+    <div class="container">
+      <span class="ql-hero__label">WORK // EVERYTHING I'VE BUILT</span>
+      <h1>My <span>work.</span></h1>
+      <p>Main quests are the big ones. Side quests are everything else I've shipped, designed or have in the build right now.</p>
+
+      <div class="ql-stats" role="list">
+        {STATS.map((s, i) => (
+          <div class="ql-stat" role="listitem">
+            <span class="ql-stat__label">{['SYS.TOKENS', 'SYS.CLAUDE_CODE', 'SYS.CODEX', 'SYS.USERS'][i] ?? 'SYS'}</span>
+            <span class="ql-stat__value" data-count={s.value} data-decimals={s.decimals} data-prefix={s.prefix ?? ''} data-suffix={s.suffix}>
+              {s.prefix ?? ''}{fmt(s.value, s.decimals)}{s.suffix}
+            </span>
+            <span class="ql-stat__desc">{s.label}</span>
+            <span class="ql-stat__bar" style={`--fill:${fills[i] ?? '60%'}`}><i></i></span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="ql-section" id="main-quests">
+    <div class="container">
+      <div class="ql-title">
+        <h2>Main quests</h2>
+        <span class="ql-title__count">[{String(MAIN_QUESTS.length).padStart(2, '0')}]</span>
+        <span class="ql-title__line"></span>
+      </div>
+      <div class="mq">
+        {MAIN_QUESTS.map((p, i) => <QuestPanel project={p} index={i} variant="main" />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="ql-section" id="side-quests">
+    <div class="container">
+      <div class="ql-title">
+        <h2>Side quests</h2>
+        <span class="ql-title__count">[{String(SIDE_QUESTS.length).padStart(2, '0')}]</span>
+        <span class="ql-title__line"></span>
+      </div>
+      <p class="ql-sub">Client builds, design systems and my own apps. Some are live, some are still in the forge.</p>
+      <div class="sq">
+        {SIDE_QUESTS.map((p, i) => <QuestPanel project={p} index={i} variant="side" />)}
+      </div>
+    </div>
+  </section>
+
+  {archived.length > 0 && (
+    <section class="ql-section" id="archive">
+      <div class="container">
+        <div class="ql-title">
+          <h2>Archived</h2>
+          <span class="ql-title__count">[{String(archived.length).padStart(2, '0')}]</span>
+          <span class="ql-title__line"></span>
+        </div>
+        <p class="ql-sub">Older projects whose sites are gone. Rebuilt here as signals, so they're not forgotten.</p>
+        <div class="aq">
+          {archived.map((a) => (
+            <article class="aq-card" style={`--accent:${a.accent}`}>
+              <div class={`aq-card__art art-${a.art}`} aria-hidden="true">
+                {a.art === 'orbit' && (<><span></span><span></span><span></span></>)}
+                {a.art === 'wave' && (
+                  <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+                    <path d="M0 60 Q 37 10 75 60 T 150 60 T 225 60 T 300 60" />
+                    <path d="M0 70 Q 37 30 75 70 T 150 70 T 225 70 T 300 70" />
+                    <path d="M0 50 Q 37 0 75 50 T 150 50 T 225 50 T 300 50" />
+                  </svg>
+                )}
+                {a.art === 'grid' && <span></span>}
+                {a.art === 'pulse' && (<><span></span><span></span></>)}
+              </div>
+              <div class="aq-card__body">
+                <span class="aq-card__meta">Archived · {a.year}</span>
+                <h3>{a.name}</h3>
+                <p>{a.what}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="ql-cta">
+    <div class="container">
+      <h2>Got a quest for me?</h2>
+      <p>Apps, automations and internal tools, built fast and at a fixed price. I make the decisions, AI does the typing, and you own the code.</p>
+      <div class="hero-actions">
+        <a href={SITE.booking} class="btn-primary hero-cta" target="_blank" rel="noopener">
+          Book a call
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href={SITE.instagram} class="btn-ghost" target="_blank" rel="noopener">Follow {SITE.instagramHandle}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Pointer-following glow inside each panel.
+  document.querySelectorAll<HTMLElement>('[data-quest]').forEach((el) => {
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+      el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+    });
+  });
+
+  // Title decode on hover / focus.
+  const GLYPHS = '<>/\\[]{}=+*#%01ABCDEFGHJKLMNPQRSTUVWXYZ';
+  function decode(el: HTMLElement) {
+    const final = el.dataset.text ?? (el.dataset.text = el.textContent ?? '');
+    let frame = 0;
+    const total = 16;
+    cancelAnimationFrame(Number(el.dataset.raf ?? 0));
+    const tick = () => {
+      const done = Math.floor((frame / total) * final.length);
+      el.textContent = final
+        .split('')
+        .map((ch, i) => (ch === ' ' || i < done ? ch : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]))
+        .join('');
+      frame++;
+      if (frame <= total) el.dataset.raf = String(requestAnimationFrame(tick));
+      else el.textContent = final;
+    };
+    tick();
+  }
+  if (!reduce) {
+    document.querySelectorAll<HTMLElement>('[data-quest]').forEach((el) => {
+      const t = el.querySelector<HTMLElement>('[data-scramble]');
+      if (!t) return;
+      el.addEventListener('pointerenter', () => decode(t));
+      el.addEventListener('focus', () => decode(t));
+    });
+  }
+
+  // Count-up for the HUD stats.
+  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+  const run = (el: HTMLElement) => {
+    const target = Number(el.dataset.count);
+    const dec = Number(el.dataset.decimals ?? 0);
+    const pre = el.dataset.prefix ?? '';
+    const suf = el.dataset.suffix ?? '';
+    const t0 = performance.now();
+    const dur = 1600;
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 4);
+      el.textContent = pre + (target * eased).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  if (!reduce) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        run(e.target as HTMLElement);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.4 });
+    counters.forEach((c) => io.observe(c));
+  }
+
+  // Boot-up entrance: panels open from a scan line.
+  (async () => {
+    if (reduce) return;
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.from('.ql-stat__bar i', { scaleX: 0, duration: 1.6, ease: 'power3.out', stagger: 0.12, delay: 0.3 });
+      document.querySelectorAll<HTMLElement>('.mq, .sq, .aq').forEach((group) => {
+        const items = group.querySelectorAll<HTMLElement>('.qp, .aq-card');
+        gsap.fromTo(items, { clipPath: 'inset(48% 0% 48% 0%)', opacity: 0 }, {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          opacity: 1,
+          duration: 0.9,
+          ease: 'power4.out',
+          stagger: 0.12,
+          clearProps: 'clipPath,opacity',
+          scrollTrigger: { trigger: group, start: 'top 85%', once: true },
+        });
+      });
+    } catch { /* content is already visible */ }
+  })();
+</script>

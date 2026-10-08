@@ -1,0 +1,874 @@
+---
+// Kleus: a branded case study in Kleus's own register. Warm paper, ink, one thing in amber,
+// the phi mark, DM Sans with Fraunces numerals. Product moments are rebuilt in HTML from
+// kleus.ai (the ring of saved material, the lesson path, the WhatsApp day, the scored check).
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import { getProject } from '../../data/work';
+import KlLogo from '../../components/case/kleus/KlLogo.astro';
+import KlRing from '../../components/case/kleus/KlRing.astro';
+import KlMark from '../../components/case/kleus/KlMark.astro';
+import KlCapital from '../../components/case/kleus/KlCapital.astro';
+import KlPath from '../../components/case/kleus/KlPath.astro';
+import KlChat from '../../components/case/kleus/KlChat.astro';
+import KlCheck from '../../components/case/kleus/KlCheck.astro';
+import KlCommits from '../../components/case/kleus/KlCommits.astro';
+
+const p = getProject('kleus')!;
+const SITE_URL = p.links?.[0]?.href ?? 'https://www.kleus.ai';
+const FONTS =
+  'https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=DM+Sans:opsz,wght@9..40,300..700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400..500;1,6..72,400&display=swap';
+
+const words = (s: string) => s.split(' ');
+
+const WHY = [
+  {
+    n: 'I',
+    h: 'WhatsApp, not another app.',
+    p: 'An app you have to remember to open is one more thing to quit. Nobody abandons WhatsApp. So the lesson, the reminders and the feedback all arrive in a chat you already live in, on WhatsApp or Telegram.',
+    r: 'chat',
+  },
+  {
+    n: 'II',
+    h: 'Fifteen minutes, on purpose.',
+    p: 'A plan that opens with your biggest commitment gets abandoned in week one. So every plan starts at fifteen minutes, and only ramps up to the time you picked over the first three lessons.',
+    r: 'ramp',
+  },
+  {
+    n: 'III',
+    h: 'Graded on what you write.',
+    p: 'Picking an answer from a list tests whether you recognise it. Writing it tests whether you know it. So every lesson ends in your own words, scored out of 100, and the ideas you missed come back in later lessons.',
+    r: 'score',
+  },
+  {
+    n: 'IV',
+    h: 'Miss a day, keep the path.',
+    p: 'No streak to lose and nothing to restart. A missed day is logged without comment and the plan bends around your week. Shame is what makes people quit, so I designed it out.',
+    r: 'week',
+  },
+  {
+    n: 'V',
+    h: 'Code makes the calls. AI writes the words.',
+    p: "The AI never decides when to message you, how long a lesson runs or when an idea comes back. That's code and SQL, with tests. The AI writes the lessons, the questions and the feedback, and if it's ever down, the reminders still go out from lines I wrote myself.",
+    r: 'split',
+  },
+];
+
+const STATS = [
+  { v: 1400, text: '1,400+', suffix: '+', label: 'commits since June 2026' },
+  { v: 5500, text: '5,500+', suffix: '+', label: 'automated tests that gate every deploy' },
+  { v: 6, text: '6', suffix: '', label: 'book and document formats it reads' },
+];
+
+const STACK = [
+  ['App', 'Next.js 16, React 19, TypeScript'],
+  ['Data', 'Supabase: Postgres with row-level security, scheduled jobs in pg_cron'],
+  ['Messages', 'WhatsApp Cloud API and a Telegram bot, mirrored to email and the web app'],
+  ['Billing', 'Stripe subscriptions'],
+  ['Tests', 'Vitest on every push in GitHub Actions, plus Playwright end to end'],
+  ['Hosting', 'Vercel, two apps: kleus.ai and app.kleus.ai'],
+];
+
+const RAILS = [
+  'The engine never imports from the screens.',
+  'No import cycles, anywhere.',
+  'Each database table has one door in the code, and the exceptions can only shrink.',
+  'Every bug fix ships with the test that would have caught it.',
+  'Main only deploys when every check is green.',
+];
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/kleus"
+  noAlternates
+  bare
+  navTheme={p.brand.light ? 'light' : 'dark'}
+  ogImage="/og/work-kleus.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={FONTS} />
+
+  <div class="kl">
+    <!-- ============================== HERO ============================== -->
+    <section class="hero" id="kl-top">
+      <div class="hero__glow" aria-hidden="true"><i></i><i></i></div>
+      <div class="kl-wrap hero__inner">
+        <p class="hero__meta" data-hero-in>
+          <span class="kicker">Main quest · My product</span>
+          <span class="pill"><i class="bead" aria-hidden="true"></i>{p.status}</span>
+          <span class="pill">{p.year}</span>
+        </p>
+        <h1 class="hero__title">
+          <span class="kl-sr">Kleus</span>
+          <KlLogo class="hero__logo" />
+        </h1>
+        <p class="hero__motto" data-hero-in>
+          <i aria-hidden="true"></i><span aria-hidden="true"></span>
+          <em>Mastery by relentless action</em>
+          <span aria-hidden="true"></span><i aria-hidden="true"></i>
+        </p>
+        <p class="hero__lead" data-hero-in>
+          I built Kleus, an AI coach that turns the books, videos and podcasts you keep saving into
+          <b>15-minute daily lessons</b>. It checks in on WhatsApp, grades what you write, and keeps you going
+          after the motivation runs out.
+        </p>
+        <div class="hero__actions" data-hero-in>
+          <a class="btn btn--amber" href={SITE_URL} target="_blank" rel="noopener">
+            Try a free lesson
+            <svg class="btn__arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
+          <a class="btn btn--key" href={SITE_URL} target="_blank" rel="noopener">
+            kleus.ai
+            <span class="btn__ext" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M8.5 7H17v8.5" /></svg></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="hero__ring" data-hero-ring>
+        <KlRing />
+      </div>
+
+      <div class="kl-wrap">
+        <dl class="facts" data-kl-reveal>
+          <div><dt>Started</dt><dd>June 2026</dd></div>
+          <div><dt>Live</dt><dd>at kleus.ai</dd></div>
+          <div><dt>Commits</dt><dd>1,400+</dd></div>
+          <div><dt>Built on</dt><dd>Next.js, Supabase, Stripe</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============================== I. THE PROBLEM ============================== -->
+    <section class="prob" id="kl-problem">
+      <div class="kl-wrap">
+        <KlMark n="I" label="The problem" />
+        <h2 class="prob__statement" data-kl-words>
+          <span class="prob__line prob__line--soft">{words("Most people don't").map((w) => <span class="w">{w} </span>)}</span>
+          <span class="prob__line prob__line--soft">{words('fail to start.').map((w) => <span class="w">{w} </span>)}</span>
+          <span class="prob__line">{words('They fail to').map((w) => <span class="w">{w} </span>)}</span>
+          <span class="prob__line"><span class="w prob__amber">continue.</span></span>
+        </h2>
+        <div class="prob__cols">
+          <div class="prob__col" data-kl-reveal>
+            <span class="kicker">What goes wrong</span>
+            <p>
+              Courses are passive and coaches are expensive, and both fail at the same point: the gap between
+              knowing and doing, repeated every day. Meanwhile the video you saved stays saved, and the book
+              stops at chapter three.
+            </p>
+          </div>
+          <div class="prob__col" data-kl-reveal>
+            <span class="kicker">The idea</span>
+            <p>
+              <b>Accountability is the product.</b> Everything else in Kleus, the plans, the lessons, the learning
+              science, is there for one job: getting you to show up again tomorrow.
+            </p>
+          </div>
+        </div>
+        <KlCapital class="prob__cap" />
+      </div>
+    </section>
+
+    <!-- ============================== II. HOW IT WORKS ============================== -->
+    <section class="how" id="kl-how">
+      <div class="kl-wrap">
+        <KlMark n="II" label="How it works" />
+        <div class="how__head">
+          <h2 class="h2" data-kl-reveal>Bring anything. <span>Kleus builds the path.</span></h2>
+          <div class="how__intro">
+            <p class="lead" data-kl-reveal>
+              Paste a YouTube or Apple Podcasts link, upload a book or a PDF, or just name a topic. Kleus reads
+              the whole thing, splits it into core concepts and teaches them one short lesson a day.
+            </p>
+            <ul class="doors" aria-label="What you can bring" data-kl-reveal>
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.4 1.4" /><path d="M14 10.5a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.4-1.4" /></svg>
+                YouTube link
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.6 11.6a6.4 6.4 0 0 0 12.8 0M12 18v3" /></svg>
+                Apple Podcasts
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2 2 0 0 1 7 3.5h12v14H7a2 2 0 0 0-2 2v-14z" /><path d="M5 19.5a2 2 0 0 0 2 2h12v-4" /></svg>
+                Book or PDF
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></svg>
+                Any topic
+              </li>
+            </ul>
+          </div>
+        </div>
+        <KlPath />
+      </div>
+    </section>
+
+    <!-- ============================== III. THE CHECK-IN ============================== -->
+    <KlChat />
+
+    <!-- ============================== IV. THE CHECK ============================== -->
+    <section class="chk" id="kl-check">
+      <div class="kl-wrap">
+        <KlMark n="IV" label="The check" dark />
+        <div class="chk__head">
+          <h2 class="h2 h2--dark" data-kl-reveal>Every lesson ends in something <span>you write.</span></h2>
+          <p class="lead lead--dark" data-kl-reveal>
+            Reading feels like learning. Writing proves it. Each lesson asks for a guess before it explains, then
+            closes with a few questions answered in your own words. Kleus scores them out of 100, quotes your
+            answer back, names what landed and what was missing, and writes tomorrow from the result.
+          </p>
+        </div>
+        <KlCheck />
+        <ul class="bands" aria-label="What a score does next">
+          <li data-band>
+            <span class="band band--solid"><i aria-hidden="true"></i>Solid</span>
+            <span class="bands__range">above 80</span>
+            <p>The plan moves on. Nothing is repeated for the sake of it.</p>
+          </li>
+          <li data-band>
+            <span class="band band--flaky"><i aria-hidden="true"></i>Flaky</span>
+            <span class="bands__range">50 to 80</span>
+            <p>It counts as done, and the weak ideas come back inside the rest of the chapter.</p>
+          </li>
+          <li data-band>
+            <span class="band band--lack"><i aria-hidden="true"></i>Lacking</span>
+            <span class="bands__range">below 50</span>
+            <p>A focused redo, spaced a lesson away. No lecture.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== V. DECISIONS ============================== -->
+    <section class="why" id="kl-why">
+      <div class="kl-wrap why__grid">
+        <div class="why__side">
+          <div class="why__sticky">
+            <KlMark n="V" label="Decisions" />
+            <h2 class="h2 h2--nobal" data-kl-reveal>Why I built it<br /> <span>this way.</span></h2>
+            <p class="lead" data-kl-reveal>Five calls that shaped Kleus. None of them were the AI's to make.</p>
+          </div>
+        </div>
+        <ol class="why__list">
+          {WHY.map((w) => (
+            <li class="why__item" data-why>
+              <span class="why__n" aria-hidden="true">{w.n}</span>
+              <div class="why__body">
+                <h3 class="why__h">{w.h}</h3>
+                <p class="why__p">{w.p}</p>
+                <div class="why__receipt" aria-hidden="true">
+                  {w.r === 'chat' && (
+                    <span class="rc rc--row">
+                      <span class="chip">
+                        <svg viewBox="0 0 24 24" fill="#25d366"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.5h-.01a9.45 9.45 0 01-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 01-1.45-5.03c0-5.2 4.24-9.43 9.45-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 012.76 6.67c0 5.2-4.24 9.43-9.44 9.43z" /></svg>
+                        WhatsApp
+                      </span>
+                      <span class="chip">
+                        <svg viewBox="0 0 24 24" fill="#229ed9"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" /></svg>
+                        Telegram
+                      </span>
+                      <span class="rc__note">Nothing to install</span>
+                    </span>
+                  )}
+                  {w.r === 'ramp' && (
+                    <span class="rc rc--ramp">
+                      <span class="ramp">
+                        <span class="ramp__col ramp__col--first"><span class="ramp__well"><i style="--h:.34"></i></span><small>15 min</small></span>
+                        <span class="ramp__col"><span class="ramp__well"><i style="--h:.55"></i></span><small></small></span>
+                        <span class="ramp__col"><span class="ramp__well"><i style="--h:.76"></i></span><small></small></span>
+                        <span class="ramp__col"><span class="ramp__well"><i style="--h:1"></i></span><small>your pace</small></span>
+                      </span>
+                    </span>
+                  )}
+                  {w.r === 'score' && (
+                    <span class="rc rc--score">
+                      <span class="mini-score"><b>82</b><small>/100</small></span>
+                      <span class="rc__quote">“Strong on the money problem, thin on why the nobles wouldn't budge.”</span>
+                    </span>
+                  )}
+                  {w.r === 'week' && (
+                    <span class="rc rc--week">
+                      {['M', 'T', 'W', 'T', 'F'].map((d, i) => (
+                        <span class:list={['day', i === 2 && 'day--off']}>
+                          <span class="day__dot">
+                            {i === 2 ? <svg viewBox="0 0 24 24"><path d="M7 12h10" /></svg> : <svg viewBox="0 0 24 24"><path d="M5 12.5 10 17l9-10" /></svg>}
+                          </span>
+                          <span class="day__l">{d}</span>
+                        </span>
+                      ))}
+                      <span class="rc__note">No streak to lose.</span>
+                    </span>
+                  )}
+                  {w.r === 'split' && (
+                    <span class="rc rc--split">
+                      <span class="plate">
+                        <span class="plate__k">Code decides</span>
+                        <span class="plate__v">When to message · how long a lesson runs · when an idea comes back</span>
+                      </span>
+                      <span class="plate plate--ai">
+                        <span class="plate__k">AI writes</span>
+                        <span class="plate__v">The lessons · the questions · the feedback</span>
+                      </span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================== VI. UNDER THE HOOD ============================== -->
+    <section class="hood" id="kl-hood">
+      <div class="kl-wrap">
+        <KlMark n="VI" label="Under the hood" dark />
+        <div class="hood__head">
+          <h2 class="h2 h2--dark" data-kl-reveal>Built human&#8209;steered.</h2>
+          <p class="lead lead--dark" data-kl-reveal>
+            I made the product calls: what the coach says, when it speaks, what counts as learned. AI did most
+            of the typing, inside rules I wrote down and enforced with tests.
+          </p>
+        </div>
+        <div class="pulse">
+          <div class="pulse__text" data-kl-reveal>
+            <span class="kicker kicker--dark">Mastery by relentless action</span>
+            <p class="pulse__big"><span data-countup data-count="97">97</span><small>of 120 days</small></p>
+            <p class="pulse__p">
+              Kleus's tagline is a promise about consistency, so I held the build to it. Since the first commit on
+              10 June, 97 of the 120 days to 7 October 2026 have at least one.
+            </p>
+          </div>
+          <div class="pulse__graph" data-kl-reveal>
+            <KlCommits />
+          </div>
+        </div>
+        <dl class="stats">
+          {STATS.map((s) => (
+            <div class="stat" data-stat>
+              <dt class="stat__l">{s.label}</dt>
+              <dd class="stat__v" data-countup data-count={s.v} data-suffix={s.suffix}>{s.text}</dd>
+            </div>
+          ))}
+        </dl>
+        <div class="hood__cols">
+          <div class="hood__col" data-kl-reveal>
+            <h3 class="kicker kicker--dark">The stack</h3>
+            <dl class="spec">
+              {STACK.map(([k, v]) => (
+                <div class="spec__row"><dt>{k}</dt><dd>{v}</dd></div>
+              ))}
+            </dl>
+          </div>
+          <div class="hood__col" data-kl-reveal>
+            <h3 class="kicker kicker--dark">Rules the AI works inside</h3>
+            <ul class="rails">
+              {RAILS.map((r, i) => (
+                <li><span class="rails__n">{String(i + 1).padStart(2, '0')}</span>{r}</li>
+              ))}
+            </ul>
+            <p class="rails__foot">Most of them fail the build in CI, so they can't quietly drift.</p>
+          </div>
+        </div>
+        <p class="quote" data-kl-reveal>
+          AI can write a lesson in seconds. Deciding when to speak, when to stay quiet and how to grade someone
+          honestly is the real work. <span>That part was mine.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================== BRING YOUR OWN THING ============================== -->
+    <section class="cta" id="kl-try">
+      <div class="cta__glow" aria-hidden="true"></div>
+      <div class="kl-wrap cta__inner">
+        <span class="cta__phi" aria-hidden="true"><KlLogo variant="phi" /></span>
+        <h2 class="cta__title" data-kl-reveal>Bring your own thing.</h2>
+        <p class="cta__sub" data-kl-reveal>
+          The book you haven't finished, the video you saved, or the topic you keep coming back to. Kleus is
+          live, and you can try a sample lesson for free, with no account.
+        </p>
+        <div class="cta__doors" data-kl-reveal>
+          <a class="btn btn--amber btn--lg" href={SITE_URL} target="_blank" rel="noopener">
+            <svg class="btn__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.4 1.4" /><path d="M14 10.5a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.4-1.4" /></svg>
+            <span class="only-wide">Paste a YouTube or Apple Podcasts link</span>
+            <span class="only-narrow">Paste a YouTube link</span>
+          </a>
+          <div class="cta__row">
+            <a class="btn btn--key" href={SITE_URL} target="_blank" rel="noopener">
+              <svg class="btn__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5" /><path d="M4.5 15v3.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V15" /></svg>
+              Upload a book or document
+            </a>
+            <a class="btn btn--key" href={SITE_URL} target="_blank" rel="noopener">
+              <svg class="btn__ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></svg>
+              Choose a topic
+            </a>
+          </div>
+        </div>
+        <a class="cta__site" href={SITE_URL} target="_blank" rel="noopener">
+          Visit kleus.ai
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5" /></svg>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <CaseNext current="kleus" />
+</Base>
+
+<script>
+  // Motion is an enhancement. Skip it for reduced motion, and on viewports so tall the whole page
+  // is on screen at once (full-page captures), where a scroll reveal would only hide things.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerHeight > 1500;
+
+  (async () => {
+    if (reduce) return;
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      const q = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => Array.from(r.querySelectorAll<T>(s));
+
+      /* ---------- hero: the mark arrives, then the page ---------- */
+      const intro = gsap.timeline({ delay: 0.1 });
+      intro
+        .from('.hero__logo', { opacity: 0, y: 14, filter: 'blur(10px)', duration: 1.2, ease: 'expo.out' }, 0)
+        .from('.hero__logo .kl-logo__phi', { rotate: -14, scale: 0.84, duration: 1.4, ease: 'expo.out' }, 0)
+        .from('.hero__logo .kl-logo__word', { x: -16, duration: 1.1, ease: 'expo.out' }, 0.12)
+        .from('[data-hero-in]', { opacity: 0, y: 16, duration: 0.8, ease: 'power3.out', stagger: 0.07 }, 0.2)
+        .from('[data-hero-ring]', { opacity: 0, y: 48, duration: 1.3, ease: 'expo.out' }, 0.35);
+
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 768px)', () => {
+        gsap.to('[data-hero-ring]', {
+          yPercent: -10, ease: 'none',
+          scrollTrigger: { trigger: '#kl-top', start: 'top top', end: 'bottom top', scrub: true },
+        });
+      });
+
+      /* ---------- generic reveals ---------- */
+      q('[data-kl-reveal]').forEach((el) => {
+        gsap.from(el, {
+          opacity: 0, y: 26, duration: 0.95, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        });
+      });
+      q('.mk__rule').forEach((el) => {
+        gsap.from(el, { scaleX: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
+      });
+
+      /* ---------- I. the statement inks in as you read it ---------- */
+      const statement = document.querySelector('[data-kl-words]');
+      if (statement) {
+        gsap.fromTo(q('.w', statement), { opacity: 0.13 }, {
+          opacity: 1, ease: 'none', stagger: 0.12,
+          scrollTrigger: { trigger: statement, start: 'top 80%', end: 'bottom 45%', scrub: 0.5 },
+        });
+      }
+
+      /* ---------- the capital: drawn from the middle outwards ---------- */
+      q('[data-kl-capital]').forEach((cap) => {
+        gsap.timeline({ scrollTrigger: { trigger: cap, start: 'top 88%', once: true } })
+          .from(q('[data-cap-line]', cap), { scaleX: 0, duration: 1.3, ease: 'expo.inOut', stagger: 0.12 })
+          .fromTo(q('[data-cap-curl]', cap), { strokeDashoffset: -1 }, { strokeDashoffset: 0, duration: 1, ease: 'power2.out' }, 0.85);
+      });
+
+      /* ---------- II. the source splits into a path ---------- */
+      const path = document.querySelector('[data-kl-path]');
+      if (path) {
+        const lead = () =>
+          gsap.timeline({ scrollTrigger: { trigger: path, start: 'top 72%', once: true } })
+            .from('[data-path-media]', { y: 34, opacity: 0, duration: 1, ease: 'expo.out' })
+            .from('.path__hand', { opacity: 0, y: 8, rotate: -9, duration: 0.6, ease: 'power2.out' }, 0.35)
+            .fromTo('[data-path-scrawl]', { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.55, ease: 'power2.inOut', stagger: 0.35 }, 0.5)
+            .from('[data-path-stem]', { scaleY: 0, duration: 0.6, ease: 'power2.inOut' }, 0.7)
+            .from('[data-path-label]', { opacity: 0, y: 12, duration: 0.6, ease: 'power3.out' }, 1.05);
+
+        mm.add('(min-width: 860px)', () => {
+          lead()
+            .fromTo('.path__curve', { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.75, ease: 'power2.out', stagger: 0.09 }, 1.25)
+            .from('.path__head', { opacity: 0, duration: 0.25, stagger: 0.09 }, 1.8)
+            .from('[data-path-card]', { y: 40, scale: 0.9, opacity: 0, duration: 0.95, ease: 'back.out(1.6)', stagger: 0.09 }, 1.75);
+        });
+        mm.add('(max-width: 859px)', () => {
+          lead().from('[data-path-card]', { y: 22, opacity: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08 }, 1.2);
+        });
+      }
+
+      /* ---------- IV. two sheets land, the score counts up ---------- */
+      const check = document.querySelector<HTMLElement>('[data-kl-check]');
+      if (check) {
+        const sheets = q('[data-sheet]', check);
+        const ring = check.querySelector<SVGCircleElement>('[data-ring]');
+        const nums = q<HTMLElement>('[data-count]', check);
+        const C = Number(ring?.dataset.ring ?? 377);
+        const tl = gsap.timeline({ scrollTrigger: { trigger: check, start: 'top 72%', once: true } });
+        tl.from(sheets, { y: 90, opacity: 0, rotate: (i) => (i ? 6 : -7), duration: 1.2, ease: 'expo.out', stagger: 0.18 });
+        if (ring) tl.fromTo(ring, { strokeDashoffset: C }, { strokeDashoffset: C * (1 - 0.93), duration: 1.6, ease: 'power3.out' }, 0.55);
+        nums.forEach((el) => {
+          const end = Number(el.dataset.count);
+          const o = { v: 0 };
+          tl.to(o, { v: end, duration: 1.6, ease: 'power3.out', onUpdate: () => { el.textContent = String(Math.round(o.v)); } }, 0.55);
+        });
+        tl.from(q('[data-row]', check), { y: 16, opacity: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12 }, 0.75)
+          .from(q('[data-fb]', check), { x: -10, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.15 }, 1.3);
+      }
+      const bands = q('[data-band]');
+      if (bands.length) {
+        gsap.from(bands, { y: 24, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: bands[0], start: 'top 90%', once: true } });
+      }
+
+      /* ---------- V. decisions ---------- */
+      q('[data-why]').forEach((item) => {
+        gsap.timeline({ scrollTrigger: { trigger: item, start: 'top 82%', once: true } })
+          .from(item.querySelector('.why__n'), { opacity: 0, y: 20, scale: 0.86, duration: 1, ease: 'expo.out' })
+          .from(item.querySelector('.why__body'), { opacity: 0, y: 26, duration: 0.9, ease: 'power3.out' }, 0.08)
+          .from(item.querySelectorAll('.rc > *'), { opacity: 0, y: 10, duration: 0.5, ease: 'power2.out', stagger: 0.06 }, 0.35);
+      });
+
+      /* ---------- VI. numbers count up, the days fill in ---------- */
+      q<HTMLElement>('[data-countup]').forEach((el) => {
+        const end = Number(el.dataset.count);
+        const suf = el.dataset.suffix ?? '';
+        const o = { v: 0 };
+        el.textContent = '0' + suf;
+        gsap.to(o, {
+          v: end, duration: 1.8, ease: 'power3.out',
+          onUpdate: () => { el.textContent = Math.round(o.v).toLocaleString('en-US') + suf; },
+          scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+        });
+      });
+      const statEls = q('[data-stat]');
+      if (statEls.length) {
+        gsap.from(statEls, { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: statEls[0], start: 'top 88%', once: true } });
+      }
+      const graph = document.querySelector('[data-kl-commits]');
+      if (graph) {
+        gsap.from(q('[data-cg-cell]:not(.cg__c--out)', graph), {
+          scale: 0.2, opacity: 0, duration: 0.45, ease: 'back.out(2)', stagger: 0.006,
+          scrollTrigger: { trigger: graph, start: 'top 82%', once: true },
+        });
+      }
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* every section is already visible without motion */
+    }
+  })();
+</script>
+
+<style>
+  :global(body) { background: #F0EEE9; }
+
+  .kl {
+    --stone: #F0EEE9;
+    --stone-mid: #DFDCD7;
+    --stone-dark: #C4C2BC;
+    --card: #F7F5F1;
+    --sunk: #E7E4DF;
+    --tray: #EAE7E2;
+    --ink: #1B1A18;
+    --ink-mid: #575652;
+    --muted: #6F6A62;
+    --faint: #8A8781;
+    --amber: #B8741B;
+    --amber-bg: #FBF2E4;
+    --olive: #4A6741;
+    --night: #181716;
+    --night-ink: #E5E4E2;
+    --night-mid: #9C9A97;
+    --night-amber: #C4913F;
+    --night-olive: #799A70;
+    --night-line: #2C2B2A;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --num: 'Fraunces', Georgia, serif;
+    --key-grad: linear-gradient(180deg, #FFFFFF 0%, #F0EEE9 100%);
+    --key: inset 0 1px 0 rgb(255 255 255 / 0.68), inset 0 -1px 0 rgb(52 40 24 / 0.064), 0 0 0 1px rgb(52 40 24 / 0.048), 0 1px 2px rgb(52 40 24 / 0.08), 0 4px 10px -1px rgb(52 40 24 / 0.064);
+    --key-lift: inset 0 1px 0 rgb(255 255 255 / 0.68), inset 0 -1px 0 rgb(52 40 24 / 0.064), 0 0 0 1px rgb(52 40 24 / 0.048), 0 2px 3px rgb(52 40 24 / 0.072), 0 14px 28px -11px rgb(52 40 24 / 0.16);
+    --well: inset 0 1px 3.5px rgb(52 40 24 / 0.085), inset 0 0 0 1px rgb(52 40 24 / 0.025), 0 1px 0 rgb(255 255 255 / 0.54);
+    --brass: linear-gradient(180deg, #BF8131 0%, #B8741B 55%, #AF6E1A 100%);
+    --brass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -1px 0 rgb(0 0 0 / 0.1), 0 0 0 1px rgb(110 62 10 / 0.18), 0 1px 2px rgb(110 62 10 / 0.21), 0 4px 13px -3px rgb(184 116 27 / 0.21);
+    --emboss: 0 1px 0 rgb(255 255 255 / 0.56);
+
+    position: relative;
+    font-family: var(--sans);
+    color: var(--ink);
+    background-color: var(--stone);
+    /* paper grain */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+  .kl :global(.kl-wrap) { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  @media (min-width: 768px) { .kl :global(.kl-wrap) { padding: 0 40px; } }
+  .kl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .kl ::selection { background: rgb(184 116 27 / 0.22); }
+
+  /* ---------- shared type ---------- */
+  .kicker { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mid); text-shadow: var(--emboss); }
+  .kicker--dark { color: var(--night-mid); text-shadow: none; }
+  .h2 {
+    margin: 0; max-width: 16ch;
+    font-size: clamp(36px, 5.2vw, 72px); font-weight: 600; letter-spacing: -0.035em; line-height: 1.02; color: var(--ink);
+    text-wrap: balance;
+  }
+  .h2 span { color: #8A8781; font-weight: 500; }
+  .h2--dark { color: var(--night-ink); }
+  .h2--nobal { text-wrap: wrap; }
+  .h2--dark span { color: #7E7B77; }
+  .lead { margin: 0; max-width: 54ch; font-size: clamp(17px, 1.45vw, 19px); line-height: 1.6; color: var(--ink-mid); }
+  .lead--dark { color: var(--night-mid); }
+
+  /* ---------- keys (DS buttons) ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    height: 48px; padding: 0 24px; border-radius: 999px;
+    font-size: 16px; font-weight: 600; letter-spacing: -0.005em; white-space: nowrap;
+    transition: transform 140ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .btn--amber { background: var(--brass); color: #fff; box-shadow: var(--brass-shadow); text-shadow: 0 -1px 0 rgb(60 30 0 / 0.22); }
+  .btn--amber:hover { transform: translateY(-1px); box-shadow: var(--brass-shadow), 0 11px 22px -11px rgb(184 116 27 / 0.55); }
+  .btn--amber:active { transform: translateY(1px); }
+  .btn--key { background: var(--key-grad); color: var(--ink); box-shadow: var(--key); text-shadow: var(--emboss); font-weight: 500; }
+  .btn--key:hover { transform: translateY(-1px); box-shadow: var(--key-lift); }
+  .btn--lg { height: 54px; padding: 0 28px; font-size: 16.5px; }
+  .btn__arr { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .btn:hover .btn__arr { transform: translateX(3px); }
+  .btn__ext { width: 24px; height: 24px; margin-right: -12px; border-radius: 50%; display: grid; place-items: center; background: var(--sunk); box-shadow: var(--well); color: var(--ink-mid); }
+  .btn__ext svg, .btn__ico { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .btn__ico { width: 18px; height: 18px; }
+  .btn:focus-visible, .cta__site:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+  /* ============================== HERO ============================== */
+  .hero { position: relative; isolation: isolate; padding: 112px 0 0; overflow: clip; }
+  .hero__glow i { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; will-change: transform; }
+  .hero__glow i:first-child { width: 760px; height: 760px; left: -260px; top: 0; background: radial-gradient(closest-side, rgb(184 116 27 / 0.11), rgb(184 116 27 / 0.04) 55%, transparent); animation: kl-drift-a 18s ease-in-out infinite; }
+  .hero__glow i:last-child { width: 680px; height: 680px; right: -240px; top: 360px; background: radial-gradient(closest-side, rgb(184 116 27 / 0.09), rgb(184 116 27 / 0.03) 55%, transparent); animation: kl-drift-b 22s ease-in-out infinite; }
+  @keyframes kl-drift-a { 50% { transform: translate(48px, -32px) scale(1.1); } }
+  @keyframes kl-drift-b { 50% { transform: translate(-56px, 24px) scale(0.92); } }
+  .hero__inner { position: relative; z-index: 200; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .hero__meta { margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px 0 10px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 500; color: var(--ink); background: var(--key-grad); box-shadow: var(--key); text-shadow: var(--emboss);
+    font-variant-numeric: tabular-nums;
+  }
+  .pill:last-child { padding-left: 11px; }
+  .bead { width: 7px; height: 7px; border-radius: 50%; background: var(--olive); box-shadow: 0 0 0 3px rgb(74 103 65 / 0.16); animation: kl-bead 2.4s ease-in-out infinite; }
+  @keyframes kl-bead { 50% { box-shadow: 0 0 0 5px rgb(74 103 65 / 0.06); } }
+  .hero__title { margin: 28px 0 0; line-height: 1; }
+  .hero__title :global(.hero__logo) { width: clamp(270px, 36vw, 520px); height: auto; color: var(--ink); }
+  .hero__motto { display: flex; align-items: center; gap: 9px; width: min(460px, 100%); margin: 24px 0 0; }
+  .hero__motto i { flex: none; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--faint); }
+  .hero__motto span { flex: 1; height: 1px; background: rgb(27 26 24 / 0.13); box-shadow: var(--emboss); }
+  .hero__motto em { flex: none; padding: 0 4px; font-style: normal; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mid); text-shadow: var(--emboss); }
+  .hero__lead { margin: 22px 0 0; max-width: 50ch; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.55; color: var(--ink-mid); text-wrap: pretty; }
+  .hero__lead b { color: var(--ink); font-weight: 600; }
+  .hero__actions { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .hero__ring { position: relative; z-index: 1; margin-top: -92px; }
+  .facts {
+    margin: 8px 0 0; padding: 26px 0 30px;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px;
+    border-top: 1px solid rgb(27 26 24 / 0.1); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
+  }
+  .facts div { display: flex; flex-direction: column; gap: 6px; }
+  .facts dt { font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+  .facts dd { margin: 0; font-size: 17px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
+
+  /* ============================== I. PROBLEM ============================== */
+  .prob { padding: clamp(96px, 12vw, 176px) 0 clamp(72px, 9vw, 128px); }
+  .prob__statement {
+    margin: 0;
+    font-size: clamp(36px, 11.4vw, 132px); font-weight: 600; letter-spacing: -0.048em; line-height: 0.95; color: var(--ink);
+  }
+  .prob__line { display: block; white-space: nowrap; }
+  .prob__line--soft { color: #8A8781; font-weight: 500; }
+  .prob__line--soft + .prob__line:not(.prob__line--soft) { margin-top: 0.12em; }
+  .prob__amber { color: var(--amber); }
+  .w { display: inline; }
+  .prob__cols { margin-top: clamp(48px, 6vw, 88px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 6vw, 96px); max-width: 1000px; }
+  .prob__col { display: flex; flex-direction: column; gap: 14px; }
+  .prob__col p { margin: 0; font-size: clamp(17px, 1.45vw, 19px); line-height: 1.65; color: var(--ink-mid); }
+  .prob__col b { color: var(--ink); font-weight: 600; }
+  .prob :global(.prob__cap) { margin-top: clamp(72px, 9vw, 120px); }
+
+  /* ============================== II. HOW ============================== */
+  .how { padding: clamp(40px, 5vw, 72px) 0 clamp(72px, 9vw, 120px); }
+  .how__head { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: end; margin-bottom: clamp(64px, 8vw, 104px); }
+  .how__intro { display: flex; flex-direction: column; gap: 22px; }
+  .doors { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .doors li {
+    display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px 0 11px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 500; color: var(--ink-mid); background: var(--sunk); box-shadow: var(--well);
+  }
+  .doors svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--faint); }
+
+  /* ============================== IV. CHECK (after dark) ============================== */
+  .chk { position: relative; background: var(--night); color: var(--night-ink); padding: clamp(24px, 4vw, 56px) 0 clamp(96px, 11vw, 160px); }
+  .chk :global(.mk__label) { text-shadow: none; }
+  .chk__head { display: flex; flex-direction: column; gap: 26px; margin-bottom: clamp(64px, 8vw, 112px); }
+  .chk__head .h2 { max-width: 13ch; }
+  .bands { list-style: none; margin: clamp(72px, 9vw, 120px) auto 0; padding: 0; max-width: 1080px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); }
+  .bands li { display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: 12px; row-gap: 10px; padding-top: 20px; border-top: 1px solid var(--night-line); }
+  .band { display: inline-flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .band i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; transform: translateY(-1px); }
+  .band--solid { color: var(--night-olive); }
+  .band--flaky { color: var(--night-amber); }
+  .band--lack { color: var(--night-mid); }
+  .bands__range { font-family: var(--num); font-size: 15px; color: #7E7B77; font-variant-numeric: tabular-nums; }
+  .bands p { grid-column: 1 / -1; margin: 0; font-size: 15.5px; line-height: 1.55; color: var(--night-mid); }
+
+  /* ============================== V. DECISIONS ============================== */
+  .why { padding: clamp(104px, 12vw, 176px) 0 clamp(88px, 10vw, 150px); }
+  .why__grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+  .why__sticky .h2 { font-size: clamp(36px, 4.3vw, 62px); max-width: none; }
+  .why__sticky { position: sticky; top: 112px; display: flex; flex-direction: column; gap: 22px; }
+  .why__sticky :global(.mk) { margin-bottom: 6px; }
+  .why__list { list-style: none; margin: 0; padding: 0; }
+  .why__item { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; padding: 40px 0 44px; position: relative; }
+  .why__item + .why__item::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 7px;
+    background:
+      radial-gradient(circle at 3.5px 3.5px, transparent 2px, var(--faint) 2.1px, var(--faint) 3.3px, transparent 3.4px) left center / 7px 7px no-repeat,
+      radial-gradient(circle at 3.5px 3.5px, transparent 2px, var(--faint) 2.1px, var(--faint) 3.3px, transparent 3.4px) right center / 7px 7px no-repeat,
+      linear-gradient(rgb(27 26 24 / 0.13), rgb(27 26 24 / 0.13)) center / calc(100% - 26px) 1px no-repeat;
+    opacity: 0.85;
+  }
+  .why__item:first-child { padding-top: 6px; }
+  .why__n { font-family: var(--num); font-weight: 300; font-size: 44px; line-height: 1; color: var(--amber); letter-spacing: 0.01em; padding-top: 2px; }
+  .why__h { margin: 0; font-size: clamp(23px, 2.2vw, 29px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; color: var(--ink); text-wrap: balance; }
+  .why__p { margin: 14px 0 0; max-width: 56ch; font-size: 17px; line-height: 1.65; color: var(--ink-mid); }
+  .why__receipt { margin-top: 22px; }
+  .rc { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .rc__note { font-size: 13.5px; color: var(--faint); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px 0 10px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 500; color: var(--ink); background: var(--key-grad); box-shadow: var(--key); text-shadow: var(--emboss);
+  }
+  .chip svg { width: 17px; height: 17px; }
+  .ramp { display: inline-flex; align-items: flex-start; gap: 8px; }
+  .ramp__col { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .ramp__well { display: flex; align-items: flex-end; width: 44px; height: 58px; padding: 4px; border-radius: 12px; background: var(--sunk); box-shadow: var(--well); }
+  .ramp__well i { display: block; width: 100%; height: calc(var(--h) * 100%); border-radius: 8px; background: var(--key-grad); box-shadow: var(--key); }
+  .ramp__col--first .ramp__well i { background: var(--brass); box-shadow: var(--brass-shadow); }
+  .ramp small { font-size: 11.5px; font-weight: 500; color: var(--faint); white-space: nowrap; }
+  .ramp__col--first small { color: var(--amber); font-weight: 600; }
+  .ramp__col:last-child small { color: var(--ink); font-weight: 600; }
+  .mini-score { display: inline-flex; align-items: baseline; gap: 2px; padding: 7px 12px; border-radius: 12px; background: var(--key-grad); box-shadow: var(--key); }
+  .mini-score b { font-size: 22px; font-weight: 600; color: var(--olive); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .mini-score small { font-size: 12px; color: var(--faint); }
+  .rc__quote { flex: 1; min-width: 220px; font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.45; color: var(--ink-mid); }
+  .rc--week { gap: 8px; }
+  .day { display: inline-flex; flex-direction: column; align-items: center; gap: 5px; }
+  .day__dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(180deg, #5C7B53, #4A6741); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px rgb(52 40 24 / 0.25); }
+  .day__dot svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .day--off .day__dot { background: var(--sunk); color: var(--faint); box-shadow: var(--well); }
+  .day__l { font-size: 11px; font-weight: 600; color: var(--faint); }
+  .rc--week .rc__note { margin-left: 8px; align-self: flex-start; margin-top: 7px; }
+  .rc--split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 10px; max-width: 560px; }
+  .plate { display: flex; flex-direction: column; gap: 5px; padding: 14px 16px; border-radius: 16px; background: var(--tray); box-shadow: var(--well); }
+  .plate__k { font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); text-shadow: var(--emboss); }
+  .plate__v { font-size: 14px; line-height: 1.45; color: var(--ink-mid); }
+  .plate--ai { background: var(--amber-bg); box-shadow: inset 0 0 0 1px rgb(221 185 106 / 0.6); }
+  .plate--ai .plate__k { color: var(--amber); }
+
+  /* ============================== VI. HOOD ============================== */
+  .hood {
+    position: relative; isolation: isolate; overflow: clip;
+    background: var(--night); color: var(--night-ink);
+    padding: clamp(104px, 12vw, 176px) 0 clamp(96px, 11vw, 160px);
+  }
+  .hood::before {
+    content: ''; position: absolute; z-index: -1; left: 50%; top: -280px; width: 900px; height: 600px; transform: translateX(-50%);
+    background: radial-gradient(50% 50% at 50% 50%, rgb(196 145 63 / 0.12), transparent 70%);
+    pointer-events: none;
+  }
+  .hood__head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: end; }
+  .pulse { margin-top: clamp(64px, 8vw, 104px); display: grid; grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .pulse__text { display: flex; flex-direction: column; gap: 16px; }
+  .pulse__text .kicker { color: var(--night-amber); }
+  .pulse__big { margin: 0; display: flex; align-items: baseline; gap: 14px; font-family: var(--num); font-weight: 300; font-size: clamp(72px, 9vw, 132px); line-height: 0.9; letter-spacing: -0.02em; color: var(--night-ink); font-variant-numeric: tabular-nums lining-nums; }
+  .pulse__big small { font-family: var(--sans); font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--night-mid); }
+  .pulse__p { margin: 0; max-width: 40ch; font-size: 16px; line-height: 1.6; color: var(--night-mid); }
+  .stats { margin: clamp(64px, 8vw, 104px) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--night-line); }
+  .stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 12px; padding: 34px 24px 6px 0; }
+  .stat + .stat { padding-left: 24px; border-left: 1px solid var(--night-line); }
+  .stat__v { margin: 0; font-family: var(--num); font-weight: 300; font-size: clamp(48px, 6vw, 88px); line-height: 0.95; letter-spacing: -0.02em; color: var(--night-ink); font-variant-numeric: tabular-nums lining-nums; }
+  .stat__l { font-size: 14.5px; line-height: 1.45; color: var(--night-mid); max-width: 20ch; }
+  .hood__cols { margin-top: clamp(72px, 9vw, 112px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(40px, 6vw, 96px); }
+  .hood__col .kicker { display: block; margin: 0 0 18px; }
+  .spec { margin: 0; }
+  .spec__row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-top: 1px solid var(--night-line); }
+  .spec__row:last-child { border-bottom: 1px solid var(--night-line); }
+  .spec dt { font-size: 13px; font-weight: 600; color: var(--night-amber); padding-top: 2px; }
+  .spec dd { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--night-ink); }
+  .rails { list-style: none; margin: 0; padding: 0; }
+  .rails li { display: flex; gap: 16px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--night-line); font-size: 15.5px; line-height: 1.5; color: var(--night-ink); }
+  .rails li:last-child { border-bottom: 1px solid var(--night-line); }
+  .rails__n { flex: none; width: 22px; font-family: var(--num); font-size: 14px; color: #7E7B77; font-variant-numeric: tabular-nums; }
+  .rails__foot { margin: 16px 0 0; font-size: 14px; color: var(--night-mid); }
+  .quote {
+    margin: clamp(80px, 10vw, 136px) auto 0; max-width: 980px; text-align: center;
+    font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-style: normal;
+    font-size: clamp(26px, 3.2vw, 42px); line-height: 1.32; letter-spacing: -0.01em; color: var(--night-mid);
+    text-wrap: balance;
+  }
+  .quote span { color: var(--night-ink); }
+
+  /* ============================== CTA ============================== */
+  .cta { position: relative; isolation: isolate; overflow: clip; padding: clamp(112px, 13vw, 190px) 0 clamp(120px, 14vw, 210px); border-top: 1px solid rgb(27 26 24 / 0.06); }
+  .cta__glow { position: absolute; z-index: -1; left: 50%; bottom: -320px; width: 900px; height: 680px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, rgb(184 116 27 / 0.16), rgb(184 116 27 / 0.05) 55%, transparent); pointer-events: none; }
+  .cta__inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .cta__phi { display: block; width: 76px; color: var(--ink); animation: kl-breath 7s ease-in-out infinite; }
+  .cta__phi :global(.kl-logo) { width: 100%; height: auto; }
+  @keyframes kl-breath { 0%, 100% { filter: blur(0); opacity: 1; transform: rotate(0deg); } 50% { filter: blur(1.5px); opacity: 0.72; transform: rotate(8deg); } }
+  .cta__title { margin: 26px 0 0; font-size: clamp(40px, 6vw, 84px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--ink); }
+  .cta__sub { margin: 22px 0 0; max-width: 46ch; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: var(--ink-mid); text-wrap: pretty; }
+  .cta__doors { margin-top: 38px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .cta__row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .only-narrow { display: none; }
+  .cta__site { margin-top: 30px; display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 500; color: var(--ink-mid); border-bottom: 1px solid rgb(27 26 24 / 0.2); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
+  .cta__site:hover { color: var(--ink); border-color: var(--ink); }
+  .cta__site svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ============================== RESPONSIVE ============================== */
+  @media (max-width: 899px) {
+    .how__head, .chk__head, .hood__head { grid-template-columns: minmax(0, 1fr); align-items: start; }
+    .why__grid { grid-template-columns: minmax(0, 1fr); }
+    .why__sticky { position: static; }
+    .bands { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .bands li { padding: 18px 0 20px; }
+    .pulse { grid-template-columns: minmax(0, 1fr); }
+    .hood__cols { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .hero { padding-top: 104px; }
+    .hero__ring { margin-top: -36px; }
+    .hero__title { margin-top: 28px; }
+    .hero__motto { margin-top: 24px; }
+    .hero__motto em { font-size: 10.5px; letter-spacing: 0.12em; }
+    .hero__actions { width: 100%; flex-direction: column; }
+    .hero__actions .btn { width: 100%; }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
+    .prob__cols { grid-template-columns: minmax(0, 1fr); }
+    .why__item { grid-template-columns: 48px minmax(0, 1fr); padding: 32px 0 36px; }
+    .why__n { font-size: 32px; }
+    .rc--split { grid-template-columns: minmax(0, 1fr); }
+    .stats { grid-template-columns: minmax(0, 1fr); border-top: 0; }
+    .stat, .stat + .stat { flex-direction: row-reverse; justify-content: flex-end; align-items: center; gap: 18px; padding: 18px 0; border-left: 0; border-top: 1px solid var(--night-line); }
+    .stat__v { font-size: 52px; min-width: 4.1ch; }
+    .stat__l { max-width: none; }
+    .spec__row { grid-template-columns: 78px minmax(0, 1fr); }
+    .cta__doors, .cta__row { width: 100%; }
+    .cta__doors .btn { width: 100%; }
+    .only-wide { display: none; }
+    .only-narrow { display: inline; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__glow i, .bead, .cta__phi { animation: none; }
+  }
+</style>

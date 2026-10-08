@@ -7,33 +7,27 @@
   },
   "hero": {
     "label": "AI Consulting & Development",
-    "h1_line1": "We make your product",
-    "h1_line2": "intelligent.",
-    "body": "AI integration, custom development, and knowledge transfer for startups that need to ship, not hire.",
-    "cta_primary": "Book a free audit",
-    "cta_secondary": "See our work"
+    "h1_line1": "We build AI with you.",
+    "h1_line2": "Then you run it.",
+    "body": "Architecture, development, and knowledge transfer. Your team walks away with working systems and the skills to evolve them. No black boxes. No dependency.",
+    "cta_primary": "Book a call",
+    "cta_secondary": "See the work"
+  },
+  "services": {
+    "label": "What We Do",
+    "h2": "Three ways we help your team.",
+    "card1_title": "Consulting",
+    "card1_body": "Architecture, model selection, evaluation frameworks. Your team learns to make AI decisions independently.",
+    "card1_tags": ["Architecture", "Model Selection", "Evaluation"],
+    "card2_title": "Development",
+    "card2_body": "Full-stack apps, semantic search, LLM features. Production-ready, scoped, delivered in weeks.",
+    "card2_tags": ["Mobile", "Web", "AI Features"],
+    "card3_title": "Knowledge Transfer",
+    "card3_body": "Workshops, pair programming, documentation. Your team inherits the capability, not just the code.",
+    "card3_tags": ["Workshops", "Training", "Documentation"]
   },
   "social_proof": {
     "trusted": "Trusted by founders building the next wave of products"
-  },
-  "services": {
-    "label": "What we do",
-    "consulting_label": "AI Consulting",
-    "consulting_h3": "Your team learns to build and run AI systems.",
-    "consulting_body": "We train your team to architect, build, and operate AI features independently. You keep the capability after we leave.",
-    "consulting_bullets": [
-      "Architecture and model selection",
-      "Prompt engineering and evaluation frameworks",
-      "Hands-on knowledge transfer in weeks"
-    ],
-    "dev_label": "Development",
-    "dev_h3": "We build it. You ship it.",
-    "dev_body": "Full-stack applications, semantic search, AI matching, and LLM-powered features. Production-ready and scoped to your needs.",
-    "dev_bullets": [
-      "Mobile and web applications",
-      "Semantic search and AI matching",
-      "End-to-end delivery in weeks"
-    ]
   },
   "case_study": {
     "label": "Case Study",
@@ -47,45 +41,54 @@
     "solution": "Embeddings plus pgvector plus LLM grading. Semantic search that understands skills, not keywords.",
     "result": "Live. Funded. Sub-second matching. Founders described it as 'feels like magic.'",
     "stack_label": "Tech Stack",
-    "stack_cta": "Book your free audit"
+    "stack_cta": "Book a call"
   },
   "process": {
-    "label": "How We Work",
-    "h2_line1": "From first call to production",
-    "h2_line2": "in weeks.",
+    "label": "How It Works",
+    "h2_line1": "One conversation.",
+    "h2_line2": "A complete architecture.",
     "step1_num": "01",
-    "step1_label": "Free Audit",
-    "step1_body": "We review your product, data, and stack. You get a prioritized AI roadmap.",
-    "step1_sub": "No cost. No commitment.",
+    "step1_label": "We Talk",
+    "step1_body": "You describe the problem. We map the landscape. Architecture doc and implementation roadmap in days.",
     "step2_num": "02",
-    "step2_label": "Knowledge Transfer",
-    "step2_body": "Your team learns to build and run AI systems. Architecture, model selection, prompts, evaluation.",
-    "step2_sub": "Your team. Your capability. Forever.",
+    "step2_label": "We Build",
+    "step2_body": "Working prototype on your data. Your team sees the code, learns the patterns, extends it.",
     "step3_num": "03",
-    "step3_label": "Build & Ship",
-    "step3_body": "Or we build it for you. Live in weeks, not months.",
-    "step3_sub": "Scoped. Priced. Delivered."
+    "step3_label": "You Ship",
+    "step3_body": "Your team deploys with confidence. We stick around for support. Then you run it."
+  },
+  "capabilities": {
+    "label": "Capabilities",
+    "h2": "We also build the rest.",
+    "cap1_title": "Agent Orchestration",
+    "cap1_body": "Autonomous workflows, multi-agent systems, tool use, and reasoning pipelines.",
+    "cap2_title": "Development",
+    "cap2_body": "Mobile, web, APIs. Flutter, Node, Python. Shipped to production.",
+    "cap3_title": "Prompt Engineering",
+    "cap3_body": "Structured prompts, evaluation frameworks, measurable outputs.",
+    "cap4_title": "AI Strategy & Architecture",
+    "cap4_body": "Model selection, cost optimization, build-vs-buy decisions, technical due diligence."
   },
   "founder": {
     "name": "Yanis Schweizer",
     "label": "Founder & Consultant",
-    "bio1": "4 years building with LLMs. Shipped semantic search at scale. Trained teams to run it independently.",
+    "bio1": "4 years shipping AI across search, matching, mobile, and web. Trained teams from seed-stage to funded to run their own AI systems.",
     "bio2": "Based in Europe. Works in English, German, Spanish, and Romanian."
   },
   "cta_block": {
-    "h2": "Ready to make your product intelligent?",
-    "body": "Book a free audit. No cost, no commitment. We look at your product and tell you what is possible.",
-    "button": "Book your free audit"
+    "h2": "Stop guessing. Get the map.",
+    "body": "One call. You walk away with clarity on what to build, how to build it, and what your team needs to own it.",
+    "button": "Book a call"
   },
   "footer": {
     "services": "Services",
     "consulting": "Consulting",
     "development": "Development",
-    "free_audit": "Free Audit",
+    "free_audit": "Book a call",
     "connect": "Connect",
     "linkedin": "LinkedIn",
     "email": "Email",
-    "calendly": "Calendly",
+    "calendly": "Book a call",
     "legal": "2026 Strade SMIP SRL. Brasov, Romania. CIF: RO48204960"
   },
   "consulting": {
@@ -93,15 +96,15 @@
     "h1_line1": "Your team builds AI.",
     "h1_line2": "We show them how.",
     "body": "Architecture, model selection, prompt engineering, evaluation frameworks. Your team leaves capable of executing independently.",
-    "cta": "Book your free audit",
-    "without_label": "Without Us",
+    "cta": "Book a call",
+    "without_label": "Without Guidance",
     "without_bullets": [
       "Months of trial and error with LLM APIs",
       "An expensive AI hire you cannot afford yet",
       "A generic chatbot that adds no real value",
       "Prompt engineering by guesswork"
     ],
-    "with_label": "With Us",
+    "with_label": "With Strade",
     "with_bullets": [
       "Proven architecture from day one",
       "Your existing team upskilled in weeks",
@@ -109,16 +112,16 @@
       "Evaluation framework so you know it works"
     ],
     "offerings_label": "What You Get",
-    "card1_h3": "Free Audit",
-    "card1_body": "We review your product, data, and stack. You get a prioritized AI roadmap.",
-    "card1_tag": "No cost. No commitment.",
-    "card1_cta": "Book your audit",
-    "card2_h3": "Knowledge Transfer",
-    "card2_body": "Hands-on training for your team. Architecture decisions, model selection, prompt structure, evaluation frameworks.",
-    "card2_tag": "Your team. Your capability. Forever.",
+    "card1_h3": "The Blueprint",
+    "card1_body": "2-hour deep dive. Written architecture doc. Implementation roadmap your engineer follows. 5 business days.",
+    "card1_tag": "Architecture + roadmap.",
+    "card1_cta": "Book a call",
+    "card2_h3": "Proof-of-Concept",
+    "card2_body": "Everything in the Blueprint + a working prototype on your data. Your team sees the code, extends it.",
+    "card2_tag": "Your data. Your code.",
     "card2_cta": "Book a call",
-    "card3_h3": "Custom Implementation",
-    "card3_body": "We build it for you. Semantic search, AI matching, LLM features, full-stack applications. Scoped to your needs.",
+    "card3_h3": "Full Build",
+    "card3_body": "Deployed, production-ready, 30 days support. For teams that want it running.",
     "card3_cta": "Discuss your project",
     "mini_label": "Proven in Production",
     "mini_h2": "Semantic matching for 10,000+ profiles.",
@@ -128,15 +131,15 @@
     "faq": [
       {
         "q": "What kind of companies do you work with?",
-        "a": "Marketplaces and SaaS products, seed to pre-Series A. If your product has a search, discovery, matching, or recommendation problem, we can help."
+        "a": "Startups and scale-ups building intelligent products. If your product needs AI features, knowledge transfer, or full-stack development, we can help."
       },
       {
-        "q": "What does the free audit include?",
-        "a": "We review your product, data, and tech stack. You get a prioritized roadmap for AI integration. Typically a 30-minute call plus a written summary. No cost, no strings."
+        "q": "What does the Blueprint include?",
+        "a": "A 2-hour deep dive into your product, data, and tech stack. You get a written architecture doc and implementation roadmap. Delivered in 5 business days."
       },
       {
-        "q": "How is knowledge transfer different from hiring a full-time AI engineer?",
-        "a": "We train your existing team in weeks. They learn to build and operate AI systems independently. No long-term salary commitment, no recruiting, no onboarding. Your capability stays in-house after we leave."
+        "q": "How is this different from hiring a full-time AI engineer?",
+        "a": "We train your existing team in weeks. They learn to build and operate AI systems independently. No long-term salary commitment, no recruiting, no onboarding. Your capability stays in-house."
       },
       {
         "q": "What languages do you work in?",
@@ -160,7 +163,7 @@
     "cap2_h3": "Web Applications",
     "cap2_body": "Full-stack web apps that scale. Clean architecture, modern tooling, deployed to production.",
     "cap3_h3": "AI Integration",
-    "cap3_body": "Search, matching, generation, automation. We add the intelligence layer to your product.",
+    "cap3_body": "Search, matching, generation, automation. The intelligence layer your product needs.",
     "projects_label": "Our Work"
   },
   "case_study_page": {

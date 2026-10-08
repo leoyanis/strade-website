@@ -1,0 +1,110 @@
+---
+// How I work with Liam: decisions are ours, AI types, weekly shipping. Plus two real calls.
+const b = '/images/work/vaultt/';
+const rows = [
+  { n: '01', t: 'The decisions are ours.', d: 'Liam owns the vision. I own the product and technical calls. AI writes the code to my spec, and I decide what ships.' },
+  { n: '02', t: 'We ship every week.', d: 'Small releases in front of real users, then we look at what people actually do with them.' },
+  { n: '03', t: 'One head across the whole system.', d: 'Design, app, database, AI and console. Nothing falls between teams, because there is only one of me.' },
+];
+---
+
+<section class="vt-work vt-section" id="vt-work">
+  <div class="vt-wrap">
+    <div class="vt-work__top">
+      <header class="vt-head vt-work__head">
+        <p class="vt-tag"><span class="no">09</span> How we work</p>
+        <h2 class="vt-h2">Liam and I make the calls. <span class="lt">AI does the typing.</span></h2>
+        <p class="vt-lede">AI made the code free. It didn't make the decisions free. That's the part I'm there for, as Liam's fractional CTO.</p>
+      </header>
+      <figure class="vt-work__photo">
+        <img src={`${b}liam-sofa.webp`} alt="Liam Jeffery, founder of Vaultt" width="720" height="720" loading="lazy" decoding="async" />
+        <figcaption><strong>Liam Jeffery</strong><span>Founder, Vaultt</span></figcaption>
+      </figure>
+    </div>
+
+    <ol class="vt-work__rows">
+      {rows.map((r) => (
+        <li class="vt-work__row" data-rise>
+          <span class="vt-work__n">{r.n}</span>
+          <strong class="vt-work__t">{r.t}</strong>
+          <p class="vt-work__d">{r.d}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="vt-calls">
+      <article class="vt-call is-main" data-rise>
+        <p class="vt-call__k">A call I'm proud of</p>
+        <h3 class="vt-call__t">The feed was burying new work.</h3>
+        <div class="vt-call__body">
+          <p>New projects kept sinking under older ones in the Showcase. The obvious fix was a bigger boost for new work, but tripling it barely moved them.</p>
+          <p>The real lever was how the feed draws from the scores, not the scores themselves. One change there fixed it. Every feed rule now lives in the admin console, so the team can retune it without an app update.</p>
+        </div>
+        <div class="vt-call__viz" aria-hidden="true">
+          <div class="vt-call__lane">
+            <span class="vt-call__lab">Before</span>
+            <span class="vt-call__tiles">{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => <i class:list={[i >= 8 && 'is-new']}></i>)}</span>
+          </div>
+          <div class="vt-call__lane">
+            <span class="vt-call__lab">After</span>
+            <span class="vt-call__tiles is-after">{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => <i class:list={[[1, 4, 6, 9].includes(i) && 'is-new']}></i>)}</span>
+          </div>
+          <span class="vt-call__cap"><i></i>New projects, top of the feed on the left</span>
+        </div>
+      </article>
+      <article class="vt-call" data-rise>
+        <p class="vt-call__k">A call about trust</p>
+        <h3 class="vt-call__t">Search can find people. It can't list them.</h3>
+        <div class="vt-call__body">
+          <p>People search is sign-in only and capped, with no paging. You can find the person you mean, but nobody can scrape the talent on Vaultt.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-work { background: var(--vt-navy); border-top: 1px solid var(--vt-line); }
+  .vt-work__top { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: end; }
+  .vt-work__head { margin-bottom: 0; }
+  .vt-work__photo {
+    position: relative; margin: 0; transform: rotate(3deg);
+    padding: 9px 9px 0; border-radius: 18px; background: var(--vt-light);
+    box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+  }
+  .vt-work__photo img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; border-radius: 11px; }
+  .vt-work__photo figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 11px 4px 13px; color: var(--vt-navy); }
+  .vt-work__photo strong { font-size: 15px; font-weight: 700; }
+  .vt-work__photo span { font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-blue-deep); }
+
+  .vt-work__rows { margin-top: clamp(56px, 7vw, 88px); border-top: 1px solid var(--vt-line-2); }
+  .vt-work__row { display: grid; grid-template-columns: 90px minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: baseline; padding: 30px 0; border-bottom: 1px solid var(--vt-line-2); }
+  .vt-work__n { font-family: var(--vt-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.12em; color: var(--vt-blue); }
+  .vt-work__t { font-family: var(--vt-display); font-size: clamp(26px, 2.8vw, 38px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+  .vt-work__d { font-size: 17px; line-height: 1.6; color: var(--vt-soft); }
+
+  .vt-calls { margin-top: clamp(56px, 7vw, 88px); display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; }
+  .vt-call { position: relative; padding: 30px; border-radius: 22px; border: 1px solid var(--vt-line-2); background: rgba(10, 33, 64, 0.5); display: flex; flex-direction: column; }
+  .vt-call.is-main { background: linear-gradient(160deg, #143563, var(--vt-navy-3)); border-color: rgba(111, 168, 255, 0.4); }
+  .vt-call__k { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-blue); }
+  .vt-call__t { margin-top: 14px; font-family: var(--vt-display); font-size: clamp(24px, 2.4vw, 32px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .vt-call__body { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+  .vt-call__body p { font-size: 16px; line-height: 1.6; color: var(--vt-soft); }
+  .vt-call__viz { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--vt-line); display: flex; flex-direction: column; gap: 12px; }
+  .vt-call__lane { display: grid; grid-template-columns: 130px minmax(0, 1fr); align-items: center; gap: 14px; }
+  .vt-call__lab { font-family: var(--vt-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vt-soft); }
+  .vt-call__tiles { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+  .vt-call__tiles i { display: block; aspect-ratio: 3 / 4; border-radius: 5px; background: rgba(232, 241, 255, 0.1); border: 1px solid var(--vt-line); }
+  .vt-call__tiles i.is-new { background: linear-gradient(160deg, #8EBBFF, #4E8FEF); border-color: transparent; box-shadow: 0 0 14px rgba(111, 168, 255, 0.45); }
+  .vt-call__cap { display: flex; align-items: center; gap: 8px; font-family: var(--vt-mono); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vt-faint); }
+  .vt-call__cap i { width: 10px; height: 12px; border-radius: 3px; background: linear-gradient(160deg, #8EBBFF, #4E8FEF); }
+
+  @media (max-width: 900px) {
+    .vt-work__top { grid-template-columns: 1fr; gap: 36px; }
+    .vt-work__photo { width: min(72%, 280px); justify-self: end; margin-right: 6px; }
+    .vt-work__row { grid-template-columns: 1fr; gap: 10px; padding: 26px 0; }
+    .vt-calls { grid-template-columns: 1fr; }
+    .vt-call { padding: 24px 20px; }
+    .vt-call__lane { grid-template-columns: 110px minmax(0, 1fr); }
+  }
+</style>

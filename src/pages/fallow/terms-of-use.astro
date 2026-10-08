@@ -1,0 +1,213 @@
+---
+// Fallow terms of use (custom EULA). Shell and styling live in layouts/Legal.astro.
+//
+// This replaces Apple's standard EULA only if LegalLinks.terms in the app and the EULA
+// field in App Store Connect are both pointed here. Until then the app still links to
+// Apple's standard EULA and this page is unreferenced.
+//
+// A custom EULA has to carry at least Apple's "Minimum Terms of Developer's End-User
+// License Agreement" (Schedule 1 of the Developer Program Licence Agreement) or review
+// rejects it. Those are the "Apple's role in this" and "Legal compliance" sections plus
+// the address in "Contact and complaints". Do not delete them to shorten the page.
+//
+// Keep the entity and contact details in step with privacy-policy.astro.
+import Legal from '../../layouts/Legal.astro';
+
+const CONTACT_EMAIL = 'support@strade.tech';
+const LEGAL_ENTITY = 'Strade SMIP SRL, a company established in Romania';
+// Apple's minimum EULA terms require a postal address for end user complaints.
+const DEVELOPER_ADDRESS = 'Strada Tâmpei 16D, Brașov, Romania';
+const GOVERNING_LAW = 'the laws of Romania';
+
+const APPLE_MEDIA_SERVICES = 'https://www.apple.com/legal/internet-services/itunes/';
+---
+
+<Legal
+  title="Fallow Terms of Use | Strade"
+  description="The terms you agree to when you use Fallow, including how the subscription and the Lifetime Unlock work."
+  path="/fallow/terms-of-use"
+  heading="Terms of Use"
+  lastUpdatedISO="2026-08-04"
+  lastUpdated="4 August 2026"
+>
+
+  <p class="legal-lede">
+    Fallow is a self control tool that runs entirely on your device. These terms cover what
+    you can expect from it, how the subscription and the Lifetime Unlock work, and the
+    limits of what is promised.
+  </p>
+
+  <h2>Who these terms are between</h2>
+  <p>
+    Fallow is published by {LEGAL_ENTITY}, referred to below as "we" or "the developer".
+    These terms are an agreement between you and us. Apple is not a party to them.
+  </p>
+  <p>
+    By downloading or using Fallow you accept these terms. If you do not accept them, do not
+    use the app.
+  </p>
+
+  <h2>Your licence</h2>
+  <p>
+    We grant you a personal, non transferable licence to use Fallow on Apple branded devices
+    that you own or control. Your use is also governed by the Usage Rules in
+    <a href={APPLE_MEDIA_SERVICES} class="text-link" target="_blank" rel="noopener">Apple's Media Services Terms and Conditions</a>.
+    This licence does not sell you the app or any of its underlying rights.
+  </p>
+
+  <h2>What Fallow does, and what it does not promise</h2>
+  <p>
+    Fallow uses Apple's Screen Time frameworks to shield the apps you select outside a daily
+    free window that you set. It is a tool that helps you keep a decision you already made.
+  </p>
+  <ul>
+    <li>
+      It is not a medical device, a clinical treatment, or a substitute for professional help
+      with compulsive behaviour or addiction.
+    </li>
+    <li>
+      It is not a security or supervision product. It is designed for the person using the
+      device, not for controlling someone else's.
+    </li>
+    <li>
+      It depends on Apple's frameworks and on your device settings. We cannot guarantee that
+      every app is blocked in every circumstance, or that the app is free of faults.
+    </li>
+    <li>
+      You keep control of your own device throughout. Nothing in Fallow prevents you from
+      removing it.
+    </li>
+  </ul>
+
+  <h2>Acceptable use</h2>
+  <p>
+    Do not copy, resell, rent or redistribute Fallow. Do not reverse engineer, decompile or
+    modify it, except to the extent the law expressly allows despite this restriction. Do not
+    use it to interfere with anyone else's device.
+  </p>
+
+  <h2>Subscription, free trial and Lifetime Unlock</h2>
+  <p>
+    Fallow offers two paid options. The exact price is shown in the app and on the App Store
+    listing, in your local currency, before you confirm anything.
+  </p>
+  <ul>
+    <li>
+      <strong>Yearly subscription.</strong> An auto renewable subscription billed once a year.
+      It opens with a one week free trial for eligible new subscribers.
+    </li>
+    <li>
+      <strong>Lifetime Unlock.</strong> A one time purchase. It does not renew and is not a
+      subscription.
+    </li>
+  </ul>
+  <p>
+    The subscription renews automatically at the end of each year unless you cancel it at
+    least 24 hours before the current period ends. Your Apple Account is charged for renewal
+    within 24 hours of the end of the period. If you buy a subscription before a free trial
+    finishes, the unused part of the trial is forfeited.
+  </p>
+  <p>
+    All payments are handled by Apple. We never see or store your payment details.
+  </p>
+
+  <h2>Cancelling and refunds</h2>
+  <p>
+    You manage and cancel the subscription in your Apple Account settings, not in Fallow.
+    Deleting the app does not cancel a subscription on its own.
+  </p>
+  <p>
+    Refunds are handled by Apple under their own policy. The developer cannot cancel a
+    subscription or issue a refund on your behalf, so please raise those with Apple directly.
+    Where consumer law in your country gives you additional cancellation or refund rights,
+    those rights still apply and nothing here removes them.
+  </p>
+
+  <h2>Price and feature changes</h2>
+  <p>
+    We may change the price of the subscription or what the paid tiers include. Changes to a
+    subscription price take effect from a following billing period, and Apple notifies you in
+    advance so you can decide whether to continue. The Lifetime Unlock, once bought, is not
+    charged again.
+  </p>
+
+  <h2>Apple's role in this</h2>
+  <p>
+    These terms are between you and the developer only. Apple is not responsible for Fallow
+    or its content. Specifically:
+  </p>
+  <ul>
+    <li>
+      Apple has no obligation to provide any maintenance or support for Fallow. Support
+      questions go to the developer, at the address below.
+    </li>
+    <li>
+      If Fallow fails to conform to any warranty that applies, you may tell Apple, and Apple
+      will refund the purchase price. To the maximum extent the law allows, Apple has no
+      other warranty obligation of any kind for Fallow.
+    </li>
+    <li>
+      The developer, not Apple, is responsible for handling any claim that Fallow fails to
+      conform to a legal requirement, or any claim under product liability, consumer
+      protection or privacy law.
+    </li>
+    <li>
+      The developer, not Apple, is responsible for investigating and resolving any claim that
+      Fallow infringes someone's intellectual property rights.
+    </li>
+    <li>
+      Apple and its subsidiaries are third party beneficiaries of these terms, and Apple has
+      the right to enforce them against you.
+    </li>
+  </ul>
+
+  <h2>Legal compliance</h2>
+  <p>
+    By using Fallow you confirm that you are not located in a country subject to a United
+    States Government embargo or designated as a terrorist supporting country, and that you
+    are not on any United States Government list of prohibited or restricted parties.
+  </p>
+
+  <h2>No warranty</h2>
+  <p>
+    Fallow is provided as it is, without warranties of any kind beyond those that cannot be
+    excluded by law. We do not promise that it will be uninterrupted, error free, or fit for
+    any particular purpose you have in mind.
+  </p>
+
+  <h2>Limits on liability</h2>
+  <p>
+    To the extent the law allows, we are not liable for indirect or consequential loss, or
+    for loss arising from your use of, or inability to use, Fallow. Nothing here limits
+    liability for death or personal injury caused by negligence, for fraud, or for anything
+    else that cannot lawfully be limited. Where liability cannot be excluded, it is limited
+    to the amount you paid for the app in the twelve months before the claim.
+  </p>
+
+  <h2>Privacy</h2>
+  <p>
+    Fallow collects no data. What the app stores, and where, is set out in the
+    <a href="/fallow/privacy-policy" class="text-link">Fallow Privacy Policy</a>.
+  </p>
+
+  <h2>Changes to these terms</h2>
+  <p>
+    If these terms change, the updated version is published here and the date at the top
+    changes with it. Continuing to use Fallow after that means you accept the new version.
+    The current version took effect on <time datetime="2026-08-04">4 August 2026</time>.
+  </p>
+
+  <h2>Governing law</h2>
+  <p>
+    These terms are governed by {GOVERNING_LAW}. If you are a consumer, you keep the benefit
+    of any mandatory protections under the law of the country you live in.
+  </p>
+
+  <h2>Contact and complaints</h2>
+  <p>
+    Questions, support requests and complaints about Fallow can go to
+    <a href={`mailto:${CONTACT_EMAIL}`} class="text-link">{CONTACT_EMAIL}</a>, or by post to
+    {DEVELOPER_ADDRESS}.
+  </p>
+
+</Legal>

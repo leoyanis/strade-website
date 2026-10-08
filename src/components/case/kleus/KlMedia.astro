@@ -1,0 +1,234 @@
+---
+// One piece of "material you keep saving": a video, a book, a podcast episode or a PDF.
+// Drawn in CSS rather than borrowing real covers or thumbnails. Every size inside is in
+// container units, so the same face works at 400px in the hero ring and fluid in the path.
+type Id = 'napoleon' | 'japanese' | 'negotiation' | 'rome' | 'stoic' | 'music' | 'thermo';
+interface Props {
+  id: Id;
+  class?: string;
+  /** Decorative copies (the ring) are hidden from screen readers. */
+  decorative?: boolean;
+}
+const { id, class: cls = '', decorative = false } = Astro.props;
+
+const META: Record<Id, { kind: 'video' | 'book' | 'pod' | 'pdf'; tag: string; label: string }> = {
+  napoleon: { kind: 'video', tag: '2:41:07', label: 'Example source: a 2 hour 41 minute documentary on Napoleon' },
+  japanese: { kind: 'video', tag: '58:32', label: 'Example source: a 58 minute video on Japanese' },
+  negotiation: { kind: 'book', tag: '320 pages', label: 'Example source: a 320 page book on negotiation' },
+  rome: { kind: 'book', tag: '443 pages', label: 'Example source: a 443 page history of Rome' },
+  stoic: { kind: 'book', tag: '273 pages', label: 'Example source: a 273 page book on Stoicism' },
+  music: { kind: 'pod', tag: '1:12:48', label: 'Example source: a 1 hour 12 minute podcast episode on music theory' },
+  thermo: { kind: 'pdf', tag: '48 pages', label: 'Example source: 48 pages of thermodynamics notes as a PDF' },
+};
+const m = META[id];
+const wave = [0.35, 0.6, 0.9, 0.5, 0.75, 1, 0.55, 0.8, 0.4, 0.65, 0.95, 0.5, 0.7, 0.3, 0.6, 0.85, 0.45, 0.6];
+const lines = [100, 92, 97, 60, 0, 95, 88, 100, 70, 0, 90, 76];
+---
+
+<div
+  class:list={['m', `m--${m.kind}`, `m--${id}`, cls]}
+  role={decorative ? undefined : 'img'}
+  aria-label={decorative ? undefined : m.label}
+  aria-hidden={decorative ? 'true' : undefined}
+>
+  {id === 'napoleon' && (
+    <div class="m__art nap">
+      <span class="nap__mono">N</span>
+      <span class="nap__horizon"></span>
+      <span class="nap__eyebrow">A documentary</span>
+      <span class="nap__title">Napoleon</span>
+      <span class="nap__years">1769 – 1821</span>
+    </div>
+  )}
+  {id === 'japanese' && (
+    <div class="m__art jp">
+      <span class="jp__sun"></span>
+      <span class="jp__text">
+        <b lang="ja">日本語</b>
+        <em>Japanese, from zero</em>
+      </span>
+    </div>
+  )}
+  {id === 'negotiation' && (
+    <div class="m__art neg">
+      <span class="neg__dot"></span>
+      <span class="neg__kicker">A field guide to</span>
+      <span class="neg__title">Negotiation</span>
+      <span class="m__bars"><i></i><i></i></span>
+    </div>
+  )}
+  {id === 'rome' && (
+    <div class="m__art rome">
+      <span class="rome__frame"></span>
+      <span class="rome__spqr">SPQR</span>
+      <span class="rome__title">Rome</span>
+      <span class="rome__rule"></span>
+      <span class="rome__sub">A history</span>
+    </div>
+  )}
+  {id === 'stoic' && (
+    <div class="m__art stoic">
+      <span class="stoic__circle"></span>
+      <span class="stoic__title">Stoicism</span>
+      <span class="stoic__sub">Letters on a steady mind</span>
+    </div>
+  )}
+  {id === 'music' && (
+    <div class="m__art pod">
+      <span class="pod__rings"></span>
+      <span class="pod__ep">Episode 12</span>
+      <span class="pod__title">Music theory, properly</span>
+      <span class="pod__wave">{wave.map((h) => <i style={`--h:${h}`}></i>)}</span>
+    </div>
+  )}
+  {id === 'thermo' && (
+    <div class="m__art pdf">
+      <span class="pdf__title">Thermodynamics</span>
+      <span class="pdf__sub">Lecture notes, weeks 1 to 6</span>
+      <span class="pdf__lines">
+        {lines.map((w) => (w ? <i style={`width:${w}%`}></i> : <b></b>))}
+      </span>
+      <span class="pdf__label">PDF</span>
+    </div>
+  )}
+
+  {m.kind === 'video' && (
+    <span class="m__play" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M7.5 4.8v14.4L19.5 12z" /></svg>
+    </span>
+  )}
+
+  <span class="m__tag" aria-hidden="true">
+    {m.kind === 'video' && (
+      <svg class="m__ico" viewBox="0 0 28.57 20"><path fill="#FF0000" d="M27.97 3.12A3.58 3.58 0 0 0 25.45.6C23.22 0 14.29 0 14.29 0S5.35 0 3.12.6A3.58 3.58 0 0 0 .6 3.12C0 5.35 0 10 0 10s0 4.65.6 6.88a3.58 3.58 0 0 0 2.52 2.52c2.23.6 11.17.6 11.17.6s8.93 0 11.16-.6a3.58 3.58 0 0 0 2.52-2.52c.6-2.23.6-6.88.6-6.88s0-4.65-.6-6.88z" /><path fill="#fff" d="M11.43 14.29 18.85 10l-7.42-4.29z" /></svg>
+    )}
+    {m.kind === 'pod' && (
+      <svg class="m__ico" viewBox="0 0 300 300"><defs><linearGradient id={`kl-ap-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F452FF" /><stop offset="1" stop-color="#832BC1" /></linearGradient></defs><rect width="300" height="300" rx="66" fill={`url(#kl-ap-${id})`} /><path fill="#fff" d="M175.7 181.1c-.4-3.6-1.6-6.2-4-8.6-4.5-4.7-12.4-7.8-21.7-7.8s-17.2 3-21.7 7.8c-2.3 2.5-3.6 5-4 8.6-.8 7-.3 13 .5 22.7.8 9.2 2.3 21.5 4.2 33.9 1.4 8.9 2.5 13.7 3.5 17.1 1.7 5.6 7.8 10.4 17.5 10.4s15.9-4.9 17.5-10.4c1-3.4 2.1-8.2 3.5-17.1 1.9-12.5 3.4-24.7 4.2-33.9.9-9.6 1.3-15.6.5-22.7zM174.6 130.1c0 13.6-11 24.6-24.6 24.6s-24.6-11-24.6-24.6 11-24.6 24.6-24.6 24.6 11 24.6 24.6zM149.7 33.2C92.3 33.4 45.3 80 44.5 137.4c-.6 46.5 29.1 86.3 70.6 100.9 1 .4 2-.5 1.9-1.5-.5-3.6-1.1-7.2-1.5-10.8-.2-1.3-1-2.3-2.1-2.9-32.8-14.3-55.7-47.2-55.3-85.3.5-50 41.3-90.7 91.2-91.1 51.1-.4 92.8 41 92.8 92 0 37.7-22.8 70.1-55.3 84.4-1.2.5-2 1.6-2.1 2.9-.5 3.6-1 7.2-1.5 10.8-.2 1.1.9 1.9 1.9 1.5 41.1-14.4 70.6-53.6 70.6-99.6-.2-58.1-47.7-105.5-106-105.4zM147.3 68.2c-37.4 1.4-67.4 32.3-67.9 69.7-.3 24.6 12 46.4 30.9 59.3.9.6 2.2-.1 2.2-1.2-.3-4.3-.3-8.1-.1-12.1.1-1.3-.4-2.5-1.4-3.4-11.5-10.8-18.5-26.2-18.1-43.2.8-30 24.9-54.4 54.9-55.6 32.6-1.3 59.4 24.9 59.4 57.1 0 16.4-7 31.2-18.1 41.7-.9.9-1.4 2.1-1.4 3.4.2 3.9.1 7.7-.1 12-.1 1.1 1.2 1.9 2.2 1.2 18.6-12.7 30.9-34.2 30.9-58.4.1-40.5-33.2-72.8-73.4-71.2z" /></svg>
+    )}
+    {m.kind === 'book' && (
+      <svg class="m__ico m__ico--line" viewBox="0 0 24 24"><path d="M12 6.6C10.8 5.6 8.9 5.1 6.5 5.1H4v12.6h2.5c2.4 0 4.3.5 5.5 1.5" /><path d="M12 6.6c1.2-1 3.1-1.5 5.5-1.5H20v12.6h-2.5c-2.4 0-4.3.5-5.5 1.5" /><path d="M12 6.6v12.6" /></svg>
+    )}
+    {m.kind === 'pdf' && (
+      <svg class="m__ico m__ico--line" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg>
+    )}
+    {m.tag}
+  </span>
+</div>
+
+<style>
+  /* ---------- frame ---------- */
+  .m {
+    position: relative;
+    container-type: inline-size;
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow: 0 2px 6px rgb(52 40 24 / 0.1), 0 24px 60px -20px rgb(0 0 0 / 0.35);
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .m--video { width: 400px; aspect-ratio: 16 / 9; border-radius: 12px; --u: calc(100cqw / 400); }
+  .m--book { width: 200px; aspect-ratio: 2 / 3; border-radius: 3px 7px 7px 3px; --u: calc(100cqw / 200); }
+  .m--pod { width: 250px; aspect-ratio: 1; border-radius: 16px; --u: calc(100cqw / 250); }
+  .m--pdf { width: 230px; aspect-ratio: 23 / 30; border-radius: 6px; --u: calc(100cqw / 230); background: #F7F5F1; box-shadow: 0 0 0 1px #DCD9D4, 0 2px 6px rgb(52 40 24 / 0.08), 0 24px 60px -20px rgb(0 0 0 / 0.3); }
+
+  .m__art { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  /* a book's spine: one shaded fold down the left edge */
+  .m--book .m__art::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgb(0 0 0 / 0.22) 0, rgb(255 255 255 / 0.16) calc(5 * var(--u)), rgb(0 0 0 / 0.05) calc(9 * var(--u)), transparent calc(16 * var(--u)));
+  }
+
+  /* ---------- tag, play ---------- */
+  .m__tag {
+    position: absolute; z-index: 3; right: calc(10 * var(--u)); bottom: calc(10 * var(--u));
+    display: inline-flex; align-items: center; gap: calc(6 * var(--u));
+    padding: calc(3 * var(--u)) calc(8 * var(--u)) calc(3 * var(--u)) calc(6 * var(--u));
+    border-radius: calc(6 * var(--u));
+    background: rgb(27 26 24 / 0.82); color: #F7F5F1;
+    font-size: calc(13 * var(--u)); font-weight: 600; line-height: 1.3;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .m__ico { width: calc(15 * var(--u)); height: calc(15 * var(--u)); flex: none; }
+  .m--video .m__ico { width: calc(17 * var(--u)); height: calc(12 * var(--u)); }
+  .m__ico--line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .m__play {
+    position: absolute; z-index: 2; inset: 0; margin: auto;
+    width: calc(56 * var(--u)); height: calc(56 * var(--u)); border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgb(27 26 24 / 0.62);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18);
+  }
+  .m__play svg { width: 40%; height: 40%; margin-left: 8%; fill: #F7F5F1; }
+  .m__bars { display: flex; flex-direction: column; gap: calc(6 * var(--u)); margin-top: auto; }
+  .m__bars i { display: block; height: calc(5 * var(--u)); border-radius: 99px; background: currentColor; opacity: 0.35; }
+  .m__bars i:first-child { width: 58%; }
+  .m__bars i:last-child { width: 36%; }
+
+  /* ---------- Napoleon: a documentary ---------- */
+  .nap {
+    justify-content: flex-end; padding: calc(22 * var(--u)) calc(26 * var(--u));
+    color: #F3E7CF;
+    background:
+      radial-gradient(70% 90% at 82% 8%, rgb(232 186 110 / 0.55), transparent 60%),
+      radial-gradient(60% 70% at 0% 100%, rgb(140 34 30 / 0.55), transparent 65%),
+      linear-gradient(160deg, #222a3a 0%, #10131a 72%);
+  }
+  .nap__mono {
+    position: absolute; right: calc(-6 * var(--u)); top: calc(-48 * var(--u));
+    font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: calc(250 * var(--u)); line-height: 1;
+    color: rgb(243 231 207 / 0.07);
+  }
+  .nap__horizon { position: absolute; left: 0; right: 0; top: 56%; height: 1px; background: linear-gradient(90deg, transparent, rgb(232 186 110 / 0.55) 30%, rgb(232 186 110 / 0.55) 70%, transparent); }
+  .nap__eyebrow { font-size: calc(11 * var(--u)); font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.75; }
+  .nap__title {
+    margin-top: calc(6 * var(--u));
+    font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: calc(50 * var(--u)); line-height: 0.95;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .nap__years { margin-top: calc(8 * var(--u)); font-size: calc(12 * var(--u)); font-weight: 500; letter-spacing: 0.14em; opacity: 0.7; }
+
+  /* ---------- Japanese: a video ---------- */
+  .jp { flex-direction: row; align-items: center; gap: calc(26 * var(--u)); padding: 0 calc(34 * var(--u)); background: #F3EDE2; color: #1B1A18; }
+  .jp__sun { width: calc(118 * var(--u)); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #E0584B, #B92D24 70%); flex: none; box-shadow: 0 calc(10 * var(--u)) calc(30 * var(--u)) calc(-10 * var(--u)) rgb(185 45 36 / 0.6); }
+  .jp__text { display: flex; flex-direction: column; gap: calc(8 * var(--u)); }
+  .jp__text b { font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif; font-weight: 600; font-size: calc(54 * var(--u)); line-height: 1; letter-spacing: 0.04em; }
+  .jp__text em { font-style: normal; font-size: calc(15 * var(--u)); font-weight: 600; letter-spacing: 0.02em; color: #575652; }
+
+  /* ---------- Negotiation: a book ---------- */
+  .neg { padding: calc(26 * var(--u)) calc(20 * var(--u)) calc(44 * var(--u)) calc(24 * var(--u)); background: #EADFCB; color: #1B1A18; }
+  .neg__dot { position: absolute; right: calc(-34 * var(--u)); top: calc(-26 * var(--u)); width: calc(120 * var(--u)); aspect-ratio: 1; border-radius: 50%; background: #D3692A; }
+  .neg__kicker { position: relative; margin-top: calc(92 * var(--u)); font-size: calc(10 * var(--u)); font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #6F6A62; }
+  .neg__title { position: relative; margin-top: calc(6 * var(--u)); font-size: calc(26 * var(--u)); font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+
+  /* ---------- Rome: a book ---------- */
+  .rome { align-items: center; justify-content: center; text-align: center; background: radial-gradient(120% 80% at 50% 0%, #74302A, #4A1D18 70%); color: #E2BE77; }
+  .rome__frame { position: absolute; inset: calc(12 * var(--u)) calc(12 * var(--u)) calc(12 * var(--u)) calc(18 * var(--u)); border: 1px solid rgb(226 190 119 / 0.55); outline: 1px solid rgb(226 190 119 / 0.3); outline-offset: calc(4 * var(--u)); }
+  .rome__spqr { font-size: calc(10 * var(--u)); font-weight: 600; letter-spacing: 0.4em; padding-left: 0.4em; opacity: 0.8; }
+  .rome__title { margin-top: calc(10 * var(--u)); font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: calc(46 * var(--u)); letter-spacing: 0.14em; padding-left: 0.14em; line-height: 1; text-transform: uppercase; }
+  .rome__rule { margin-top: calc(14 * var(--u)); width: calc(40 * var(--u)); height: 1px; background: currentColor; opacity: 0.6; }
+  .rome__sub { margin-top: calc(12 * var(--u)); font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: calc(14 * var(--u)); opacity: 0.85; }
+
+  /* ---------- Stoicism: a book ---------- */
+  .stoic { padding: calc(30 * var(--u)) calc(22 * var(--u)) 0 calc(26 * var(--u)); background: #22302A; color: #EDE6D6; }
+  .stoic__circle { width: calc(64 * var(--u)); aspect-ratio: 1; border-radius: 50%; border: 1.5px solid rgb(237 230 214 / 0.7); box-shadow: inset calc(-14 * var(--u)) 0 0 rgb(237 230 214 / 0.18); }
+  .stoic__title { margin-top: auto; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 400; font-size: calc(36 * var(--u)); line-height: 1; letter-spacing: -0.01em; }
+  .stoic__sub { margin: calc(10 * var(--u)) 0 calc(48 * var(--u)); font-size: calc(11 * var(--u)); letter-spacing: 0.06em; opacity: 0.7; max-width: 80%; line-height: 1.35; }
+
+  /* ---------- Music theory: a podcast episode ---------- */
+  .pod { padding: calc(22 * var(--u)); color: #fff; background: linear-gradient(150deg, #5B2BBE 0%, #8E33C8 52%, #D447C9 100%); }
+  .pod__rings { position: absolute; right: calc(-60 * var(--u)); top: calc(-60 * var(--u)); width: calc(220 * var(--u)); aspect-ratio: 1; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 calc(14 * var(--u)), rgb(255 255 255 / 0.12) calc(14 * var(--u)) calc(15.5 * var(--u))); }
+  .pod__ep { position: relative; font-size: calc(11 * var(--u)); font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.8; }
+  .pod__title { position: relative; margin-top: calc(6 * var(--u)); font-size: calc(26 * var(--u)); font-weight: 700; letter-spacing: -0.03em; line-height: 1.02; max-width: 75%; }
+  .pod__wave { position: absolute; left: calc(22 * var(--u)); bottom: calc(18 * var(--u)); height: calc(34 * var(--u)); display: flex; align-items: center; gap: calc(4 * var(--u)); }
+  .pod__wave i { display: block; width: calc(4 * var(--u)); height: calc(var(--h) * 100%); border-radius: 9px; background: rgb(255 255 255 / 0.85); }
+
+  /* ---------- Thermodynamics: a PDF ---------- */
+  .pdf { padding: calc(24 * var(--u)) calc(22 * var(--u)); color: #1B1A18; }
+  .pdf__title { font-size: calc(17 * var(--u)); font-weight: 700; letter-spacing: -0.02em; }
+  .pdf__sub { margin-top: calc(2 * var(--u)); font-size: calc(11 * var(--u)); color: #6F6A62; }
+  .pdf__lines { margin-top: calc(16 * var(--u)); display: flex; flex-direction: column; gap: calc(8 * var(--u)); }
+  .pdf__lines i { display: block; height: calc(5 * var(--u)); border-radius: 9px; background: rgb(152 150 146 / 0.38); }
+  .pdf__lines b { display: block; height: calc(4 * var(--u)); }
+  .pdf__label { position: absolute; left: calc(22 * var(--u)); bottom: calc(14 * var(--u)); padding: calc(3 * var(--u)) calc(8 * var(--u)); border-radius: calc(4 * var(--u)); background: #A23B2D; color: #F7F5F1; font-size: calc(12 * var(--u)); font-weight: 700; letter-spacing: 0.06em; }
+  .m--pdf .m__tag { bottom: calc(12 * var(--u)); }
+</style>

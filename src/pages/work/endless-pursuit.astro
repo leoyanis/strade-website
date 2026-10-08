@@ -1,0 +1,1292 @@
+---
+// Endless Pursuit: branded side-quest case study.
+// Look and feel follow the app's own design system (docs/DESIGN.md in the client repo):
+// warm near-black, Geist + Geist Mono + Instrument Serif, rare gold, Liquid Glass chrome.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import Phone from '../../components/case/side-dark/Phone.astro';
+import { getProject } from '../../data/work';
+
+const p = getProject('endless-pursuit')!;
+const img = (f: string) => `/images/work/endless-pursuit/${f}`;
+const fonts =
+  'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap';
+
+// The lemniscate behind the hero, generated once (x = a·cos t / (1 + sin²t), y = a·sin t·cos t / (1 + sin²t)).
+const loop = (() => {
+  const a = 500;
+  const n = 160;
+  let d = '';
+  for (let i = 0; i <= n; i++) {
+    const t = (i / n) * Math.PI * 2;
+    const s = Math.sin(t);
+    const c = Math.cos(t);
+    const den = 1 + s * s;
+    d += `${i ? 'L' : 'M'}${((a * c) / den).toFixed(1)} ${(((a * s * c) / den) * 1.18).toFixed(1)} `;
+  }
+  return d.trim() + 'Z';
+})();
+
+// Circle members, colours from the prototype.
+const members = [
+  ['M', '#948AEA,#DE7546'], ['R', '#E3C588,#DE7546'], ['A', '#E3C588,#948AEA'], ['S', '#DE7546,#E3C588'],
+  ['A', '#84BE71,#E3C588'], ['L', '#84BE71,#948AEA'], ['I', '#E3C588,#84BE71'], ['F', '#948AEA,#9C9C97'],
+  ['Z', '#DE7546,#9C9C97'], ['J', '#948AEA,#E3C588'], ['K', '#DE7546,#84BE71'], ['T', '#5E5E5A,#9C9C97'],
+  ['E', '#948AEA,#84BE71'], ['L', '#DE7546,#948AEA'], ['N', '#84BE71,#DE7546'], ['O', '#9C9C97,#E3C588'],
+];
+
+const proto = [
+  { src: 'onboarding.webp', cap: 'Pick a direction' },
+  { src: 'circle-step.webp', cap: 'Get into a circle' },
+  { src: 'today.webp', cap: 'Today' },
+  { src: 'day.webp', cap: 'Day detail' },
+  { src: 'feed.webp', cap: 'Circle feed' },
+  { src: 'profile.webp', cap: 'Profile' },
+  { src: 'tribe.webp', cap: 'Tribe' },
+  { src: 'share.webp', cap: 'Share your day' },
+  { src: 'workspaces.webp', cap: 'Workspaces' },
+];
+
+const decisions = [
+  ['One codebase, its own look', 'Flutter for iOS and Android, with a design system of its own instead of Material or Cupertino.'],
+  ['The rules are plain code', 'What counts as showing up, streaks and circle runs live in plain Dart, and every rule is unit-tested.'],
+  ['Privacy the database enforces', 'Row-level security on every table, so even a modified app can’t read around it.'],
+  ['Live by default', 'Supabase Realtime pushes your day to your circle the moment you log something.'],
+  ['Nothing hard-coded', 'Circle size and limits live in an admin-editable config, with safe defaults if it can’t load.'],
+];
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/endless-pursuit"
+  noAlternates
+  bare
+  navTheme={p.brand.light ? 'light' : 'dark'}
+  ogImage="/og/work-endless-pursuit.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={fonts} />
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="ep-i-inf" viewBox="0 0 24 24"><path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"></path></symbol>
+      <symbol id="ep-i-flame" viewBox="0 0 24 24"><path d="M12 21c-3.4 0-6-2.3-6-5.5c0-2.4 1.5-4.1 2.9-5.7c.3.9.9 1.6 1.7 2.1c-.1-2.6.5-5.6 2.9-7.4c-.1 2.4 1 3.9 2.3 5.4c1.3 1.5 2.7 3.1 2.7 5.6c0 3.2-2.6 5.5-6 5.5z"></path><path d="M12 21c-1.4 0-2.4-.9-2.4-2.2c0-1.3 1-2.2 2.4-3.6c1.4 1.4 2.4 2.3 2.4 3.6c0 1.3-1 2.2-2.4 2.2z"></path></symbol>
+      <symbol id="ep-i-bolt" viewBox="0 0 24 24"><path d="M13 3.5L5.5 13.5h6l-1 7l7.5-10h-6z"></path></symbol>
+      <symbol id="ep-i-camera" viewBox="0 0 24 24"><path d="M5 7.5h1.8l1.5-2.2h7.4l1.5 2.2H19a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2z"></path><circle cx="12" cy="13.2" r="3.1"></circle></symbol>
+      <symbol id="ep-i-barbell" viewBox="0 0 24 24"><path d="M2.5 12h2"></path><path d="M19.5 12h2"></path><path d="M8.5 12h7"></path><path d="M5.5 8v8"></path><path d="M8.5 6.5v11"></path><path d="M15.5 6.5v11"></path><path d="M18.5 8v8"></path></symbol>
+      <symbol id="ep-i-flag" viewBox="0 0 24 24"><path d="M6 20V4"></path><path d="M6 4.5h11l-2.5 4l2.5 4H6"></path></symbol>
+      <symbol id="ep-i-book" viewBox="0 0 24 24"><path d="M4.5 5.5a2 2 0 0 1 2-2H11v16H6.5a2 2 0 0 0-2 2z"></path><path d="M19.5 5.5a2 2 0 0 0-2-2H13v16h4.5a2 2 0 0 1 2 2z"></path></symbol>
+      <symbol id="ep-i-play" viewBox="0 0 24 24"><path d="M7.5 5.2v13.6a.6.6 0 0 0 .9.5l10.8-6.8a.6.6 0 0 0 0-1L8.4 4.7a.6.6 0 0 0-.9.5z" fill="currentColor" stroke="none"></path></symbol>
+      <symbol id="ep-i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.4 4.4L19 7.5"></path></symbol>
+      <symbol id="ep-i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4"></circle><circle cx="18" cy="6" r="2.4"></circle><circle cx="18" cy="18" r="2.4"></circle><path d="M8.2 10.9l7.6-3.8"></path><path d="M8.2 13.1l7.6 3.8"></path></symbol>
+      <symbol id="ep-i-users" viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3.2"></circle><path d="M3.5 20c.3-3 2.6-5 5.5-5s5.2 2 5.5 5"></path><path d="M15.8 4.6a3.2 3.2 0 0 1 0 5.8"></path><path d="M17.4 15.3c1.9.7 3 2.4 3.1 4.7"></path></symbol>
+      <symbol id="ep-i-today" viewBox="0 0 24 24"><path d="M4.5 16.5a7.5 7.5 0 0 1 15 0"></path><path d="M2.5 20h19"></path><path d="M12 4v3.2"></path><path d="M5.4 7.4L7 9"></path><path d="M18.6 7.4L17 9"></path></symbol>
+      <symbol id="ep-i-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6"></path><path d="M4 4v4.5h4.5"></path></symbol>
+    </defs>
+  </svg>
+
+  <div class="ep">
+    <!-- ============================== HERO ============================== -->
+    <section class="ep-hero" aria-labelledby="ep-title">
+      <div class="ep-hero__wash" aria-hidden="true"></div>
+      <svg class="ep-loop" viewBox="-560 -290 1120 580" aria-hidden="true">
+        <defs>
+          <linearGradient id="ep-loop-grad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#F0DCAF"></stop>
+            <stop offset="1" stop-color="#D9B678"></stop>
+          </linearGradient>
+          <filter id="ep-loop-glow" x="-20%" y="-50%" width="140%" height="200%">
+            <feGaussianBlur stdDeviation="9"></feGaussianBlur>
+          </filter>
+        </defs>
+        <path class="ep-loop__track" d={loop} pathLength="1000"></path>
+        <path class="ep-loop__glow" d={loop} pathLength="1000" filter="url(#ep-loop-glow)"></path>
+        <path class="ep-loop__comet" d={loop} pathLength="1000"></path>
+      </svg>
+
+      <div class="ep-wrap ep-hero__grid">
+        <div class="ep-hero__copy">
+          <p class="ep-wordmark" data-hero-in>
+            <svg aria-hidden="true"><use href="#ep-i-inf"></use></svg>
+            Side quest · client app
+          </p>
+          <h1 id="ep-title" class="ep-h1" data-hero-in>
+            {p.name}
+          </h1>
+          <p class="ep-moment ep-hero__moment" data-hero-in>Show up. They’ll see it.</p>
+          <p class="ep-lede" data-hero-in>{p.summary}</p>
+          <ul class="ep-chips" data-hero-in>
+            <li>For {p.client.replace(', Founder', ', founder')}</li>
+            <li class="ep-mono">{p.year}</li>
+            <li class="is-status"><i aria-hidden="true"></i>{p.status}</li>
+          </ul>
+        </div>
+
+        <div class="ep-hero__stage">
+          <div class="ep-hero__halo" aria-hidden="true"></div>
+          <div class="ep-hero__phone" data-hero-phone>
+            <Phone
+              src={img('today.webp')}
+              alt="The Today screen: your day card live to the circle, a gold Start focus button and one-tap widgets"
+              priority
+            />
+          </div>
+          <span class="ep-glass ep-pill ep-pill--live" data-pill aria-hidden="true"><i class="ep-livedot"></i>Live to <b>Dawn Patrol</b></span>
+          <span class="ep-glass ep-pill ep-pill--run" data-pill aria-hidden="true"><svg><use href="#ep-i-flame"></use></svg><b class="ep-mono">24</b> day run</span>
+          <span class="ep-glass ep-pill ep-pill--nudge" data-pill aria-hidden="true"><svg><use href="#ep-i-bolt"></use></svg>Nudged Tom</span>
+          <span class="ep-glass ep-pill ep-pill--focus" data-pill aria-hidden="true"><i class="ep-sq"></i>Focusing · <b class="ep-mono">24:10</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== NUMBERS ============================== -->
+    <section class="ep-numbers" aria-label="Key facts">
+      <div class="ep-wrap">
+        <div class="ep-daybar" aria-hidden="true">
+          <div class="ep-abar">
+            <span class="b body" style="left:2%;width:7%"></span>
+            <span class="d body" style="left:11%"></span>
+            <span class="b work" style="left:15%;width:16%"></span>
+            <span class="b work" style="left:33%;width:8%"></span>
+            <span class="b mind" style="left:45%;width:5%"></span>
+            <span class="d body" style="left:53%"></span>
+            <span class="b work" style="left:57%;width:12%"></span>
+            <span class="b body" style="left:73%;width:6%"></span>
+            <span class="b mind" style="left:84%;width:7%"></span>
+            <span class="now" style="left:93%"></span>
+          </div>
+          <div class="ep-hours"><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div>
+        </div>
+        <dl class="ep-stats">
+          <div class="ep-stat">
+            <dt class="ep-stat__v">iOS + Android</dt>
+            <dd class="ep-stat__l"><i class="gold"></i>one codebase</dd>
+          </div>
+          <div class="ep-stat">
+            <dt class="ep-stat__v" data-count="20">20</dt>
+            <dd class="ep-stat__l"><i class="work"></i>people per circle, changeable without a release</dd>
+          </div>
+          <div class="ep-stat">
+            <dt class="ep-stat__v" data-count="3">3</dt>
+            <dd class="ep-stat__l"><i class="body"></i><i class="work"></i><i class="mind"></i>modes: Body, Work, Mind</dd>
+          </div>
+          <div class="ep-stat">
+            <dt class="ep-stat__v">Fixed scope</dt>
+            <dd class="ep-stat__l"><i class="gold"></i>fixed price, fixed date</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============================== PROBLEM ============================== -->
+    <section class="ep-problem">
+      <div class="ep-wrap ep-problem__grid">
+        <p class="ep-over" data-reveal>The problem</p>
+        <div>
+          <h2 class="ep-statement" data-reveal>
+            Nickolas wanted an app for people who say they’ll work on themselves, <em class="ep-moment">and then don’t.</em>
+          </h2>
+          <div class="ep-problem__body">
+            <p data-reveal>
+              Tracking apps are lonely, and accountability groups live in messy group chats. The idea only works if two
+              things are true:
+            </p>
+            <ul class="ep-musts">
+              <li data-reveal><span class="ep-tick"><svg><use href="#ep-i-check"></use></svg></span>Logging takes seconds.</li>
+              <li data-reveal><span class="ep-tick"><svg><use href="#ep-i-check"></use></svg></span>Your group can see whether you showed up.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== WHAT I BUILT ============================== -->
+    <section class="ep-built" aria-labelledby="ep-built-h">
+      <div class="ep-wrap">
+        <header class="ep-sechead">
+          <p class="ep-over" data-reveal>What I built</p>
+          <h2 id="ep-built-h" class="ep-h2" data-reveal>Log it in one tap. <em class="ep-moment">Your circle sees it live.</em></h2>
+        </header>
+
+        <!-- 01 onboarding -->
+        <article class="ep-moment-row ep-moment-row--onb">
+          <div class="ep-moment-row__text">
+            <span class="ep-num ep-mono">01</span>
+            <h3 class="ep-h3" data-reveal>Straight into your tribe</h3>
+            <p data-reveal>
+              Onboarding starts with one question: what are you pursuing? Body, Work or Mind. Then it puts you in a
+              circle of up to 20 people who see your day as it happens.
+            </p>
+            <p class="ep-quote" data-reveal>Solo tracking isn’t what this is. This step can’t be skipped.<span>From the circle screen</span></p>
+          </div>
+          <div class="ep-onb-phones">
+            <div class="ep-onb-phones__a" data-float="-1">
+              <Phone src={img('onboarding.webp')} alt="Onboarding: What are you pursuing? Train & fuel, Build & ship, Read & reflect" />
+            </div>
+            <div class="ep-onb-phones__b" data-float="1">
+              <Phone src={img('circle-step.webp')} alt="Onboarding: Get into a circle. Start a circle, join with a code, or find one" />
+            </div>
+          </div>
+        </article>
+
+        <!-- 02 one-tap logging (live recreation) -->
+        <article class="ep-moment-row ep-moment-row--flip" id="ep-log">
+          <div class="ep-moment-row__text">
+            <span class="ep-num ep-mono">02</span>
+            <h3 class="ep-h3" data-reveal>One tap, and your day goes live</h3>
+            <p data-reveal>
+              Every tracker is a one-tap widget on Today: a focus block, a meal, a training session, pages read. Your day
+              card fills itself in, and the activity bar shows the whole day from 6:00 to midnight. There is no post
+              button. Logging is posting.
+            </p>
+            <button class="ep-replay" type="button" data-replay="log">
+              <svg aria-hidden="true"><use href="#ep-i-replay"></use></svg>Replay
+            </button>
+          </div>
+
+          <div class="ep-device" role="group" aria-label="A recreation of the Today screen. Tapping a widget logs it and the day card updates.">
+            <div class="ep-app">
+              <div class="ep-app__head">
+                <div>
+                  <p class="ep-app__date">Thursday · 24 September</p>
+                  <p class="ep-app__title">Today</p>
+                </div>
+                <span class="ep-flame"><svg aria-hidden="true"><use href="#ep-i-flame"></use></svg><b class="ep-mono" data-streak>9</b></span>
+              </div>
+
+              <div class="ep-card ep-daycard">
+                <div class="ep-daycard__top">
+                  <span><i class="ep-livedot"></i>Live to <b>Dawn Patrol</b></span>
+                  <span class="ep-sub"><svg aria-hidden="true"><use href="#ep-i-share"></use></svg>Share</span>
+                </div>
+                <div class="ep-abar ep-abar--big" data-abar>
+                  <span class="b body" data-blk="train" style="left:3%;width:7%"></span>
+                  <span class="d body" data-blk="meal" style="left:12%"></span>
+                  <span class="b work" data-blk="focus" style="left:16%;width:13%"></span>
+                  <span class="b mind" data-blk="read" style="left:31%;width:5%"></span>
+                  <span class="now" data-now style="left:38%"></span>
+                </div>
+                <div class="ep-hours"><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div>
+                <div class="ep-tiles">
+                  <div class="ep-tile ep-tile--hero">
+                    <p class="v ep-mono" data-tile="focus">2h 25m</p>
+                    <p class="l"><i class="work"></i>Focus</p>
+                  </div>
+                  <div class="ep-tile">
+                    <p class="v ep-mono"><span data-tile="vol">6,004</span><small>kg</small></p>
+                    <p class="l"><i class="body"></i>Volume</p>
+                  </div>
+                  <div class="ep-tile">
+                    <p class="v ep-mono"><span data-tile="pro">68</span><small>/160g</small></p>
+                    <p class="l"><i class="body"></i>Protein</p>
+                  </div>
+                </div>
+              </div>
+
+              <button class="ep-goldbtn" type="button" data-tap="focus">
+                <svg aria-hidden="true"><use href="#ep-i-play"></use></svg>Start focus · Northwind
+              </button>
+
+              <div class="ep-widgets">
+                <button type="button" class="ep-wdg" data-tap="meal">
+                  <span class="ic body"><svg aria-hidden="true"><use href="#ep-i-camera"></use></svg></span>
+                  <span class="lab">Snap a meal</span><span class="val ep-mono">64g left</span>
+                </button>
+                <button type="button" class="ep-wdg" data-tap="train">
+                  <span class="ic body"><svg aria-hidden="true"><use href="#ep-i-barbell"></use></svg></span>
+                  <span class="lab">Push B</span><span class="val ep-mono">Start session</span>
+                </button>
+                <button type="button" class="ep-wdg" data-tap="tasks">
+                  <span class="ic work"><svg aria-hidden="true"><use href="#ep-i-flag"></use></svg></span>
+                  <span class="lab">Tasks</span><span class="val ep-mono">4 open · 1 starred</span>
+                </button>
+                <button type="button" class="ep-wdg" data-tap="read">
+                  <span class="ic mind"><svg aria-hidden="true"><use href="#ep-i-book"></use></svg></span>
+                  <span class="lab">Log pages</span><span class="val ep-mono">p. 212 / 304</span>
+                </button>
+              </div>
+
+              <div class="ep-glass ep-toast" data-toast="log" aria-live="polite" hidden><i class="ep-livedot"></i><span>Live to Dawn Patrol</span></div>
+              <span class="ep-tapdot" data-tapdot aria-hidden="true" hidden></span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 03 who showed up (live recreation) -->
+        <article class="ep-moment-row" id="ep-tribe">
+          <div class="ep-moment-row__text">
+            <span class="ep-num ep-mono">03</span>
+            <h3 class="ep-h3" data-reveal>Who showed up today</h3>
+            <p data-reveal>
+              The circle card shows who has logged today, the circle run (days in a row when everyone showed up) and who
+              is still quiet. One tap nudges them. It’s allowed once per person per day, and the database itself
+              enforces that.
+            </p>
+            <button class="ep-replay" type="button" data-replay="tribe">
+              <svg aria-hidden="true"><use href="#ep-i-replay"></use></svg>Replay
+            </button>
+          </div>
+
+          <div class="ep-device" role="group" aria-label="A recreation of the circle card: who showed up today, the circle run, and a nudge for a quiet member.">
+            <div class="ep-app ep-app--tribe">
+              <div class="ep-app__head">
+                <p class="ep-app__title">Tribe</p>
+              </div>
+              <div class="ep-card ep-circle">
+                <div class="ep-circle__top">
+                  <div>
+                    <p class="ep-circle__name">Dawn Patrol</p>
+                    <p class="ep-sub">16 of 20 · together since July</p>
+                  </div>
+                </div>
+                <div class="ep-circle__run">
+                  <span class="ep-mono">24</span>
+                  <span class="ep-sub">day circle run · best 31</span>
+                </div>
+                <div class="ep-circle__prog">
+                  <div class="ep-circle__progtop"><span class="ep-sub">Showed up today</span><span class="ep-mono"><b data-showed>11</b> / 16</span></div>
+                  <div class="ep-pbar"><i data-pbar style="width:68.75%"></i></div>
+                </div>
+                <div class="ep-strip" data-strip>
+                  {members.map(([n, g], i) => (
+                    <span
+                      class:list={['ep-av', i < 11 ? 'is-done' : 'is-quiet', i === 1 && 'is-active']}
+                      style={`--g:linear-gradient(135deg,${g})`}
+                      data-i={i}
+                    >{n}</span>
+                  ))}
+                </div>
+              </div>
+
+              <p class="ep-quietlabel"><span>Quiet · <b data-quiet>5</b></span><span>Run ends at midnight</span></p>
+              <div class="ep-card ep-qrow" data-tom>
+                <span class="ep-av is-quiet" style="--g:linear-gradient(135deg,#5E5E5A,#9C9C97)">T</span>
+                <div class="ep-qrow__who">
+                  <p class="ep-qrow__name">Tom</p>
+                  <p class="ep-sub" data-tom-line>Last log yesterday 21:40</p>
+                </div>
+                <button type="button" class="ep-nudge" data-nudge>
+                  <svg aria-hidden="true"><use href="#ep-i-bolt"></use></svg><span>Nudge</span>
+                </button>
+              </div>
+
+              <div class="ep-glass ep-toast" data-toast="tribe" aria-live="polite" hidden><svg aria-hidden="true"><use href="#ep-i-bolt"></use></svg><span>Nudged Tom</span></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- around the loop -->
+        <div class="ep-around">
+          <div class="ep-around__item" data-reveal>
+            <p class="ep-around__k">Privacy, per circle</p>
+            <p>You choose which numbers flow to each circle. Weight is off by default. The fact that you showed up always flows.</p>
+          </div>
+          <div class="ep-around__item" data-reveal>
+            <p class="ep-around__k">A feed that stays short</p>
+            <p>One living card per person per day. Your circle comes first, then the people you follow.</p>
+          </div>
+          <div class="ep-around__item" data-reveal>
+            <p class="ep-around__k">Settings without a release</p>
+            <p>Circle size and limits live in the database, so Nickolas can change them without shipping a new version.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== DESIGN SYSTEM ============================== -->
+    <section class="ep-glasssec" aria-labelledby="ep-glass-h">
+      <div class="ep-wrap ep-glasssec__grid">
+        <div class="ep-glasssec__text">
+          <p class="ep-over" data-reveal>Design system</p>
+          <h2 id="ep-glass-h" class="ep-h2" data-reveal>Liquid Glass, <em class="ep-moment">with an honest fallback.</em></h2>
+          <p data-reveal>
+            I gave the app its own design system. On iOS 26 the tab bar, pills and round buttons use Apple’s native
+            Liquid Glass. On Android and older iPhones they switch to a frosted look that doesn’t pretend to be glass.
+          </p>
+          <ol class="ep-rules">
+            <li data-reveal><span class="ep-mono">01</span>Numbers are the hero.</li>
+            <li data-reveal><span class="ep-mono">02</span>Gold is rare: one gold button per screen.</li>
+            <li data-reveal><span class="ep-mono">03</span>Each mode has one colour.</li>
+            <li data-reveal><span class="ep-mono">04</span>Glass is chrome, never content.</li>
+            <li data-reveal><span class="ep-mono">05</span>Motion confirms. It doesn’t decorate.</li>
+          </ol>
+        </div>
+
+        <div class="ep-lab" data-mat="glass">
+          <div class="ep-lab__blobs" aria-hidden="true">
+            <i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i>
+          </div>
+          <p class="ep-lab__line" aria-hidden="true"><span class="ep-mono">24</span><em class="ep-moment">day circle run</em></p>
+          <div class="ep-lab__seg" role="group" aria-label="Material">
+            <button type="button" class="is-on" data-mat-btn="glass" aria-pressed="true">Liquid Glass</button>
+            <button type="button" data-mat-btn="fallback" aria-pressed="false">Fallback</button>
+          </div>
+          <div class="ep-lab__bar" aria-hidden="true">
+            <div class="ep-lab__cap ep-mat">
+              <span class="ep-lab__ind"></span>
+              <span class="ep-lab__tab is-on"><svg><use href="#ep-i-today"></use></svg>Today</span>
+              <span class="ep-lab__tab"><svg><use href="#ep-i-users"></use></svg>Tribe</span>
+              <span class="ep-lab__tab"><i class="ep-lab__me">A</i>Profile</span>
+            </div>
+            <span class="ep-lab__inf ep-mat"><svg><use href="#ep-i-inf"></use></svg></span>
+          </div>
+          <p class="ep-lab__note" data-mat-note>iOS 26 and later: native glass, with lensing and a specular edge.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== HOW ============================== -->
+    <section class="ep-how" aria-labelledby="ep-how-h">
+      <div class="ep-wrap">
+        <header class="ep-sechead ep-sechead--split">
+          <div>
+            <p class="ep-over" data-reveal>How I built it</p>
+            <h2 id="ep-how-h" class="ep-h2" data-reveal>Every screen agreed <em class="ep-moment">before any app code.</em></h2>
+          </div>
+          <p class="ep-sechead__aside" data-reveal>
+            Before writing app code I built a clickable prototype of the whole app, so every screen was agreed up front.
+            Then I designed the product topic by topic and wrote each decision down. I make the calls, and the AI that
+            does the typing works from those decisions, not from guesses.
+          </p>
+        </header>
+      </div>
+
+      <div class="ep-reel" aria-label="Screens from the clickable prototype">
+        <div class="ep-reel__track">
+          {[0, 1].map((dup) => (
+            <ul class="ep-reel__set" aria-hidden={dup === 1 ? 'true' : undefined}>
+              {proto.map((s) => (
+                <li class="ep-reel__item">
+                  <Phone src={img(s.src)} alt={dup === 1 ? '' : `Prototype screen: ${s.cap}`} />
+                  <span class="ep-reel__cap">{s.cap}</span>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+
+      <div class="ep-wrap ep-how__grid">
+        <ol class="ep-decisions">
+          {decisions.map(([t, d], i) => (
+            <li data-reveal>
+              <span class="ep-num ep-mono">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{t}</h3>
+                <p>{d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <aside class="ep-config" data-reveal aria-label="Example of the admin-editable app config">
+          <p class="ep-config__head"><span class="ep-mono">app_config</span><span class="ep-sub">editable by admins</span></p>
+          <dl>
+            <div><dt class="ep-mono">circle.max_members</dt><dd class="ep-mono">20</dd></div>
+            <div><dt class="ep-mono">nutrition.ai_photos_per_day</dt><dd class="ep-mono">3</dd></div>
+            <div><dt class="ep-mono">nutrition.ai_photos_enabled</dt><dd class="ep-mono is-true">true</dd></div>
+          </dl>
+          <p class="ep-config__foot">Loaded at start-up and cached, with safe defaults.</p>
+        </aside>
+      </div>
+
+      <div class="ep-wrap">
+        <ul class="ep-stack" aria-label="Stack">
+          <li>Flutter 3.41</li>
+          <li>Riverpod</li>
+          <li>go_router</li>
+          <li>Supabase Postgres</li>
+          <li>Auth</li>
+          <li>Storage</li>
+          <li>Realtime</li>
+          <li>Row-level security</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== CLOSE ============================== -->
+    <section class="ep-close">
+      <div class="ep-wrap ep-close__inner">
+        <svg class="ep-close__inf" aria-hidden="true"><use href="#ep-i-inf"></use></svg>
+        <p class="ep-close__line ep-moment" data-reveal>Day one is already on the board.</p>
+        <div class="ep-close__status" data-reveal>
+          <span class="ep-chips"><span class="is-status"><i aria-hidden="true"></i>{p.status}</span></span>
+          <p>Building it now with Nickolas, for iOS and Android.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <CaseNext current="endless-pursuit" />
+</Base>
+
+<style>
+  :global(body) { background: #121110; }
+  :global(#scroll-progress) { background: #E3C588; }
+
+  .ep {
+    --bg: #121110;
+    --bg-deep: #0c0b0a;
+    --s1: #171513;
+    --s2: #1e1b18;
+    --s3: #27231f;
+    --line: #2a2622;
+    --text: #F3EEE4;
+    --sub: #a39c8f;
+    --mut: #6b665c;
+    --gold: #E3C588;
+    --gold-hi: #F0DCAF;
+    --gold-lo: #D9B678;
+    --gold-ink: #382C12;
+    --body: #DE7546;
+    --work: #948AEA;
+    --mind: #84BE71;
+    --sans: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --spring: cubic-bezier(.25, 1, .35, 1);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: clip;
+  }
+  .ep-wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; position: relative; }
+  .ep-mono { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .ep-moment { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+  .ep-sub { color: var(--sub); }
+  .ep-over {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+  }
+  .ep-h2 {
+    font-size: clamp(32px, 5vw, 60px); line-height: 1.02; font-weight: 600; letter-spacing: -0.035em;
+    max-width: 18ch; margin-top: 16px;
+  }
+  .ep-h2 .ep-moment { color: var(--gold); font-size: 1.08em; }
+  .ep-h3 { font-size: clamp(24px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+  .ep-num { display: inline-block; font-size: 13px; color: var(--gold); margin-bottom: 14px; }
+
+  /* ---------- glass (from the app's design system) ---------- */
+  .ep-glass {
+    position: relative; isolation: isolate;
+    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.08);
+    backdrop-filter: blur(10px) saturate(190%) brightness(1.08);
+    box-shadow:
+      inset 0 1px .5px rgba(255,255,255,.35), inset 0 -1px 1px rgba(255,255,255,.08),
+      inset 0 0 18px rgba(255,255,255,.05), 0 10px 30px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.4);
+  }
+  .ep-glass::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: linear-gradient(140deg, rgba(255,255,255,.55), rgba(255,255,255,.08) 30%, rgba(255,255,255,.02) 60%, rgba(255,255,255,.3));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  .ep-livedot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex: none;
+    animation: ep-pulse 2s infinite;
+  }
+  @keyframes ep-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(227,197,136,.55); }
+    70% { box-shadow: 0 0 0 8px rgba(227,197,136,0); }
+    100% { box-shadow: 0 0 0 0 rgba(227,197,136,0); }
+  }
+
+  /* ============================== HERO ============================== */
+  .ep-hero {
+    position: relative; min-height: min(100svh, 960px); padding: 120px 0 72px;
+    display: flex; align-items: center;
+  }
+  .ep-hero__wash {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(900px 520px at 72% 28%, #221a0c 0%, transparent 62%),
+      radial-gradient(700px 480px at 8% 92%, #15122a 0%, transparent 62%),
+      linear-gradient(180deg, #0c0b0a 0%, var(--bg) 100%);
+  }
+  .ep-loop {
+    position: absolute; left: 50%; top: 54%; width: min(1500px, 128vw); height: auto;
+    transform: translate(-50%, -50%); pointer-events: none; overflow: visible;
+  }
+  .ep-loop path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .ep-loop__track { stroke: rgba(227,197,136,.11); stroke-width: 1.5; }
+  .ep-loop__glow, .ep-loop__comet {
+    stroke: url(#ep-loop-grad); stroke-dasharray: 70 930;
+    animation: ep-orbit 9s linear infinite;
+  }
+  .ep-loop__glow { stroke-width: 14; opacity: .55; }
+  .ep-loop__comet { stroke-width: 3.5; }
+  @keyframes ep-orbit { to { stroke-dashoffset: -1000; } }
+
+  .ep-hero__grid {
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 48px; align-items: center;
+    width: 100%;
+  }
+  .ep-wordmark {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text);
+  }
+  .ep-wordmark svg { width: 30px; height: 30px; color: var(--gold); fill: none; stroke: currentColor; stroke-width: 2; }
+  .ep-h1 {
+    margin-top: 22px; font-size: clamp(56px, 8.6vw, 124px); line-height: .9; font-weight: 600; letter-spacing: -0.055em;
+    max-width: 8ch;
+  }
+  .ep-hero__moment { margin-top: 18px; font-size: clamp(30px, 3.6vw, 46px); line-height: 1; color: var(--gold); }
+  .ep-lede { margin-top: 30px; max-width: 460px; font-size: 18px; line-height: 1.55; color: var(--sub); }
+  .ep-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; padding: 0; list-style: none; }
+  .ep-chips li, .ep-chips > span {
+    display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px;
+    background: var(--s2); border: 1px solid var(--line); color: var(--sub); font-size: 13px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .ep-chips .is-status { color: var(--gold); background: rgba(227,197,136,.1); border-color: rgba(227,197,136,.3); }
+  .ep-chips .is-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); animation: ep-pulse 2s infinite; }
+
+  .ep-hero__stage { position: relative; display: grid; place-items: center; min-height: 600px; }
+  .ep-hero__halo {
+    position: absolute; width: 440px; height: 440px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(227,197,136,.22) 0%, rgba(227,197,136,.06) 40%, transparent 70%);
+    filter: blur(10px);
+  }
+  .ep-hero__phone { position: relative; width: min(300px, 74vw); transform: rotate(-3deg); }
+  .ep-hero__phone :global(.sd-phone) {
+    --ph-bezel: #0e0d0c; --ph-ring: rgba(240,220,175,.16);
+    --ph-shadow: 0 50px 100px -30px rgba(0,0,0,.85), 0 0 80px -20px rgba(227,197,136,.18);
+  }
+  .ep-pill {
+    position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 8px;
+    height: 42px; padding: 0 16px; border-radius: 999px; font-size: 13.5px; color: #fff; white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .ep-pill b { font-weight: 600; }
+  .ep-pill svg { width: 16px; height: 16px; fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ep-pill--live { top: 12%; left: -4%; }
+  .ep-pill--run { top: 30%; right: -2%; }
+  .ep-pill--run b { color: var(--gold); }
+  .ep-pill--nudge { bottom: 26%; left: -8%; }
+  .ep-pill--focus { bottom: 9%; right: 2%; }
+  .ep-sq { width: 9px; height: 9px; border-radius: 3px; background: var(--work); }
+
+  /* ============================== NUMBERS ============================== */
+  .ep-numbers { padding: 24px 0 96px; position: relative; }
+  .ep-daybar { max-width: 100%; margin-bottom: 44px; }
+  .ep-abar { position: relative; height: 16px; border-radius: 8px; background: var(--s2); overflow: hidden; }
+  .ep-abar .b { position: absolute; top: 0; bottom: 0; border-radius: 3px; transform-origin: left center; }
+  .ep-abar .d { position: absolute; top: 5px; width: 6px; height: 6px; border-radius: 50%; }
+  .ep-abar .now { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--gold); border-radius: 2px; box-shadow: 0 0 8px var(--gold); }
+  .ep-abar .body { background: var(--body); }
+  .ep-abar .work { background: var(--work); }
+  .ep-abar .mind { background: var(--mind); }
+  .ep-hours { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; color: var(--mut); margin-top: 8px; }
+  .ep-stats { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; margin: 0; }
+  .ep-stat { padding: 4px 24px 4px 0; }
+  .ep-stat + .ep-stat { padding-left: 24px; border-left: 1px solid var(--line); }
+  .ep-stat__v {
+    font-family: var(--mono); font-weight: 500; font-size: clamp(26px, 2.7vw, 38px); line-height: 1.05; white-space: nowrap;
+    letter-spacing: -0.04em; font-variant-numeric: tabular-nums;
+  }
+  .ep-stat__l { margin: 10px 0 0; display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--sub); line-height: 1.4; }
+  .ep-stat__l i { width: 7px; height: 7px; border-radius: 2px; flex: none; }
+  i.gold { background: var(--gold); } i.body { background: var(--body); } i.work { background: var(--work); } i.mind { background: var(--mind); }
+
+  /* ============================== PROBLEM ============================== */
+  .ep-problem { padding: 110px 0; background: var(--bg-deep); border-top: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17; }
+  .ep-problem__grid { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
+  .ep-problem__grid > .ep-over { padding-top: 14px; }
+  .ep-statement {
+    font-size: clamp(30px, 4.4vw, 56px); line-height: 1.08; font-weight: 500; letter-spacing: -0.035em; max-width: 21ch;
+  }
+  .ep-statement .ep-moment { color: var(--gold); font-size: 1.1em; }
+  .ep-problem__body { margin-top: 36px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; max-width: 900px; }
+  .ep-problem__body p { font-size: 18px; line-height: 1.6; color: var(--sub); }
+  .ep-musts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+  .ep-musts li { display: flex; align-items: center; gap: 14px; font-size: 18px; font-weight: 500; }
+  .ep-tick {
+    width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(180deg, var(--gold-hi), var(--gold-lo)); color: var(--gold-ink);
+  }
+  .ep-tick svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ============================== BUILT ============================== */
+  .ep-built { padding: 120px 0 80px; position: relative; }
+  .ep-sechead { margin-bottom: 72px; }
+  .ep-moment-row {
+    display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center;
+    padding: 56px 0; border-top: 1px solid var(--line);
+  }
+  .ep-moment-row--flip .ep-moment-row__text { order: 2; }
+  .ep-moment-row__text p { font-size: 17px; line-height: 1.65; color: var(--sub); margin-top: 16px; max-width: 460px; }
+  .ep-moment-row__text .ep-quote { font-family: var(--serif); font-style: italic; color: var(--text); font-size: 24px; line-height: 1.3; padding-left: 16px; border-left: 2px solid var(--gold); }
+  .ep-quote span { display: block; margin-top: 8px; font: 500 11px var(--sans); font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); }
+
+  .ep-onb-phones { position: relative; height: 620px; }
+  .ep-onb-phones > div { position: absolute; width: 270px; }
+  .ep-onb-phones__a { left: 4%; top: 0; transform: rotate(-4deg); }
+  .ep-onb-phones__b { right: 4%; top: 70px; transform: rotate(3deg); }
+  .ep-onb-phones :global(.sd-phone) { --ph-bezel: #0e0d0c; --ph-ring: rgba(255,255,255,.1); }
+
+  .ep-replay {
+    margin-top: 26px; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px;
+    border-radius: 999px; border: 1px solid var(--line); background: var(--s1); color: var(--sub);
+    font: 500 13px var(--sans); cursor: pointer; transition: color .2s, border-color .2s;
+  }
+  .ep-replay:hover { color: var(--text); border-color: var(--mut); }
+  .ep-replay svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* the recreated app surface */
+  .ep-device {
+    position: relative; justify-self: center; width: 100%; max-width: 410px; border-radius: 44px; padding: 10px;
+    background: #0d0c0b; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 60px 120px -40px rgba(0,0,0,.9), 0 0 120px -40px rgba(227,197,136,.15);
+  }
+  .ep-app {
+    position: relative; overflow: hidden; border-radius: 36px; background: #0A0A0A; padding: 22px 16px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .ep-app__head { display: flex; align-items: flex-end; justify-content: space-between; padding: 4px 2px 4px; }
+  .ep-app__date { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+  .ep-app__title { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+  .ep-flame { display: inline-flex; align-items: center; gap: 3px; color: var(--gold); font-size: 20px; }
+  .ep-flame svg { width: 18px; height: 18px; fill: none; stroke: var(--gold); stroke-width: 2.2; }
+  .ep-card { background: #141414; border: 1px solid #262626; border-radius: 22px; }
+  .ep-daycard { padding: 16px; display: flex; flex-direction: column; gap: 0; }
+  .ep-daycard__top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 14px; }
+  .ep-daycard__top > span { display: inline-flex; align-items: center; gap: 8px; }
+  .ep-daycard__top svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .ep-abar--big { height: 22px; border-radius: 9px; }
+  .ep-abar--big .d { top: 8px; }
+  .ep-tiles { display: flex; gap: 18px; margin-top: 14px; }
+  .ep-tile .v { font-weight: 500; font-size: 20px; line-height: 24px; white-space: nowrap; }
+  .ep-tile--hero .v { font-size: 26px; line-height: 28px; }
+  .ep-tile .v small { font-size: 12px; color: var(--sub); margin-left: 2px; letter-spacing: 0; }
+  .ep-tile .l { font-size: 12px; color: var(--sub); margin-top: 4px; display: flex; align-items: center; gap: 5px; }
+  .ep-tile .l i { width: 6px; height: 6px; border-radius: 2px; }
+  .ep-goldbtn {
+    height: 52px; border-radius: 999px; border: 0; width: 100%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(180deg, var(--gold-hi), var(--gold-lo)); color: var(--gold-ink);
+    font: 600 16px var(--sans); letter-spacing: -0.01em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.5);
+    transition: transform .28s var(--spring);
+  }
+  .ep-goldbtn svg { width: 18px; height: 18px; }
+  .ep-goldbtn:active, .ep-goldbtn.is-press { transform: scale(.96); }
+  .ep-widgets { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ep-wdg {
+    background: #141414; border: 1px solid #262626; border-radius: 18px; padding: 14px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; color: var(--text);
+    font-family: var(--sans); transition: transform .28s var(--spring), border-color .2s;
+  }
+  .ep-wdg:hover { border-color: #34302b; }
+  .ep-wdg:active, .ep-wdg.is-press { transform: scale(.96); }
+  .ep-wdg .ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 6px; }
+  .ep-wdg .ic svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ep-wdg .ic.body { background: rgba(222,117,70,.14); color: var(--body); }
+  .ep-wdg .ic.work { background: rgba(148,138,234,.14); color: var(--work); }
+  .ep-wdg .ic.mind { background: rgba(132,190,113,.14); color: var(--mind); }
+  .ep-wdg .lab { font-size: 14px; font-weight: 500; }
+  .ep-wdg .val { font-size: 12px; color: var(--sub); letter-spacing: 0; }
+  .ep-toast {
+    position: absolute; left: 50%; bottom: 22px; transform: translate(-50%, 0); z-index: 5;
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px;
+    font-size: 13.5px; color: #fff; white-space: nowrap; pointer-events: none;
+  }
+  .ep-toast[hidden], .ep-tapdot[hidden] { display: none; }
+  .ep-toast svg { width: 15px; height: 15px; fill: none; stroke: var(--gold); stroke-width: 2; }
+  .ep-tapdot {
+    position: absolute; z-index: 6; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,.12) 60%, transparent 70%);
+    pointer-events: none; left: 0; top: 0;
+  }
+
+  /* tribe */
+  .ep-app--tribe { padding-bottom: 70px; }
+  .ep-circle { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .ep-circle__name { font-size: 18px; font-weight: 600; }
+  .ep-circle__top .ep-sub { font-size: 13px; }
+  .ep-circle__run { display: flex; align-items: flex-end; gap: 10px; }
+  .ep-circle__run .ep-mono { font-size: 46px; line-height: 1; color: var(--gold); font-weight: 400; }
+  .ep-circle__run .ep-sub { font-size: 13px; padding-bottom: 6px; }
+  .ep-circle__progtop { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 8px; }
+  .ep-circle__progtop b { font-weight: 500; }
+  .ep-pbar { height: 6px; border-radius: 3px; background: var(--s3); overflow: hidden; }
+  .ep-pbar i { display: block; height: 100%; background: var(--gold); border-radius: 3px; transition: width .5s var(--spring); }
+  .ep-strip { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; padding-top: 4px; }
+  .ep-av {
+    position: relative; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+    font-size: 12px; font-weight: 600; color: #fff; background: var(--g);
+    transition: filter .4s, opacity .4s, box-shadow .4s;
+  }
+  .ep-av.is-quiet { filter: grayscale(1); opacity: .32; }
+  .ep-av.is-done { box-shadow: 0 0 0 2px #141414, 0 0 0 3.5px var(--gold); }
+  .ep-av.is-active::after {
+    content: ""; position: absolute; right: -2px; bottom: -2px; width: 11px; height: 11px; border-radius: 50%;
+    background: var(--gold); border: 2.5px solid #141414;
+  }
+  .ep-quietlabel {
+    display: flex; justify-content: space-between; padding: 8px 4px 0; font-size: 11px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--mut);
+  }
+  .ep-quietlabel b { font-weight: 600; }
+  .ep-qrow { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .ep-qrow .ep-av { width: 38px; flex: none; }
+  .ep-qrow__who { flex: 1; min-width: 0; }
+  .ep-qrow__name { font-size: 15px; font-weight: 600; }
+  .ep-qrow .ep-sub { font-size: 12.5px; }
+  .ep-nudge {
+    height: 34px; padding: 0 14px; border-radius: 999px; background: var(--s3); border: 0; color: var(--text);
+    font: 500 13px var(--sans); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    transition: transform .28s var(--spring), color .2s;
+  }
+  .ep-nudge svg { width: 15px; height: 15px; fill: none; stroke: var(--gold); stroke-width: 2; }
+  .ep-nudge.is-sent { color: var(--gold); }
+  .ep-nudge.is-press { transform: scale(.94); }
+
+  .ep-around { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 40px; padding-top: 48px; border-top: 1px solid var(--line); }
+  .ep-around__k { font-size: 17px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+  .ep-around__item p:not(.ep-around__k) { font-size: 15px; line-height: 1.6; color: var(--sub); }
+  .ep-around__item { padding-left: 18px; border-left: 2px solid var(--gold); }
+
+  /* ============================== DESIGN SYSTEM ============================== */
+  .ep-glasssec { padding: 110px 0; background: var(--bg-deep); border-top: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17; }
+  .ep-glasssec__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
+  .ep-glasssec__text > p:not(.ep-over) { margin-top: 22px; font-size: 17px; line-height: 1.65; color: var(--sub); max-width: 470px; }
+  .ep-rules { list-style: none; padding: 0; margin: 30px 0 0; border-top: 1px solid var(--line); }
+  .ep-rules li { display: flex; gap: 18px; align-items: baseline; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 16px; font-weight: 500; }
+  .ep-rules .ep-mono { color: var(--gold); font-size: 12px; font-weight: 400; }
+
+  .ep-lab {
+    position: relative; overflow: hidden; border-radius: 32px; min-height: 520px; background: #0b0a09;
+    border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 28px 22px 26px;
+  }
+  .ep-lab__blobs { position: absolute; inset: 0; }
+  .ep-lab__blobs i { position: absolute; border-radius: 50%; filter: blur(2px); }
+  .ep-lab__blobs .b1 { width: 52%; aspect-ratio: 1; left: -6%; top: 26%; background: radial-gradient(circle at 40% 40%, #ec8a5c, #DE7546 55%, #9b3f17); animation: ep-drift1 14s ease-in-out infinite alternate; }
+  .ep-lab__blobs .b2 { width: 46%; aspect-ratio: 1; right: -8%; top: 8%; background: radial-gradient(circle at 40% 40%, #b3abf5, #948AEA 55%, #5c51b8); animation: ep-drift2 16s ease-in-out infinite alternate; }
+  .ep-lab__blobs .b3 { width: 34%; aspect-ratio: 1; left: 38%; bottom: -10%; background: radial-gradient(circle at 40% 40%, #a7d897, #84BE71 55%, #4d7d3d); animation: ep-drift3 12s ease-in-out infinite alternate; }
+  .ep-lab__blobs .b4 { width: 22%; aspect-ratio: 1; left: 30%; top: 4%; background: radial-gradient(circle at 40% 40%, #f6e6c2, #E3C588 55%, #a8853f); animation: ep-drift2 11s ease-in-out infinite alternate-reverse; }
+  @keyframes ep-drift1 { to { transform: translate(38%, -14%) scale(1.08); } }
+  @keyframes ep-drift2 { to { transform: translate(-30%, 22%) scale(.92); } }
+  @keyframes ep-drift3 { to { transform: translate(-46%, -30%) scale(1.12); } }
+  .ep-lab__line {
+    position: relative; z-index: 1; align-self: flex-start; font-size: clamp(34px, 4vw, 48px); line-height: 1; font-weight: 600;
+    letter-spacing: -0.035em; color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,.35);
+  }
+  .ep-lab__line .ep-mono { display: block; font-size: clamp(76px, 9vw, 112px); line-height: .9; font-weight: 500; letter-spacing: -0.06em; }
+  .ep-lab__line em { display: block; margin-top: 6px; font-weight: 400; font-size: .72em; }
+  .ep-lab__seg {
+    position: relative; z-index: 2; display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+    background: rgba(10,10,10,.55); border: 1px solid rgba(255,255,255,.1);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
+  .ep-lab__seg button {
+    height: 34px; padding: 0 16px; border-radius: 999px; border: 0; background: none; color: rgba(255,255,255,.7);
+    font: 500 13px var(--sans); cursor: pointer; transition: background .25s, color .25s;
+  }
+  .ep-lab__seg button.is-on { background: rgba(255,255,255,.16); color: #fff; }
+  .ep-lab__bar { position: relative; z-index: 2; width: 100%; max-width: 380px; display: flex; gap: 10px; align-items: center; }
+  .ep-lab__cap { flex: 1; height: 64px; border-radius: 999px; display: flex; align-items: center; padding: 6px; position: relative; }
+  .ep-lab__ind { position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc((100% - 12px) / 3); border-radius: 999px; background: rgba(255,255,255,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+  .ep-lab__tab {
+    position: relative; z-index: 1; flex: 1; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; font-size: 10.5px; font-weight: 500; color: rgba(255,255,255,.72);
+  }
+  .ep-lab__tab.is-on { color: #fff; }
+  .ep-lab__tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ep-lab__me { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 9px; font-weight: 600; background: linear-gradient(135deg, #E3C588, #948AEA); color: #fff; }
+  .ep-lab__inf { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; color: var(--gold); flex: none; }
+  .ep-lab__inf svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .ep-lab__note { position: relative; z-index: 2; font-size: 12.5px; color: rgba(255,255,255,.75); text-align: center; text-shadow: 0 1px 6px rgba(0,0,0,.6); min-height: 2.6em; }
+  /* the two materials */
+  .ep-lab[data-mat='glass'] .ep-mat {
+    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    -webkit-backdrop-filter: blur(6px) saturate(190%) brightness(1.08); backdrop-filter: blur(6px) saturate(190%) brightness(1.08);
+    box-shadow: inset 0 1px .5px rgba(255,255,255,.4), inset 0 -1px 1px rgba(255,255,255,.1), inset 0 0 18px rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.18);
+  }
+  .ep-lab[data-mat='fallback'] .ep-mat {
+    background: rgba(20,20,20,.84); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.45); border: 1px solid #262626;
+  }
+  .ep-lab[data-mat='fallback'] .ep-lab__ind { background: #242424; box-shadow: none; }
+  .ep-mat { transition: background .35s, box-shadow .35s, border-color .35s; }
+
+  /* ============================== HOW ============================== */
+  .ep-how { padding: 120px 0 100px; }
+  .ep-sechead--split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 48px; align-items: end; margin-bottom: 56px; }
+  .ep-sechead__aside { font-size: 17px; line-height: 1.65; color: var(--sub); }
+  .ep-reel { overflow: hidden; padding: 10px 0 30px; -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .ep-reel__track { display: flex; width: max-content; animation: ep-reel 70s linear infinite; }
+  .ep-reel:hover .ep-reel__track { animation-play-state: paused; }
+  .ep-reel__set { display: flex; gap: 28px; padding: 0 14px; margin: 0; list-style: none; }
+  .ep-reel__item { width: 210px; flex: none; }
+  .ep-reel__item :global(.sd-phone) { --ph-bezel: #0e0d0c; --ph-shadow: 0 30px 60px -30px rgba(0,0,0,.9); }
+  .ep-reel__cap { display: block; margin-top: 14px; text-align: center; font-size: 12.5px; color: var(--sub); }
+  @keyframes ep-reel { to { transform: translateX(-50%); } }
+
+  .ep-how__grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 56px; margin-top: 64px; align-items: start; }
+  .ep-decisions { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .ep-decisions li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 8px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .ep-decisions .ep-num { margin: 3px 0 0; }
+  .ep-decisions h3 { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
+  .ep-decisions p { margin-top: 6px; font-size: 15.5px; line-height: 1.6; color: var(--sub); }
+  .ep-config { border-radius: 22px; background: #141414; border: 1px solid #262626; padding: 18px; position: sticky; top: 96px; }
+  .ep-config__head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding-bottom: 12px; border-bottom: 1px solid #262626; }
+  .ep-config__head .ep-mono { color: var(--gold); font-size: 13px; }
+  .ep-config dl { margin: 0; }
+  .ep-config dl div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1f1f1f; }
+  .ep-config dt { font-size: 12.5px; color: var(--text); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+  .ep-config dd { margin: 0; font-size: 13px; color: var(--gold); }
+  .ep-config dd.is-true { color: var(--mind); }
+  .ep-config__foot { margin-top: 12px; font-size: 12.5px; color: var(--sub); }
+  .ep-stack { list-style: none; padding: 0; margin: 56px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .ep-stack li {
+    height: 34px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--s1); color: var(--sub); font: 500 13px var(--mono); letter-spacing: -0.01em;
+  }
+
+  /* ============================== CLOSE ============================== */
+  .ep-close {
+    padding: 130px 0 140px; text-align: center; position: relative;
+    background: radial-gradient(700px 360px at 50% 100%, rgba(227,197,136,.12), transparent 70%), var(--bg);
+  }
+  .ep-close__inner { display: flex; flex-direction: column; align-items: center; }
+  .ep-close__inf { width: 64px; height: 64px; fill: none; stroke: var(--gold); stroke-width: 1.6; }
+  .ep-close__line { margin-top: 24px; font-size: clamp(42px, 7vw, 92px); line-height: 1; color: var(--text); max-width: 14ch; }
+  .ep-close__status { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 14px; font-size: 16px; color: var(--sub); }
+  .ep-close__status .ep-chips { margin: 0; }
+
+  /* ============================== RESPONSIVE ============================== */
+  @media (max-width: 1023px) {
+    .ep-hero__grid { grid-template-columns: 1fr; gap: 40px; }
+    .ep-hero__stage { min-height: 0; padding: 30px 0 10px; }
+    .ep-moment-row, .ep-glasssec__grid, .ep-how__grid { grid-template-columns: 1fr; gap: 44px; }
+    .ep-moment-row--flip .ep-moment-row__text { order: 0; }
+    .ep-sechead--split { grid-template-columns: 1fr; gap: 20px; }
+    .ep-config { position: static; }
+    .ep-stats { grid-template-columns: 1fr 1fr; row-gap: 32px; }
+    .ep-stat + .ep-stat { padding-left: 0; border-left: 0; }
+    .ep-stat:nth-child(even) { padding-left: 24px; border-left: 1px solid var(--line); }
+  }
+  @media (max-width: 767px) {
+    .ep-wrap { padding: 0 20px; }
+    .ep-hero { padding: 104px 0 40px; min-height: 0; }
+    .ep-loop { top: 70%; width: 190vw; }
+    .ep-h1 { font-size: clamp(54px, 16vw, 72px); }
+    .ep-lede { font-size: 16.5px; }
+    .ep-chips li, .ep-chips > span { height: 30px; font-size: 12.5px; padding: 0 12px; }
+    .ep-hero__halo { width: 320px; height: 320px; }
+    .ep-hero__phone { width: min(250px, 66vw); }
+    .ep-pill { height: 36px; font-size: 12px; padding: 0 12px; gap: 6px; }
+    .ep-pill--live { top: 6%; left: 0; }
+    .ep-pill--run { top: 30%; right: 0; }
+    .ep-pill--nudge { bottom: 26%; left: 0; }
+    .ep-pill--focus { bottom: 6%; right: 0; }
+    .ep-numbers { padding: 16px 0 72px; }
+    .ep-stats { grid-template-columns: 1fr 1fr; row-gap: 28px; }
+    .ep-stat { padding: 0 12px 0 0; }
+    .ep-stat + .ep-stat { padding-left: 0; border-left: 0; }
+    .ep-stat:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--line); }
+    .ep-stat__v { font-size: 24px; white-space: normal; }
+    .ep-stat__l { font-size: 12.5px; align-items: flex-start; }
+    .ep-stat__l i { margin-top: 5px; }
+    .ep-problem { padding: 80px 0; }
+    .ep-problem__grid { grid-template-columns: 1fr; gap: 18px; }
+    .ep-problem__grid > .ep-over { padding-top: 0; }
+    .ep-problem__body { grid-template-columns: 1fr; gap: 24px; margin-top: 26px; }
+    .ep-problem__body p, .ep-musts li { font-size: 16.5px; }
+    .ep-built { padding: 84px 0 56px; }
+    .ep-sechead { margin-bottom: 36px; }
+    .ep-moment-row { padding: 44px 0; }
+    .ep-moment-row__text p { font-size: 16px; }
+    .ep-onb-phones { height: 440px; }
+    .ep-onb-phones > div { width: 54%; max-width: 220px; }
+    .ep-onb-phones__a { left: 0; }
+    .ep-onb-phones__b { right: 0; top: 46px; }
+    .ep-device { border-radius: 38px; padding: 8px; }
+    .ep-app { border-radius: 31px; padding: 18px 12px 16px; }
+    .ep-app__title { font-size: 26px; }
+    .ep-tiles { gap: 12px; }
+    .ep-tile .v { font-size: 17px; }
+    .ep-tile--hero .v { font-size: 21px; }
+    .ep-wdg { padding: 12px; }
+    .ep-wdg .lab { font-size: 13.5px; }
+    .ep-wdg .val { font-size: 11px; }
+    .ep-strip { gap: 6px; }
+    .ep-around { grid-template-columns: 1fr; gap: 26px; margin-top: 24px; padding-top: 36px; }
+    .ep-glasssec { padding: 84px 0; }
+    .ep-lab { min-height: 460px; border-radius: 26px; padding: 22px 14px 20px; }
+    .ep-lab__bar { gap: 8px; }
+    .ep-lab__cap { height: 58px; }
+    .ep-lab__tab { height: 46px; }
+    .ep-lab__inf { width: 58px; height: 58px; }
+    .ep-how { padding: 84px 0 72px; }
+    .ep-reel__item { width: 160px; }
+    .ep-reel__set { gap: 18px; padding: 0 9px; }
+    .ep-how__grid { margin-top: 40px; }
+    .ep-decisions li { grid-template-columns: 44px minmax(0, 1fr); }
+    .ep-close { padding: 96px 0 104px; }
+    .ep-close__line { font-size: clamp(40px, 12vw, 56px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ep-loop__glow, .ep-loop__comet, .ep-livedot, .ep-chips .is-status i, .ep-lab__blobs i, .ep-reel__track { animation: none !important; }
+    .ep-reel { overflow-x: auto; -webkit-mask: none; mask: none; }
+    .ep-reel__set[aria-hidden='true'] { display: none; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const root = document.querySelector<HTMLElement>('.ep');
+    if (!root) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---------- Liquid Glass / fallback switch (works without GSAP) ----------
+    const lab = root.querySelector<HTMLElement>('.ep-lab');
+    const note = root.querySelector<HTMLElement>('[data-mat-note]');
+    root.querySelectorAll<HTMLButtonElement>('[data-mat-btn]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const mat = b.dataset.matBtn!;
+        lab?.setAttribute('data-mat', mat);
+        root.querySelectorAll<HTMLButtonElement>('[data-mat-btn]').forEach((x) => {
+          x.classList.toggle('is-on', x === b);
+          x.setAttribute('aria-pressed', String(x === b));
+        });
+        if (note) {
+          note.textContent =
+            mat === 'glass'
+              ? 'iOS 26 and later: native glass, with lensing and a specular edge.'
+              : 'Android and older iOS: a plain frosted surface. No fake refraction.';
+        }
+      });
+    });
+
+    if (reduce) return;
+
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ---------- hero entrance ----------
+      const heroIn = root.querySelectorAll('[data-hero-in]');
+      gsap.from(heroIn, { opacity: 0, y: 24, duration: 0.9, stagger: 0.08, ease: 'power3.out', delay: 0.1 });
+      gsap.from('[data-hero-phone]', { opacity: 0, y: 70, rotate: 4, duration: 1.3, ease: 'expo.out', delay: 0.25 });
+      gsap.from('[data-pill]', { opacity: 0, scale: 0.6, duration: 0.8, stagger: 0.14, ease: 'back.out(1.8)', delay: 0.85 });
+
+      // pills drift slowly on scroll
+      root.querySelectorAll<HTMLElement>('[data-pill]').forEach((el, i) => {
+        gsap.to(el, {
+          y: (i % 2 ? -1 : 1) * 46,
+          ease: 'none',
+          scrollTrigger: { trigger: '.ep-hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+        });
+      });
+      gsap.to('[data-hero-phone]', {
+        y: -40, rotate: -1, ease: 'none',
+        scrollTrigger: { trigger: '.ep-hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+      });
+
+      // ---------- generic reveals ----------
+      root.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        gsap.from(el, {
+          opacity: 0, y: 26, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        });
+      });
+
+      // ---------- number band: blocks grow, counts roll ----------
+      const bandBlocks = root.querySelectorAll('.ep-daybar .b, .ep-daybar .d');
+      gsap.from(bandBlocks, {
+        scaleX: 0, opacity: 0, duration: 0.6, stagger: 0.07, ease: 'power2.out',
+        scrollTrigger: { trigger: '.ep-daybar', start: 'top 90%', once: true },
+      });
+      gsap.from('.ep-daybar .now', {
+        left: '0%', duration: 1.4, ease: 'power2.inOut',
+        scrollTrigger: { trigger: '.ep-daybar', start: 'top 90%', once: true },
+      });
+      root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+        const to = Number(el.dataset.count);
+        const o = { v: 0 };
+        gsap.to(o, {
+          v: to, duration: 1.2, ease: 'power2.out',
+          onUpdate: () => { el.textContent = String(Math.round(o.v)); },
+          scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+        });
+      });
+
+      // ---------- onboarding phones float ----------
+      root.querySelectorAll<HTMLElement>('[data-float]').forEach((el) => {
+        const dir = Number(el.dataset.float);
+        gsap.fromTo(el, { y: 60 * -dir }, {
+          y: 60 * dir, ease: 'none',
+          scrollTrigger: { trigger: '.ep-moment-row--onb', start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        });
+      });
+
+      // ---------- transient UI (toasts, tap ripples) is only revealed under JS ----------
+      root.querySelectorAll<HTMLElement>('.ep-toast, .ep-tapdot').forEach((el) => {
+        gsap.set(el, { opacity: 0 });
+        el.removeAttribute('hidden');
+      });
+
+      // ---------- shared helpers for the two recreations ----------
+      const fmtH = (m: number) => `${Math.floor(m / 60)}h ${String(Math.round(m % 60)).padStart(2, '0')}m`;
+      const tapAt = (app: HTMLElement, target: HTMLElement) => {
+        const dot = app.querySelector<HTMLElement>('[data-tapdot]');
+        target.classList.add('is-press');
+        setTimeout(() => target.classList.remove('is-press'), 220);
+        if (!dot) return;
+        const a = app.getBoundingClientRect();
+        const r = target.getBoundingClientRect();
+        gsap.set(dot, { left: r.left - a.left + r.width / 2, top: r.top - a.top + r.height / 2 });
+        gsap.fromTo(dot, { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 1.5, duration: 0.6, ease: 'power2.out' });
+      };
+      const toast = (el: HTMLElement | null) => {
+        if (!el) return;
+        gsap.killTweensOf(el);
+        gsap.fromTo(el, { opacity: 0, y: 16, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.7)' });
+        gsap.to(el, { opacity: 0, y: 8, duration: 0.4, delay: 1.9, ease: 'power2.in' });
+      };
+
+      // ---------- 02: one-tap logging ----------
+      const logRow = root.querySelector<HTMLElement>('#ep-log');
+      if (logRow) {
+        const app = logRow.querySelector<HTMLElement>('.ep-app')!;
+        const blk = (k: string) => app.querySelector<HTMLElement>(`[data-blk="${k}"]`)!;
+        const tile = (k: string) => app.querySelector<HTMLElement>(`[data-tile="${k}"]`)!;
+        const btn = (k: string) => app.querySelector<HTMLElement>(`[data-tap="${k}"]`)!;
+        const now = app.querySelector<HTMLElement>('[data-now]')!;
+        const logToast = app.querySelector<HTMLElement>('[data-toast="log"]');
+        const final = { focus: 145, vol: 6004, pro: 68 };
+        const state = { focus: 0, vol: 0, pro: 0 };
+        const paint = () => {
+          tile('focus').textContent = fmtH(state.focus);
+          tile('vol').textContent = Math.round(state.vol).toLocaleString('en-GB');
+          tile('pro').textContent = String(Math.round(state.pro));
+        };
+        let tl: gsap.core.Timeline | null = null;
+        const reset = () => {
+          tl?.kill();
+          Object.assign(state, { focus: 0, vol: 0, pro: 0 });
+          paint();
+          gsap.set(['train', 'meal', 'focus', 'read'].map(blk), { scaleX: 0, opacity: 0 });
+          gsap.set(now, { left: '9%' });
+        };
+        reset();
+        const play = () => {
+          reset();
+          tl = gsap.timeline({ delay: 0.3 });
+          tl.call(() => { tapAt(app, btn('train')); toast(logToast); })
+            .to(blk('train'), { scaleX: 1, opacity: 1, duration: 0.7, ease: 'power2.out' }, '+=0.15')
+            .to(state, { vol: final.vol, duration: 1, ease: 'power2.out', onUpdate: paint }, '<')
+            .to(now, { left: '13%', duration: 0.6, ease: 'power2.inOut' }, '<')
+            .call(() => tapAt(app, btn('meal')), [], '+=0.35')
+            .to(blk('meal'), { scaleX: 1, opacity: 1, duration: 0.35, ease: 'back.out(3)' }, '+=0.15')
+            .to(state, { pro: final.pro, duration: 0.9, ease: 'power2.out', onUpdate: paint }, '<')
+            .call(() => tapAt(app, btn('focus')), [], '+=0.35')
+            .to(blk('focus'), { scaleX: 1, opacity: 1, duration: 1.2, ease: 'power1.inOut' }, '+=0.15')
+            .to(state, { focus: final.focus, duration: 1.2, ease: 'power1.inOut', onUpdate: paint }, '<')
+            .to(now, { left: '30%', duration: 1.2, ease: 'power1.inOut' }, '<')
+            .call(() => tapAt(app, btn('read')), [], '+=0.35')
+            .to(blk('read'), { scaleX: 1, opacity: 1, duration: 0.6, ease: 'power2.out' }, '+=0.15')
+            .to(now, { left: '38%', duration: 0.6, ease: 'power2.inOut' }, '<');
+        };
+        ScrollTrigger.create({ trigger: app, start: 'top 70%', once: true, onEnter: play });
+        logRow.querySelector('[data-replay="log"]')?.addEventListener('click', play);
+
+        // the widgets are tappable by hand too
+        const manual: Record<string, () => void> = {
+          train: () => gsap.to(blk('train'), { scaleX: 1, opacity: 1, duration: 0.5 }),
+          meal: () => gsap.to(blk('meal'), { scaleX: 1, opacity: 1, duration: 0.3 }),
+          focus: () => gsap.to(blk('focus'), { scaleX: 1, opacity: 1, duration: 0.6 }),
+          read: () => gsap.to(blk('read'), { scaleX: 1, opacity: 1, duration: 0.5 }),
+          tasks: () => {},
+        };
+        app.querySelectorAll<HTMLElement>('[data-tap]').forEach((b) => {
+          b.addEventListener('click', () => {
+            tapAt(app, b);
+            manual[b.dataset.tap!]?.();
+            toast(logToast);
+          });
+        });
+      }
+
+      // ---------- 03: who showed up + nudge ----------
+      const tribeRow = root.querySelector<HTMLElement>('#ep-tribe');
+      if (tribeRow) {
+        const app = tribeRow.querySelector<HTMLElement>('.ep-app')!;
+        const avs = Array.from(app.querySelectorAll<HTMLElement>('[data-strip] .ep-av'));
+        const showed = app.querySelector<HTMLElement>('[data-showed]')!;
+        const quiet = app.querySelector<HTMLElement>('[data-quiet]')!;
+        const bar = app.querySelector<HTMLElement>('[data-pbar]')!;
+        const nudge = app.querySelector<HTMLElement>('[data-nudge]')!;
+        const nudgeLabel = nudge.querySelector('span')!;
+        const tomLine = app.querySelector<HTMLElement>('[data-tom-line]')!;
+        const tomAv = app.querySelector<HTMLElement>('[data-tom] .ep-av')!;
+        const tribeToast = app.querySelector<HTMLElement>('[data-toast="tribe"]');
+        const setCount = (n: number) => {
+          showed.textContent = String(n);
+          quiet.textContent = String(16 - n);
+          bar.style.width = `${(n / 16) * 100}%`;
+        };
+        const light = (el: HTMLElement) => {
+          el.classList.remove('is-quiet');
+          el.classList.add('is-done');
+          gsap.fromTo(el, { scale: 0.7 }, { scale: 1, duration: 0.6, ease: 'back.out(3)' });
+        };
+        let tl: gsap.core.Timeline | null = null;
+        let sent = false;
+        const reset = () => {
+          tl?.kill();
+          sent = false;
+          nudge.classList.remove('is-sent');
+          nudgeLabel.textContent = 'Nudge';
+          tomLine.textContent = 'Last log yesterday 21:40';
+          tomAv.classList.add('is-quiet');
+          tomAv.classList.remove('is-done');
+          avs.forEach((a, i) => {
+            a.classList.toggle('is-done', i < 6);
+            a.classList.toggle('is-quiet', i >= 6);
+          });
+          setCount(6);
+        };
+        const doNudge = () => {
+          if (sent) {
+            nudgeLabel.textContent = 'Nudged';
+            return;
+          }
+          sent = true;
+          tapAt(app, nudge);
+          nudge.classList.add('is-sent');
+          nudgeLabel.textContent = 'Nudged';
+          toast(tribeToast);
+        };
+        const play = () => {
+          reset();
+          tl = gsap.timeline({ delay: 0.4 });
+          for (let i = 6; i < 11; i++) {
+            tl.call(() => { light(avs[i]); setCount(i + 1); }, [], i === 6 ? 0 : '+=0.42');
+          }
+          tl.call(doNudge, [], '+=0.9')
+            .call(() => {
+              tomLine.textContent = 'Logging now · focus';
+              light(tomAv);
+              light(avs[11]);
+              setCount(12);
+            }, [], '+=2.2');
+        };
+        reset();
+        ScrollTrigger.create({ trigger: app, start: 'top 70%', once: true, onEnter: play });
+        tribeRow.querySelector('[data-replay="tribe"]')?.addEventListener('click', play);
+        nudge.addEventListener('click', doNudge);
+      }
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* motion is decoration; the page is complete without it */
+    }
+  })();
+</script>

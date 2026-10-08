@@ -1,0 +1,99 @@
+---
+// Shared ending for every /work/<slug> page: a full-bleed "next quest" panel in the
+// NEXT project's colours, then a personal booking strip. Keeps the journey going.
+import { MAIN_QUESTS, SIDE_QUESTS } from '../data/work';
+import { SITE } from '../data/site';
+
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+const order = [...MAIN_QUESTS, ...SIDE_QUESTS];
+const i = order.findIndex((p) => p.slug === current);
+const next = order[(i + 1) % order.length];
+const label = next.tier === 'main' ? 'Next main quest' : 'Next side quest';
+---
+
+<section
+  class="case-next"
+  style={`--cn-bg:${next.brand.bg};--cn-text:${next.brand.text};--cn-muted:${next.brand.muted};--cn-accent:${next.brand.accent}`}
+>
+  <a href={`/work/${next.slug}`} class="case-next__link">
+    <span class="case-next__label">{label} <i aria-hidden="true">→</i></span>
+    <span class="case-next__name">{next.name}</span>
+    <span class="case-next__summary">{next.summary}</span>
+    <span class="case-next__bar" aria-hidden="true"></span>
+  </a>
+</section>
+
+<section class="case-cta">
+  <div class="case-cta__inner">
+    <img src={SITE.avatar} alt="Yanis Schweizer" width="56" height="56" loading="lazy" />
+    <div class="case-cta__text">
+      <strong>Want something like this built?</strong>
+      <span>I decide, AI types. You own the code. Fixed price.</span>
+    </div>
+    <div class="case-cta__actions">
+      <a href={SITE.booking} target="_blank" rel="noopener" class="case-cta__book">Book a call</a>
+      <a href="/work" class="case-cta__all">All quests</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .case-next {
+    position: relative; z-index: 2;
+    background: var(--cn-bg); color: var(--cn-text);
+    overflow: hidden;
+  }
+  .case-next__link {
+    display: block; max-width: 1120px; margin: 0 auto;
+    padding: clamp(72px, 12vw, 140px) 24px clamp(64px, 10vw, 120px);
+  }
+  .case-next__label {
+    display: inline-flex; gap: 10px; align-items: center;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--cn-accent);
+  }
+  .case-next__label i { font-style: normal; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .case-next__name {
+    display: block; margin-top: 14px;
+    font-size: clamp(56px, 13vw, 168px); font-weight: 700; letter-spacing: -0.05em; line-height: 0.92;
+    transition: letter-spacing 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: left center;
+  }
+  .case-next__summary { display: block; margin-top: 22px; max-width: 520px; font-size: 17px; line-height: 1.6; color: var(--cn-muted); }
+  .case-next__bar {
+    position: absolute; left: 0; bottom: 0; height: 4px; width: 100%;
+    background: var(--cn-accent); transform: scaleX(0); transform-origin: left;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .case-next__link:hover .case-next__name { letter-spacing: -0.035em; transform: translateX(8px); }
+  .case-next__link:hover .case-next__label i { transform: translateX(8px); }
+  .case-next__link:hover .case-next__bar { transform: scaleX(1); }
+
+  .case-cta { position: relative; z-index: 2; background: #050505; border-top: 1px solid #1d1d1d; }
+  .case-cta__inner {
+    max-width: 1120px; margin: 0 auto; padding: 28px 24px;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  }
+  .case-cta img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #00e5ff; }
+  .case-cta__text { flex: 1; min-width: 220px; display: flex; flex-direction: column; }
+  .case-cta__text strong { color: #f0f0f0; font-size: 18px; font-weight: 600; }
+  .case-cta__text span { color: #888; font-size: 14px; }
+  .case-cta__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .case-cta__book {
+    background: #00e5ff; color: #0a0a0a; font-weight: 600; font-size: 15px;
+    padding: 12px 22px; border-radius: 999px; transition: box-shadow 0.3s;
+  }
+  .case-cta__book:hover { box-shadow: 0 0 28px rgba(0, 229, 255, 0.45); }
+  .case-cta__all {
+    color: #f0f0f0; font-weight: 500; font-size: 15px; padding: 12px 20px;
+    border-radius: 999px; border: 1px solid #333;
+  }
+  .case-cta__all:hover { border-color: #666; }
+  @media (max-width: 600px) {
+    .case-cta__actions { width: 100%; }
+    .case-cta__actions a { flex: 1; text-align: center; }
+  }
+</style>

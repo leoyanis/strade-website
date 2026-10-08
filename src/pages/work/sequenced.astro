@@ -1,0 +1,866 @@
+---
+// Sequenced: a side-quest case study written in the studio's own house style
+// (black stage, Inter at -68, one accent, small-radius pills, giant ghost words, hand-drawn marks).
+// No client photos or brands: every "photo" here is an abstract scene, and the demo story pitches the tool itself.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import Story from '../../components/case/sequenced/Story.astro';
+import { STORY_PAGES, type StoryPage } from '../../components/case/sequenced/pages';
+import { getProject } from '../../data/work';
+
+const p = getProject('sequenced')!;
+const M = '/images/work/sequenced/marks';
+
+const checkPage: StoryPage = {
+  id: 'check',
+  archetype: 'bottom-statement',
+  scene: 'a',
+  subject: 'high',
+  top: [{ role: 'k', html: 'real talk..', align: 'center' }],
+  bottom: [
+    { role: 'h', html: 'layout is the <mark>slow part.</mark>', align: 'center' },
+    { role: 'p', html: 'so the tool does it, <b>& the designer</b> keeps the <u>last 10%.</u>', align: 'center' },
+  ],
+  aside: '(next slide)',
+};
+
+const layers = [
+  { id: 'mark', icon: 'pen', name: 'Hand-drawn ellipse', type: 'PNG layer' },
+  { id: 'text', icon: 'T', name: 'Text boxes, line breaks fixed', type: 'Text' },
+  { id: 'pills', icon: 'pill', name: 'Highlight pill', type: 'Vector shape' },
+  { id: 'ghost', icon: 'T', name: 'Ghost word “LAYERS”', type: 'Text' },
+  { id: 'fade', icon: 'grad', name: 'Black fades', type: 'PNG layer' },
+  { id: 'photo', icon: 'img', name: 'Photo, pre-cropped', type: 'Image' },
+];
+
+const accents = [
+  { name: 'Gold', acc: '#FFBD59', ink: '#000000' },
+  { name: 'Red', acc: '#FF3131', ink: '#FFFFFF' },
+  { name: 'Yellow', acc: '#FFDE59', ink: '#000000' },
+  { name: 'Purple', acc: '#8C52FF', ink: '#FFFFFF' },
+  { name: 'Green', acc: '#00BF63', ink: '#FFFFFF' },
+  { name: 'Orange', acc: '#FF751F', ink: '#000000' },
+  { name: 'Sky', acc: '#38B6FF', ink: '#000000' },
+  { name: 'Mono', acc: '#FFFFFF', ink: '#000000' },
+];
+
+const grammar = [
+  { code: '**word**', label: 'SemiBold spine', html: 'the <b>meaning words</b> carry it' },
+  { code: '==word==', label: 'Pill', html: 'the most <mark>loaded noun</mark>' },
+  { code: '++word++', label: 'Accent', html: 'names & <i class="a">numbers</i>' },
+  { code: '__word__', label: 'Marker underline', html: 'the <u>payoff tail</u>' },
+  { code: '((word))', label: 'Hand ellipse', html: 'one <span class="ell">hinge</span> word' },
+  { code: '[[word]]', label: 'Dashed box', html: '<span class="box">a reframe</span>' },
+  { code: '~~word~~', label: 'Strike scribble', html: 'it <s>could</s> will' },
+];
+
+const decisions = [
+  { t: 'The AI chooses. The code draws.', b: 'Every layout lives in code, built from the studio’s own pages. Claude only picks one per page and fills its slots. That keeps a ten-page sequence on-brand, and a designer can still finish the last 10% by hand.' },
+  { t: 'A design check, not a redraw.', b: 'The check sends the rendered pages back to Claude as images. It returns corrected specs, so the fix goes through the same layouts instead of new pixels.' },
+  { t: 'Export for the person who finishes it.', b: 'The .pptx measures the browser layout and writes every line break, so Canva can’t re-wrap the text and the pills stay aligned.' },
+  { t: 'Bring your own key.', b: 'Requests go straight from the browser to Anthropic and photos are stored in the browser. No server route, so no serverless timeouts.' },
+];
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/sequenced"
+  noAlternates
+  bare
+  navTheme="dark"
+  ogImage="/og/work-sequenced.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap" />
+
+  <div class="sq" id="sq">
+    <!-- ============================== HERO ============================== -->
+    <header class="sq-hero">
+      <div class="sq-ghost sq-hero__ghost" aria-hidden="true">SEQUENCED</div>
+      <div class="sq-wrap sq-hero__grid">
+        <div class="sq-hero__copy">
+          <ul class="sq-chips" aria-label="Project facts">
+            <li>Client: Danny Fresko’s creative studio</li>
+            <li>{p.year}</li>
+            <li class="sq-chip--live"><i aria-hidden="true"></i>{p.status}</li>
+          </ul>
+          <h1 class="sq-h1">
+            <span class="sq-h1__k"><b>sequenced</b> designs instagram stories</span>
+            <span class="sq-h1__d">in a studio’s <mark>house style.</mark></span>
+          </h1>
+          <p class="sq-lede">Brief the pages and drop in photos. Claude lays out the whole sequence from the studio’s own layouts, checks its work, and exports an editable file for Canva with every text box, pill and photo on <b>its own layer.</b></p>
+          <p class="sq-hero__aside">
+            <span>(scroll, it designs itself)</span>
+            <svg viewBox="0 0 140 310" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-dasharray="1 13"><path d="M74 12 C42 10 22 42 46 58 C70 72 98 44 82 26 C66 10 112 28 116 84 C120 146 108 212 70 274"/></g><path d="M62 304 L50 274 L86 284 Z" fill="currentColor"/></svg>
+          </p>
+        </div>
+
+        <div class="sq-viewer" id="sq-viewer" aria-label="A generated story sequence, playing">
+          <div class="sq-viewer__glow" aria-hidden="true"></div>
+          <div class="sq-viewer__frame">
+            <div class="sq-viewer__pages">
+              {STORY_PAGES.map((pg, i) => <Story page={pg} class={i === 0 ? 'is-on' : ''} />)}
+            </div>
+            <div class="sq-viewer__ui" aria-hidden="true">
+              <div class="sq-viewer__bars">{STORY_PAGES.map((_, i) => <i class={i === 0 ? 'is-full' : ''}><b></b></i>)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================== STATS ============================== -->
+    <section class="sq-stats" aria-label="What the house style was built from">
+      <div class="sq-wrap">
+        <p class="sq-stats__line"><span><b>63</b> sequences</span><i>•</i><span><b>457</b> pages</span><i>•</i><span><b>12</b> carousels</span><i>•</i><span><b>23</b> layouts</span></p>
+        <p class="sq-stats__sub">The studio’s work, studied page by page and turned into code. <span>(and the export is 100% editable in canva)</span></p>
+      </div>
+    </section>
+
+    <!-- ============================== PROBLEM ============================== -->
+    <section class="sq-sec sq-problem">
+      <div class="sq-wrap">
+        <div class="sq-bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        <p class="sq-kicker">the problem:</p>
+        <h2 class="sq-h2">about <b>25 clients.</b> every sequence <mark>built by hand.</mark></h2>
+        <div class="sq-problem__grid">
+          <p class="sq-p">Danny’s studio designs Instagram story sequences for about 25 clients, and every one is hand-built in Canva, page by page.</p>
+          <p class="sq-problem__big">the hours go on <s>ideas</s> <b>layout.</b></p>
+          <p class="sq-p">Generic AI design tools don’t help. They <span class="sq-ell">ignore</span> the studio’s style.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== BUILD ============================== -->
+    <section class="sq-sec sq-build" id="sq-build">
+      <div class="sq-ghost sq-sec__ghost" aria-hidden="true">BRIEF</div>
+      <div class="sq-wrap">
+        <div class="sq-bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+        <p class="sq-kicker">how it works:</p>
+        <h2 class="sq-h2">brief it. <b>watch it design.</b></h2>
+        <p class="sq-p sq-p--lead">Each page gets a role and a goal, the photos go in, and the client’s accent gets picked. Claude chooses one of the studio’s 23 layouts for every page and fills it: copy with emphasis, photo placement, the giant background word and the hand-drawn marks.</p>
+
+        <div class="sq-board" id="sq-board">
+          <div class="sq-board__bar">
+            <div class="sq-board__group">
+              <span class="sq-board__lbl">Brief</span>
+              <ol class="sq-board__brief">
+                <li><b>1</b>Hook</li><li><b>2</b>Proof</li><li><b>3</b>Reveal</li><li><b>4</b>Offer</li><li><b>5</b>CTA</li>
+              </ol>
+            </div>
+            <div class="sq-board__group">
+              <span class="sq-board__lbl">Photos</span>
+              <div class="sq-board__photos">
+                {STORY_PAGES.map((pg) => <span class={`st--${pg.scene}`}><i class="sq-mini"></i></span>)}
+              </div>
+            </div>
+            <div class="sq-board__group sq-board__group--acc">
+              <span class="sq-board__lbl">Accent</span>
+              <span class="sq-board__swatch"><i></i><b class="sq-accname">Gold</b></span>
+            </div>
+            <button class="sq-board__go" type="button" id="sq-go">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+              <span>Generate</span>
+            </button>
+          </div>
+
+          <div class="sq-board__status" aria-live="polite">
+            <span class="sq-board__dot" aria-hidden="true"></span>
+            <span class="sq-board__msg" id="sq-msg">Done · 5 pages, design check passed</span>
+            <span class="sq-board__prog" aria-hidden="true"><i id="sq-prog"></i></span>
+          </div>
+
+          <div class="sq-board__pages">
+            {STORY_PAGES.map((pg, i) => (
+              <figure class="sq-board__cell">
+                <Story page={pg} build />
+                <figcaption><b>p{i + 1}</b> {pg.archetype}</figcaption>
+              </figure>
+            ))}
+            <figure class="sq-board__cell sq-board__cell--export">
+              <div class="sq-export">
+                <svg class="sq-export__file" viewBox="0 0 48 60" aria-hidden="true"><path d="M6 2h26l14 14v38a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M32 2v14h14" fill="none" stroke="currentColor" stroke-width="2.5"/><text x="24" y="44" text-anchor="middle" font-size="10" font-weight="800" fill="currentColor" font-family="Inter, sans-serif">PPTX</text></svg>
+                <b>sequence.pptx</b>
+                <span>every element a layer</span>
+                <i class="sq-export__btn">Open in Canva</i>
+              </div>
+              <figcaption><b>export</b> editable</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== CHECK ============================== -->
+    <section class="sq-sec sq-check" id="sq-check">
+      <div class="sq-wrap sq-check__grid">
+        <div class="sq-check__copy">
+          <div class="sq-bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          <p class="sq-kicker">then it checks its own work:</p>
+          <h2 class="sq-h2">a second look, <b>before a designer’s first.</b></h2>
+          <p class="sq-p">With design check on, the rendered pages go back to Claude as images. It flags overlaps, bad crops and weak contrast, then sends back corrected specs. One of the house rules: <b>text never covers a face.</b></p>
+          <ul class="sq-flags" id="sq-flags">
+            <li data-flag="overlap"><span class="sq-flags__tag">Overlap</span><span>Headline sat on the face. Moved under it, onto the dark torso.</span><i class="sq-flags__ok" aria-label="fixed">✓</i></li>
+            <li data-flag="crop"><span class="sq-flags__tag">Crop</span><span>Head clipped at the top edge. Photo re-framed on its focus point.</span><i class="sq-flags__ok" aria-label="fixed">✓</i></li>
+            <li data-flag="contrast"><span class="sq-flags__tag">Contrast</span><span>Grey aside on a bright patch. Extra black fade added.</span><i class="sq-flags__ok" aria-label="fixed">✓</i></li>
+          </ul>
+        </div>
+        <div class="sq-check__stage">
+          <div class="sq-check__phone">
+            <Story page={checkPage} class="st--check" />
+            <div class="sq-check__face" aria-hidden="true"><span>face + 40px</span></div>
+            <div class="sq-check__scan" aria-hidden="true"></div>
+          </div>
+          <p class="sq-check__cap">(demo page, made for this case study)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== LAYERS ============================== -->
+    <section class="sq-sec sq-layers" id="sq-layers">
+      <div class="sq-ghost sq-sec__ghost sq-sec__ghost--r" aria-hidden="true">CANVA</div>
+      <div class="sq-wrap">
+        <div class="sq-bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+        <p class="sq-kicker">the export:</p>
+        <h2 class="sq-h2">every element, <b>its own layer.</b></h2>
+        <div class="sq-layers__grid">
+          <div class="sq-x" id="sq-x" aria-label="One story page, exploded into its Canva layers">
+            <div class="sq-x__stack">
+              {layers.slice().reverse().map((l, i) => (
+                <div class={`sq-x__layer sq-x__layer--${l.id}`} style={`--i:${i}`} data-layer-id={l.id}>
+                  <Story page={STORY_PAGES[3]} class={`only-${l.id}`} />
+                  <span class="sq-x__tag">{l.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div class="sq-layers__side">
+            <p class="sq-p">The export is an editable .pptx that opens in Canva. Photos arrive pre-cropped, highlights become vector shapes, and the hand-drawn marks and gradients become PNG layers. Every line break is written in, so nothing re-wraps.</p>
+            <div class="sq-panel" role="list" aria-label="Layers, as Canva shows them">
+              <p class="sq-panel__t">Layers</p>
+              {layers.map((l) => (
+                <div class="sq-panel__row" role="listitem" data-layer-id={l.id} tabindex="0">
+                  <span class={`sq-panel__ico sq-panel__ico--${l.icon}`} aria-hidden="true">{l.icon === 'T' ? 'T' : ''}</span>
+                  <span class="sq-panel__name">{l.name}</span>
+                  <span class="sq-panel__type">{l.type}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== STYLE ============================== -->
+    <section class="sq-sec sq-style">
+      <div class="sq-wrap">
+        <div class="sq-bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+        <p class="sq-kicker">the house style:</p>
+        <h2 class="sq-h2">63 sequences, <b>turned into rules.</b></h2>
+        <p class="sq-p sq-p--lead">I had the studio’s work broken down page by page: colours measured from pixels, the type matched down to its letter spacing, every page sorted into a layout. Each rule was checked against the original pages before it went in. The result is a guide Claude reads and a set of layouts that keep it on-brand.</p>
+
+        <div class="sq-style__grid">
+          <div class="sq-card sq-card--accent">
+            <p class="sq-card__t">one accent per sequence. <b>try one:</b></p>
+            <div class="sq-swatches" role="radiogroup" aria-label="Accent colour">
+              {accents.map((a, i) => (
+                <button type="button" role="radio" aria-checked={i === 0 ? 'true' : 'false'} class={i === 0 ? 'is-on' : ''} style={`--c:${a.acc}`} data-acc={a.acc} data-ink={a.ink} data-name={a.name} aria-label={a.name}></button>
+              ))}
+            </div>
+            <p class="sq-card__note">It re-themes this whole page, the way one pick re-themes a sequence.</p>
+            <div class="sq-type">
+              <p class="sq-type__line">inter only, <b>at -68.</b></p>
+              <p class="sq-type__line sq-type__line--sm">two weights in every line, <mark>one pill</mark> per block.</p>
+            </div>
+          </div>
+
+          <div class="sq-card sq-card--grammar">
+            <p class="sq-card__t">the emphasis grammar <b>claude writes</b></p>
+            <ul class="sq-grammar">
+              {grammar.map((g) => (
+                <li>
+                  <code>{g.code}</code>
+                  <span class="sq-grammar__arrow" aria-hidden="true">→</span>
+                  <span class="sq-grammar__out" set:html={g.html} />
+                  <span class="sq-grammar__lbl">{g.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== HOW ============================== -->
+    <section class="sq-sec sq-how">
+      <div class="sq-ghost sq-sec__ghost" aria-hidden="true">CODE</div>
+      <div class="sq-wrap">
+        <p class="sq-kicker">how i built it:</p>
+        <h2 class="sq-h2 sq-h2--xl"><span class="sq-boxed">claude doesn’t draw pixels.</span></h2>
+        <p class="sq-p sq-p--lead">That one rule shaped the whole build. I decided where the AI is good (choosing, writing, checking) and where code is better (layout, type, export), then had AI write the code to my plan.</p>
+        <ol class="sq-dec">
+          {decisions.map((d, i) => (
+            <li>
+              <span class="sq-dec__n">0{i + 1}</span>
+              <div><b>{d.t}</b><p>{d.b}</p></div>
+            </li>
+          ))}
+        </ol>
+        <div class="sq-how__foot">
+          <ul class="sq-stack" aria-label="Stack">
+            <li>Next.js 16</li><li>React 19</li><li>Tailwind 4</li><li>Anthropic SDK</li><li>pptxgenjs</li><li>IndexedDB</li>
+          </ul>
+          <p class="sq-status"><i aria-hidden="true"></i><span><b>In build</b> with Danny’s studio.</span></p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <CaseNext current="sequenced" />
+</Base>
+
+<style>
+  .sq {
+    --acc: #ffbd59; --acc-ink: #000; --mute: #9a9a9a; --soft: rgba(255, 255, 255, 0.66); --line: rgba(255, 255, 255, 0.12);
+    background: #000; color: #fff; overflow-x: clip;
+    font-family: 'Inter', system-ui, sans-serif; font-variation-settings: 'opsz' 14;
+    -webkit-font-smoothing: antialiased;
+  }
+  :global(body) { background: #000; }
+  :global(#scroll-progress) { background: var(--acc, #ffbd59); }
+  .sq-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  .sq :global(mark) {
+    color: var(--acc-ink); font-weight: 700; border-radius: 0.11em; padding: 0.01em 0.2em 0.06em;
+    background: linear-gradient(var(--acc), var(--acc)) no-repeat 0 0 / var(--sw, 100%) 100%;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .sq-ghost {
+    position: absolute; font-weight: 700; letter-spacing: -0.068em; line-height: 0.8; color: rgba(255, 255, 255, 0.07);
+    white-space: nowrap; pointer-events: none; user-select: none; z-index: 0;
+  }
+
+  .sq-kicker { font-size: 18px; letter-spacing: -0.03em; color: var(--mute); margin-bottom: 14px; }
+  .sq-h2 {
+    font-size: clamp(38px, 6.4vw, 84px); line-height: 1.03; letter-spacing: -0.068em; font-weight: 400; max-width: 980px;
+  }
+  .sq-h2 b { font-weight: 700; }
+  .sq-h2--xl { font-size: clamp(40px, 8vw, 116px); }
+  .sq-p { font-size: 18px; line-height: 1.62; letter-spacing: -0.022em; color: var(--soft); max-width: 600px; }
+  .sq-p b { color: #fff; font-weight: 600; }
+  .sq-p--lead { margin-top: 22px; font-size: 19px; max-width: 680px; }
+  .sq-sec { position: relative; padding: clamp(96px, 12vw, 160px) 0; }
+  .sq-sec__ghost { font-size: clamp(160px, 26vw, 400px); top: 40px; left: -2vw; }
+  .sq-sec__ghost--r { left: auto; right: -2vw; }
+
+  /* IG-style progress bars as section openers */
+  .sq-bars { display: flex; gap: 6px; max-width: 360px; margin-bottom: 26px; }
+  .sq-bars i { flex: 1; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.18); }
+  .sq-bars i.on { background: #fff; }
+
+  /* ------------------------------------------------------------------ hero */
+  .sq-hero { position: relative; padding: 120px 0 90px; overflow: hidden; }
+  .sq-hero__ghost { font-size: clamp(120px, 21vw, 330px); left: 50%; top: 58%; transform: translate(-50%, -50%); color: rgba(255, 255, 255, 0.06); }
+  .sq-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .sq-chips { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+  .sq-chips li {
+    font-size: 13px; letter-spacing: -0.01em; font-weight: 500; color: #d6d6d6; padding: 7px 12px; border-radius: 6px;
+    border: 1px dashed rgba(255, 255, 255, 0.28); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .sq-chip--live i { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 0 var(--acc); animation: sq-pulse 1.8s ease-out infinite; }
+  @keyframes sq-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--acc) 70%, transparent); } 100% { box-shadow: 0 0 0 9px transparent; } }
+
+  .sq-h1 { font-weight: 400; letter-spacing: -0.068em; }
+  .sq-h1__k { display: block; font-size: clamp(22px, 2.6vw, 34px); line-height: 1.2; color: #fff; margin-bottom: 10px; letter-spacing: -0.05em; }
+  .sq-h1__k b { font-weight: 600; color: var(--acc); }
+  .sq-h1__d { display: block; font-size: clamp(50px, 7vw, 104px); line-height: 0.96; font-weight: 700; }
+  .sq-lede { margin-top: 30px; font-size: 19px; line-height: 1.6; letter-spacing: -0.022em; color: var(--soft); max-width: 560px; }
+  .sq-lede b { color: #fff; font-weight: 600; }
+  .sq-hero__aside { margin-top: 30px; display: flex; align-items: flex-start; gap: 12px; color: var(--mute); font-size: 15px; letter-spacing: -0.03em; }
+  .sq-hero__aside svg { width: 30px; height: 66px; color: #fff; opacity: 0.85; margin-top: 4px; }
+
+  .sq-viewer { position: relative; width: 100%; max-width: 360px; justify-self: end; }
+  .sq-viewer__glow { position: absolute; inset: 8% -18% -6%; background: radial-gradient(closest-side, color-mix(in srgb, var(--acc) 26%, transparent), transparent); filter: blur(30px); z-index: 0; }
+  .sq-viewer__frame { position: relative; z-index: 1; border-radius: 26px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9); transform: rotate(2.2deg); }
+  .sq-viewer__pages { position: relative; aspect-ratio: 9 / 16; }
+  .sq-viewer__pages :global(.st) { position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s ease; }
+  .sq-viewer__pages :global(.st.is-on) { opacity: 1; }
+  .sq-viewer__pages :global(.st.is-on .st__scene) { animation: sq-kb 4s ease-out both; }
+  @keyframes sq-kb { from { transform: scale(1.09); } to { transform: scale(1); } }
+  .sq-viewer__ui { position: absolute; left: 0; right: 0; top: 0; padding: 10px 10px 0; z-index: 3; pointer-events: none; }
+  .sq-viewer__bars { display: flex; gap: 4px; }
+  .sq-viewer__bars i { flex: 1; height: 2.5px; border-radius: 2px; background: rgba(255, 255, 255, 0.32); overflow: hidden; }
+  .sq-viewer__bars b { display: block; height: 100%; width: 0; background: #fff; }
+  .sq-viewer__bars i.is-full b { width: 100%; }
+  .sq-viewer__bars i.is-run b { animation: sq-bar 3.6s linear forwards; }
+  @keyframes sq-bar { from { width: 0; } to { width: 100%; } }
+
+  /* ------------------------------------------------------------------ stats */
+  .sq-stats { padding: 34px 0 30px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; z-index: 1; }
+  .sq-stats__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; font-size: clamp(30px, 4.6vw, 64px); line-height: 1.08; letter-spacing: -0.068em; font-weight: 400; }
+  .sq-stats__line b { font-weight: 700; color: var(--acc); }
+  .sq-stats__line i { font-style: normal; color: rgba(255, 255, 255, 0.3); }
+  .sq-stats__sub { margin-top: 14px; font-size: 16px; color: var(--soft); letter-spacing: -0.02em; }
+  .sq-stats__sub span { color: var(--mute); }
+
+  /* ------------------------------------------------------------------ problem */
+  .sq-problem__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); margin-top: 56px; align-items: center; }
+  .sq-problem__big { font-size: clamp(34px, 4.4vw, 60px); line-height: 1.02; letter-spacing: -0.068em; text-align: center; }
+  .sq-problem__big s { text-decoration: none; position: relative; color: rgba(255, 255, 255, 0.5); }
+  .sq-problem__big s::after {
+    content: ''; position: absolute; left: -6%; right: -6%; top: 28%; height: 52%; background: var(--acc);
+    -webkit-mask: url(/images/work/sequenced/marks/strike-scribble.svg) center / 100% 100% no-repeat;
+    mask: url(/images/work/sequenced/marks/strike-scribble.svg) center / 100% 100% no-repeat;
+  }
+  .sq-problem__big b { font-weight: 700; color: #fff; }
+  .sq-ell { position: relative; display: inline-block; color: #fff; font-weight: 600; }
+  .sq-ell::after {
+    content: ''; position: absolute; left: -20%; right: -20%; top: -42%; bottom: -36%; background: var(--acc);
+    -webkit-mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / 100% 100% no-repeat;
+    mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / 100% 100% no-repeat;
+  }
+
+  /* ------------------------------------------------------------------ build board */
+  .sq-board { margin-top: 56px; border: 1px solid var(--line); border-radius: 22px; padding: 18px; background: linear-gradient(180deg, #0b0b0b, #050505); }
+  .sq-board__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 26px; padding: 6px 6px 18px; border-bottom: 1px solid var(--line); }
+  .sq-board__group { display: flex; align-items: center; gap: 10px; }
+  .sq-board__lbl { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); }
+  .sq-board__brief { list-style: none; display: flex; gap: 6px; flex-wrap: wrap; }
+  .sq-board__brief li { font-size: 13px; letter-spacing: -0.01em; padding: 6px 10px 6px 6px; border-radius: 7px; background: #161616; border: 1px solid #262626; display: inline-flex; align-items: center; gap: 7px; }
+  .sq-board__brief b { width: 18px; height: 18px; border-radius: 4px; display: grid; place-items: center; font-size: 11px; background: #262626; }
+  .sq-board__photos { display: flex; gap: 5px; }
+  .sq-board__photos span { width: 26px; height: 34px; border-radius: 5px; overflow: hidden; position: relative; border: 1px solid #2a2a2a; }
+  .sq-mini { position: absolute; inset: 0; }
+  .sq-board__photos .st--a .sq-mini { background: radial-gradient(30% 20% at 30% 35%, rgba(255, 200, 120, 0.8), transparent 70%), linear-gradient(#141826, #08090c); }
+  .sq-board__photos .st--b .sq-mini { background: radial-gradient(60% 40% at 50% 0%, rgba(255, 236, 205, 0.6), transparent 75%), linear-gradient(#1b1916, #050505); }
+  .sq-board__photos .st--c .sq-mini { background: linear-gradient(180deg, #0a0816, #5b2350 60%, #1a0c19); }
+  .sq-board__photos .st--d .sq-mini { background: radial-gradient(40% 30% at 30% 35%, rgba(0, 220, 255, 0.6), transparent 72%), linear-gradient(#03080c, #071820); }
+  .sq-board__photos .st--e .sq-mini { background: radial-gradient(80% 40% at 50% 100%, rgba(255, 176, 92, 0.7), transparent 72%), #120a04; }
+  .sq-board__swatch { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 10px 6px 6px; border-radius: 7px; background: #161616; border: 1px solid #262626; }
+  .sq-board__swatch i { width: 18px; height: 18px; border-radius: 4px; background: var(--acc); }
+  .sq-board__swatch b { font-weight: 500; }
+  .sq-board__go {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: 0;
+    font: 700 14px/1 'Inter', sans-serif; letter-spacing: -0.02em; padding: 11px 16px; border-radius: 8px;
+    background: var(--acc); color: var(--acc-ink); transition: transform 0.15s ease, box-shadow 0.25s ease;
+  }
+  .sq-board__go:hover { transform: translateY(-1px); box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--acc) 70%, transparent); }
+  .sq-board__status { display: flex; align-items: center; gap: 12px; padding: 16px 6px; font-size: 14px; letter-spacing: -0.02em; color: var(--soft); }
+  .sq-board__dot { width: 8px; height: 8px; border-radius: 50%; background: #00bf63; flex: none; }
+  .sq-board.is-busy .sq-board__dot { background: var(--acc); animation: sq-pulse 1.2s ease-out infinite; }
+  .sq-board__msg { flex: 1; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sq-board__prog { width: 160px; height: 4px; border-radius: 4px; background: #1d1d1d; overflow: hidden; flex: none; }
+  .sq-board__prog i { display: block; height: 100%; width: 100%; background: var(--acc); transform-origin: 0 50%; }
+  .sq-board__pages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .sq-board__cell { margin: 0; }
+  .sq-board__cell :global(.st) { border-radius: 10px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08); }
+  .sq-board.is-armed :global(.st__skel) { display: block; }
+  .sq-board__cell figcaption { margin-top: 9px; font: 500 12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--mute); }
+  .sq-board__cell figcaption b { color: #fff; font-weight: 600; margin-right: 4px; }
+  .sq-export {
+    aspect-ratio: 9 / 16; border-radius: 10px; border: 1.5px dashed color-mix(in srgb, var(--acc) 60%, transparent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 12px;
+    background: radial-gradient(70% 50% at 50% 40%, color-mix(in srgb, var(--acc) 12%, transparent), transparent);
+  }
+  .sq-export__file { width: 46px; height: 58px; color: var(--acc); }
+  .sq-export b { font-size: 14px; letter-spacing: -0.03em; }
+  .sq-export span { font-size: 12px; color: var(--mute); letter-spacing: -0.02em; }
+  .sq-export__btn { margin-top: 6px; font-style: normal; font-size: 12px; font-weight: 700; padding: 8px 10px; border-radius: 7px; background: #fff; color: #000; letter-spacing: -0.02em; }
+
+  /* ------------------------------------------------------------------ design check */
+  .sq-check { background: radial-gradient(60% 50% at 75% 50%, color-mix(in srgb, var(--acc) 7%, transparent), transparent 70%); }
+  .sq-check__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: clamp(40px, 7vw, 110px); align-items: center; }
+  .sq-check__copy .sq-p { margin-top: 22px; }
+  .sq-flags { list-style: none; margin-top: 34px; display: flex; flex-direction: column; gap: 10px; max-width: 560px; }
+  .sq-flags li { display: grid; grid-template-columns: 92px minmax(0, 1fr) 24px; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: #0a0a0a; font-size: 15px; line-height: 1.45; letter-spacing: -0.02em; color: var(--soft); }
+  .sq-flags__tag { justify-self: start; font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: rgba(255, 49, 49, 0.12); color: #ff6b6b; border: 1px solid rgba(255, 49, 49, 0.35); }
+  .sq-flags li.is-fixed .sq-flags__tag, .sq-flags li:not(.is-open) .sq-flags__tag { background: rgba(0, 191, 99, 0.12); color: #3ddc84; border-color: rgba(0, 191, 99, 0.4); }
+  .sq-flags li.is-open .sq-flags__tag { background: rgba(255, 49, 49, 0.12); color: #ff6b6b; border-color: rgba(255, 49, 49, 0.35); }
+  .sq-flags__ok { font-style: normal; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 800; background: #00bf63; color: #000; }
+  .sq-flags li.is-open .sq-flags__ok { background: #222; color: transparent; }
+  .sq-check__stage { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .sq-check__cap { margin-top: 14px; font-size: 14px; color: var(--mute); letter-spacing: -0.03em; }
+  .sq-check__phone { position: relative; width: min(100%, 360px); border-radius: 22px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9); }
+  .sq-check__face { position: absolute; left: 24%; width: 52%; top: 27%; height: 33%; border: 2px dashed #ff3131; border-radius: 10px; opacity: 0; pointer-events: none; }
+  .sq-check__face span { position: absolute; left: 50%; top: -24px; transform: translateX(-50%); font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: #ff6b6b; white-space: nowrap; background: #000; padding: 4px 6px; border-radius: 4px; }
+  .sq-check__scan { position: absolute; left: 0; right: 0; top: 0; height: 18%; opacity: 0; pointer-events: none; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--acc) 30%, transparent) 85%, var(--acc) 100%); mix-blend-mode: screen; }
+  .sq-check__phone :global(.st--check .st__bot) { bottom: 11%; }
+
+  /* ------------------------------------------------------------------ exploded layers */
+  .sq-layers__grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 90px); align-items: center; margin-top: 40px; }
+  .sq-x { position: relative; height: 700px; perspective: 1900px; display: grid; place-items: center; }
+  .sq-x__stack {
+    --rx: 56deg; --rz: -36deg; --gap: 62px;
+    position: relative; top: 34px; width: 270px; aspect-ratio: 9 / 16; transform-style: preserve-3d;
+    transform: rotateX(var(--rx)) rotateZ(var(--rz)) translateZ(-90px);
+  }
+  .sq-x__layer { position: absolute; inset: 0; transform: translateZ(calc(var(--i) * var(--gap))); transform-style: preserve-3d; transition: filter 0.25s ease; }
+  .sq-x__layer :global(.st) { border-radius: 14px; background: transparent; }
+  .sq-x__layer--photo :global(.st) { background: #000; }
+  .sq-x__layer::after { content: ''; position: absolute; inset: 0; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.22); pointer-events: none; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+  .sq-x__layer.is-hot::after { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc), 0 0 40px -6px color-mix(in srgb, var(--acc) 60%, transparent); }
+  .sq-x__tag {
+    position: absolute; left: 100%; top: 0; margin-left: 10px; white-space: nowrap; transform: translateZ(1px);
+    font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: #fff; background: #111; border: 1px solid #2a2a2a; padding: 5px 7px; border-radius: 5px;
+    opacity: var(--tags, 1);
+  }
+  /* each layer instance only shows its own part */
+  .sq-x__layer :global(.st > *) { visibility: hidden; }
+  .sq-x__layer--photo :global(.st__photo),
+  .sq-x__layer--fade :global(.st__fade),
+  .sq-x__layer--ghost :global(.st__ghost),
+  .sq-x__layer--text :global(.st__top),
+  .sq-x__layer--text :global(.st__bot),
+  .sq-x__layer--pills :global(.st__bot),
+  .sq-x__layer--mark :global(.st__top) { visibility: visible; }
+  .sq-x__layer--pills :global(.st__bot) { color: transparent; }
+  .sq-x__layer--pills :global(.st__bot mark) { color: transparent; }
+  .sq-x__layer--text :global(mark) { background: none; color: color-mix(in srgb, #fff calc(var(--tags, 1) * 100%), var(--acc-ink)); }
+  .sq-x__layer--text :global(.ell)::after { display: none; }
+  .sq-x__layer--mark :global(.st__top) { color: transparent; }
+  .sq-x__layer--fade :global(.st__fade) { opacity: 0.9; }
+  .sq-x__layer--fade::before { content: ''; position: absolute; inset: 0; border-radius: 14px; opacity: calc(var(--tags, 1) * 0.9); background: repeating-conic-gradient(rgba(255, 255, 255, 0.09) 0 25%, transparent 0 50%) 0 0 / 14px 14px; }
+
+  .sq-layers__side .sq-p { margin-bottom: 26px; }
+  .sq-panel { border-radius: 16px; background: #fff; color: #0e1318; padding: 14px; box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.9); max-width: 460px; }
+  .sq-panel__t { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; padding: 2px 6px 10px; color: #0e1318; }
+  .sq-panel__row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 8px; border-radius: 10px; cursor: default; transition: background 0.2s ease; font-size: 14px; letter-spacing: -0.015em; outline: none; }
+  .sq-panel__row + .sq-panel__row { margin-top: 2px; }
+  .sq-panel__row:hover, .sq-panel__row:focus-visible, .sq-panel__row.is-hot { background: #eef2ff; }
+  .sq-panel__ico { width: 34px; height: 34px; border-radius: 8px; background: #f1f3f6; border: 1px solid #e3e6eb; display: grid; place-items: center; font-weight: 800; font-size: 15px; color: #39424e; position: relative; overflow: hidden; }
+  .sq-panel__ico--img { background: linear-gradient(160deg, #3a4266, #0c0f18 70%); border: 0; }
+  .sq-panel__ico--img::after { content: ''; position: absolute; width: 8px; height: 8px; border-radius: 50%; top: 8px; left: 9px; background: #ffc878; box-shadow: 10px 6px 0 -2px #8ad2ff; }
+  .sq-panel__ico--grad { background: linear-gradient(180deg, #000, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0) 55%, #000), repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 8px 8px; }
+  .sq-panel__ico--pill::after { content: ''; width: 20px; height: 9px; border-radius: 2px; background: var(--acc); }
+  .sq-panel__ico--pen::after { content: ''; width: 24px; height: 14px; background: #39424e; -webkit-mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / contain no-repeat; mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / contain no-repeat; }
+  .sq-panel__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sq-panel__type { font-size: 12px; color: #6b7480; white-space: nowrap; }
+
+  /* ------------------------------------------------------------------ style */
+  .sq-style__grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 18px; margin-top: 50px; }
+  .sq-card { border: 1px solid var(--line); border-radius: 22px; padding: clamp(22px, 3vw, 32px); background: #070707; }
+  .sq-card__t { font-size: 22px; letter-spacing: -0.05em; line-height: 1.2; }
+  .sq-card__t b { font-weight: 700; }
+  .sq-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .sq-swatches button { width: 44px; height: 44px; border-radius: 9px; border: 0; cursor: pointer; background: var(--c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); transition: box-shadow 0.2s ease; }
+  .sq-swatches button:hover { box-shadow: 0 0 0 2px #000, 0 0 0 4px rgba(255, 255, 255, 0.45); }
+  .sq-swatches button.is-on { box-shadow: 0 0 0 2px #000, 0 0 0 4px #fff; }
+  .sq-card__note { margin-top: 14px; font-size: 14px; color: var(--mute); letter-spacing: -0.02em; }
+  .sq-type { margin-top: 34px; padding-top: 26px; border-top: 1px dashed var(--line); }
+  .sq-type__line { font-size: clamp(34px, 4vw, 52px); line-height: 1.02; letter-spacing: -0.068em; }
+  .sq-type__line b { font-weight: 700; }
+  .sq-type__line--sm { margin-top: 14px; font-size: clamp(20px, 2vw, 26px); line-height: 1.3; letter-spacing: -0.05em; color: var(--soft); }
+  .sq-grammar { list-style: none; margin-top: 16px; }
+  .sq-grammar li { display: grid; grid-template-columns: 118px 20px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 13px 0; border-bottom: 1px dashed var(--line); }
+  .sq-grammar li:last-child { border-bottom: 0; }
+  .sq-grammar code { font: 500 14px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--acc); }
+  .sq-grammar__arrow { color: var(--mute); }
+  .sq-grammar__out { font-size: 21px; letter-spacing: -0.06em; line-height: 1.2; }
+  .sq-grammar__out :global(b) { font-weight: 700; }
+  .sq-grammar__out :global(.a) { font-style: normal; font-weight: 700; color: var(--acc); }
+  .sq-grammar__out :global(u) { text-decoration: none; position: relative; white-space: nowrap; }
+  .sq-grammar__out :global(u)::after { content: ''; position: absolute; left: -3%; right: -3%; bottom: -0.2em; height: 0.26em; background: var(--acc); -webkit-mask: url(/images/work/sequenced/marks/underline-marker.svg) center / 100% 100% no-repeat; mask: url(/images/work/sequenced/marks/underline-marker.svg) center / 100% 100% no-repeat; }
+  .sq-grammar__out :global(.ell) { position: relative; display: inline-block; }
+  .sq-grammar__out :global(.ell)::after { content: ''; position: absolute; left: -22%; right: -22%; top: -38%; bottom: -34%; background: var(--acc); -webkit-mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / 100% 100% no-repeat; mask: url(/images/work/sequenced/marks/ellipse-pen.svg) center / 100% 100% no-repeat; }
+  .sq-grammar__out :global(.box) { display: inline-block; padding: 0.06em 0.3em 0.1em; border-radius: 0.24em; outline: 2px dashed var(--acc); }
+  .sq-grammar__out :global(s) { text-decoration: none; position: relative; color: rgba(255, 255, 255, 0.5); }
+  .sq-grammar__out :global(s)::after { content: ''; position: absolute; left: -8%; right: -8%; top: 30%; height: 50%; background: var(--acc); -webkit-mask: url(/images/work/sequenced/marks/strike-scribble.svg) center / 100% 100% no-repeat; mask: url(/images/work/sequenced/marks/strike-scribble.svg) center / 100% 100% no-repeat; }
+  .sq-grammar__lbl { font-size: 12px; color: var(--mute); letter-spacing: -0.01em; text-align: right; }
+
+  /* ------------------------------------------------------------------ how */
+  .sq-boxed { display: inline; padding: 0.02em 0.22em 0.08em; border-radius: 0.14em; outline: 3px dashed var(--acc); outline-offset: 4px; line-height: 1.25; font-weight: 700; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .sq-dec { list-style: none; margin-top: 56px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; }
+  .sq-dec li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 26px 0; border-top: 1px solid var(--line); }
+  .sq-dec__n { font-weight: 700; font-size: 15px; color: var(--acc); letter-spacing: -0.02em; padding-top: 4px; }
+  .sq-dec b { display: block; font-size: 24px; font-weight: 700; letter-spacing: -0.055em; line-height: 1.15; }
+  .sq-dec p { margin-top: 10px; font-size: 16px; line-height: 1.6; color: var(--soft); letter-spacing: -0.02em; }
+  .sq-how__foot { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: center; justify-content: space-between; padding-top: 28px; border-top: 1px solid var(--line); }
+  .sq-stack { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .sq-stack li { font-size: 13px; font-weight: 500; padding: 8px 12px; border-radius: 7px; border: 1px solid #2a2a2a; color: #ddd; letter-spacing: -0.01em; }
+  .sq-status { display: inline-flex; align-items: center; gap: 12px; font-size: 16px; letter-spacing: -0.03em; color: var(--soft); }
+  .sq-status i { width: 9px; height: 9px; border-radius: 50%; background: var(--acc); animation: sq-pulse 1.8s ease-out infinite; flex: none; }
+  .sq-status b { color: #fff; font-weight: 700; }
+  .sq-status em { font-style: normal; color: var(--mute); }
+
+  /* ------------------------------------------------------------------ responsive */
+  @media (max-width: 1023px) {
+    .sq-hero__grid { grid-template-columns: minmax(0, 1fr) 300px; }
+    .sq-board__pages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .sq-problem__grid { grid-template-columns: minmax(0, 1fr); }
+    .sq-problem__big { text-align: left; }
+    .sq-layers__grid, .sq-style__grid, .sq-check__grid { grid-template-columns: minmax(0, 1fr); }
+    .sq-check__stage { order: -1; }
+  }
+  @media (max-width: 767px) {
+    .sq-wrap { padding: 0 20px; }
+    .sq-hero { padding: 96px 0 64px; }
+    .sq-hero__grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .sq-viewer { justify-self: center; max-width: 280px; }
+    .sq-hero__ghost { top: 76%; font-size: 34vw; }
+    .sq-h1__d { font-size: clamp(50px, 14.4vw, 64px); }
+    .sq-lede { font-size: 17px; }
+    .sq-stats__line { gap: 4px 12px; font-size: 30px; }
+    .sq-sec__ghost { font-size: 42vw; top: 30px; }
+    .sq-board { padding: 12px; border-radius: 18px; }
+    .sq-board__bar { gap: 12px 16px; }
+    .sq-board__group--acc { display: none; }
+    .sq-board__go { margin-left: 0; width: 100%; justify-content: center; }
+    .sq-board__prog { width: 70px; }
+    .sq-board__pages { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .sq-board__msg { font-size: 12px; }
+    .sq-flags li { grid-template-columns: minmax(0, 1fr) 24px; gap: 8px 10px; }
+    .sq-flags__tag { grid-column: 1 / -1; }
+    .sq-flags li > span:nth-child(2) { grid-column: 1; }
+    .sq-x { height: 470px; perspective: 1400px; }
+    .sq-x__stack { width: 190px; --gap: 44px; }
+    .sq-x__tag { display: none; }
+    .sq-x__stack { top: 20px; }
+    .sq-grammar li { grid-template-columns: 96px minmax(0, 1fr); gap: 6px 10px; }
+    .sq-grammar__arrow, .sq-grammar__lbl { display: none; }
+    .sq-grammar__out { font-size: 19px; }
+    .sq-dec { grid-template-columns: minmax(0, 1fr); }
+    .sq-dec li { grid-template-columns: 40px minmax(0, 1fr); }
+    .sq-dec b { font-size: 21px; }
+    .sq-boxed { outline-width: 2px; }
+    .sq-p, .sq-p--lead { font-size: 17px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sq-chip--live i, .sq-status i { animation: none; }
+    .sq-viewer__pages :global(.st.is-on .st__scene) { animation: none; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const root = document.getElementById('sq');
+
+    /* ---------- accent switcher: re-themes the page like one pick re-themes a sequence ---------- */
+    const accName = document.querySelectorAll<HTMLElement>('.sq-accname');
+    document.querySelectorAll<HTMLButtonElement>('.sq-swatches button').forEach((b, _i, all) => {
+      b.addEventListener('click', () => {
+        if (!root) return;
+        root.style.setProperty('--acc', b.dataset.acc || '#FFBD59');
+        root.style.setProperty('--acc-ink', b.dataset.ink || '#000');
+        all.forEach((x) => { const on = x === b; x.classList.toggle('is-on', on); x.setAttribute('aria-checked', String(on)); });
+        accName.forEach((n) => (n.textContent = b.dataset.name || ''));
+      });
+    });
+
+    /* ---------- layer panel <-> exploded stack highlight ---------- */
+    const hot = (id: string | null) => {
+      document.querySelectorAll<HTMLElement>('.sq-x__layer, .sq-panel__row').forEach((el) => el.classList.toggle('is-hot', !!id && el.dataset.layerId === id));
+    };
+    document.querySelectorAll<HTMLElement>('.sq-panel__row').forEach((row) => {
+      row.addEventListener('mouseenter', () => hot(row.dataset.layerId || null));
+      row.addEventListener('focus', () => hot(row.dataset.layerId || null));
+      row.addEventListener('mouseleave', () => hot(null));
+      row.addEventListener('blur', () => hot(null));
+    });
+
+    /* ---------- hero story viewer ---------- */
+    const viewer = document.getElementById('sq-viewer');
+    const vPages = viewer ? Array.from(viewer.querySelectorAll<HTMLElement>('.sq-viewer__pages > .st')) : [];
+    const vBars = viewer ? Array.from(viewer.querySelectorAll<HTMLElement>('.sq-viewer__bars i')) : [];
+    let vIdx = 0;
+    let vTimer: number | undefined;
+    const show = (n: number) => {
+      vIdx = (n + vPages.length) % vPages.length;
+      vPages.forEach((pg, i) => pg.classList.toggle('is-on', i === vIdx));
+      vBars.forEach((b, i) => {
+        b.classList.remove('is-run');
+        b.classList.toggle('is-full', i < vIdx);
+      });
+      const bar = vBars[vIdx];
+      if (bar) { void bar.offsetWidth; bar.classList.add('is-run'); }
+      window.clearTimeout(vTimer);
+      vTimer = window.setTimeout(() => show(vIdx + 1), 3600);
+    };
+    if (viewer && vPages.length && !reduce) {
+      viewer.addEventListener('click', () => show(vIdx + 1));
+      new IntersectionObserver((es) => es.forEach((e) => {
+        if (e.isIntersecting) show(vIdx); else window.clearTimeout(vTimer);
+      }), { threshold: 0.3 }).observe(viewer);
+    }
+
+    if (reduce) return;
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      /* hero entrance */
+      gsap.timeline({ delay: 0.1 })
+        .from('.sq-h1__k', { y: 16, autoAlpha: 0, duration: 0.6, ease: 'power3.out' })
+        .from('.sq-h1__d', { y: 30, autoAlpha: 0, duration: 0.8, ease: 'power3.out' }, 0.12)
+        .fromTo('.sq-h1__d mark', { '--sw': '0%' }, { '--sw': '100%', duration: 0.7, ease: 'power2.inOut' }, 0.55)
+        .from('.sq-lede, .sq-hero__aside, .sq-chips', { y: 14, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out' }, 0.45)
+        .from('.sq-viewer__frame', { y: 40, rotate: 8, autoAlpha: 0, duration: 1, ease: 'power3.out' }, 0.2)
+        .from('.sq-hero__ghost', { autoAlpha: 0, scale: 1.08, duration: 1.4, ease: 'power2.out' }, 0);
+      gsap.to('.sq-hero__ghost', { yPercent: -30, ease: 'none', scrollTrigger: { trigger: '.sq-hero', start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.utils.toArray<HTMLElement>('.sq-sec__ghost').forEach((g) => {
+        gsap.fromTo(g, { yPercent: 18 }, { yPercent: -18, ease: 'none', scrollTrigger: { trigger: g.parentElement!, start: 'top bottom', end: 'bottom top', scrub: true } });
+      });
+
+      /* stats + section heads */
+      gsap.from('.sq-stats__line > *', { y: 20, autoAlpha: 0, duration: 0.6, stagger: 0.06, ease: 'power3.out', scrollTrigger: { trigger: '.sq-stats', start: 'top 85%' } });
+      gsap.utils.toArray<HTMLElement>('.sq-sec').forEach((sec) => {
+        const bars = sec.querySelectorAll('.sq-bars i.on');
+        if (bars.length) gsap.from(bars, { scaleX: 0, transformOrigin: '0 50%', duration: 0.5, stagger: 0.07, ease: 'power2.out', scrollTrigger: { trigger: sec, start: 'top 78%' } });
+        const h = sec.querySelector('.sq-h2');
+        if (h) gsap.from(h, { y: 34, autoAlpha: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: h, start: 'top 85%' } });
+        sec.querySelectorAll<HTMLElement>('.sq-h2 mark').forEach((m) => {
+          gsap.fromTo(m, { '--sw': '0%' }, { '--sw': '100%', duration: 0.7, ease: 'power2.inOut', scrollTrigger: { trigger: m, start: 'top 82%' } });
+        });
+      });
+      gsap.from('.sq-problem__grid > *', { y: 30, autoAlpha: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out', scrollTrigger: { trigger: '.sq-problem__grid', start: 'top 82%' } });
+
+      /* ---------- the build: pages get designed one by one ---------- */
+      const board = document.getElementById('sq-board');
+      const msg = document.getElementById('sq-msg');
+      const prog = document.getElementById('sq-prog');
+      const go = document.getElementById('sq-go');
+      if (board && msg && prog) {
+        const cells = Array.from(board.querySelectorAll<HTMLElement>('.sq-board__cell'));
+        const pageCells = cells.filter((c) => !c.classList.contains('sq-board__cell--export'));
+        const exportCell = cells.find((c) => c.classList.contains('sq-board__cell--export'));
+        const say = (t: string) => () => { msg.textContent = t; };
+        let tl: gsap.core.Timeline | null = null;
+
+        const build = () => {
+          tl?.kill();
+          board.classList.add('is-armed', 'is-busy');
+          // empty targets are skipped (a bare duration keeps every page on the same timing)
+          type Tg = Element | NodeListOf<Element> | Element[] | null;
+          const has = (t: Tg) => !!t && (!('length' in t) || t.length > 0);
+          const list = (...els: (Element | null)[]) => els.filter(Boolean) as Element[];
+          const S = (t: Tg, vars: gsap.TweenVars) => { if (has(t)) gsap.set(t as gsap.TweenTarget, vars); };
+          const A = (t: Tg, vars: gsap.TweenVars, pos?: gsap.Position) => {
+            if (!tl) return;
+            if (has(t)) tl.to(t as gsap.TweenTarget, vars, pos);
+            else tl.to({}, { duration: Number(vars.duration ?? 0) }, pos);
+          };
+          const parts = (c: HTMLElement) => ({
+            skel: c.querySelector('.st__skel'),
+            tag: c.querySelector('.st__skel-tag'),
+            scene: c.querySelector('.st__scene'),
+            dress: list(c.querySelector('.st__subj'), c.querySelector('.st__fade')),
+            ghost: c.querySelector('.st__ghost'),
+            lines: c.querySelectorAll('.st__b'),
+            pills: c.querySelectorAll('.st__b mark'),
+            draws: c.querySelectorAll('.st__b u, .st__b .ell'),
+            paths: c.querySelectorAll('.st__mark path'),
+            sparks: c.querySelectorAll('.st__mark--sparkle'),
+            aside: c.querySelector('.st__aside'),
+            cap: c.querySelector('figcaption'),
+          });
+          // reset to "empty board"
+          pageCells.forEach((c) => {
+            const q = parts(c);
+            S(q.skel, { autoAlpha: 1 });
+            S(q.tag, { autoAlpha: 0, scale: 0.8 });
+            S(list(q.scene, ...q.dress, q.ghost, q.aside), { autoAlpha: 0 });
+            S(q.lines, { autoAlpha: 0, y: 8 });
+            S(q.pills, { '--sw': '0%' });
+            S(q.draws, { '--draw': '0%' });
+            S(q.paths, { '--off': 1 });
+            S(q.sparks, { scale: 0, transformOrigin: '50% 50%' });
+            S(q.cap, { autoAlpha: 0.35 });
+          });
+          if (exportCell) gsap.set(exportCell, { autoAlpha: 0.15, y: 10 });
+          gsap.set(prog, { scaleX: 0 });
+
+          tl = gsap.timeline({ onComplete: () => board.classList.remove('is-busy') });
+          tl.add(say('Reading the brief · 5 pages, 5 photos, accent picked'));
+          tl.to({}, { duration: 0.6 });
+          pageCells.forEach((c, i) => {
+            const q = parts(c);
+            const arch = c.querySelector('.st')?.getAttribute('data-arch') || '';
+            tl!.add(say(`Page ${i + 1} of 5 · choosing a layout…`));
+            A(q.tag, { autoAlpha: 1, scale: 1, duration: 0.3, ease: 'back.out(2)' });
+            tl!.add(say(`Page ${i + 1} of 5 · ${arch} · filling the slots`), '+=0.35');
+            A(q.skel, { autoAlpha: 0, duration: 0.3 });
+            if (q.scene) tl!.fromTo(q.scene, { autoAlpha: 0, scale: 1.14 }, { autoAlpha: 1, scale: 1, duration: 0.7, ease: 'power2.out' }, '<');
+            A(q.dress, { autoAlpha: 1, duration: 0.4 }, '<0.15');
+            if (q.ghost) tl!.fromTo(q.ghost, { autoAlpha: 0, letterSpacing: '0.1em' }, { autoAlpha: 1, letterSpacing: '-0.068em', duration: 0.6, ease: 'power3.out' }, '<0.1');
+            A(q.lines, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.12, ease: 'power2.out' }, '<0.2');
+            A(q.pills, { '--sw': '100%', duration: 0.4, stagger: 0.1, ease: 'power2.inOut' });
+            A(q.draws, { '--draw': '100%', duration: 0.45, stagger: 0.1, ease: 'power1.inOut' }, '<0.1');
+            A(q.paths, { '--off': 0, duration: 0.5, stagger: 0.12, ease: 'power1.inOut' }, '<');
+            A(q.sparks, { scale: 1, duration: 0.4, ease: 'back.out(3)' }, '<');
+            A(q.aside, { autoAlpha: 1, duration: 0.3 }, '<');
+            A(q.cap, { autoAlpha: 1, duration: 0.3 }, '<');
+            tl!.to(prog, { scaleX: (i + 1) / 6, duration: 0.3 }, '<');
+          });
+          tl.add(say('Design check · reviewing 5 rendered pages'))
+            .to(pageCells.map((c) => c.querySelector('.st')), { filter: 'brightness(1.25)', duration: 0.18, stagger: 0.08, yoyo: true, repeat: 1 })
+            .add(say('Design check passed · exporting .pptx'))
+            .to(prog, { scaleX: 1, duration: 0.4 })
+            .to(exportCell ? [exportCell] : [], { autoAlpha: 1, y: 0, duration: 0.5, ease: 'back.out(2)' }, '<')
+            .add(say('Done · 5 pages, every element its own layer'));
+          tl.timeScale(window.innerWidth >= 768 ? 1.9 : 1.7);
+        };
+
+        ScrollTrigger.create({ trigger: board, start: 'top 70%', once: true, onEnter: build });
+        go?.addEventListener('click', build);
+      }
+
+      /* ---------- design check: flag, then fix ---------- */
+      const check = document.getElementById('sq-check');
+      if (check) {
+        const story = check.querySelector<HTMLElement>('.st--check');
+        const bot = story?.querySelector<HTMLElement>('.st__bot');
+        const subj = story?.querySelector<HTMLElement>('.st__subj');
+        const aside = story?.querySelector<HTMLElement>('.st__aside');
+        const fade = story?.querySelector<HTMLElement>('.st__fade');
+        const face = check.querySelector<HTMLElement>('.sq-check__face');
+        const scan = check.querySelector<HTMLElement>('.sq-check__scan');
+        const flags = Array.from(check.querySelectorAll<HTMLElement>('.sq-flags li'));
+        const run = () => {
+          if (!bot || !subj || !aside || !fade || !face || !scan) return;
+          flags.forEach((f) => f.classList.add('is-open'));
+          const ctl = gsap.timeline();
+          ctl.set(bot, { yPercent: -128 })
+            .set(subj, { yPercent: -16 })
+            .set(aside, { color: '#6b6b6b' })
+            .set(fade, { opacity: 0.55 })
+            .fromTo(scan, { autoAlpha: 1, yPercent: -100 }, { yPercent: 560, duration: 1.4, ease: 'power1.inOut' }, 0.4)
+            .to(scan, { autoAlpha: 0, duration: 0.2 })
+            .to(face, { autoAlpha: 1, duration: 0.3 }, 1.0)
+            .from(flags, { x: -16, autoAlpha: 0.3, duration: 0.4, stagger: 0.18 }, 1.1)
+            .add(() => flags[0]?.classList.remove('is-open'), '+=0.5')
+            .to(bot, { yPercent: 0, duration: 0.8, ease: 'power3.inOut' }, '<')
+            .add(() => flags[1]?.classList.remove('is-open'), '+=0.4')
+            .to(subj, { yPercent: 0, duration: 0.8, ease: 'power3.inOut' }, '<')
+            .add(() => flags[2]?.classList.remove('is-open'), '+=0.4')
+            .to(fade, { opacity: 1, duration: 0.6 }, '<')
+            .to(aside, { color: '#9a9a9a', duration: 0.6 }, '<')
+            .to(face, { autoAlpha: 0, duration: 0.4 }, '+=0.3');
+        };
+        ScrollTrigger.create({ trigger: check, start: 'top 60%', once: true, onEnter: run });
+      }
+
+      /* ---------- exploded layers: flat page → Canva layers, scrubbed ---------- */
+      const stack = document.querySelector<HTMLElement>('.sq-x__stack');
+      if (stack) {
+        const mobile = window.innerWidth < 768;
+        gsap.fromTo(stack,
+          { '--rx': '0deg', '--rz': '0deg', '--gap': '0px', '--tags': 0 },
+          { '--rx': '56deg', '--rz': '-36deg', '--gap': mobile ? '44px' : '62px', '--tags': 1, ease: 'power2.inOut',
+            scrollTrigger: { trigger: '#sq-x', start: 'top 85%', end: 'center 45%', scrub: 0.6 } });
+        gsap.from('.sq-panel__row', { x: 24, autoAlpha: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', scrollTrigger: { trigger: '.sq-panel', start: 'top 85%' } });
+      }
+
+      /* style + how */
+      gsap.from('.sq-grammar li', { y: 16, autoAlpha: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', scrollTrigger: { trigger: '.sq-grammar', start: 'top 85%' } });
+      gsap.from('.sq-swatches button', { scale: 0.4, autoAlpha: 0, duration: 0.45, stagger: 0.05, ease: 'back.out(2.4)', scrollTrigger: { trigger: '.sq-swatches', start: 'top 88%' } });
+      gsap.from('.sq-dec li', { y: 26, autoAlpha: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.sq-dec', start: 'top 85%' } });
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* motion is decoration; everything is visible without it */
+    }
+  })();
+</script>

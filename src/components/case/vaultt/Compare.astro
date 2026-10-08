@@ -1,0 +1,84 @@
+---
+// CV vs Vaultt, recreated from vaultt.io's comparison. On scroll the CV lines get struck out
+// and the Vaultt lines check in.
+const cv = ['The university you went to', 'Your job titles and dates', 'A list of buzzwords and adjectives', 'What you say you can do'];
+const vaultt = [
+  { t: 'Projects, builds and startups', d: 'The real work you have shipped.' },
+  { t: 'Real results', d: 'Proof behind every claim.' },
+  { t: 'Tools in practice', d: 'Shown in the work, not listed.' },
+  { t: 'Backed by others', d: 'Peers and employers vouch for it.' },
+];
+---
+
+<section class="vt-cmp vt-section" id="vt-compare">
+  <div class="vt-wrap">
+    <header class="vt-head">
+      <p class="vt-tag"><span class="no">07</span> The pitch</p>
+      <h2 class="vt-h2">Judged on your work, <span class="lt">not the words on a page.</span></h2>
+    </header>
+
+    <div class="vt-cmp__grid">
+      <div class="vt-cmp__col is-cv">
+        <p class="vt-cmp__k">A CV or LinkedIn tells them</p>
+        <ul>
+          {cv.map((t) => (
+            <li class="vt-cmp__no">
+              <span class="vt-cmp__x" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17" /></svg></span>
+              <span class="vt-cmp__txt">{t}<span class="vt-cmp__strike" aria-hidden="true"></span></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="vt-cmp__vs" aria-hidden="true"><span>vs</span></div>
+      <div class="vt-cmp__col is-vaultt">
+        <p class="vt-cmp__k">Your Vaultt shows</p>
+        <ul>
+          {vaultt.map((v) => (
+            <li class="vt-cmp__yes">
+              <span class="vt-cmp__ok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg></span>
+              <span><strong>{v.t}</strong><span>{v.d}</span></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+    <p class="vt-cmp__note">My job was to make the right column real: profiles that hold the work, and search that reads it.</p>
+  </div>
+</section>
+
+<style is:global>
+  .vt-cmp { background: var(--vt-navy); }
+  .vt-cmp__grid { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0; align-items: stretch; }
+  .vt-cmp__col { padding: 30px 30px 26px; border-radius: 18px; }
+  .vt-cmp__col.is-cv { border: 1px solid var(--vt-line); background: rgba(10, 33, 64, 0.4); }
+  .vt-cmp__col.is-vaultt {
+    border: 1px solid rgba(111, 168, 255, 0.75); background: linear-gradient(165deg, #143563, var(--vt-navy-3));
+    box-shadow: 0 0 0 4px rgba(111, 168, 255, 0.07), 0 40px 90px -40px rgba(111, 168, 255, 0.45);
+  }
+  .vt-cmp__k { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); padding-bottom: 14px; border-bottom: 1px solid var(--vt-line); }
+  .is-vaultt .vt-cmp__k { color: var(--vt-blue); }
+  .vt-cmp__col li { display: flex; gap: 14px; align-items: flex-start; padding: 17px 0; border-bottom: 1px solid var(--vt-line); }
+  .vt-cmp__col li:last-child { border-bottom: 0; padding-bottom: 4px; }
+  .vt-cmp__x, .vt-cmp__ok { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; margin-top: 1px; }
+  .vt-cmp__x { background: rgba(232, 241, 255, 0.07); color: var(--vt-faint); }
+  .vt-cmp__ok { background: var(--vt-glow); color: var(--vt-blue); border: 1px solid rgba(111, 168, 255, 0.45); }
+  .vt-cmp__x svg, .vt-cmp__ok svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-cmp__txt { position: relative; font-size: 17px; line-height: 1.45; color: var(--vt-soft); }
+  .vt-cmp__strike { position: absolute; left: -2px; right: -4px; top: 55%; height: 1.5px; background: rgba(232, 241, 255, 0.55); transform-origin: left; transform: scaleX(var(--s, 1)); }
+  .vt-cmp__yes strong { display: block; font-size: 17px; font-weight: 600; color: var(--vt-light); }
+  .vt-cmp__yes span span { display: block; margin-top: 3px; font-size: 14.5px; line-height: 1.5; color: var(--vt-soft); }
+  .vt-cmp__vs { display: flex; align-items: center; justify-content: center; padding: 0 18px; }
+  .vt-cmp__vs span { font-family: var(--vt-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--vt-line-2); background: var(--vt-navy); }
+  .vt-cmp__note { margin-top: 36px; max-width: 640px; font-size: 17px; line-height: 1.6; color: var(--vt-soft); }
+
+  @media (max-width: 860px) {
+    .vt-cmp__grid { grid-template-columns: 1fr; }
+    .vt-cmp__vs { padding: 0; height: 0; position: relative; z-index: 2; }
+    .vt-cmp__vs span { position: absolute; top: -20px; }
+    .vt-cmp__col { padding: 22px 20px 18px; }
+    .vt-cmp__col.is-cv { margin-bottom: 0; }
+    .vt-cmp__col.is-vaultt { margin-top: 0; }
+    .vt-cmp__grid { gap: 16px; }
+    .vt-cmp__txt, .vt-cmp__yes strong { font-size: 16px; }
+  }
+</style>

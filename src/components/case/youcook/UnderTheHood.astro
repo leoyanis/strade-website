@@ -1,0 +1,192 @@
+---
+// Stack and decisions, written as a recipe card. Facts from the app's pubspec and Cloud Functions.
+interface Props { year: string }
+const { year } = Astro.props;
+const ingredients = [
+  { q: '1', t: 'Flutter codebase', d: 'for iOS and Android' },
+  { q: '', t: 'Firebase', d: 'for sign-in, data and storage' },
+  { q: '', t: 'Cloud Functions', d: 'so every AI call runs on the server' },
+  { q: '', t: 'OpenAI vision', d: 'to read the photo of your fridge' },
+  { q: '', t: 'Whisper', d: 'to turn a voice note into a list' },
+  { q: '', t: 'Groq + OpenAI models', d: 'to write recipes, steps and lists' },
+  { q: '', t: 'An image model', d: 'to picture each new dish' },
+  { q: '', t: 'RevenueCat', d: 'for subscriptions, a pinch' },
+  { q: '', t: 'Next.js', d: 'for youcookapp.com' },
+];
+const method = [
+  { h: 'Make input effortless.', p: 'A photo, a voice note or a few typed words. Nobody wants to type out their whole fridge.' },
+  { h: 'One model per job.', p: 'Each task goes to the model that does it fast and cheap, instead of one big model for everything.' },
+  { h: 'Watch the costs.', p: 'Every AI call runs in a Cloud Function that checks who’s asking and logs the tokens it used, so I could see what each recipe cost.' },
+  { h: 'One codebase, two stores.', p: 'Flutter let me ship to the App Store and Google Play from the same code.' },
+  { h: 'Sell it myself.', p: 'The website, the store screenshots and the Meta ads were mine too.' },
+];
+---
+
+<section class="hood" id="yc-hood">
+  <div class="hood__wrap">
+    <div class="hood__head" data-yc-reveal>
+      <p class="yc-eyebrow">Under the hood</p>
+      <h2 class="hood__title">The recipe behind<br />the recipes</h2>
+      <p class="hood__lede">
+        I made every call: what to build, which AI handles which job, how to charge for it and how to sell it.
+      </p>
+    </div>
+
+    <article class="card">
+      <header class="card__top">
+        <div class="card__brand">
+          <span class="card__hat"><img src="/images/work/youcook/hat.webp" alt="" width="200" height="200" loading="lazy" /></span>
+          <span><small>Recipe</small><strong>YouCook</strong></span>
+        </div>
+        <dl class="card__facts">
+          <div><dt>Serves</dt><dd>iOS + Android</dd></div>
+          <div><dt>Chef</dt><dd>Me, start to finish</dd></div>
+          <div><dt>Cooked</dt><dd>{year}</dd></div>
+        </dl>
+      </header>
+      <div class="card__cols">
+        <div class="card__ing">
+          <h3 class="card__h">Ingredients</h3>
+          <ul>
+            {ingredients.map((it) => (
+              <li class="ing">
+                <span class="ing__dot" aria-hidden="true"></span>
+                <span>{it.q && <b class="ing__q">{it.q}</b>} <strong>{it.t}</strong> {it.d}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="card__method">
+          <h3 class="card__h">Method</h3>
+          <ol>
+            {method.map((m, i) => (
+              <li class="mth">
+                <span class="mth__n">{i + 1}</span>
+                <span><strong>{m.h}</strong> {m.p}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .hood {
+    position: relative;
+    background: var(--yc-surface);
+    padding: clamp(80px, 10vw, 140px) 0;
+    overflow: clip;
+  }
+  .hood::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--yc-pattern);
+    background-size: clamp(380px, 38vw, 560px);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .hood__wrap { position: relative; max-width: 1200px; margin: 0 auto; padding: 0 var(--yc-gutter); }
+  .hood__head { max-width: 720px; margin-bottom: 44px; }
+  .hood__title {
+    font-size: clamp(40px, 5.2vw, 70px);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--yc-ink-strong);
+    margin: 0 0 18px;
+  }
+  .hood__lede { font-size: clamp(17px, 1.45vw, 19.5px); font-weight: 500; line-height: 1.6; color: #555; margin: 0; max-width: 560px; }
+
+  .card {
+    position: relative;
+    border-radius: 30px;
+    background: #fff;
+    box-shadow: 0 40px 80px -40px rgba(120, 40, 25, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+  }
+  .card__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px 32px;
+    padding: 24px 32px;
+    background: var(--yc-teal);
+    background-image: var(--yc-pattern-light);
+    background-size: 420px;
+    color: #fff;
+  }
+  .card__brand { display: flex; align-items: center; gap: 14px; }
+  .card__hat { width: 56px; height: 56px; border-radius: 18px; background: #fff; display: grid; place-items: center; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
+  .card__hat img { width: 40px; height: auto; }
+  .card__brand small { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
+  .card__brand strong { display: block; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  .card__facts { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 0; }
+  .card__facts div { display: flex; flex-direction: column; }
+  .card__facts dt { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; }
+  .card__facts dd { margin: 0; font-size: 17px; font-weight: 700; }
+
+  .card__cols { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); }
+  .card__ing, .card__method { padding: 32px 36px 38px; }
+  .card__ing { background: #fffaf8; border-right: 1.5px dashed #f0d6d0; }
+  .card__h {
+    font-family: var(--yc-hand);
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--yc-salmon);
+    line-height: 1;
+    margin: 0 0 16px;
+  }
+  .card__ing ul { list-style: none; margin: 0; padding: 0; }
+  .ing { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed #f0dcd6; font-size: 16.5px; font-weight: 500; color: #555; line-height: 1.45; }
+  .ing:last-child { border-bottom: 0; }
+  .ing strong { color: #222; font-weight: 700; }
+  .ing__q { color: var(--yc-coral); font-weight: 700; }
+  .ing__dot { flex: none; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--yc-coral); transform: translateY(-1px); }
+
+  .card__method ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+  .mth { display: flex; gap: 16px; align-items: flex-start; font-size: 17px; font-weight: 500; line-height: 1.55; color: #555; }
+  .mth strong { color: #222; font-weight: 700; }
+  .mth__n {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #fff;
+    background: var(--yc-teal);
+    box-shadow: 0 6px 14px -6px rgba(23, 133, 126, 0.8);
+  }
+
+  @media (max-width: 860px) {
+    .card__cols { grid-template-columns: minmax(0, 1fr); }
+    .card__ing { border-right: 0; border-bottom: 1.5px dashed #f0d6d0; }
+    .card__top { padding: 22px 22px; }
+    .card__ing, .card__method { padding: 26px 22px 30px; }
+    .card__brand strong { font-size: 26px; }
+  }
+</style>
+
+<script>
+  import { loadMotion } from './motion';
+
+  (async () => {
+    const root = document.getElementById('yc-hood');
+    if (!root) return;
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap, ScrollTrigger } = m;
+    const card = root.querySelector('.card')!;
+    const tl = gsap.timeline({ scrollTrigger: { trigger: card, start: 'top 80%', once: true } });
+    tl.from(card, { y: 70, rotate: -1.5, autoAlpha: 0, duration: 1, ease: 'power3.out' })
+      .from(root.querySelectorAll('.ing'), { x: -18, autoAlpha: 0, duration: 0.45, stagger: 0.06, ease: 'power2.out' }, 0.35)
+      .from(root.querySelectorAll('.mth'), { y: 18, autoAlpha: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out' }, 0.5)
+      .from(root.querySelectorAll('.mth__n'), { scale: 0, duration: 0.45, stagger: 0.1, ease: 'back.out(3)' }, 0.55);
+    m.refresh();
+  })();
+</script>

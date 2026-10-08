@@ -1,0 +1,1079 @@
+---
+// Outreach & CRM System: white-label build with Matteo Caruso.
+// Strictly anonymous: no client name, branding, staff, screenshots or real lead data.
+// Every UI below is recreated in HTML with neutral demo data and a neutral indigo accent.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import { getProject } from '../../data/work';
+
+const p = getProject('outreach-crm')!;
+
+const leads = [
+  { n: 'Dana Whitfield', c: 'Northwind', r: 'Head of Marketing', e: 'dana@northwind.co', v: 'Valid' },
+  { n: 'Luis Ortega', c: 'Acme Studio', r: 'Founder', e: 'luis@acmestudio.com', v: 'Valid' },
+  { n: 'Priya Raman', c: 'Fieldnote', r: 'Operations Lead', e: 'priya@fieldnote.io', v: 'Catch-all' },
+  { n: 'Tom Becker', c: 'Bluebird Labs', r: 'CEO', e: 'tom@bluebirdlabs.com', v: 'Valid' },
+  { n: 'Ana Costa', c: 'Lumen & Co', r: 'Events Manager', e: 'ana@lumen.co', v: 'Invalid' },
+  { n: 'Kenji Mori', c: 'Harbor Supply', r: 'Office Manager', e: 'kenji@harborsupply.com', v: 'Valid' },
+];
+
+const ramp = Array.from({ length: 14 }, (_, i) => {
+  const day = i + 1;
+  return { day, v: Math.min(50, 20 + Math.max(0, day - 7) * 5) };
+});
+
+const tests = [
+  'sends inside the window on a weekday, never outside it',
+  'follows the ramp: 20 a day for the first week, then +5 a day',
+  'sends at most one email per mailbox per round and spaces them out',
+  'sends follow-ups after their delay, from the same mailbox, in the same thread',
+  'never sends a half-filled email: a lead missing {{company}} is skipped once, with a note',
+  'a reply in the thread stops the sequence and shows as New reply',
+  'an out-of-office answer is logged and the sequence carries on',
+  'a bounce marks the email bounced, puts the address on do-not-contact and stops the sequence',
+  'a timeout after Microsoft accepted the email counts as sent (no second send)',
+  'a database error after a successful send never sends the same step twice',
+  'an outage spreads its failures over different leads instead of using up one lead',
+  'a wrong app secret pauses every mailbox and uses up no lead; after Resume the email goes out',
+  'daylight saving day (25 hours): the limit holds and the window follows local time',
+  'never verify the same address twice (each check costs a credit)',
+  'HTML and header injection in lead data is escaped / flattened',
+  'only the owner sets or removes a key, and nobody signed in can read it back',
+  'the team always keeps an owner',
+];
+
+const decisions = [
+  { t: 'Failures that aren’t the lead’s fault never cost the lead its email.', b: 'A full mailbox or a wrong secret pauses sending with Microsoft’s reason, and throttling just waits. The lead keeps its place.' },
+  { t: 'An email Microsoft didn’t confirm is never retried.', b: 'If a send can’t be confirmed, it is skipped, not repeated. Nobody gets the same email twice.' },
+  { t: 'No open tracking. People set the status.', b: 'The app only marks New reply when an answer arrives. Interested, Ready for a call and the rest are a person’s call.' },
+  { t: 'Catch-all addresses are capped at 20%.', b: 'Addresses that can’t be fully verified still go out, but never more than a fifth of a mailbox’s sends.' },
+];
+
+const I = {
+  leads: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.6-4.6',
+  send: 'M21 3 10 14M21 3l-7 18-4-7-7-4 18-7z',
+  crm: 'M4 5h16v14H4zM4 10h16M10 10v9',
+  mail: 'M3 6h18v12H3zM3 7l9 6 9-6',
+  inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1 2h6l1-2h5',
+  gear: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
+};
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/outreach-crm"
+  noAlternates
+  bare
+  navTheme="light"
+  ogImage="/og/work-outreach-crm.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+
+  <div class="oc">
+    <!-- ============================== HERO ============================== -->
+    <header class="oc-hero">
+      <div class="oc-wrap oc-hero__top">
+        <ul class="oc-chips" aria-label="Project facts">
+          <li><span class="oc-chips__dot"></span>White-label · built with Matteo Caruso</li>
+          <li>{p.year}</li>
+          <li class="oc-chips__status"><span class="oc-pulse" aria-hidden="true"></span>{p.status}</li>
+        </ul>
+        <h1 class="oc-h1">Find them. Email them. <span>Catch every reply.</span></h1>
+        <p class="oc-lede">A marketing team was running outreach from spreadsheets. I replaced it with one app: a lead finder, campaigns sent from the team’s own Microsoft 365 mailboxes, and a CRM where no reply gets lost.</p>
+      </div>
+
+      <div class="oc-wrap">
+        <div class="oc-stage">
+        <div class="oc-sat oc-sat--toast" aria-hidden="true">
+          <span class="oc-ava" style="--h:248">DW</span>
+          <div><b>New reply · Dana Whitfield</b><span>Sequence stopped for this lead</span></div>
+        </div>
+        <div class="oc-sat oc-sat--box" aria-hidden="true">
+          <span class="oc-pulse"></span>
+          <div><b>sam@yourcompany.com</b><span>Ramping up · 25 a day</span></div>
+          <i class="oc-sat__gauge"><s></s></i>
+        </div>
+        <div class="oc-app" id="oc-app" aria-label="The campaign overview, recreated with demo data">
+          <div class="oc-app__chrome" aria-hidden="true">
+            <span class="oc-app__lights"><i></i><i></i><i></i></span>
+            <span class="oc-app__path">Workspace <em>/</em> Campaigns <em>/</em> <b>Spring outreach</b></span>
+            <span class="oc-app__search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d={I.leads}/></svg>Search<kbd>⌘K</kbd></span>
+          </div>
+          <div class="oc-app__body">
+            <aside class="oc-side" aria-hidden="true">
+              <div class="oc-side__brand"><span class="oc-logo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d={I.send}/></svg></span><b>Outreach</b></div>
+              <nav class="oc-side__nav">
+                <span><svg viewBox="0 0 24 24"><path d={I.leads}/></svg>Leads</span>
+                <span class="is-on"><svg viewBox="0 0 24 24"><path d={I.send}/></svg>Campaigns</span>
+                <span><svg viewBox="0 0 24 24"><path d={I.crm}/></svg>CRM</span>
+                <span><svg viewBox="0 0 24 24"><path d={I.mail}/></svg>Email accounts</span>
+                <span><svg viewBox="0 0 24 24"><path d={I.inbox}/></svg>Unibox<em class="oc-badge" data-badge>3</em></span>
+              </nav>
+              <div class="oc-side__foot"><span><svg viewBox="0 0 24 24"><path d={I.gear}/></svg>Settings</span></div>
+            </aside>
+            <div class="oc-main">
+              <div class="oc-camp">
+                <div>
+                  <p class="oc-camp__name">Spring outreach</p>
+                  <p class="oc-camp__meta"><span class="oc-tag">Sending</span>240 leads · 3 emails · 2 senders</p>
+                </div>
+                <div class="oc-live">
+                  <span class="oc-pulse" aria-hidden="true"></span>
+                  <div><b>Sending now</b><small>09:00–17:00 local time · next in 4 min</small></div>
+                </div>
+              </div>
+              <div class="oc-tiles">
+                <div class="oc-tile"><span>Sent</span><b data-roll="412">412</b><small>of 720 planned</small></div>
+                <div class="oc-tile"><span>Replied</span><b data-roll="37">37</b><small>9% of sent</small></div>
+                <div class="oc-tile"><span>Interested</span><b data-roll="12">12</b><small>set by the team</small></div>
+                <div class="oc-tile oc-tile--hide-s"><span>Bounced</span><b data-roll="4">4</b><small>moved to do-not-contact</small></div>
+              </div>
+              <div class="oc-cols">
+                <div class="oc-seqprog">
+                  <p class="oc-sectt">Sequence progress</p>
+                  <div class="oc-gauge"><div><b>1</b><span>Quick question, {'{{first_name}}'}</span><em>100%</em></div><i><s style="--w:100%"></s></i></div>
+                  <div class="oc-gauge is-live"><div><b>2</b><span>Re: Quick question</span><em>64%</em></div><i><s style="--w:64%"></s></i></div>
+                  <div class="oc-gauge"><div><b>3</b><span>Last nudge</span><em>22%</em></div><i><s style="--w:22%"></s></i></div>
+                </div>
+                <div class="oc-feed">
+                  <p class="oc-sectt">Latest replies</p>
+                  <ul class="oc-feed__list" id="oc-feed">
+                    <li><span class="oc-ava" style="--h:248">DW</span><div><b>Dana Whitfield</b><span>Sounds interesting, can you send times?</span></div><span class="oc-pill oc-pill--new">New reply</span></li>
+                    <li><span class="oc-ava" style="--h:160">LO</span><div><b>Luis Ortega</b><span>What does this cost for a team of 5?</span></div><span class="oc-pill oc-pill--q">Asked a question</span></li>
+                    <li><span class="oc-ava" style="--h:30">TB</span><div><b>Tom Becker</b><span>Yes, let’s talk next week.</span></div><span class="oc-pill oc-pill--call">✦ Ready for a call</span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+        <p class="oc-demo">Recreated in HTML with demo data. The real app stays private.</p>
+      </div>
+
+      <div class="oc-wrap">
+        <div class="oc-partner">
+          <span class="oc-partner__ava" aria-hidden="true">MC</span>
+          <p><b>Built with Matteo Caruso.</b> Matteo runs the client relationship. I designed and built the system under his name, so the client stays private.</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================== NUMBERS ============================== -->
+    <section class="oc-nums" aria-label="Project in numbers">
+      <div class="oc-wrap oc-nums__row">
+        {p.metrics!.map((m, i) => (
+          <div class="oc-num">
+            <b data-num={i === 0 ? '130' : i === 2 ? '0' : ''}>{m.value}</b>
+            <span>{m.label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ============================== PROBLEM ============================== -->
+    <section class="oc-sec oc-problem">
+      <div class="oc-wrap oc-problem__grid">
+        <div class="oc-problem__copy">
+          <p class="oc-kicker">The problem</p>
+          <h2 class="oc-h2">Outreach lived in a spreadsheet.</h2>
+          <p class="oc-p">Leads were found by hand, emails were copy-pasted one at a time, and replies got lost across inboxes. Matteo brought me in to build one system for all of it, under his name.</p>
+        </div>
+        <div class="oc-swap" id="oc-swap">
+          <div class="oc-sheet" aria-label="Before: a spreadsheet">
+            <div class="oc-sheet__bar"><span>outreach_FINAL_v3.xlsx</span></div>
+            <div class="oc-sheet__grid">
+              <span class="h"></span><span class="h">A</span><span class="h">B</span><span class="h">C</span><span class="h">D</span>
+              <span class="n">1</span><span class="b">Name</span><span class="b">Company</span><span class="b">Sent?</span><span class="b">Replied?</span>
+              <span class="n">2</span><span>Dana W.</span><span>Northwind</span><span>yes</span><span class="y">?? check inbox</span>
+              <span class="n">3</span><span>Luis O</span><span>acme studio</span><span>y (2x?)</span><span></span>
+              <span class="n">4</span><span>Priya</span><span>Fieldnote</span><span class="r">#N/A</span><span>no</span>
+              <span class="n">5</span><span>Tom Becker</span><span>Bluebird</span><span>sent</span><span class="y">replied to Sam??</span>
+              <span class="n">6</span><span>ana costa</span><span>Lumen</span><span></span><span class="r">bounced</span>
+            </div>
+          </div>
+          <div class="oc-swap__arrow" aria-hidden="true"><svg viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h54M46 3l10 9-10 9"/></svg></div>
+          <div class="oc-clean" aria-label="After: one lead list">
+            <div class="oc-clean__head"><span>Lead</span><span>Status</span></div>
+            <div class="oc-clean__row"><span class="oc-ava" style="--h:248">DW</span><div><b>Dana Whitfield</b><small>Northwind · step 2 of 3</small></div><span class="oc-pill oc-pill--new">New reply</span></div>
+            <div class="oc-clean__row"><span class="oc-ava" style="--h:160">LO</span><div><b>Luis Ortega</b><small>Acme Studio · step 1 of 3</small></div><span class="oc-pill oc-pill--q">Asked a question</span></div>
+            <div class="oc-clean__row"><span class="oc-ava" style="--h:80">PR</span><div><b>Priya Raman</b><small>Fieldnote · step 3 of 3</small></div><span class="oc-pill">Not replied</span></div>
+            <div class="oc-clean__row"><span class="oc-ava" style="--h:30">TB</span><div><b>Tom Becker</b><small>Bluebird Labs · replied</small></div><span class="oc-pill oc-pill--call">✦ Ready for a call</span></div>
+            <div class="oc-clean__row"><span class="oc-ava" style="--h:0">AC</span><div><b>Ana Costa</b><small>Lumen &amp; Co · bounced</small></div><span class="oc-pill oc-pill--dnc">Do not contact</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== 01 FIND ============================== -->
+    <section class="oc-sec oc-step oc-find">
+      <div class="oc-wrap oc-step__grid">
+        <div class="oc-step__copy">
+          <p class="oc-step__n">01 · Find</p>
+          <h2 class="oc-h2">Leads, without the copy-paste.</h2>
+          <p class="oc-p">Filters, one search bar, saved searches or the team’s own CSV. One search runs every chosen source, merges what it finds, drops anyone already in the CRM and ranks the rest. Every address is verified before anything is sent.</p>
+        </div>
+        <div class="oc-finder" id="oc-finder" aria-label="The lead finder, recreated with demo data">
+          <div class="oc-finder__rail" aria-hidden="true">
+            <p class="oc-sectt">Who</p>
+            <div class="oc-chipset"><span class="is-on">Marketing</span><span class="is-on">Founders</span><span>Operations</span><span>Events</span></div>
+            <p class="oc-sectt">Where</p>
+            <span class="oc-field">Region <i>▾</i></span>
+            <p class="oc-sectt">Size</p>
+            <div class="oc-chipset"><span>1–10</span><span class="is-on">11–50</span><span>51–200</span></div>
+            <span class="oc-go">Find leads</span>
+            <div class="oc-finder__save"><span>Load</span><span>Save</span><span>CSV</span></div>
+          </div>
+          <div class="oc-finder__view">
+            <div class="oc-search">
+              <div class="oc-search__top"><b>Searching</b><span id="oc-left">Almost done</span></div>
+              <div class="oc-search__bar"><i id="oc-sbar"></i><s></s></div>
+              <div class="oc-search__meta"><span>Web, directories, your CSV…</span><span id="oc-found">29 found so far</span></div>
+              <ul class="oc-log" id="oc-log">
+                <li>09:41:02 · Sources started · 3 running</li>
+                <li>09:41:20 · Directory search · 18 people so far</li>
+                <li>09:41:37 · Website emails · 11 found</li>
+                <li>09:41:52 · Duplicates removed · 3 already in the CRM</li>
+                <li class="is-new">09:42:05 · Ranked by relevance · 29 new leads</li>
+              </ul>
+            </div>
+            <table class="oc-table">
+              <thead><tr><th></th><th>Name</th><th class="oc-hide-s">Company</th><th>Email check</th></tr></thead>
+              <tbody>
+                {leads.map((l) => (
+                  <tr>
+                    <td><span class:list={['oc-check', l.v !== 'Invalid' && 'is-on']} aria-hidden="true"></span></td>
+                    <td><b>{l.n}</b><small>{l.r}</small></td>
+                    <td class="oc-hide-s">{l.c}</td>
+                    <td><span class:list={['oc-ver', `oc-ver--${l.v.toLowerCase().replace('-', '')}`]}>{l.v}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== 02 SEND ============================== -->
+    <section class="oc-sec oc-step oc-send">
+      <div class="oc-wrap">
+        <div class="oc-step__copy oc-step__copy--wide">
+          <p class="oc-step__n">02 · Send</p>
+          <h2 class="oc-h2">Campaigns that send themselves, carefully.</h2>
+          <p class="oc-p">A campaign is a lead list, a sequence of emails and a schedule. It sends from the team’s own Microsoft 365 mailboxes, follow-ups land in the same thread, and a reply stops the sequence for that person.</p>
+        </div>
+
+        <div class="oc-flow" id="oc-flow" aria-label="Leads moving through a three-step sequence">
+          <div class="oc-flow__list"><b>240</b><span>leads in the list</span></div>
+          <div class="oc-flow__track">
+            <div class="oc-flow__line" aria-hidden="true"><i></i></div>
+            <div class="oc-flow__step" style="--x:0">
+              <span class="oc-flow__node">1</span>
+              <div class="oc-mailcard"><small>Day 0 · 09:00–17:00</small><b>Quick question, {'{{first_name}}'}</b></div>
+            </div>
+            <div class="oc-flow__step" style="--x:1">
+              <span class="oc-flow__node">2</span>
+              <div class="oc-mailcard"><small>+2 days · same thread</small><b>Re: Quick question</b></div>
+            </div>
+            <div class="oc-flow__step" style="--x:2">
+              <span class="oc-flow__node">3</span>
+              <div class="oc-mailcard"><small>+4 days · same thread</small><b>Last nudge</b></div>
+            </div>
+            <div class="oc-flow__lane" aria-hidden="true"><span class="oc-pill oc-pill--new">Replied · sequence stops</span></div>
+            <div class="oc-flow__dots" aria-hidden="true">
+              {Array.from({ length: 9 }).map((_, i) => <i class="oc-dot" style={`--h:${(i * 47) % 360}`}></i>)}
+            </div>
+          </div>
+        </div>
+
+        <div class="oc-send__grid">
+          <div class="oc-ramp" id="oc-ramp">
+            <div class="oc-ramp__head">
+              <p class="oc-sectt">Daily limit per mailbox</p>
+              <span class="oc-switch" aria-hidden="true"><i></i>Ramp up new mailboxes</span>
+            </div>
+            <div class="oc-ramp__nums">
+              <div><b>20</b><span>Start at, a day</span></div>
+              <div><b>+5</b><span>Then add, a day</span></div>
+              <div><b>50</b><span>Max, a day</span></div>
+            </div>
+            <div class="oc-ramp__chart" aria-label="Daily sending limit over the first 14 sending days">
+              <span class="oc-ramp__cap" aria-hidden="true"><em>Max 50</em></span>
+              {ramp.map((r) => (
+                <div class:list={['oc-ramp__col', r.day <= 7 && 'is-flat']} style={`--v:${r.v}`}>
+                  <span class="oc-ramp__v">{r.v}</span>
+                  <i class="oc-ramp__bar"></i>
+                  <span class="oc-ramp__d">{r.day}</span>
+                </div>
+              ))}
+            </div>
+            <p class="oc-ramp__foot"><span>First week: 20 a day</span><span>Then +5 a day, up to 50</span></p>
+          </div>
+
+          <div class="oc-tpl" id="oc-tpl">
+            <div class="oc-tpl__editor">
+              <p class="oc-sectt">Template</p>
+              <p class="oc-tpl__subj">Quick question, <code>{'{{first_name}}'}</code></p>
+              <p class="oc-tpl__body">Hi <code>{'{{first_name}}'}</code>, I came across <code>{'{{company}}'}</code> and loved what your team is building. Would a short call next week be useful?</p>
+              <p class="oc-tpl__sig"><code>{'{{sender_name}}'}</code></p>
+            </div>
+            <div class="oc-tpl__preview">
+              <p class="oc-sectt">Live preview <span id="oc-tpl-who">for Dana · Northwind</span></p>
+              <div class="oc-sheet2">
+                <p><span>From</span><span>Sam Taylor</span></p>
+                <p><span>To</span><span><em data-k="email">dana@northwind.co</em></span></p>
+                <p><span>Subject</span><span>Quick question, <em data-k="first">Dana</em></span></p>
+                <div class="oc-sheet2__body">Hi <em data-k="first">Dana</em>, I came across <em data-k="company">Northwind</em> and loved what your team is building. Would a short call next week be useful?<br /><br />Sam</div>
+              </div>
+              <p class="oc-tpl__warn"><span aria-hidden="true">!</span>A lead missing a variable is skipped with a note. Nothing goes out half-filled.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== 03 CATCH ============================== -->
+    <section class="oc-sec oc-step oc-catch">
+      <div class="oc-wrap oc-step__grid oc-step__grid--flip">
+        <div class="oc-step__copy">
+          <p class="oc-step__n">03 · Catch</p>
+          <h2 class="oc-h2">Every reply, in one inbox.</h2>
+          <p class="oc-p">The engine reads every mailbox each minute. A real reply stops the sequence and lands in the Unibox as New reply. An out-of-office is logged and the sequence carries on. A bounce goes straight to do-not-contact.</p>
+          <ul class="oc-legend" aria-label="What the app does with each answer">
+            <li><span class="oc-pill oc-pill--new">New reply</span>sequence stops</li>
+            <li><span class="oc-pill oc-pill--ooo">Out of office</span>sequence carries on</li>
+            <li><span class="oc-pill oc-pill--dnc">Bounced</span>do-not-contact</li>
+          </ul>
+        </div>
+        <div class="oc-unibox" id="oc-unibox" aria-label="The Unibox, recreated with demo data">
+          <div class="oc-unibox__list">
+            <div class="oc-unibox__head"><b>All replies</b><span class="oc-badge" data-badge>3</span></div>
+            <div class="oc-ub is-on">
+              <span class="oc-ava" style="--h:248">DW</span>
+              <div><b>Dana Whitfield <i>2m</i></b><span>Sounds interesting, can you send times?</span></div>
+              <span class="oc-pill oc-pill--new">New reply</span>
+            </div>
+            <div class="oc-ub">
+              <span class="oc-ava" style="--h:200">KM</span>
+              <div><b>Kenji Mori <i>14m</i></b><span>Automatic reply: I’m away until Monday</span></div>
+              <span class="oc-pill oc-pill--ooo">Out of office</span>
+            </div>
+            <div class="oc-ub">
+              <span class="oc-ava" style="--h:300">JP</span>
+              <div><b>Jonah Price <i>38m</i></b><span>Happy to see a demo, what’s next?</span></div>
+              <span class="oc-pill oc-pill--int">Interested</span>
+            </div>
+            <div class="oc-ub">
+              <span class="oc-ava" style="--h:160">LO</span>
+              <div><b>Luis Ortega <i>1h</i></b><span>What does this cost for a team of 5?</span></div>
+              <span class="oc-pill oc-pill--q">Asked a question</span>
+            </div>
+          </div>
+          <div class="oc-unibox__conv">
+            <div class="oc-conv__mine"><small>You · Step 1 · Mon 09:14</small><b>Quick question, Dana</b><span>Hi Dana, I came across Northwind and loved what…</span></div>
+            <div class="oc-conv__mine"><small>You · Step 2 · Wed 10:02</small><b>Re: Quick question, Dana</b><span>Just bumping this in case it got buried…</span></div>
+            <div class="oc-conv__theirs"><small>Dana Whitfield · Wed 11:37</small><p>Sounds interesting, can you send a couple of times for next week?</p><div class="oc-conv__acts"><span class="oc-key">Set status ▾</span><span class="oc-key">Reply in Outlook ↗</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== 04 CLOSE ============================== -->
+    <section class="oc-sec oc-step oc-close">
+      <div class="oc-wrap">
+        <div class="oc-step__copy oc-step__copy--wide">
+          <p class="oc-step__n">04 · Close</p>
+          <h2 class="oc-h2">A pipeline the team moves by hand.</h2>
+          <p class="oc-p">Everyone who replied sits on a drag-and-drop board, with search, filters and a detail panel for each lead. The app only ever sets New reply. Every other status is a person’s call.</p>
+        </div>
+        <div class="oc-board" id="oc-board" aria-label="The pipeline, recreated with demo data">
+          <div class="oc-col" data-col="new"><p><i style="--d:var(--c-new)"></i>New reply<em>2</em></p>
+            <div class="oc-card oc-card--drag" id="oc-drag"><span class="oc-ava" style="--h:248">DW</span><div><b>Dana Whitfield</b><small>Northwind</small></div></div>
+            <div class="oc-card"><span class="oc-ava" style="--h:120">SR</span><div><b>Sofia Rossi</b><small>Atlas Events</small></div></div>
+          </div>
+          <div class="oc-col" data-col="q"><p><i style="--d:var(--c-q)"></i>Asked a question<em>1</em></p>
+            <div class="oc-card"><span class="oc-ava" style="--h:160">LO</span><div><b>Luis Ortega</b><small>Acme Studio</small></div></div>
+          </div>
+          <div class="oc-col" data-col="int"><p><i style="--d:var(--c-int)"></i>Interested<em>1</em></p>
+            <div class="oc-drop" aria-hidden="true"></div>
+            <div class="oc-card"><span class="oc-ava" style="--h:300">JP</span><div><b>Jonah Price</b><small>Copperline</small></div></div>
+          </div>
+          <div class="oc-col oc-col--hide-s" data-col="call"><p><i style="--d:var(--c-new)"></i>Ready for a call<em>1</em></p>
+            <div class="oc-card"><span class="oc-ava" style="--h:30">TB</span><div><b>Tom Becker</b><small>Bluebird Labs</small></div></div>
+          </div>
+          <div class="oc-col oc-col--hide-m" data-col="fu"><p><i style="--d:var(--c-fu)"></i>Needs follow-up<em>0</em></p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== HOW ============================== -->
+    <section class="oc-sec oc-how">
+      <div class="oc-wrap">
+        <div class="oc-how__grid">
+          <div class="oc-how__copy">
+            <p class="oc-kicker">How I built it</p>
+            <h2 class="oc-h2">The schedule lives in the database.</h2>
+            <p class="oc-p">A schedule inside Supabase (pg_cron) runs the engine every minute, so nothing depends on someone keeping a laptop open. Mailbox credentials sit in an encrypted vault, and row-level security decides who sees what. About ten days from scope to a working app.</p>
+          </div>
+          <div class="oc-loop" aria-label="What happens every minute">
+            <div class="oc-loop__ring" aria-hidden="true"><i class="oc-loop__hand"></i></div>
+            <div class="oc-loop__center"><b>Every</b><b>minute</b></div>
+            <span class="oc-loop__step oc-loop__step--1"><em>1</em>Verify new addresses</span>
+            <span class="oc-loop__step oc-loop__step--2"><em>2</em>Read every inbox</span>
+            <span class="oc-loop__step oc-loop__step--3"><em>3</em>One careful send round</span>
+          </div>
+        </div>
+
+        <div class="oc-how__grid2">
+          <ol class="oc-dec">
+            {decisions.map((d) => (
+              <li><b>{d.t}</b><span>{d.b}</span></li>
+            ))}
+          </ol>
+          <div class="oc-term" id="oc-term" aria-label="The engine’s test suite">
+            <div class="oc-term__bar" aria-hidden="true"><i></i><i></i><i></i><span>npm run test</span></div>
+            <div class="oc-term__body">
+              <p class="oc-term__cmd"><span>$</span> vitest run</p>
+              <ul class="oc-term__lines">
+                {tests.map((t, i) => <li class={i > 6 ? 'is-later' : ''}><span>✓</span>{t}</li>)}
+              </ul>
+              <p class="oc-term__sum"><span>Tests</span><b><em id="oc-pass">130</em> passed</b> (130)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="oc-how__foot">
+          <ul class="oc-stack" aria-label="Stack">
+            <li>Next.js 16</li><li>React 19</li><li>Tailwind 4</li><li>Supabase</li><li>Postgres + RLS</li><li>Vault</li><li>pg_cron</li><li>Microsoft Graph</li><li>Vercel</li><li>Vitest</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== HANDOVER ============================== -->
+    <section class="oc-out">
+      <div class="oc-wrap oc-out__inner">
+        <p class="oc-kicker">Where it is now</p>
+        <p class="oc-out__t">Handover.</p>
+        <p class="oc-p">The app is being handed over through Matteo, with a step-by-step Microsoft 365 setup guide and a plain-English running-costs sheet. Zero spreadsheets left.</p>
+      </div>
+    </section>
+  </div>
+
+  <CaseNext current="outreach-crm" />
+</Base>
+
+<style>
+  .oc {
+    --bg: #f7f5f3; --app: #f9f9f9; --surface: #fff; --tray: #f2f2f2; --field: #f4f4f4; --line: #e9e9e9; --line-2: #dedede;
+    --ink: #1f1b18; --ink-2: #6e6660; --ink-3: #9b958f; --acc: #5b5bf6; --acc-2: #4545e0; --acc-tint: rgba(91, 91, 246, 0.08);
+    --c-new: #5b5bf6; --c-q: #d9970f; --c-int: #10a37f; --c-fu: #8b5cf6; --c-stop: #a0a0a0; --c-live: #22c55e;
+    --raise: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(18, 18, 18, 0.03), 0 1px 1px rgba(18, 18, 18, 0.04), 0 2px 5px rgba(18, 18, 18, 0.03), 0 14px 30px -14px rgba(18, 18, 18, 0.1);
+    --key: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(18, 18, 18, 0.05), 0 1px 1px rgba(18, 18, 18, 0.05), 0 2px 5px rgba(18, 18, 18, 0.04);
+    --well: inset 0 1px 3px rgba(18, 18, 18, 0.07), inset 0 0 0 1px rgba(18, 18, 18, 0.02), 0 1px 0 rgba(255, 255, 255, 0.6);
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: var(--bg); overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+  }
+  :global(body) { background: #f7f5f3; }
+  :global(body[data-nav='light'] #scroll-progress) { background: #5b5bf6; }
+  .oc-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; position: relative; }
+
+  .oc-kicker, .oc-step__n { font: 600 13px/1 var(--mono); letter-spacing: 0.02em; color: var(--acc); margin-bottom: 18px; text-transform: uppercase; }
+  .oc-h2 { font-size: clamp(34px, 4.8vw, 60px); line-height: 1.03; letter-spacing: -0.04em; font-weight: 650; max-width: 760px; }
+  .oc-p { margin-top: 18px; font-size: 18px; line-height: 1.62; color: var(--ink-2); max-width: 560px; letter-spacing: -0.01em; }
+  .oc-sec { padding: clamp(88px, 11vw, 150px) 0; }
+  .oc-sectt { font-size: 12.5px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 10px; display: flex; justify-content: space-between; gap: 10px; }
+
+  /* shared atoms */
+  .oc-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--c-live); flex: none; display: inline-block; }
+  .oc-pulse::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--c-live); opacity: 0; animation: oc-ping 1.8s ease-out infinite; }
+  @keyframes oc-ping { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+  .oc-ava { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: hsl(var(--h) 45% 32%); background: hsl(var(--h) 70% 92%); box-shadow: inset 0 0 0 1px hsl(var(--h) 40% 80%); }
+  .oc-pill {
+    --d: var(--c-stop); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 600; letter-spacing: -0.01em;
+    padding: 5px 10px 5px 8px; border-radius: 999px; background: var(--surface); color: var(--ink); box-shadow: var(--key); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .oc-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--d) 16%, transparent); }
+  .oc-pill--new { --d: var(--c-new); }
+  .oc-pill--q { --d: var(--c-q); }
+  .oc-pill--int { --d: var(--c-int); }
+  .oc-pill--call { --d: var(--c-new); }
+  .oc-pill--call::before { display: none; }
+  .oc-pill--ooo { --d: #b9b4ae; }
+  .oc-pill--dnc { --d: #e5484d; }
+  .oc-badge { font-style: normal; display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; font-size: 10.5px; font-weight: 700; color: #fff; background: linear-gradient(180deg, #7272ff, var(--acc)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 1px 2px rgba(91, 91, 246, 0.4); }
+  .oc-key { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 7px 11px; border-radius: 999px; background: linear-gradient(180deg, #fff, #f7f7f7); box-shadow: var(--key); }
+
+  /* ------------------------------------------------------------------ hero */
+  .oc-hero { position: relative; padding: 116px 0 40px; overflow: hidden; }
+  .oc-hero::before { content: ''; position: absolute; left: 50%; top: 340px; width: 1200px; height: 700px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(91, 91, 246, 0.14), transparent); pointer-events: none; }
+  .oc-hero__top { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .oc-chips { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 30px; }
+  .oc-chips li { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; padding: 7px 13px; border-radius: 999px; background: var(--surface); box-shadow: var(--key); color: var(--ink-2); }
+  .oc-chips__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); }
+  .oc-chips__status { color: var(--ink) !important; font-weight: 600 !important; }
+  .oc-h1 { font-size: clamp(44px, 7.2vw, 96px); line-height: 0.98; letter-spacing: -0.05em; font-weight: 700; max-width: 1000px; }
+  .oc-h1 span { color: var(--acc); }
+  .oc-lede { margin-top: 24px; font-size: 19px; line-height: 1.6; color: var(--ink-2); max-width: 640px; letter-spacing: -0.012em; }
+
+  .oc-app { position: relative; margin-top: 64px; border-radius: 18px; background: var(--app); overflow: hidden; box-shadow: 0 0 0 1px rgba(18, 18, 18, 0.07), 0 30px 80px -30px rgba(31, 27, 24, 0.35), 0 12px 24px -12px rgba(31, 27, 24, 0.12); }
+  .oc-app__chrome { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: #fbfbfb; }
+  .oc-app__lights { display: flex; gap: 6px; }
+  .oc-app__lights i { width: 11px; height: 11px; border-radius: 50%; background: #e2e2e2; }
+  .oc-app__path { flex: 1; font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-app__path em { font-style: normal; margin: 0 4px; color: #cfcfcf; }
+  .oc-app__path b { color: var(--ink); font-weight: 600; }
+  .oc-app__search { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-3); padding: 7px 10px; border-radius: 999px; background: var(--field); box-shadow: var(--well); }
+  .oc-app__search kbd { font: 500 11px/1 var(--mono); color: var(--ink-3); }
+  .oc-app__body { display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: 520px; }
+  .oc-side { background: var(--tray); border-right: 1px solid var(--line); padding: 16px 12px; display: flex; flex-direction: column; }
+  .oc-side__brand { display: flex; align-items: center; gap: 9px; padding: 4px 8px 18px; font-size: 14px; }
+  .oc-logo { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(135deg, #7b7bff, #4545e0); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 6px rgba(91, 91, 246, 0.35); }
+  .oc-side__nav { display: flex; flex-direction: column; gap: 3px; }
+  .oc-side__nav span, .oc-side__foot span { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; font-size: 13.5px; color: var(--ink-2); font-weight: 500; }
+  .oc-side__nav svg, .oc-side__foot svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .oc-side__nav span.is-on { background: var(--surface); color: var(--ink); box-shadow: var(--key); }
+  .oc-side__nav .oc-badge { margin-left: auto; }
+  .oc-side__foot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 8px; }
+  .oc-main { padding: 22px 26px 26px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .oc-camp { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+  .oc-camp__name { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+  .oc-camp__meta { margin-top: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-3); }
+  .oc-tag { font-size: 11.5px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--surface); color: var(--ink); box-shadow: var(--key); }
+  .oc-live { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 12px; background: var(--surface); box-shadow: var(--raise); }
+  .oc-live b { display: block; font-size: 13px; font-weight: 600; }
+  .oc-live small { font-size: 11.5px; color: var(--ink-3); font-family: var(--mono); }
+  .oc-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .oc-tile { padding: 14px 16px; border-radius: 14px; background: linear-gradient(180deg, #fff, #fdfdfd); box-shadow: var(--raise); display: flex; flex-direction: column; gap: 4px; }
+  .oc-tile span { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+  .oc-tile b { font-size: 30px; font-weight: 650; letter-spacing: -0.04em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .oc-tile small { font-size: 11.5px; color: var(--ink-3); }
+  .oc-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 26px; }
+  .oc-gauge { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .oc-gauge > div { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13px; margin-bottom: 8px; }
+  .oc-gauge b { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-size: 11px; background: var(--surface); box-shadow: var(--key); }
+  .oc-gauge span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-gauge em { font: 500 12px/1 var(--mono); font-style: normal; color: var(--ink-3); }
+  .oc-gauge i { display: block; height: 7px; border-radius: 99px; background: var(--field); box-shadow: var(--well); overflow: hidden; position: relative; }
+  .oc-gauge s { display: block; height: 100%; width: var(--w); border-radius: inherit; background: #262626; transform-origin: 0 50%; position: relative; overflow: hidden; }
+  .oc-gauge.is-live s::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent); animation: oc-scan 1.6s linear infinite; }
+  @keyframes oc-scan { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+  .oc-feed__list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .oc-feed__list li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface); box-shadow: var(--raise); }
+  .oc-feed__list b { display: block; font-size: 13px; font-weight: 600; }
+  .oc-feed__list span:not(.oc-pill):not(.oc-ava) { display: block; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-demo { margin-top: 14px; text-align: center; font-size: 13px; color: var(--ink-3); }
+  .oc-stage { position: relative; }
+  .oc-sat { position: absolute; z-index: 3; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 1px rgba(18, 18, 18, 0.06), 0 20px 40px -18px rgba(31, 27, 24, 0.35); }
+  .oc-sat b { display: block; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+  .oc-sat span:not(.oc-ava):not(.oc-pulse) { display: block; font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+  .oc-sat--toast { bottom: -24px; right: 40px; }
+  .oc-sat--box { top: 380px; left: -44px; flex-wrap: wrap; width: 230px; }
+  .oc-sat__gauge { flex-basis: 100%; height: 6px; border-radius: 99px; background: var(--field); box-shadow: var(--well); overflow: hidden; }
+  .oc-sat__gauge s { display: block; width: 52%; height: 100%; border-radius: inherit; background: #262626; }
+  @media (max-width: 1259px) { .oc-sat { display: none; } }
+
+  .oc-partner { margin: 48px auto 0; max-width: 720px; display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: 18px; background: var(--surface); box-shadow: var(--raise); }
+  .oc-partner__ava { width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff; background: linear-gradient(135deg, #2b2b2b, #555); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+  .oc-partner p { font-size: 15.5px; line-height: 1.55; color: var(--ink-2); }
+  .oc-partner b { color: var(--ink); }
+
+  /* ------------------------------------------------------------------ numbers */
+  .oc-nums { padding: 70px 0 30px; }
+  .oc-nums__row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .oc-num { padding: 26px 26px 24px; border-radius: 20px; background: linear-gradient(180deg, #fff, #fcfcfc); box-shadow: var(--raise); display: flex; flex-direction: column; gap: 8px; }
+  .oc-num b { font-size: clamp(44px, 5.4vw, 68px); font-weight: 700; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .oc-num:first-child b { color: var(--acc); }
+  .oc-num span { font-size: 15px; color: var(--ink-2); line-height: 1.45; }
+
+  /* ------------------------------------------------------------------ problem */
+  .oc-problem__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .oc-swap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); align-items: center; gap: 10px; }
+  .oc-swap__arrow { color: var(--ink-3); width: 44px; }
+  .oc-sheet { border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px #dcdcdc, 0 18px 40px -24px rgba(0, 0, 0, 0.3); transform: rotate(-2deg); font-family: Calibri, Arial, sans-serif; }
+  .oc-sheet__bar { background: #1f7a45; color: #fff; font-size: 11.5px; padding: 7px 10px; font-family: Arial, sans-serif; }
+  .oc-sheet__grid { display: grid; grid-template-columns: 22px repeat(4, minmax(0, 1fr)); font-size: 11.5px; }
+  .oc-sheet__grid span { padding: 6px 6px; border-right: 1px solid #e3e3e3; border-bottom: 1px solid #e3e3e3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #222; min-height: 27px; }
+  .oc-sheet__grid .h { background: #f3f3f3; color: #777; text-align: center; font-size: 10.5px; }
+  .oc-sheet__grid .n { background: #f3f3f3; color: #777; text-align: center; font-size: 10.5px; padding: 6px 0; }
+  .oc-sheet__grid .b { font-weight: 700; }
+  .oc-sheet__grid .y { background: #fff2a8; }
+  .oc-sheet__grid .r { color: #c62828; background: #fde7e7; }
+  .oc-clean { border-radius: 16px; background: var(--app); padding: 10px; box-shadow: 0 0 0 1px rgba(18, 18, 18, 0.06), 0 24px 50px -28px rgba(31, 27, 24, 0.35); }
+  .oc-clean__head { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; color: var(--ink-3); padding: 4px 8px 8px; }
+  .oc-clean__row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 11px; background: var(--surface); box-shadow: var(--raise); }
+  .oc-clean__row + .oc-clean__row { margin-top: 6px; }
+  .oc-clean__row b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-clean__row small { display: block; font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ------------------------------------------------------------------ steps (shared) */
+  .oc-step__grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .oc-step__grid--flip { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.25fr); }
+  .oc-step__copy--wide { max-width: 760px; }
+  .oc-find, .oc-close { background: #fff; }
+
+  /* finder */
+  .oc-finder { display: grid; grid-template-columns: 200px minmax(0, 1fr); border-radius: 18px; overflow: hidden; background: var(--app); box-shadow: 0 0 0 1px rgba(18, 18, 18, 0.07), 0 30px 70px -36px rgba(31, 27, 24, 0.35); }
+  .oc-finder__rail { padding: 18px 16px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+  .oc-finder__rail .oc-sectt { margin: 12px 0 6px; }
+  .oc-finder__rail .oc-sectt:first-child { margin-top: 0; }
+  .oc-chipset { display: flex; flex-wrap: wrap; gap: 6px; }
+  .oc-chipset span { font-size: 12px; padding: 6px 10px; border-radius: 999px; color: var(--ink-2); background: var(--field); box-shadow: var(--well); }
+  .oc-chipset span.is-on { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--key); }
+  .oc-field { display: flex; justify-content: space-between; font-size: 12.5px; padding: 8px 12px; border-radius: 999px; background: var(--surface); box-shadow: var(--key); color: var(--ink-2); }
+  .oc-field i { font-style: normal; color: var(--ink-3); }
+  .oc-go { margin-top: 16px; text-align: center; font-size: 13px; font-weight: 600; color: #fff; padding: 10px; border-radius: 999px; background: linear-gradient(135deg, #7272ff, #4545e0); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 18px -8px rgba(91, 91, 246, 0.6); }
+  .oc-finder__save { display: flex; gap: 6px; margin-top: 8px; }
+  .oc-finder__save span { flex: 1; text-align: center; font-size: 11.5px; padding: 7px 0; border-radius: 999px; background: var(--surface); box-shadow: var(--key); color: var(--ink-2); }
+  .oc-finder__view { padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .oc-search__top { display: flex; justify-content: space-between; font-size: 13px; }
+  .oc-search__top span { color: var(--ink-3); font-size: 12.5px; }
+  .oc-search__bar { position: relative; height: 8px; border-radius: 99px; background: var(--field); box-shadow: var(--well); overflow: hidden; margin: 8px 0; }
+  .oc-search__bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 86%; border-radius: inherit; background: #262626; transform-origin: 0 50%; }
+  .oc-search__bar s { position: absolute; top: 0; bottom: 0; width: 26%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent); animation: oc-scan 1.4s linear infinite; }
+  .oc-search__meta { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--ink-2); }
+  .oc-search__meta span:last-child { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+  .oc-log { list-style: none; margin-top: 10px; font: 400 11.5px/1.75 var(--mono); color: var(--ink-3); position: relative; -webkit-mask: linear-gradient(180deg, transparent, #000 40%); mask: linear-gradient(180deg, transparent, #000 40%); }
+  .oc-log li.is-new { color: var(--ink-2); }
+  .oc-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .oc-table th { text-align: left; font-size: 11.5px; font-weight: 600; color: var(--ink-3); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  .oc-table td { padding: 8px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .oc-table td b { display: block; font-weight: 600; font-size: 12.5px; }
+  .oc-table td small { color: var(--ink-3); font-size: 11.5px; }
+  .oc-check { display: inline-block; width: 16px; height: 16px; border-radius: 5px; background: var(--field); box-shadow: var(--well); position: relative; vertical-align: middle; }
+  .oc-check.is-on { background: #262626; box-shadow: none; }
+  .oc-check.is-on::after { content: ''; position: absolute; left: 5px; top: 2px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .oc-ver { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; padding: 4px 8px; border-radius: 999px; background: var(--surface); box-shadow: var(--key); }
+  .oc-ver::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--c-int); }
+  .oc-ver--catchall::before { background: var(--c-q); }
+  .oc-ver--invalid { color: var(--ink-3); text-decoration: line-through; }
+  .oc-ver--invalid::before { background: #e5484d; }
+
+  /* send: flow */
+  .oc-flow { margin-top: 56px; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 28px; align-items: center; padding: 30px; border-radius: 22px; background: #fff; box-shadow: var(--raise); }
+  .oc-flow__list { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 150px; border-radius: 16px; background: var(--tray); box-shadow: var(--well); text-align: center; }
+  .oc-flow__list b { font-size: 34px; font-weight: 700; letter-spacing: -0.04em; }
+  .oc-flow__list span { font-size: 12.5px; color: var(--ink-3); }
+  .oc-flow__track { position: relative; height: 230px; }
+  .oc-flow__line { position: absolute; left: 0; right: 0; top: 150px; height: 3px; border-radius: 3px; background: var(--line-2); }
+  .oc-flow__line i { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, var(--acc), #8b8bff); transform-origin: 0 50%; }
+  .oc-flow__step { position: absolute; top: 0; left: calc(var(--x) * 37%); width: 26%; display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .oc-flow__node { order: 2; position: absolute; top: 138px; width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(180deg, #7272ff, var(--acc)); box-shadow: 0 0 0 5px #fff, 0 4px 10px rgba(91, 91, 246, 0.35); z-index: 2; }
+  .oc-mailcard { width: 100%; padding: 12px 14px; border-radius: 14px; background: var(--app); box-shadow: var(--raise); text-align: left; }
+  .oc-mailcard small { display: block; font: 500 11px/1.3 var(--mono); color: var(--ink-3); margin-bottom: 5px; }
+  .oc-mailcard b { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-flow__lane { position: absolute; right: 0; top: 196px; }
+  .oc-flow__dots { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .oc-flow__step { z-index: 2; }
+  .oc-dot { position: absolute; left: -4%; top: 145px; width: 13px; height: 13px; border-radius: 50%; background: hsl(var(--h) 70% 60%); box-shadow: 0 0 0 3px #fff, 0 2px 6px rgba(0, 0, 0, 0.18); opacity: 0; }
+
+  .oc-send__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+  .oc-ramp, .oc-tpl { border-radius: 22px; background: #fff; box-shadow: var(--raise); padding: 24px; }
+  .oc-ramp__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .oc-ramp__head .oc-sectt { margin: 0; }
+  .oc-switch { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); }
+  .oc-switch i { width: 30px; height: 18px; border-radius: 99px; background: #262626; position: relative; }
+  .oc-switch i::after { content: ''; position: absolute; right: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+  .oc-ramp__nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 18px 0 8px; padding: 14px; border-radius: 16px; background: var(--tray); box-shadow: var(--well); }
+  .oc-ramp__nums div { text-align: center; }
+  .oc-ramp__nums b { display: block; font: 600 24px/1 var(--mono); letter-spacing: -0.04em; }
+  .oc-ramp__nums span { font-size: 11.5px; color: var(--ink-3); }
+  .oc-ramp__chart { position: relative; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 5px; align-items: end; height: 190px; padding-top: 26px; margin-top: 10px; }
+  .oc-ramp__cap { position: absolute; left: 0; right: 0; top: 26px; border-top: 1.5px dashed var(--line-2); }
+  .oc-ramp__cap em { position: absolute; right: 0; top: -20px; font: 500 11px/1 var(--mono); font-style: normal; color: var(--ink-3); }
+  .oc-ramp__col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+  .oc-ramp__v { font: 500 10px/1 var(--mono); color: var(--ink-3); }
+  .oc-ramp__bar { width: 100%; height: calc(var(--v) / 50 * 132px); border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, #8b8bff, var(--acc)); transform-origin: 50% 100%; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+  .oc-ramp__col.is-flat .oc-ramp__bar { background: linear-gradient(180deg, #c9c9ff, #a7a7f9); }
+  .oc-ramp__d { font: 500 10px/1 var(--mono); color: var(--ink-3); }
+  .oc-ramp__foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+
+  .oc-tpl { display: flex; flex-direction: column; gap: 16px; }
+  .oc-tpl__editor { padding: 14px; border-radius: 14px; background: var(--field); box-shadow: var(--well); }
+  .oc-tpl__subj { font-size: 13.5px; font-weight: 600; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .oc-tpl__body, .oc-tpl__sig { font-size: 13px; line-height: 1.6; color: var(--ink-2); }
+  .oc-tpl__sig { margin-top: 8px; }
+  .oc-tpl code { font: 500 11.5px/1 var(--mono); color: var(--acc-2); background: var(--acc-tint); padding: 3px 6px; border-radius: 6px; white-space: nowrap; }
+  .oc-tpl__preview .oc-sectt span { font-weight: 500; color: var(--ink-3); }
+  .oc-sheet2 { border-radius: 14px; background: var(--app); box-shadow: var(--raise); padding: 12px 14px; font-size: 13px; }
+  .oc-sheet2 > p { display: grid; grid-template-columns: 62px minmax(0, 1fr); padding: 6px 0; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-sheet2 > p > span:first-child { color: var(--ink-3); font-size: 12px; }
+  .oc-sheet2 > p > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-sheet2 em { font-style: normal; background: var(--acc-tint); color: var(--acc-2); border-radius: 4px; padding: 0 3px; transition: background 0.3s; }
+  .oc-sheet2__body { padding-top: 10px; line-height: 1.6; color: var(--ink-2); }
+  .oc-tpl__warn { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
+  .oc-tpl__warn span { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #8a5a00; background: #ffe7a8; }
+
+  /* catch: unibox */
+  .oc-legend { list-style: none; margin-top: 26px; display: flex; flex-direction: column; gap: 10px; }
+  .oc-legend li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--ink-2); }
+  .oc-unibox { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; padding: 18px; border-radius: 22px; background: var(--app); box-shadow: 0 0 0 1px rgba(18, 18, 18, 0.06), 0 30px 70px -36px rgba(31, 27, 24, 0.35); }
+  .oc-unibox__head { display: flex; align-items: center; gap: 8px; font-size: 13.5px; padding: 2px 4px 10px; }
+  .oc-unibox__list { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .oc-ub { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 11px 12px; border-radius: 13px; }
+  .oc-ub.is-on { background: var(--surface); box-shadow: var(--raise); }
+  .oc-ub b { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
+  .oc-ub b i { font-style: normal; font-weight: 400; color: var(--ink-3); font-size: 11.5px; }
+  .oc-ub > div span { display: block; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-ub .oc-pill { grid-column: 2; justify-self: start; margin-top: 6px; }
+  .oc-unibox__conv { border-radius: 16px; background: var(--tray); box-shadow: var(--well); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .oc-conv__mine { padding: 10px 12px; border-radius: 12px; background: var(--field); box-shadow: var(--well); }
+  .oc-conv__mine small, .oc-conv__theirs small { display: block; font: 500 10.5px/1.3 var(--mono); color: var(--ink-3); margin-bottom: 4px; }
+  .oc-conv__mine b { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+  .oc-conv__mine span { display: block; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-conv__theirs { padding: 14px; border-radius: 14px; background: #fff; box-shadow: var(--raise); }
+  .oc-conv__theirs p { font-size: 13.5px; line-height: 1.55; }
+  .oc-conv__acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+  /* close: pipeline */
+  .oc-board { margin-top: 56px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; position: relative; }
+  .oc-col { min-height: 300px; border-radius: 18px 18px 0 0; padding: 12px; background: linear-gradient(180deg, var(--tray), rgba(242, 242, 242, 0)); box-shadow: inset 0 1px 3px rgba(18, 18, 18, 0.05); }
+  .oc-col > p { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; padding: 4px 4px 12px; }
+  .oc-col > p i { width: 7px; height: 7px; border-radius: 50%; background: var(--d); flex: none; }
+  .oc-col > p em { margin-left: auto; font-style: normal; font-weight: 500; color: var(--ink-3); display: inline-block; }
+  .oc-card { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 13px; background: #fff; box-shadow: var(--raise); position: relative; z-index: 2; }
+  .oc-card + .oc-card { margin-top: 8px; }
+  .oc-card b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oc-card small { font-size: 11.5px; color: var(--ink-3); }
+  .oc-card > div { min-width: 0; }
+  .oc-drop { height: 0; border-radius: 13px; background: rgba(18, 18, 18, 0.035); box-shadow: inset 0 1px 3px rgba(18, 18, 18, 0.1), inset 0 0 0 1px rgba(18, 18, 18, 0.03); opacity: 0; }
+  .oc-card--drag { z-index: 20; }
+  .oc-card--drag.is-lifted { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 22px 40px -14px rgba(31, 27, 24, 0.35); }
+
+  /* how */
+  .oc-how { background: #fff; }
+  .oc-how__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .oc-loop { position: relative; width: min(100%, 420px); aspect-ratio: 1; justify-self: center; }
+  .oc-loop__ring { position: absolute; inset: 14%; border-radius: 50%; border: 1.5px dashed var(--line-2); }
+  .oc-loop__hand { position: absolute; left: 50%; top: 50%; width: 50%; height: 2px; transform-origin: 0 50%; background: linear-gradient(90deg, transparent, var(--acc)); animation: oc-spin 6s linear infinite; }
+  .oc-loop__hand::after { content: ''; position: absolute; right: -6px; top: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 6px rgba(91, 91, 246, 0.15); }
+  @keyframes oc-spin { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
+  .oc-loop__center { position: absolute; inset: 36%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; box-shadow: var(--raise); }
+  .oc-loop__center b { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  .oc-loop__center b:last-child { color: var(--acc); }
+  .oc-loop__step { position: absolute; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; padding: 8px 12px 8px 8px; border-radius: 999px; background: #fff; box-shadow: var(--raise); white-space: nowrap; }
+  .oc-loop__step em { font-style: normal; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; color: #fff; background: #262626; }
+  .oc-loop__step--1 { left: 50%; top: 9%; transform: translateX(-50%); }
+  .oc-loop__step--2 { right: -2%; bottom: 20%; }
+  .oc-loop__step--3 { left: -2%; bottom: 20%; }
+
+  .oc-how__grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 60px); margin-top: 70px; align-items: start; }
+  .oc-dec { list-style: none; display: flex; flex-direction: column; gap: 22px; counter-reset: dec; }
+  .oc-dec li { counter-increment: dec; position: relative; padding-left: 44px; }
+  .oc-dec li::before { content: counter(dec); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; font: 600 12px/1 var(--mono); background: var(--surface); box-shadow: var(--key); color: var(--acc); }
+  .oc-dec b { display: block; font-size: 17px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.35; }
+  .oc-dec span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+  .oc-term { border-radius: 16px; overflow: hidden; background: #111214; box-shadow: 0 30px 70px -30px rgba(17, 18, 20, 0.6); color: #d7d7d7; }
+  .oc-term__bar { display: flex; align-items: center; gap: 6px; padding: 11px 14px; background: #1b1c1f; border-bottom: 1px solid #26272b; }
+  .oc-term__bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3b40; }
+  .oc-term__bar span { margin-left: 10px; font: 500 12px/1 var(--mono); color: #8a8b90; }
+  .oc-term__body { padding: 16px 18px 18px; font: 400 12.5px/1.75 var(--mono); }
+  .oc-term__cmd { color: #e8e8e8; }
+  .oc-term__cmd span { color: #8b8bff; margin-right: 6px; }
+  .oc-term__lines { list-style: none; margin-top: 8px; }
+  .oc-term__lines li { display: grid; grid-template-columns: 20px minmax(0, 1fr); color: #b9bac0; }
+  .oc-term__lines li span { color: #4ade80; }
+  .oc-term__sum { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #2c2d31; color: #8a8b90; }
+  .oc-term__sum span { display: inline-block; width: 70px; }
+  .oc-term__sum b { color: #4ade80; font-weight: 600; }
+  .oc-term__sum em { font-style: normal; font-variant-numeric: tabular-nums; }
+  .oc-how__foot { margin-top: 56px; padding-top: 26px; border-top: 1px solid var(--line); }
+  .oc-stack { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .oc-stack li { font-size: 13px; font-weight: 500; padding: 8px 13px; border-radius: 999px; background: var(--surface); box-shadow: var(--key); color: var(--ink-2); }
+
+  /* handover */
+  .oc-out { padding: clamp(90px, 11vw, 150px) 0; text-align: center; background: radial-gradient(70% 80% at 50% 100%, rgba(91, 91, 246, 0.12), transparent 70%), var(--bg); }
+  .oc-out__inner { display: flex; flex-direction: column; align-items: center; }
+  .oc-out__t { font-size: clamp(60px, 11vw, 150px); font-weight: 700; letter-spacing: -0.06em; line-height: 0.95; }
+  .oc-out .oc-p { margin-left: auto; margin-right: auto; text-align: center; }
+
+  /* ------------------------------------------------------------------ responsive */
+  @media (max-width: 1023px) {
+    .oc-app__body { grid-template-columns: 64px minmax(0, 1fr); }
+    .oc-side__brand b, .oc-side__nav span, .oc-side__foot span { font-size: 0; gap: 0; justify-content: center; }
+    .oc-side__nav .oc-badge { display: none; }
+    .oc-problem__grid, .oc-step__grid, .oc-step__grid--flip, .oc-how__grid, .oc-how__grid2, .oc-send__grid { grid-template-columns: minmax(0, 1fr); }
+    .oc-step__grid--flip .oc-step__copy { order: -1; }
+    .oc-board { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .oc-col--hide-m { display: none; }
+    .oc-flow { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+    .oc-flow__list { height: auto; flex-direction: row; padding: 12px; gap: 10px; }
+    .oc-flow__list b { font-size: 26px; }
+    .oc-flow__track { height: 420px; }
+    .oc-flow__line { left: 22px; right: auto; top: 6px; bottom: 60px; width: 3px; height: auto; }
+    .oc-flow__line i { transform-origin: 50% 0; }
+    .oc-flow__step { left: 0; right: 0; width: auto; top: calc(var(--x) * 118px); flex-direction: row; padding-left: 52px; }
+    .oc-flow__node { top: 14px; left: 9px; }
+    .oc-flow__lane { right: auto; left: 52px; top: auto; bottom: 8px; }
+    .oc-dot { left: 17px; top: -10px; }
+    .oc-flow__step .oc-mailcard { max-width: 420px; }
+    .oc-sat { display: none; }
+  }
+  @media (max-width: 767px) {
+    .oc-wrap { padding: 0 20px; }
+    .oc-hero { padding: 96px 0 24px; }
+    .oc-h1 { font-size: clamp(40px, 11.5vw, 52px); }
+    .oc-lede { font-size: 17px; }
+    .oc-app { margin-top: 40px; border-radius: 16px; }
+    .oc-app__chrome { padding: 10px 12px; }
+    .oc-app__search { display: none; }
+    .oc-app__body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+    .oc-side { display: none; }
+    .oc-main { padding: 16px; gap: 14px; }
+    .oc-live { width: 100%; }
+    .oc-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .oc-tile { padding: 12px; }
+    .oc-tile b { font-size: 24px; }
+    .oc-tile small { display: none; }
+    .oc-tile--hide-s { display: none; }
+    .oc-cols { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .oc-partner { align-items: flex-start; }
+    .oc-nums { padding-top: 50px; }
+    .oc-nums__row { grid-template-columns: minmax(0, 1fr); }
+    .oc-swap { grid-template-columns: minmax(0, 1fr); }
+    .oc-swap__arrow { transform: rotate(90deg); justify-self: center; }
+    .oc-finder { grid-template-columns: minmax(0, 1fr); }
+    .oc-finder__rail { display: none; }
+    .oc-hide-s { display: none; }
+    .oc-ramp, .oc-tpl { padding: 18px; }
+    .oc-ramp__chart { gap: 3px; height: 170px; }
+    .oc-ramp__v { font-size: 8.5px; }
+    .oc-ramp__bar { height: calc(var(--v) / 50 * 112px); }
+    .oc-unibox { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+    .oc-board { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .oc-col--hide-s { display: none; }
+    .oc-col { padding: 8px; min-height: 240px; }
+    .oc-col > p { font-size: 11.5px; padding-bottom: 8px; }
+    .oc-card { padding: 9px; gap: 7px; flex-direction: column; align-items: flex-start; }
+    .oc-card .oc-ava { width: 26px; height: 26px; font-size: 10px; }
+    .oc-card b { font-size: 12px; white-space: normal; }
+    .oc-loop { width: min(100%, 330px); }
+    .oc-loop__step { font-size: 12px; }
+    .oc-loop__step--2 { right: -4%; bottom: 14%; }
+    .oc-loop__step--3 { left: -4%; bottom: 14%; }
+    .oc-term__body { font-size: 11px; padding: 14px; }
+    .oc-p { font-size: 17px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .oc-pulse::after, .oc-gauge.is-live s::after, .oc-search__bar s, .oc-loop__hand { animation: none; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* template preview: cycles through demo leads */
+    const people = [
+      { first: 'Dana', company: 'Northwind', email: 'dana@northwind.co' },
+      { first: 'Luis', company: 'Acme Studio', email: 'luis@acmestudio.com' },
+      { first: 'Priya', company: 'Fieldnote', email: 'priya@fieldnote.io' },
+    ];
+    const tpl = document.getElementById('oc-tpl');
+    const who = document.getElementById('oc-tpl-who');
+    if (tpl && who && !reduce) {
+      let k = 0;
+      let timer: number | undefined;
+      const fill = () => {
+        k = (k + 1) % people.length;
+        const pp = people[k];
+        tpl.querySelectorAll<HTMLElement>('[data-k]').forEach((el) => {
+          const key = el.dataset.k as 'first' | 'company' | 'email';
+          el.textContent = pp[key];
+          el.animate([{ backgroundColor: 'rgba(91,91,246,.32)' }, { backgroundColor: 'rgba(91,91,246,.08)' }], { duration: 700 });
+        });
+        who.textContent = `for ${pp.first} · ${pp.company}`;
+      };
+      new IntersectionObserver((es) => es.forEach((e) => {
+        window.clearInterval(timer);
+        if (e.isIntersecting) timer = window.setInterval(fill, 2400);
+      }), { threshold: 0.4 }).observe(tpl);
+    }
+
+    if (reduce) return;
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+      const mobile = window.innerWidth < 768;
+
+      /* hero */
+      gsap.timeline({ delay: 0.1 })
+        .from('.oc-chips li', { y: 12, autoAlpha: 0, duration: 0.5, stagger: 0.06, ease: 'power3.out' })
+        .from('.oc-h1', { y: 30, autoAlpha: 0, duration: 0.8, ease: 'power3.out' }, 0.1)
+        .from('.oc-lede', { y: 16, autoAlpha: 0, duration: 0.6, ease: 'power3.out' }, 0.3)
+        .from('.oc-app', { y: 60, autoAlpha: 0, scale: 0.97, duration: 1, ease: 'power3.out' }, 0.35)
+        .from('.oc-tile', { y: 16, autoAlpha: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out' }, 0.8)
+        .from('.oc-gauge s', { scaleX: 0, duration: 1, stagger: 0.12, ease: 'power3.out' }, 0.9);
+      gsap.from('.oc-sat--box', { x: -30, autoAlpha: 0, duration: 0.8, delay: 1.3, ease: 'power3.out' });
+      gsap.from('.oc-sat--toast', { y: 30, autoAlpha: 0, scale: 0.92, duration: 0.8, delay: 2.4, ease: 'back.out(1.8)' });
+      gsap.to('.oc-sat--toast', { y: -40, ease: 'none', scrollTrigger: { trigger: '.oc-stage', start: 'top 60%', end: 'bottom top', scrub: true } });
+      gsap.to('.oc-sat--box', { y: 30, ease: 'none', scrollTrigger: { trigger: '.oc-stage', start: 'top 60%', end: 'bottom top', scrub: true } });
+      document.querySelectorAll<HTMLElement>('[data-roll]').forEach((b) => {
+        const to = Number(b.dataset.roll);
+        const o = { v: 0 };
+        gsap.to(o, { v: to, duration: 1.6, delay: 0.9, ease: 'power3.out', onUpdate: () => { b.textContent = Math.round(o.v).toLocaleString('en-GB'); } });
+      });
+      // a new reply drops into the feed, then the badge ticks
+      const feed = document.getElementById('oc-feed');
+      if (feed) {
+        const first = feed.firstElementChild as HTMLElement | null;
+        if (first) {
+          gsap.from(first, { y: -26, autoAlpha: 0, filter: 'blur(6px)', duration: 0.7, delay: 2.1, ease: 'power3.out' });
+          gsap.from(first.querySelector('.oc-pill'), { scale: 0.6, autoAlpha: 0, duration: 0.5, delay: 2.6, ease: 'back.out(3)' });
+        }
+        gsap.from(feed.querySelectorAll('li:not(:first-child)'), { y: -26, duration: 0.7, delay: 2.1, ease: 'power3.out' });
+      }
+
+      /* numbers */
+      gsap.from('.oc-num', { y: 26, autoAlpha: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.oc-nums', start: 'top 85%' } });
+      const n130 = document.querySelector<HTMLElement>('.oc-num b[data-num="130"]');
+      if (n130) {
+        const o = { v: 0 };
+        ScrollTrigger.create({ trigger: n130, start: 'top 90%', once: true, onEnter: () => gsap.to(o, { v: 130, duration: 1.4, ease: 'power3.out', onUpdate: () => { n130.textContent = String(Math.round(o.v)); } }) });
+      }
+
+      /* section heads */
+      gsap.utils.toArray<HTMLElement>('.oc-h2').forEach((h) => gsap.from(h, { y: 30, autoAlpha: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: h, start: 'top 85%' } }));
+
+      /* problem: the sheet hands its rows to the app */
+      const swap = document.getElementById('oc-swap');
+      if (swap) {
+        const tl = gsap.timeline({ scrollTrigger: { trigger: swap, start: 'top 72%' } });
+        tl.from('.oc-sheet', { x: -30, rotate: -6, autoAlpha: 0, duration: 0.7, ease: 'power3.out' })
+          .from('.oc-swap__arrow', { autoAlpha: 0, x: -10, duration: 0.4 }, '-=0.2')
+          .from('.oc-clean__row', { x: mobile ? 0 : -60, y: mobile ? -30 : 0, autoAlpha: 0, scale: 0.92, duration: 0.55, stagger: 0.12, ease: 'power3.out' })
+          .from('.oc-clean__row .oc-pill', { scale: 0.5, autoAlpha: 0, duration: 0.4, stagger: 0.12, ease: 'back.out(3)' }, '-=0.6')
+          .to('.oc-sheet', { autoAlpha: 0.45, filter: 'grayscale(1)', duration: 0.6 }, '-=0.4');
+      }
+
+      /* find: live search */
+      const finder = document.getElementById('oc-finder');
+      if (finder) {
+        const found = document.getElementById('oc-found');
+        const left = document.getElementById('oc-left');
+        const tl = gsap.timeline({ scrollTrigger: { trigger: finder, start: 'top 75%' } });
+        const fo = { v: 0 };
+        tl.fromTo('#oc-sbar', { scaleX: 0.04 }, { scaleX: 1, duration: 2.6, ease: 'power1.inOut' })
+          .to(fo, { v: 29, duration: 2.6, ease: 'power1.inOut', onUpdate: () => { if (found) found.textContent = `${Math.round(fo.v)} found so far`; } }, 0)
+          .add(() => { if (left) left.textContent = 'About 1 min left'; }, 0)
+          .add(() => { if (left) left.textContent = 'Almost done'; }, 1.6)
+          .from('#oc-log li', { y: 12, autoAlpha: 0, filter: 'blur(6px)', duration: 0.5, stagger: 0.45, ease: 'power3.out' }, 0.1)
+          .from('.oc-table tbody tr', { y: 10, autoAlpha: 0, duration: 0.4, stagger: 0.08, ease: 'power3.out' }, 1.8)
+          .from('.oc-ver', { scale: 0.6, autoAlpha: 0, duration: 0.35, stagger: 0.08, ease: 'back.out(3)' }, 2.2);
+      }
+
+      /* send: leads flow through the sequence */
+      const flow = document.getElementById('oc-flow');
+      if (flow) {
+        const vertical = window.innerWidth < 1024;
+        gsap.from('.oc-flow__line i', { scaleX: vertical ? 1 : 0, scaleY: vertical ? 0 : 1, duration: 1.2, ease: 'power2.inOut', scrollTrigger: { trigger: flow, start: 'top 75%' } });
+        gsap.from('.oc-flow__step', { y: 20, autoAlpha: 0, duration: 0.6, stagger: 0.15, ease: 'power3.out', scrollTrigger: { trigger: flow, start: 'top 75%' } });
+        const track = flow.querySelector<HTMLElement>('.oc-flow__track')!;
+        const dots = gsap.utils.toArray<HTMLElement>('.oc-dot');
+        const loop = gsap.timeline({ repeat: -1, paused: true });
+        dots.forEach((d, i) => {
+          const stopAt = i % 4 === 1 ? 1 : i % 4 === 3 ? 2 : 3; // some reply early and leave the sequence
+          const t0 = i * 0.55;
+          if (!vertical) {
+            const xs = [0.13, 0.5, 0.87].map((f) => f * track.clientWidth);
+            loop.set(d, { x: 0, y: 0, autoAlpha: 0, scale: 1 }, t0)
+              .to(d, { autoAlpha: 1, duration: 0.2 }, t0)
+              .to(d, { x: xs[0] + track.clientWidth * 0.04, duration: 0.9, ease: 'power1.inOut' }, t0);
+            for (let s = 1; s < stopAt; s++) loop.to(d, { x: xs[s] + track.clientWidth * 0.04, duration: 0.9, ease: 'power1.inOut' }, t0 + s * 1.05);
+            const tEnd = t0 + stopAt * 1.05;
+            if (stopAt < 3) loop.to(d, { y: 56, x: '+=' + track.clientWidth * 0.1, duration: 0.6, ease: 'power2.in' }, tEnd).to(d, { autoAlpha: 0, duration: 0.3 }, tEnd + 0.55);
+            else loop.to(d, { x: track.clientWidth * 1.02, autoAlpha: 0, duration: 0.8, ease: 'power1.in' }, tEnd);
+          } else {
+            const ys = [0, 118, 236].map((v) => v + 30);
+            loop.set(d, { x: 0, y: 0, autoAlpha: 0 }, t0)
+              .to(d, { autoAlpha: 1, duration: 0.2 }, t0)
+              .to(d, { y: ys[0], duration: 0.8, ease: 'power1.inOut' }, t0);
+            for (let s = 1; s < stopAt; s++) loop.to(d, { y: ys[s], duration: 0.8, ease: 'power1.inOut' }, t0 + s * 0.95);
+            const tEnd = t0 + stopAt * 0.95;
+            if (stopAt < 3) loop.to(d, { x: 30, autoAlpha: 0, duration: 0.6, ease: 'power2.in' }, tEnd);
+            else loop.to(d, { y: 380, autoAlpha: 0, duration: 0.8 }, tEnd);
+          }
+        });
+        ScrollTrigger.create({ trigger: flow, start: 'top 85%', end: 'bottom 10%', onToggle: (self) => (self.isActive ? loop.play() : loop.pause()) });
+      }
+
+      /* send: ramp chart */
+      gsap.from('.oc-ramp__bar', { scaleY: 0, duration: 0.7, stagger: 0.05, ease: 'power3.out', scrollTrigger: { trigger: '#oc-ramp', start: 'top 78%' } });
+      gsap.from('.oc-ramp__v', { autoAlpha: 0, y: 6, duration: 0.3, stagger: 0.05, delay: 0.3, scrollTrigger: { trigger: '#oc-ramp', start: 'top 78%' } });
+
+      /* catch: replies land and get tagged */
+      const ub = document.getElementById('oc-unibox');
+      if (ub) {
+        const rows = ub.querySelectorAll('.oc-ub');
+        const tl = gsap.timeline({ scrollTrigger: { trigger: ub, start: 'top 72%' } });
+        tl.from(rows, { y: -18, autoAlpha: 0, filter: 'blur(6px)', duration: 0.6, stagger: 0.35, ease: 'power3.out' })
+          .from(ub.querySelectorAll('.oc-ub .oc-pill'), { scale: 0.5, autoAlpha: 0, duration: 0.45, stagger: 0.35, ease: 'back.out(3)' }, 0.35)
+          .from(ub.querySelectorAll('.oc-conv__mine, .oc-conv__theirs'), { y: 14, autoAlpha: 0, duration: 0.5, stagger: 0.15, ease: 'power3.out' }, 0.6);
+      }
+
+      /* close: a card gets dragged from New reply to Interested */
+      const board = document.getElementById('oc-board');
+      const drag = document.getElementById('oc-drag');
+      if (board && drag) {
+        const drop = board.querySelector<HTMLElement>('.oc-drop');
+        const below = drag.nextElementSibling as HTMLElement | null;
+        const cNew = board.querySelector<HTMLElement>('[data-col="new"] > p em');
+        const cInt = board.querySelector<HTMLElement>('[data-col="int"] > p em');
+        const setCounts = (a: number, b: number) => {
+          if (cNew) cNew.textContent = String(a);
+          if (cInt) cInt.textContent = String(b);
+          [cNew, cInt].forEach((el) => el?.animate([{ transform: 'scale(1.5)', color: '#5b5bf6' }, { transform: 'scale(1)' }], { duration: 450, easing: 'cubic-bezier(.2,1.4,.4,1)' }));
+        };
+        const run = () => {
+          if (!drop) return;
+          const h = drag.offsetHeight;
+          const a = drag.getBoundingClientRect();
+          const d = drop.getBoundingClientRect();
+          const dx = d.left - a.left;
+          const dy = d.top - a.top;
+          const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.2, delay: 0.4 });
+          tl.add(() => drag.classList.add('is-lifted'))
+            .to(drag, { scale: 1.04, rotate: -2.5, duration: 0.3, ease: 'power2.out' })
+            .to(drag, { x: dx, y: dy, duration: 1, ease: 'power2.inOut' })
+            .to(below, { y: -(h + 8), duration: 0.5, ease: 'power3.inOut' }, '<0.15')
+            .to(drop, { height: h, marginBottom: 8, autoAlpha: 1, duration: 0.55, ease: 'power3.inOut' }, '<0.25')
+            .to(drag, { scale: 1, rotate: 0, duration: 0.25, ease: 'power2.out' })
+            .add(() => { drag.classList.remove('is-lifted'); setCounts(1, 2); })
+            .to(drag, { duration: 1.8 })
+            .to(drag, { autoAlpha: 0, duration: 0.3 })
+            .set(drag, { x: 0, y: 0 })
+            .to(drop, { height: 0, marginBottom: 0, autoAlpha: 0, duration: 0.45, ease: 'power3.inOut' }, '<')
+            .to(below, { y: 0, duration: 0.45, ease: 'power3.inOut' }, '<')
+            .add(() => setCounts(2, 1), '<')
+            .to(drag, { autoAlpha: 1, duration: 0.3 });
+        };
+        ScrollTrigger.create({ trigger: board, start: 'top 70%', once: true, onEnter: run });
+      }
+
+      /* how: tests tick through */
+      const term = document.getElementById('oc-term');
+      if (term) {
+        const lines = term.querySelectorAll<HTMLElement>('.oc-term__lines li');
+        const pass = document.getElementById('oc-pass');
+        const o = { v: 0 };
+        const tl = gsap.timeline({ scrollTrigger: { trigger: term, start: 'top 75%' } });
+        tl.from(lines, { autoAlpha: 0, x: -6, duration: 0.18, stagger: 0.13, ease: 'none' })
+          .to(o, { v: 130, duration: lines.length * 0.13, ease: 'none', onUpdate: () => { if (pass) pass.textContent = String(Math.round(o.v)); } }, 0)
+          .from('.oc-term__sum', { autoAlpha: 0, y: 6, duration: 0.3 }, 0);
+      }
+      gsap.from('.oc-dec li', { y: 18, autoAlpha: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.oc-dec', start: 'top 85%' } });
+      gsap.from('.oc-loop__step', { scale: 0.7, autoAlpha: 0, duration: 0.5, stagger: 0.15, ease: 'back.out(2)', scrollTrigger: { trigger: '.oc-loop', start: 'top 80%' } });
+      gsap.from('.oc-out__t', { y: 40, autoAlpha: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: '.oc-out', start: 'top 80%' } });
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* motion is decoration */
+    }
+  })();
+</script>

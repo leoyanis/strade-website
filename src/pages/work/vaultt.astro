@@ -1,0 +1,161 @@
+---
+// Vaultt (formerly StudentVenture): the flagship case study.
+// Brand matches vaultt.io: navy + light blue, Bricolage Grotesque / Hanken Grotesk / mono labels.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import { getProject } from '../../data/work';
+import Hero from '../../components/case/vaultt/Hero.astro';
+import Numbers from '../../components/case/vaultt/Numbers.astro';
+import Story from '../../components/case/vaultt/Story.astro';
+import Rebrand from '../../components/case/vaultt/Rebrand.astro';
+import BriefDemo from '../../components/case/vaultt/BriefDemo.astro';
+import Tour from '../../components/case/vaultt/Tour.astro';
+import Compare from '../../components/case/vaultt/Compare.astro';
+import Stack from '../../components/case/vaultt/Stack.astro';
+import Working from '../../components/case/vaultt/Working.astro';
+import Quote from '../../components/case/vaultt/Quote.astro';
+import Links from '../../components/case/vaultt/Links.astro';
+
+const p = getProject('vaultt')!;
+const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/vaultt"
+  noAlternates
+  bare
+  navTheme={p.brand.light ? 'light' : 'dark'}
+  ogImage="/og/work-vaultt.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={p.brand.fontsHref} />
+  <meta slot="head" name="theme-color" content="#0C2748" />
+
+  <div class="vt" id="vt">
+    <Hero appStore={APP_STORE} />
+    <Numbers />
+    <Story />
+    <Rebrand />
+    <BriefDemo />
+    <Tour appStore={APP_STORE} />
+    <Compare />
+    <Stack />
+    <Working />
+    {p.testimonial && <Quote t={p.testimonial} />}
+    <Links appStore={APP_STORE} />
+  </div>
+
+  <CaseNext current="vaultt" />
+</Base>
+
+<script>
+  import { initVaultt } from '../../components/case/vaultt/motion';
+  initVaultt();
+</script>
+
+<style is:global>
+  /* ---------- page-level brand overrides (this page only) ---------- */
+  body.is-bare { background: #0C2748; }
+  body.is-bare #scroll-progress { background: #6FA8FF; }
+  body.is-bare #site-nav.is-scrolled { background: rgba(10, 33, 64, 0.8); border-bottom-color: rgba(232, 241, 255, 0.08); }
+  body.is-bare .nav-links .nav-free { color: #6FA8FF; }
+  body.is-bare .nav-links .nav-book { background: #6FA8FF; color: #0C2748; }
+  body.is-bare .nav-links .nav-book:hover { color: #0C2748; box-shadow: 0 0 26px rgba(111, 168, 255, 0.5); }
+
+  /* ---------- tokens ---------- */
+  .vt {
+    --vt-navy: #0C2748;
+    --vt-navy-2: #0A2140;
+    --vt-navy-3: #0E2C52;
+    --vt-panel: #123058;
+    --vt-panel-2: #16386A;
+    --vt-light: #E8F1FF;
+    --vt-soft: rgba(232, 241, 255, 0.68);
+    --vt-faint: rgba(232, 241, 255, 0.42);
+    --vt-blue: #6FA8FF;
+    --vt-blue-2: #8EBBFF;
+    --vt-blue-deep: #2F80EE;
+    --vt-glow: rgba(111, 168, 255, 0.16);
+    --vt-line: rgba(232, 241, 255, 0.08);
+    --vt-line-2: rgba(232, 241, 255, 0.15);
+    --vt-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
+    --vt-sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --vt-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --vt-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --vt-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    position: relative;
+    z-index: 2;
+    overflow-x: clip;
+    background: var(--vt-navy);
+    color: var(--vt-light);
+    font-family: var(--vt-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .vt ::selection { background: rgba(111, 168, 255, 0.38); color: #fff; }
+  .vt img, .vt video { max-width: 100%; }
+
+  .vt-wrap { position: relative; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+  @media (min-width: 768px) { .vt-wrap { padding: 0 40px; } }
+
+  .vt-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .vt-mono { font-family: var(--vt-mono); }
+
+  /* section label, like vaultt.io's mono .tag */
+  .vt-tag {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--vt-mono); font-size: 11.5px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; line-height: 1.4;
+    color: var(--vt-blue);
+  }
+  .vt-tag .no { color: var(--vt-faint); }
+
+  .vt-h2 {
+    font-family: var(--vt-display); font-weight: 700;
+    font-size: clamp(38px, 5.4vw, 78px); line-height: 0.98; letter-spacing: -0.04em;
+    text-wrap: balance; color: var(--vt-light);
+  }
+  .vt-h2 .lt { color: var(--vt-faint); }
+  .vt-h2 .ac { color: var(--vt-blue); }
+  .vt-lede { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: var(--vt-soft); max-width: 640px; }
+  .vt-lede strong { color: var(--vt-light); font-weight: 600; }
+
+  .vt-section { position: relative; padding: clamp(96px, 12vw, 168px) 0; }
+  .vt-head { display: flex; flex-direction: column; gap: 22px; margin-bottom: clamp(44px, 6vw, 72px); }
+
+  /* buttons */
+  .vt-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: var(--vt-sans); font-size: 15px; font-weight: 600; line-height: 1;
+    padding: 16px 26px; border-radius: 999px; border: 1px solid transparent; cursor: pointer;
+    transition: transform 0.18s var(--vt-ease), background 0.2s var(--vt-ease), box-shadow 0.2s var(--vt-ease), border-color 0.2s, color 0.2s;
+  }
+  .vt-btn .arw { display: inline-block; transition: transform 0.2s var(--vt-ease); }
+  .vt-btn:hover .arw { transform: translate(3px, -3px); }
+  .vt-btn--blue { background: var(--vt-blue); color: var(--vt-navy); box-shadow: 0 10px 30px -12px rgba(111, 168, 255, 0.75); }
+  .vt-btn--blue:hover { background: var(--vt-blue-2); transform: translateY(-2px); box-shadow: 0 16px 38px -12px rgba(111, 168, 255, 0.9); }
+  .vt-btn--ghost { color: var(--vt-light); border-color: var(--vt-line-2); }
+  .vt-btn--ghost:hover { background: var(--vt-light); color: var(--vt-navy); border-color: var(--vt-light); }
+
+  /* App Store badge (white, like vaultt.io) */
+  .vt-store {
+    display: inline-flex; align-items: center; gap: 11px;
+    background: #fff; color: #0C2748; border-radius: 14px; padding: 10px 18px 10px 15px;
+    box-shadow: 0 14px 34px -16px rgba(0, 0, 0, 0.6);
+    transition: transform 0.18s var(--vt-ease), box-shadow 0.2s;
+  }
+  .vt-store:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -16px rgba(111, 168, 255, 0.55); }
+  .vt-store svg { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
+  .vt-store > span { display: flex; flex-direction: column; font-family: var(--vt-sans); font-size: 17px; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; white-space: nowrap; }
+  .vt-store em { font-style: normal; }
+  .vt-store small { font-size: 10.5px; font-weight: 500; letter-spacing: 0.01em; color: #4a5b74; }
+  .vt-store b { color: var(--vt-blue-deep); font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vt *, .vt *::before, .vt *::after { animation: none !important; transition: none !important; }
+  }
+</style>

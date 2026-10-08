@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import { visibleResources } from '../../data/resources';
+import { SITE } from '../../data/site';
+import '../../styles/quests.css';
+import '../../styles/free.css';
+
+const resources = visibleResources();
+---
+
+<Base
+  title="Free stuff | Yanis Schweizer"
+  description="Everything I give away in my Instagram DMs: Claude skills, prompts, templates and tools I actually use to build with AI."
+  path="/free"
+  noAlternates
+  ogImage="/og/free.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <script slot="head" is:inline>
+    // Hide the intro until the motion is ready (never longer than 2.6s).
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('fi-intro');
+      setTimeout(() => document.documentElement.classList.remove('fi-intro'), 2600);
+    }
+  </script>
+
+  <section class="ql-hero free-index">
+    <div class="container">
+      <span class="ql-hero__label">FREE // NO EMAIL NEEDED</span>
+      <h1>Free <span>stuff.</span></h1>
+      <p>Everything I give away in my DMs, in one place. Skills, prompts and templates I actually use to build with AI. Take them, use them, ship something.</p>
+      <div class="social-row" style="margin-top:26px">
+        <a class="social-btn is-ig" href={SITE.instagram} target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          New drops land on {SITE.instagramHandle} first
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ql-section">
+    <div class="container">
+      {resources.length > 0 ? (
+        <div class="res-grid">
+          {resources.map((r, i) => (
+            <a class="res-card" href={`/free/${r.slug}`} style={r.accent ? `--acc:${r.accent}` : undefined}>
+              <span class="res-card__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="res-kind">{r.kind}{!r.published && <span class="res-draft">draft</span>}</span>
+              <h3>{r.title}</h3>
+              <p>{r.summary}</p>
+              <span class="res-go">Get it free <i aria-hidden="true">→</i></span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="res-empty">
+          <h2>First drop is on its way.</h2>
+          <p>Follow along on Instagram and you'll get it before anyone else.</p>
+          <div class="social-row"><a class="social-btn is-ig" href={SITE.instagram} target="_blank" rel="noopener">Follow {SITE.instagramHandle}</a></div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="ql-cta">
+    <div class="container">
+      <h2>Rather have it built for you?</h2>
+      <p>Apps, automations and AI tools at a fixed price. I make the decisions, AI does the typing, and you own the code.</p>
+      <div class="hero-actions">
+        <a href={SITE.booking} class="btn-primary hero-cta" target="_blank" rel="noopener">
+          Book a call
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="/work" class="btn-ghost">See my work</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { initFreeIndex } from '../../components/free/motion/index-page';
+  initFreeIndex();
+</script>

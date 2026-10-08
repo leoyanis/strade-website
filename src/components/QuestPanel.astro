@@ -1,0 +1,93 @@
+---
+// Sci-fi "quest" panel for /work. No border strokes: a chamfered glass frame with a
+// travelling light edge, HUD corner brackets, a scan sweep, a pointer-following glow,
+// a glitch on the image and a decoding title on hover. Main quests sit in an
+// accordion that expands the hovered panel; side quests grow out of their slot.
+import type { Project } from '../data/work';
+
+interface Props {
+  project: Project;
+  index: number;
+  variant: 'main' | 'side';
+}
+const { project: p, index, variant } = Astro.props;
+const num = String(index + 1).padStart(2, '0');
+const building = p.status !== 'Live' && p.status !== 'Delivered';
+const img = p.cover.type === 'image' ? p.cover : null;
+---
+
+<a
+  href={`/work/${p.slug}`}
+  class={`qp qp--${variant}`}
+  style={`--accent:${p.accent};--qbg:${p.brand.bg};${img ? `--img:url('${img.src}')` : ''}`}
+  data-quest
+>
+  <span class="qp__edge" aria-hidden="true"></span>
+  <div class="qp__frame">
+    <div class={`qp__media ${img?.fit === 'contain' ? 'is-contain' : ''}`} aria-hidden="true">
+      {img ? (
+        <img
+          src={img.src}
+          alt=""
+          loading={variant === 'main' ? 'eager' : 'lazy'}
+          decoding="async"
+          style={img.position ? `object-position:center ${img.position}` : undefined}
+        />
+      ) : p.cover.type === 'mock' && p.cover.mock === 'crm' ? (
+        <div class="mock-crm">
+          {[
+            { col: 'Replied', n: 3 },
+            { col: 'Call booked', n: 2 },
+            { col: 'Won', n: 1 },
+          ].map(({ col, n }) => (
+            <div class="mock-crm__col">
+              <span class="mock-crm__head">{col}<i>{n}</i></span>
+              {Array.from({ length: n }).map((_, i) => (
+                <span class="mock-crm__card">
+                  <b style={`width:${55 + ((i * 17) % 30)}%`}></b>
+                  <s style={`width:${35 + ((i * 23) % 40)}%`}></s>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="mock-stories">
+          <span class="mock-story"><em>PLAN</em><b>Your week,<br />sorted.</b></span>
+          <span class="mock-story is-mid"><em>NEW</em><b>Three things<br />we changed</b></span>
+          <span class="mock-story"><em>DROP</em><b>Out now.</b></span>
+        </div>
+      )}
+    </div>
+    <div class="qp__shade" aria-hidden="true"></div>
+    <div class="qp__grid" aria-hidden="true"></div>
+    <div class="qp__scan" aria-hidden="true"></div>
+    <div class="qp__glow" aria-hidden="true"></div>
+    <span class="qp__corner qp__corner--tl" aria-hidden="true"></span>
+    <span class="qp__corner qp__corner--tr" aria-hidden="true"></span>
+    <span class="qp__corner qp__corner--bl" aria-hidden="true"></span>
+    <span class="qp__corner qp__corner--br" aria-hidden="true"></span>
+
+    <div class="qp__hud" aria-hidden="true">
+      <span>{variant === 'main' ? 'MQ' : 'SQ'}-{num}</span>
+      <span class={`qp__state ${building ? 'is-building' : ''}`}><i></i>{p.status}</span>
+    </div>
+
+    <div class="qp__content">
+      <span class="qp__kicker">{p.kind === 'product' ? 'My product' : p.client} · {p.year}</span>
+      <h3 class="qp__title"><span class="sr-only">{p.name}</span><span aria-hidden="true" data-scramble>{p.name}</span></h3>
+      <p class="qp__summary">{p.summary}</p>
+      <div class="qp__more"><div class="qp__more-in">
+        {p.metrics && p.metrics.length > 0 && (
+          <dl class="qp__metrics">
+            {p.metrics.slice(0, 3).map((m) => (
+              <div><dt>{m.value}</dt><dd>{m.label}</dd></div>
+            ))}
+          </dl>
+        )}
+        <div class="qp__tags">{p.tags.slice(0, 4).map((t) => <span>{t}</span>)}</div>
+      </div></div>
+      <span class="qp__cta">Open quest <i aria-hidden="true">→</i></span>
+    </div>
+  </div>
+</a>

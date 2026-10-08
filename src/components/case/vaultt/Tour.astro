@@ -1,0 +1,475 @@
+---
+// Product tour: six panels. Desktop: pinned horizontal strip. Mobile / no JS: stacked.
+import AppleLogo from './AppleLogo.astro';
+interface Props { appStore: string }
+const { appStore } = Astro.props;
+const b = '/images/work/vaultt/';
+const tiles = [
+  { img: 'hc-4.webp', t: 'Cinematic film trailer', k: 'Film & Video' },
+  { img: 'hc-2.webp', t: 'Magazine spread', k: 'Graphic Design' },
+  { img: 'hc-1.webp', t: 'Interrupt Autopilot', k: 'Creative Arts' },
+  { img: 'hc-3.webp', t: 'Portrait series', k: 'Photography' },
+];
+const pipe = ['Applied', 'In review', 'Task assigned', 'Task submitted', 'Rated', 'Hired'];
+const nav = [
+  { g: 'Overview', items: ['Dashboard'] },
+  { g: 'People', items: ['Students', 'Companies', 'Accelerator', 'Verification'] },
+  { g: 'Content', items: ['Showcase', 'Posts', 'Challenges'] },
+  { g: 'Operations', items: ['Applications', 'Notifications'] },
+  { g: 'Insights', items: ['Engagement', 'Retention'] },
+  { g: 'Configure', items: ['Feed rules', 'Flags', 'Release gate'] },
+];
+const rules = [
+  { n: 'Newness', v: 0.72 },
+  { n: 'Likes', v: 0.46 },
+  { n: 'Personal match', v: 0.58 },
+  { n: 'Featured boost', v: 0.3 },
+  { n: 'Randomness', v: 0.38 },
+];
+---
+
+<section class="vt-tour" id="vt-tour">
+  <div class="vt-wrap">
+    <header class="vt-head vt-tour__head">
+      <p class="vt-tag"><span class="no">06</span> What I built</p>
+      <h2 class="vt-h2">Two sides, one platform. <span class="lt">Plus everything that runs it.</span></h2>
+      <p class="vt-lede">Talent on one side, companies on the other, and the tools Liam's team uses to run it all. I designed and built every piece.</p>
+    </header>
+  </div>
+
+  <div class="vt-tour__vp" id="vt-tour-vp">
+    <div class="vt-tour__track" id="vt-tour-track">
+
+      <!-- 01 talent -->
+      <article class="vt-panel vt-panel--talent" data-n="01">
+        <div class="vt-panel__text">
+          <p class="vt-panel__k"><span>01</span> For talent</p>
+          <h3 class="vt-panel__t">A portfolio that does the talking.</h3>
+          <p class="vt-panel__d">Films, games, designs, startups: every project lives on one profile. A build-in-public feed, feedback and kudos keep people coming back.</p>
+          <ul class="vt-panel__list"><li>Portfolios</li><li>Showcase feed</li><li>Projects</li><li>Events</li><li>Referrals</li></ul>
+        </div>
+        <div class="vt-panel__vis" aria-hidden="true">
+          <div class="vt-prof">
+            <div class="vt-prof__head">
+              <span class="vt-prof__av"><img src={`${b}icon.webp`} alt="" width="40" height="40" loading="lazy" /></span>
+              <div class="vt-prof__who">
+                <strong>Your Vaultt <svg viewBox="0 0 24 24" class="vt-tick"><circle cx="12" cy="12" r="10" /><path d="m8 12.5 2.6 2.5L16 9.5" /></svg></strong>
+                <span>Film · Design · Games</span>
+              </div>
+              <span class="vt-prof__btn">Connect</span>
+            </div>
+            <div class="vt-prof__tabs"><span class="is-on">Projects</span><span>Showcase</span><span>Feedback</span></div>
+            <div class="vt-prof__grid">
+              {tiles.map((t) => (
+                <div class="vt-prof__tile">
+                  <img src={`${b}${t.img}`} alt="" width="520" height="340" loading="lazy" decoding="async" />
+                  <span class="vt-prof__tt">{t.t}<em>{t.k}</em></span>
+                </div>
+              ))}
+            </div>
+            <div class="vt-prof__tools"><span>Tools in practice</span><i>Premiere Pro</i><i>Figma</i><i>Unity</i><i>Blender</i></div>
+          </div>
+          <span class="vt-float-chip vt-float-chip--fb"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /></svg>Give feedback</span>
+          <span class="vt-float-chip vt-float-chip--kd"><svg viewBox="0 0 24 24" class="is-fill"><path d="M12 21s-7.5-4.6-9.6-9.3C1 8.4 3.1 5 6.6 5c2 0 3.6 1.1 4.4 2.6h2C13.8 6.1 15.4 5 17.4 5c3.5 0 5.6 3.4 4.2 6.7C19.5 16.4 12 21 12 21Z" /></svg>Kudos</span>
+        </div>
+      </article>
+
+      <!-- 02 challenges -->
+      <article class="vt-panel vt-panel--chal" data-n="02">
+        <div class="vt-panel__text">
+          <p class="vt-panel__k"><span>02</span> Challenges</p>
+          <h3 class="vt-panel__t">Build something. Get seen for it.</h3>
+          <p class="vt-panel__d">Sponsored challenges give people a reason to start, a deadline to finish and a stage for the result. Every entry becomes a portfolio project, with judges, winners and prizes.</p>
+          <ul class="vt-panel__list"><li>Film</li><li>Music</li><li>Games</li><li>Front end</li><li>Community</li></ul>
+        </div>
+        <div class="vt-panel__vis" aria-hidden="true">
+          <div class="vt-fan">
+            <figure class="vt-fan__card" data-i="0">
+              <div class="vt-fan__img"><img src={`${b}ch-screen.webp`} alt="" width="760" height="475" loading="lazy" decoding="async" /><span class="vt-fan__chip">Open now</span></div>
+              <figcaption><span>Film festival</span><strong>The Big Screen</strong></figcaption>
+            </figure>
+            <figure class="vt-fan__card" data-i="1">
+              <div class="vt-fan__img"><img src={`${b}ch-break.webp`} alt="" width="760" height="475" loading="lazy" decoding="async" /><span class="vt-fan__chip">Open now</span></div>
+              <figcaption><span>Music</span><strong>The Big Break</strong></figcaption>
+            </figure>
+            <figure class="vt-fan__card" data-i="2">
+              <div class="vt-fan__img"><img src={`${b}ch-builder.webp`} alt="" width="760" height="475" loading="lazy" decoding="async" /><span class="vt-fan__chip">Monthly</span></div>
+              <figcaption><span>Community</span><strong>Builder Days</strong></figcaption>
+            </figure>
+          </div>
+        </div>
+      </article>
+
+      <!-- 03 companies -->
+      <article class="vt-panel vt-panel--co" data-n="03">
+        <div class="vt-panel__text">
+          <p class="vt-panel__k"><span>03</span> For companies</p>
+          <h3 class="vt-panel__t">Hire on a task, not a CV.</h3>
+          <p class="vt-panel__d">Companies post jobs, projects and events. Candidates apply by doing a real task, and the company rates the work before anyone gets hired. Only verified companies get in, and every post has its own analytics.</p>
+          <ul class="vt-panel__list"><li>Task-based hiring</li><li>Applicant management</li><li>Analytics</li><li>Verified onboarding</li></ul>
+        </div>
+        <div class="vt-panel__vis" aria-hidden="true">
+          <img class="vt-co__laptop" src={`${b}v1-analytics.webp`} alt="" width="958" height="593" loading="lazy" decoding="async" />
+          <div class="vt-pipe" id="vt-pipe">
+            <div class="vt-pipe__head">
+              <span class="vt-pipe__av">SM</span>
+              <div><strong>Sarah M.</strong><span>Marketing Specialist</span></div>
+            </div>
+            <div class="vt-pipe__track">
+              <span class="vt-pipe__rail"><i></i></span>
+              <ol class="vt-pipe__steps">
+                {pipe.map((s, i) => (
+                  <li class:list={['vt-pipe__step', i === pipe.length - 1 && 'is-last']} data-i={i}><span class="vt-pipe__dot"></span>{s}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 04 admin console -->
+      <article class="vt-panel vt-panel--con" data-n="04">
+        <div class="vt-panel__text">
+          <p class="vt-panel__k"><span>04</span> Admin console</p>
+          <h3 class="vt-panel__t">The control room.</h3>
+          <p class="vt-panel__d">A Next.js console for the team: people, verification, content, applications, analytics and live settings. The feed's ranking rules are data, so the team can retune the Showcase without shipping an app update.</p>
+          <ul class="vt-panel__list"><li>Next.js</li><li>Retention cohorts</li><li>Moderation</li><li>Feed rules</li></ul>
+        </div>
+        <div class="vt-panel__vis" aria-hidden="true">
+          <div class="vt-con">
+            <div class="vt-con__side">
+              <div class="vt-con__brand"><img src={`${b}icon.webp`} alt="" width="18" height="18" loading="lazy" />Console</div>
+              {nav.map((g) => (
+                <div class="vt-con__group">
+                  <span class="vt-con__g">{g.g}</span>
+                  {g.items.map((it) => <span class:list={['vt-con__item', it === 'Feed rules' && 'is-on']}>{it}</span>)}
+                </div>
+              ))}
+            </div>
+            <div class="vt-con__main">
+              <div class="vt-con__top"><span>Configure <i>/</i> Feed rules</span><span class="vt-con__env">Production</span></div>
+              <div class="vt-con__rules" id="vt-rules">
+                {rules.map((r) => (
+                  <div class="vt-con__rule" style={`--v:${r.v}`}>
+                    <span class="vt-con__rn">{r.n}</span>
+                    <span class="vt-con__track"><span class="vt-con__fill"></span><span class="vt-con__thumb"></span></span>
+                  </div>
+                ))}
+              </div>
+              <div class="vt-con__prev">
+                <span class="vt-con__pl">Preview · For You feed</span>
+                <div class="vt-con__tiles" id="vt-tiles">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <span class:list={['vt-con__tile', i % 3 === 0 && 'is-new']}></span>)}
+                </div>
+              </div>
+              <div class="vt-con__heat">
+                <span class="vt-con__pl">Retention · weekly cohorts</span>
+                <div class="vt-con__grid">
+                  {Array.from({ length: 6 }).map((_, r) => (
+                    <div class="vt-con__row">
+                      {Array.from({ length: 8 }).map((_, c) => (
+                        <span class="vt-con__cell" style={`--o:${c > 7 - r ? 0 : Math.max(0.08, 1 - c * 0.13 - r * 0.04)}`}></span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 05 accelerator intake -->
+      <article class="vt-panel vt-panel--acc" data-n="05">
+        <div class="vt-panel__text">
+          <p class="vt-panel__k"><span>05</span> Accelerator intake</p>
+          <h3 class="vt-panel__t">Apply once. Get an account.</h3>
+          <p class="vt-panel__d">The application form for the StudentVenture accelerator. Submitting it creates a real Vaultt account and an application the team reviews in the console. Nobody copies anything between tools.</p>
+          <ul class="vt-panel__list"><li>Next.js</li><li>One submit, two records</li><li>Reviewed in the console</li></ul>
+        </div>
+        <div class="vt-panel__vis" aria-hidden="true">
+          <div class="vt-form" id="vt-form">
+            <div class="vt-form__card">
+              <p class="vt-form__k">StudentVenture accelerator</p>
+              <p class="vt-form__t">Apply for the next cohort</p>
+              <div class="vt-form__f"><span>Full name</span><b data-type="Amara O.">Amara O.</b></div>
+              <div class="vt-form__f"><span>University</span><b data-type="University of Manchester">University of Manchester</b></div>
+              <div class="vt-form__f is-tall"><span>What are you building?</span><b data-type="A revision planner for nursing students">A revision planner for nursing students</b></div>
+              <span class="vt-form__btn">Submit application</span>
+            </div>
+            <div class="vt-form__done">
+              <span class="vt-form__ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg></span>
+              <div>
+                <strong>You're in.</strong>
+                <span>Vaultt account created</span>
+                <span>Application sent to the team</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 06 iOS -->
+      <article class="vt-panel vt-panel--ios" data-n="06">
+        <div class="vt-panel__text">
+          <p class="vt-panel__k"><span>06</span> iOS app</p>
+          <h3 class="vt-panel__t">Vaultt, in your pocket.</h3>
+          <p class="vt-panel__d">The same Flutter codebase ships to iPhone. Upload work, take on challenges and connect with people wherever you are. Now in App Store beta.</p>
+          <a class="vt-store vt-panel__store" href={appStore} target="_blank" rel="noopener" aria-label="Vaultt on the App Store (Beta)">
+            <AppleLogo />
+            <span><small>Download on the</small><em>App Store <b>(Beta)</b></em></span>
+          </a>
+        </div>
+        <div class="vt-panel__vis" aria-hidden="true">
+          <div class="vt-phone">
+            <div class="vt-phone__screen"><img src={`${b}app-showcase.webp`} alt="" width="560" height="1212" loading="lazy" decoding="async" /></div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="vt-tour__progress" aria-hidden="true"><i></i></div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-tour { position: relative; padding: clamp(96px, 12vw, 160px) 0 clamp(72px, 9vw, 120px); background: var(--vt-navy-2); }
+  .vt-tour__head { max-width: 900px; }
+
+  .vt-tour__vp { position: relative; }
+  .vt-tour__track { display: flex; flex-direction: column; gap: 22px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+  .vt-tour__progress { display: none; }
+
+  /* panel */
+  .vt-panel {
+    --pbg: linear-gradient(160deg, #123462 0%, var(--vt-navy-3) 55%);
+    --pfg: var(--vt-light); --psoft: var(--vt-soft); --pk: var(--vt-blue); --pline: var(--vt-line-2);
+    position: relative; overflow: hidden; isolation: isolate;
+    display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: 36px; align-items: center;
+    padding: clamp(28px, 4vw, 52px);
+    border-radius: 26px; border: 1px solid var(--pline); background: var(--pbg); color: var(--pfg);
+  }
+  .vt-panel::before {
+    content: attr(data-n); position: absolute; z-index: -1; right: 18px; bottom: -0.2em;
+    font-family: var(--vt-display); font-weight: 800; font-size: clamp(140px, 18vw, 260px); line-height: 1; letter-spacing: -0.06em;
+    color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--pfg) 9%, transparent); pointer-events: none;
+  }
+  .vt-panel__text { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; }
+  .vt-panel__k { display: flex; gap: 10px; font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pk); }
+  .vt-panel__k span { opacity: 0.55; }
+  .vt-panel__t { margin-top: 16px; font-family: var(--vt-display); font-weight: 700; font-size: clamp(30px, 3.2vw, 46px); line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance; }
+  .vt-panel__d { margin-top: 16px; font-size: 16px; line-height: 1.6; color: var(--psoft); max-width: 440px; }
+  .vt-panel__list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+  .vt-panel__list li {
+    font-family: var(--vt-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--pfg); padding: 6px 10px; border-radius: 99px; border: 1px solid var(--pline);
+  }
+  .vt-panel__vis { position: relative; z-index: 1; min-height: 340px; display: flex; align-items: center; justify-content: center; }
+  .vt-panel__store { margin-top: 26px; }
+
+  .vt-panel--chal { --pbg: radial-gradient(120% 90% at 85% 20%, rgba(232, 60, 60, 0.16), transparent 55%), linear-gradient(160deg, #0F2A50, #091C37); }
+  .vt-panel--co { --pbg: var(--vt-blue); --pfg: var(--vt-navy); --psoft: rgba(12, 39, 72, 0.8); --pk: var(--vt-navy); --pline: rgba(12, 39, 72, 0.22); }
+  .vt-panel--con { --pbg: linear-gradient(160deg, #0A1E3A, #061428); }
+  .vt-panel--acc { --pbg: var(--vt-light); --pfg: var(--vt-navy); --psoft: rgba(12, 39, 72, 0.74); --pk: var(--vt-blue-deep); --pline: rgba(12, 39, 72, 0.16); }
+  .vt-panel--ios { --pbg: radial-gradient(90% 90% at 75% 60%, rgba(111, 168, 255, 0.28), transparent 60%), linear-gradient(160deg, #123462, var(--vt-navy-2)); }
+
+  /* floating chips used in panels */
+  .vt-float-chip {
+    position: absolute; z-index: 3; display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--vt-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--vt-light);
+    background: var(--vt-navy-2); border: 1px solid var(--vt-line-2); border-radius: 22px; padding: 9px 13px;
+    box-shadow: 0 16px 34px -14px rgba(0, 0, 0, 0.75);
+  }
+  .vt-float-chip svg { width: 14px; height: 14px; fill: none; stroke: var(--vt-blue); stroke-width: 2; stroke-linejoin: round; }
+  .vt-float-chip svg.is-fill { fill: var(--vt-blue); stroke: none; }
+  .vt-float-chip--fb { top: 4%; right: 2%; }
+  .vt-float-chip--kd { bottom: 6%; left: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-float-chip { animation: vt-float 6.5s ease-in-out infinite; }
+    .vt-float-chip--kd { animation-delay: -3s; }
+  }
+
+  /* 01 profile mock */
+  .vt-prof {
+    width: min(100%, 480px); padding: 18px; border-radius: 18px;
+    background: linear-gradient(165deg, #16386A, var(--vt-navy-3)); border: 1px solid var(--vt-line-2);
+    box-shadow: 0 50px 90px -50px rgba(0, 0, 0, 0.9);
+  }
+  .vt-prof__head { display: flex; align-items: center; gap: 12px; }
+  .vt-prof__av { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--vt-navy-2); border: 1.5px solid var(--vt-line-2); }
+  .vt-prof__av img { width: 24px; height: 24px; display: block; }
+  .vt-prof__who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .vt-prof__who strong { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .vt-prof__who span { font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-faint); margin-top: 3px; }
+  .vt-tick { width: 16px; height: 16px; display: inline-block; }
+  .vt-tick circle { fill: var(--vt-blue-deep); }
+  .vt-tick path { fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-prof__btn { font-size: 12.5px; font-weight: 700; color: var(--vt-navy); background: var(--vt-blue); border-radius: 99px; padding: 8px 14px; }
+  .vt-prof__tabs { display: flex; gap: 18px; margin: 16px 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--vt-line); font-family: var(--vt-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vt-faint); }
+  .vt-prof__tabs .is-on { color: var(--vt-light); position: relative; }
+  .vt-prof__tabs .is-on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -11px; height: 2px; background: var(--vt-blue); }
+  .vt-prof__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vt-prof__tile { position: relative; border-radius: 11px; overflow: hidden; aspect-ratio: 16 / 11; background: var(--vt-navy-2); }
+  .vt-prof__tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vt-prof__tt {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 10px 8px;
+    background: linear-gradient(180deg, transparent, rgba(6, 20, 40, 0.92));
+    display: flex; flex-direction: column; font-size: 12px; font-weight: 600; line-height: 1.2;
+  }
+  .vt-prof__tt em { font-style: normal; font-family: var(--vt-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vt-blue); margin-top: 3px; }
+  .vt-prof__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; }
+  .vt-prof__tools span { font-family: var(--vt-mono); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vt-faint); margin-right: 4px; }
+  .vt-prof__tools i { font-style: normal; font-family: var(--vt-mono); font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--vt-soft); background: rgba(232, 241, 255, 0.07); border-radius: 14px; padding: 4px 8px; }
+
+  /* 02 challenge fan */
+  .vt-fan { position: relative; width: min(100%, 520px); height: 360px; }
+  .vt-fan__card {
+    position: absolute; left: 50%; top: 50%; width: 62%; margin: 0;
+    background: var(--vt-navy-3); border: 1px solid var(--vt-line-2); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 34px 74px -34px rgba(0, 0, 0, 0.9);
+    transform: translate(-50%, -50%) translateX(var(--x)) translateY(var(--y)) rotate(var(--r));
+  }
+  .vt-fan__card[data-i='0'] { --x: -34%; --y: 4%; --r: -8deg; z-index: 1; }
+  .vt-fan__card[data-i='1'] { --x: 34%; --y: 6%; --r: 8deg; z-index: 1; }
+  .vt-fan__card[data-i='2'] { --x: 0%; --y: -4%; --r: 0deg; z-index: 2; }
+  .vt-fan__img { position: relative; aspect-ratio: 16 / 10; }
+  .vt-fan__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vt-fan__chip { position: absolute; top: 10px; left: 10px; font-family: var(--vt-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-light); background: rgba(12, 39, 72, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(232, 241, 255, 0.25); border-radius: 20px; padding: 5px 9px; }
+  .vt-fan figcaption { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 3px; }
+  .vt-fan figcaption span { font-family: var(--vt-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-blue); }
+  .vt-fan figcaption strong { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+
+  /* 03 companies: v1 analytics + task pipeline */
+  .vt-panel--co .vt-panel__vis { min-height: 380px; }
+  .vt-co__laptop { position: absolute; right: -2%; top: 46%; width: 88%; height: auto; transform: translateY(-50%); filter: drop-shadow(0 40px 50px rgba(12, 39, 72, 0.45)); }
+  .vt-pipe {
+    position: absolute; left: 0; bottom: 2%; z-index: 2; width: 230px;
+    padding: 16px; border-radius: 16px; background: var(--vt-navy); color: var(--vt-light);
+    box-shadow: 0 30px 60px -24px rgba(12, 39, 72, 0.75);
+  }
+  .vt-pipe__head { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--vt-line); }
+  .vt-pipe__av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--vt-navy); background: linear-gradient(135deg, #CFE1FF, #6FA8FF); }
+  .vt-pipe__head div { display: flex; flex-direction: column; }
+  .vt-pipe__head strong { font-size: 13.5px; font-weight: 700; }
+  .vt-pipe__head span { font-family: var(--vt-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-faint); margin-top: 2px; }
+  .vt-pipe__track { position: relative; margin-top: 12px; }
+  .vt-pipe__steps { position: relative; display: flex; flex-direction: column; gap: 9px; padding-left: 4px; }
+  .vt-pipe__rail { position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--vt-line-2); border-radius: 2px; overflow: hidden; }
+  .vt-pipe__rail i { position: absolute; inset: 0; background: var(--vt-blue); transform-origin: top; transform: scaleY(var(--pp, 1)); }
+  .vt-pipe__step { position: relative; display: flex; align-items: center; gap: 12px; font-family: var(--vt-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-light); }
+  .vt-pipe__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--vt-blue); box-shadow: 0 0 0 3px var(--vt-navy); position: relative; z-index: 1; }
+  .vt-pipe__step.is-last { color: #9FF0C1; font-weight: 600; }
+  .vt-pipe__step.is-last .vt-pipe__dot { background: #54D68C; box-shadow: 0 0 0 3px var(--vt-navy), 0 0 14px #54D68C; }
+  .vt-pipe__step.is-dim { color: var(--vt-faint); }
+  .vt-pipe__step.is-dim .vt-pipe__dot { background: var(--vt-panel-2); box-shadow: 0 0 0 3px var(--vt-navy); }
+
+  /* 04 console */
+  .vt-con {
+    width: min(100%, 600px); display: grid; grid-template-columns: 150px minmax(0, 1fr);
+    border-radius: 14px; overflow: hidden; border: 1px solid var(--vt-line-2); background: #0A1A31;
+    box-shadow: 0 50px 90px -50px rgba(0, 0, 0, 0.95);
+    font-family: var(--vt-sans);
+  }
+  .vt-con__side { padding: 14px 10px; background: #08172C; border-right: 1px solid var(--vt-line); display: flex; flex-direction: column; gap: 9px; }
+  .vt-con__brand { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; padding: 0 6px 6px; }
+  .vt-con__brand img { width: 16px; height: 16px; display: block; }
+  .vt-con__group { display: flex; flex-direction: column; gap: 1px; }
+  .vt-con__g { font-family: var(--vt-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); padding: 0 6px 3px; }
+  .vt-con__item { font-size: 11px; color: var(--vt-soft); padding: 3px 6px; border-radius: 6px; }
+  .vt-con__item.is-on { color: var(--vt-light); background: rgba(111, 168, 255, 0.16); box-shadow: inset 2px 0 0 var(--vt-blue); }
+  .vt-con__main { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .vt-con__top { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; }
+  .vt-con__top i { font-style: normal; color: var(--vt-faint); margin: 0 4px; }
+  .vt-con__env { font-family: var(--vt-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #FF9B9B; background: rgba(255, 90, 90, 0.14); border: 1px solid rgba(255, 120, 120, 0.35); border-radius: 99px; padding: 4px 8px; }
+  .vt-con__rules { display: flex; flex-direction: column; gap: 9px; padding: 12px; border-radius: 10px; background: rgba(232, 241, 255, 0.03); border: 1px solid var(--vt-line); }
+  .vt-con__rule { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; }
+  .vt-con__rn { font-size: 11px; color: var(--vt-soft); }
+  .vt-con__track { position: relative; height: 4px; border-radius: 4px; background: rgba(232, 241, 255, 0.1); }
+  .vt-con__fill { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v) * 100%); border-radius: 4px; background: var(--vt-blue); }
+  .vt-con__thumb { position: absolute; top: 50%; left: calc(var(--v) * 100%); width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(111, 168, 255, 0.35); }
+  .vt-con__pl { display: block; font-family: var(--vt-mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-faint); margin-bottom: 7px; }
+  .vt-con__tiles { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+  .vt-con__tile { aspect-ratio: 3 / 4; border-radius: 5px; background: linear-gradient(160deg, #1C447C, #123058); border: 1px solid var(--vt-line); }
+  .vt-con__tile.is-new { background: linear-gradient(160deg, #8EBBFF, #4E8FEF); }
+  .vt-con__grid { display: flex; flex-direction: column; gap: 3px; }
+  .vt-con__row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; }
+  .vt-con__cell { height: 9px; border-radius: 2px; background: rgba(111, 168, 255, var(--o)); }
+
+  /* 05 accelerator form */
+  .vt-form { position: relative; width: min(100%, 420px); }
+  .vt-form__card {
+    padding: 22px; border-radius: 18px; background: #fff; color: var(--vt-navy);
+    box-shadow: 0 40px 80px -40px rgba(12, 39, 72, 0.55); border: 1px solid rgba(12, 39, 72, 0.08);
+  }
+  .vt-form__k { font-family: var(--vt-mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vt-blue-deep); }
+  .vt-form__t { margin-top: 6px; font-family: var(--vt-display); font-size: 22px; font-weight: 700; letter-spacing: -0.025em; }
+  .vt-form__f { display: flex; flex-direction: column; gap: 5px; margin-top: 14px; }
+  .vt-form__f span { font-size: 11px; font-weight: 600; color: rgba(12, 39, 72, 0.6); }
+  .vt-form__f b { display: block; min-height: 40px; font-weight: 500; font-size: 14px; color: var(--vt-navy); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(12, 39, 72, 0.16); background: #F6F9FF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vt-form__f.is-tall b { min-height: 58px; white-space: normal; }
+  .vt-form__btn { display: block; margin-top: 18px; text-align: center; font-size: 14px; font-weight: 700; color: #fff; background: var(--vt-navy); border-radius: 99px; padding: 13px; }
+  .vt-form__done {
+    position: absolute; right: -6%; bottom: -10%; display: flex; gap: 12px; align-items: flex-start;
+    padding: 16px 18px; border-radius: 16px; background: var(--vt-navy); color: var(--vt-light);
+    box-shadow: 0 30px 60px -24px rgba(12, 39, 72, 0.8);
+  }
+  .vt-form__ok { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: #54D68C; color: var(--vt-navy); }
+  .vt-form__ok svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-form__done div { display: flex; flex-direction: column; gap: 3px; }
+  .vt-form__done strong { font-family: var(--vt-display); font-size: 17px; font-weight: 700; }
+  .vt-form__done span { font-family: var(--vt-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vt-soft); }
+
+  /* 06 phone */
+  .vt-phone {
+    position: relative; width: 250px; aspect-ratio: 560 / 1212; padding: 9px;
+    border-radius: 44px; background: linear-gradient(145deg, #2a3442, #0d1219 40%, #222b36);
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12) inset, 0 60px 110px -40px rgba(0, 0, 0, 0.9), 0 0 120px -20px rgba(111, 168, 255, 0.45);
+    transform: rotate(-4deg);
+  }
+  .vt-phone__screen { width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #000; }
+  .vt-phone__screen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* ---------- pinned horizontal mode ---------- */
+  .vt-tour.is-pinned .vt-tour__vp { height: 100vh; max-height: 1000px; min-height: 640px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+  .vt-tour.is-pinned .vt-tour__track {
+    flex-direction: row; gap: 28px; max-width: none; width: max-content; margin: 0;
+    padding: 0 max(40px, calc((100vw - 1120px) / 2));
+    will-change: transform;
+  }
+  .vt-tour.is-pinned .vt-panel { width: min(1060px, 82vw); height: min(620px, calc(100vh - 170px)); flex-shrink: 0; }
+  .vt-tour.is-pinned .vt-tour__progress {
+    display: block; position: relative; width: min(1120px, calc(100vw - 80px)); height: 2px; margin: 34px auto 0;
+    background: var(--vt-line-2); border-radius: 2px; overflow: hidden;
+  }
+  .vt-tour.is-pinned .vt-tour__progress i { position: absolute; inset: 0; background: var(--vt-blue); transform-origin: left; transform: scaleX(var(--p, 0)); }
+
+  @media (max-width: 900px) {
+    .vt-panel { grid-template-columns: 1fr; gap: 26px; border-radius: 22px; }
+    .vt-panel__vis { min-height: 0; }
+    .vt-panel::before { font-size: 150px; right: 10px; top: -0.18em; bottom: auto; }
+    .vt-fan { height: 300px; }
+    .vt-panel--co .vt-panel__vis { min-height: 0; flex-direction: column; gap: 0; }
+    .vt-co__laptop { position: relative; right: auto; top: auto; transform: none; width: 100%; }
+    .vt-pipe { position: relative; left: auto; bottom: auto; width: 100%; max-width: 330px; margin-top: -16%; }
+    .vt-con { grid-template-columns: 112px minmax(0, 1fr); }
+    .vt-con__item { font-size: 10px; }
+    .vt-con__rule { grid-template-columns: 84px 1fr; }
+    .vt-form__done { position: relative; right: auto; bottom: auto; margin: -18px 0 0 auto; width: max-content; max-width: 100%; }
+    .vt-phone { width: 220px; }
+  }
+  @media (max-width: 560px) {
+    .vt-tour__track { padding: 0 14px; gap: 16px; }
+    .vt-panel { padding: 24px 18px 22px; }
+    .vt-panel__t { font-size: 30px; }
+    .vt-panel__d { font-size: 15.5px; }
+    .vt-prof { padding: 14px; }
+    .vt-prof__btn { font-size: 11px; padding: 7px 11px; }
+    .vt-float-chip { font-size: 9px; padding: 7px 10px; }
+    .vt-float-chip--fb { top: -14px; right: 4px; }
+    .vt-float-chip--kd { bottom: -12px; left: 4px; }
+    .vt-fan { height: 240px; }
+    .vt-fan figcaption { padding: 8px 10px 10px; }
+    .vt-fan figcaption strong { font-size: 12px; }
+    .vt-con { grid-template-columns: 1fr; }
+    .vt-con__side { display: none; }
+  }
+</style>

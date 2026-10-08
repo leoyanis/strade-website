@@ -1,0 +1,241 @@
+---
+// Step two of kleus.ai's flowchart: one saved source splits into a path of short lessons.
+// Desktop: the six lessons land on a loose U-shaped arc, each with an arrow from the split
+// (geometry ported from the live AssignmentFan). Phones: the same list becomes the app's own
+// dashboard pattern, a raised "next up" card over pressed plates that wait their turn.
+import KlMedia from './KlMedia.astro';
+
+const LESSONS = [
+  { t: 'How revolutionaries crowned an emperor', m: 5 },
+  { t: 'Brumaire: the coup that ended the Republic', m: 6 },
+  { t: 'The Concordat: peace with the Church', m: 5 },
+  { t: 'The Civil Code that outlived him', m: 6 },
+  { t: 'Austerlitz and the empire at its peak', m: 5 },
+  { t: 'Moscow, 1812: where it broke', m: 6 },
+];
+
+// Fan geometry in a 1100 x 430 stage (the live site's numbers, re-based to the split point).
+const W = 160, GAP = 22, ARC = 30, TILT = 5, TOP = 140, DROP = 26, CX = 550;
+const JITTER: [number, number, number][] = [[3, 4, -1.5], [-4, -3, 1.2], [2, 5, -0.6], [-3, -2, 1.8], [4, 3, -1.1], [-2, 6, 0.9]];
+const n = LESSONS.length;
+const left0 = CX - (n * W + (n - 1) * GAP) / 2;
+const pos = LESSONS.map((_, i) => {
+  const u = (i / (n - 1)) * 2 - 1;
+  const [jx, jy, jr] = JITTER[i];
+  return {
+    x: left0 + i * (W + GAP) + W / 2 + jx,
+    y: TOP + ARC * (1 - u * u) + jy + (i === 0 ? DROP : 0),
+    r: -TILT * u + jr,
+  };
+});
+const arrows = pos.map((p) => {
+  const Y = p.y - 10;
+  return {
+    d: `M${CX} 0 C ${CX} ${(Y * 0.55).toFixed(1)}, ${p.x.toFixed(1)} ${(Y * 0.4).toFixed(1)}, ${p.x.toFixed(1)} ${Y.toFixed(1)}`,
+    head: `M${(p.x - 4.5).toFixed(1)} ${(Y - 6).toFixed(1)} L${p.x.toFixed(1)} ${Y.toFixed(1)} L${(p.x + 4.5).toFixed(1)} ${(Y - 6).toFixed(1)}`,
+  };
+});
+---
+
+<div class="path" data-kl-path>
+  <div class="path__source">
+    <div class="path__note" aria-hidden="true" data-path-note>
+      <span class="path__hand">Ex; 2h 41m documentary on Napoleon</span>
+      <svg class="path__scrawl path__scrawl--wide" viewBox="0 0 120 80" fill="none">
+        <path d="M8 8 C 22 40, 58 58, 104 60" pathLength="1" data-path-scrawl />
+        <path d="M92 50 L104 60 L90 68" pathLength="1" data-path-scrawl />
+      </svg>
+      <svg class="path__scrawl path__scrawl--narrow" viewBox="0 0 60 56" fill="none">
+        <path d="M14 4 C 4 22, 40 26, 34 50" pathLength="1" data-path-scrawl />
+        <path d="M26 42 L34 51 L41 41" pathLength="1" data-path-scrawl />
+      </svg>
+    </div>
+    <div class="path__media" data-path-media>
+      <KlMedia id="napoleon" />
+    </div>
+  </div>
+
+  <div class="path__split">
+    <span class="path__stem" aria-hidden="true" data-path-stem></span>
+    <p class="path__label" data-path-label>Gets split into core concepts &amp; topics</p>
+  </div>
+
+  <div class="path__stage">
+    <svg class="path__arrows" viewBox="0 0 1100 430" aria-hidden="true">
+      {arrows.map((a) => (
+        <g data-path-arrow>
+          <path class="path__curve" d={a.d} pathLength="1" />
+          <path class="path__head" d={a.head} />
+        </g>
+      ))}
+    </svg>
+    <ol class="path__lessons" aria-label="An example path, built from the documentary">
+      {LESSONS.map((l, i) => (
+        <li class:list={['ls', i === 0 && 'ls--first']} style={`--x:${pos[i].x.toFixed(1)};--y:${pos[i].y.toFixed(1)};--r:${pos[i].r.toFixed(2)}deg`}>
+          <div class="ls__card" data-path-card>
+            <span class="ls__head">
+              <span class="ls__n">{i === 0 ? 'Next up' : `Lesson ${i + 1}`}</span>
+              <span class="ls__n ls__n--fan">Lesson {i + 1}</span>
+              <span class="ls__dot" aria-hidden="true">·</span>
+              <span class="ls__m ls__m--list">about {l.m} min</span>
+            </span>
+            <span class="ls__t">{l.t}</span>
+            <span class="ls__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="ls__foot">
+              <span class="ls__m">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
+                about {l.m} min
+              </span>
+              {i === 0 && (
+                <span class="ls__go" aria-hidden="true">
+                  Begin
+                  <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </span>
+              )}
+            </span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</div>
+
+<style>
+  .path { position: relative; }
+
+  /* ---------- the source ---------- */
+  .path__source { position: relative; width: min(400px, 100%); margin: 0 auto; }
+  .path__media :global(.m) { width: 100%; }
+  .path__note {
+    position: absolute; right: calc(100% + 18px); top: 8px; width: 300px;
+    display: flex; flex-direction: column; align-items: flex-end;
+    pointer-events: none;
+  }
+  .path__hand {
+    font-family: 'Caveat', 'Bradley Hand', cursive; font-weight: 600; font-size: 27px; line-height: 1.05;
+    color: #B8741B; transform: rotate(-5deg); white-space: nowrap; margin-right: 26px;
+  }
+  .path__scrawl { width: 120px; height: 80px; margin-top: 2px; margin-right: -24px; }
+  .path__scrawl path { stroke: #B8741B; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .path__scrawl--narrow { display: none; }
+
+  /* ---------- the split ---------- */
+  .path__split { display: flex; flex-direction: column; align-items: center; }
+  .path__stem { display: block; width: 1px; height: 56px; background: linear-gradient(#989692, rgb(152 150 146 / 0.5)); transform-origin: top; }
+  .path__label {
+    margin: 14px 0 18px; text-align: center;
+    font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; color: #1B1A18;
+    text-wrap: balance;
+  }
+
+  /* ---------- fan (desktop) ---------- */
+  .path__stage {
+    position: relative; max-width: 1100px; margin: 0 auto;
+    aspect-ratio: 1100 / 430;
+    container-type: inline-size;
+    --u: calc(100cqw / 1100);
+  }
+  .path__arrows { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .path__curve, .path__head { fill: none; stroke: #989692; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .path__curve { stroke-opacity: 0.55; }
+  .path__head { stroke-opacity: 0.7; }
+  .path__lessons { list-style: none; margin: 0; padding: 0; }
+  .ls {
+    position: absolute;
+    left: calc(var(--x) / 1100 * 100%);
+    top: calc(var(--y) / 430 * 100%);
+    width: calc(160 * var(--u));
+    height: calc(200 * var(--u));
+    transform: translateX(-50%) rotate(var(--r));
+    transform-origin: 50% 0%;
+    z-index: 2;
+  }
+  .ls--first { transform: translateX(-50%) rotate(var(--r)) scale(1.1); z-index: 3; }
+  .ls__card {
+    height: 100%;
+    display: flex; flex-direction: column;
+    padding: calc(16 * var(--u));
+    border-radius: calc(12 * var(--u));
+    background: linear-gradient(180deg, #FCFBF8 0%, #F7F5F1 62%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.65), inset 0 -1px 0 rgb(52 40 24 / 0.035),
+      0 0 0 1px rgb(52 40 24 / 0.05), 0 1px 2px rgb(52 40 24 / 0.06),
+      0 16px 40px -22px rgb(52 40 24 / 0.4);
+    transition: translate 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+  }
+  .ls--first .ls__card {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.72), 0 0 0 1px rgb(52 40 24 / 0.05), 0 2px 4px rgb(52 40 24 / 0.05),
+      0 24px 52px -22px rgb(52 40 24 / 0.5);
+  }
+  .ls__card:hover { translate: 0 -4px; }
+  .ls__head { display: flex; align-items: baseline; gap: 6px; }
+  .ls__n { font-size: calc(12 * var(--u)); font-weight: 600; color: #B8741B; }
+  .ls__n:not(.ls__n--fan) { display: none; }
+  .ls__head .ls__dot, .ls__head .ls__m--list { display: none; }
+  .ls__t { margin-top: calc(8 * var(--u)); font-size: calc(15 * var(--u)); font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; color: #1B1A18; }
+  .ls__bars { margin-top: auto; display: flex; flex-direction: column; gap: calc(6 * var(--u)); }
+  .ls__bars i { display: block; height: calc(5 * var(--u)); border-radius: 9px; background: rgb(152 150 146 / 0.26); }
+  .ls__bars i:nth-child(1) { width: 100%; }
+  .ls__bars i:nth-child(2) { width: 80%; }
+  .ls__bars i:nth-child(3) { width: 60%; }
+  .ls__foot { margin-top: calc(12 * var(--u)); display: flex; align-items: center; justify-content: space-between; }
+  .ls__m { display: inline-flex; align-items: center; gap: 5px; font-size: calc(12 * var(--u)); color: #8A8781; font-variant-numeric: tabular-nums; }
+  .ls__m svg { width: calc(13 * var(--u)); height: calc(13 * var(--u)); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .ls__go { display: none; }
+
+  /* ---------- list (phones, small tablets) ---------- */
+  /* the handwritten note sits beside the card only when there is room for it */
+  @media (max-width: 1199px) {
+    .path__note { position: static; width: auto; align-items: center; margin-bottom: 4px; }
+    .path__hand { margin-right: 0; font-size: 25px; white-space: normal; text-align: center; }
+    .path__scrawl--wide { display: none; }
+    .path__scrawl--narrow { display: block; width: 46px; height: 44px; margin: 2px 0 -6px 120px; }
+  }
+  @media (max-width: 859px) {
+    .path__stem { height: 40px; }
+    .path__stage { aspect-ratio: auto; container-type: normal; max-width: 560px; }
+    .path__arrows { display: none; }
+    .path__lessons { display: flex; flex-direction: column; gap: 10px; }
+    .ls, .ls--first { position: static; width: auto; height: auto; transform: none; }
+    .ls__card {
+      padding: 14px 16px 15px; border-radius: 16px;
+      background: #EAE7E2;
+      box-shadow: inset 0 1px 3.5px rgb(52 40 24 / 0.085), inset 0 0 0 1px rgb(52 40 24 / 0.025), 0 1px 0 rgb(255 255 255 / 0.54);
+    }
+    .ls__card:hover { translate: none; }
+    .ls__head { gap: 6px; }
+    .ls__n, .ls__m, .ls__t { font-size: inherit; }
+    .ls__n--fan { display: inline; font-size: 13px; color: #8A8781; font-weight: 500; }
+    .ls__head .ls__dot, .ls__head .ls__m--list { display: inline; font-size: 13px; color: #8A8781; }
+    .ls__t { margin-top: 3px; font-size: 16.5px; font-weight: 500; color: #575652; line-height: 1.3; }
+    .ls__bars, .ls__foot { display: none; }
+
+    /* lesson 1 is the hero: raised, brighter, with the one amber key */
+    .ls--first .ls__card {
+      padding: 18px 18px 16px; border-radius: 18px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 100%);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.72), 0 0 0 1px rgb(52 40 24 / 0.04), 0 2px 4px rgb(52 40 24 / 0.05),
+        0 26px 54px -24px rgb(52 40 24 / 0.32);
+      margin-bottom: 6px;
+    }
+    .ls--first .ls__n:not(.ls__n--fan) { display: inline; font-size: 13px; color: #4A6741; font-weight: 600; }
+    .ls--first .ls__n--fan { color: #575652; }
+    .ls--first .ls__head .ls__dot, .ls--first .ls__head .ls__m--list { display: none; }
+    .ls--first .ls__t { font-size: 20px; font-weight: 500; color: #1B1A18; margin-top: 6px; }
+    .ls--first .ls__foot { display: flex; margin-top: 14px; }
+    .ls--first .ls__m { font-size: 15px; color: #575652; font-weight: 300; }
+    .ls--first .ls__m svg { width: 16px; height: 16px; color: #989692; }
+    .ls--first .ls__go {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px; border-radius: 999px;
+      font-size: 14px; font-weight: 500; color: #fff;
+      background: linear-gradient(180deg, #BF8131 0%, #B8741B 55%, #AF6E1A 100%);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -1px 0 rgb(0 0 0 / 0.1), 0 0 0 1px rgb(110 62 10 / 0.18), 0 1px 2px rgb(110 62 10 / 0.21), 0 4px 13px -3px rgb(184 116 27 / 0.21);
+      text-shadow: 0 -1px 0 rgb(60 30 0 / 0.22);
+    }
+    .ls--first .ls__go svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  }
+</style>

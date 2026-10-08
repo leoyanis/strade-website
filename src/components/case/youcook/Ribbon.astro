@@ -1,0 +1,81 @@
+---
+import { SPARK } from './hat';
+const front = ['Photo, voice or text in', 'A recipe in seconds', 'Step-by-step cook mode', 'AI chef chat', 'Weekly meal plans', 'Automatic shopping lists', 'Cook reminders'];
+const back = ['🍚 Rice', '🥦 Broccoli', '🥬 Lettuce', '🍊 Orange', '🥩 Beef', '🥛 Milk', '🥚 Eggs', '🧈 Butter', '🧀 Parmesan', '🌶️ Chilli', '🍝 Pasta', '🐟 Tuna', '🍋 Lemon', '🧅 Onion', '🥕 Carrot', '🍗 Chicken'];
+---
+
+<div class="ribbons" aria-label="What YouCook does">
+  <div class="ribbon ribbon--back" aria-hidden="true">
+    <div class="ribbon__track ribbon__track--rev">
+      {[0, 1].map(() => back.map((t) => <span class="ribbon__item ribbon__item--sm">{t}</span>))}
+    </div>
+  </div>
+  <div class="ribbon ribbon--front">
+    <div class="ribbon__track">
+      {[0, 1].map((k) =>
+        front.map((t) => (
+          <span class="ribbon__item" aria-hidden={k === 1 ? 'true' : undefined}>
+            {t}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={SPARK} /></svg>
+          </span>
+        ))
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .ribbons {
+    position: relative;
+    overflow: clip;
+    padding: 46px 0;
+    background: #fff;
+    z-index: 2;
+  }
+  .ribbon {
+    position: relative;
+    margin: 0 -60px;
+    overflow: hidden;
+  }
+  .ribbon--front {
+    background: var(--yc-coral);
+    transform: rotate(-2.2deg);
+    box-shadow: 0 14px 30px -12px rgba(255, 107, 107, 0.55);
+    z-index: 2;
+  }
+  .ribbon--back {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    background: var(--yc-teal);
+    transform: translateY(-50%) rotate(2.4deg);
+    z-index: 1;
+  }
+  .ribbon__track {
+    display: flex;
+    width: max-content;
+    align-items: center;
+  }
+  .ribbon__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 22px;
+    padding: 15px 0 15px 22px;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+  .ribbon__item svg { width: 18px; height: 18px; flex: none; }
+  .ribbon__item svg path { fill: #fff; opacity: 0.85; }
+  .ribbon__item--sm { font-size: 15px; padding: 11px 0 11px 26px; color: #eafaf7; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ribbon__track { animation: yc-marquee 46s linear infinite; }
+    .ribbon__track--rev { animation: yc-marquee-rev 60s linear infinite; }
+  }
+  @keyframes yc-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes yc-marquee-rev { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+</style>

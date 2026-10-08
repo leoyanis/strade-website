@@ -2,7 +2,7 @@
 import { t, type Locale } from '../i18n/utils';
 interface Props { locale: Locale; }
 const { locale } = Astro.props;
-const CALENDLY = 'https://calendly.com/yanis-schweizer';
+const CALENDLY = 'https://cal.com/yanis-schweizer-lfdylj/discovery-call?overlayCalendar=true';
 ---
 
 <section class="eng-section">
@@ -10,7 +10,7 @@ const CALENDLY = 'https://calendly.com/yanis-schweizer';
     <span class="label">{t(locale, 'consulting.offerings_label')}</span>
 
     <div class="eng-top-row">
-      <!-- Card 1: Free Audit -->
+      <!-- Card 1: The Blueprint -->
       <div class="eng-card reveal-section" style="--reveal-delay:0s; border-top: 2px solid var(--cyan)">
         <h3>{t(locale, 'consulting.card1_h3')}</h3>
         <p class="eng-body">{t(locale, 'consulting.card1_body')}</p>

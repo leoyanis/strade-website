@@ -1,0 +1,1200 @@
+---
+// Playivity: branded side-quest case study.
+// Brand from Playivity's own guidelines (Fredoka + Inter, their colour tokens, chunky 3D CTAs).
+// The Pals are real delivered loops, flattened onto white so they play the same in every browser.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import { getProject } from '../../data/work';
+
+const p = getProject('playivity')!;
+const I = '/images/work/playivity';
+
+const pals = [
+  { id: 'movi', name: 'Movi', verb: 'Move', domain: 'Physical', line: 'An energetic explorer who loves to move.', state: 'Encourage' },
+  { id: 'lexi', name: 'Lexi', verb: 'Think', domain: 'Cognitive', line: 'A curious thinker who explains and discovers.', state: 'Celebrate' },
+  { id: 'emmi', name: 'Emmi', verb: 'Feel', domain: 'Affective', line: 'A kind encourager who looks after wellbeing.', state: 'Ready' },
+  { id: 'nexo', name: 'Nexo', verb: 'Connect', domain: 'Social', line: 'A team motivator who brings everyone together.', state: 'Celebrate' },
+];
+const states = [
+  { id: 'celebrate', label: 'Celebrate', note: 'jump, bounce, cheer' },
+  { id: 'ready', label: 'Ready', note: 'breathe, blink, sway' },
+  { id: 'encourage', label: 'Encourage', note: 'wave, nod, beckon' },
+];
+const doodles = ['sun', 'lightning', 'rainbow', 'footprints', 'flame', 'chair', 'people', 'flag', 'sparkle', 'star', 'flower', 'watch', 'chart', 'wand', 'house', 'head'];
+const week = [
+  { d: 'Mon', s: 58, l: 34, m: 8 },
+  { d: 'Tue', s: 50, l: 38, m: 12 },
+  { d: 'Wed', s: 60, l: 32, m: 8 },
+  { d: 'Thu', s: 50, l: 34, m: 8 },
+  { d: 'Fri', s: 50, l: 34, m: 8 },
+];
+const energy = [
+  { d: 'Mon', v: 72 }, { d: 'Tue', v: 85 }, { d: 'Wed', v: 64 }, { d: 'Thu', v: 92 }, { d: 'Fri', v: 78 },
+];
+const decisions = [
+  { icon: 'chart', t: 'Wire to tokens, never to hex.', b: 'Every colour carries a light and a dark value. Bind a component to the token and both themes come for free.' },
+  { icon: 'flower', t: 'The wording never shames.', b: 'Progress reads as how far there is to go. Sitting still gets a gentle nudge, never a red fail.' },
+  { icon: 'sparkle', t: 'The chunky button means action.', b: 'The raised 3D style is kept for real moments like Start game and How did we do? Everything else stays flat.' },
+  { icon: 'lightning', t: 'Auto Play has no start button.', b: 'It runs whenever Playposts are connected, so a teacher never has to remember to switch it on.' },
+  { icon: 'house', t: 'The top bar stays for teachers.', b: 'Overview, Classes and Let’s Play. Admin lives in the avatar menu, out of the way.' },
+];
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/playivity"
+  noAlternates
+  bare
+  navTheme="light"
+  ogImage="/og/work-playivity.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" />
+
+  <div class="pv">
+    <!-- ============================== HERO ============================== -->
+    <header class="pv-hero" id="pv-hero">
+      <div class="pv-hero__doodles" aria-hidden="true">
+        <i class="dd dd--sun" style={`--m:url(${I}/doodles/sun.webp)`}></i>
+        <i class="dd dd--sparkle" style={`--m:url(${I}/doodles/sparkle.webp)`}></i>
+        <i class="dd dd--rainbow" style={`--m:url(${I}/doodles/rainbow.webp)`}></i>
+        <i class="dd dd--bolt" style={`--m:url(${I}/doodles/lightning.webp)`}></i>
+        <i class="dd dd--star" style={`--m:url(${I}/doodles/star.webp)`}></i>
+        <i class="dd dd--flower" style={`--m:url(${I}/doodles/flower.webp)`}></i>
+      </div>
+
+      <div class="pv-wrap pv-hero__grid">
+        <div class="pv-hero__meta">
+          <img class="pv-hero__logo" src={`${I}/logo.webp`} alt="Playivity" width="520" height="268" />
+          <ul class="pv-chips" aria-label="Project facts">
+            <li class="pv-chip">Client: Playivity</li>
+            <li class="pv-chip">{p.year}</li>
+            <li class="pv-chip pv-chip--met"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M8 12.5l2.6 2.6L16 9.6"/></svg>{p.status}</li>
+          </ul>
+        </div>
+
+        <div class="pv-lineup" aria-label="The four Playivity Pals">
+          {pals.map((pal, i) => (
+            <figure class={`pv-pal pv-pal--${pal.id}`} style={`--i:${i}`}>
+              <div class="pv-pal__stage">
+                <div class="pv-pal__body">
+                  <video class="pv-pal__vid" autoplay muted loop playsinline preload="auto" width="480" height="480" poster={`${I}/pals/${pal.id}.webp`} aria-label={`${pal.name}, animated`}>
+                    <source src={`${I}/pals/${pal.id}.webm`} type="video/webm" />
+                    <source src={`${I}/pals/${pal.id}.mp4`} type="video/mp4" />
+                  </video>
+                </div>
+                <span class="pv-pal__shadow" aria-hidden="true"></span>
+              </div>
+              <figcaption>
+                <strong>{pal.name}</strong>
+                <span>{pal.verb}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <div class="pv-hero__copy">
+          <p class="pv-eyebrow">UI/UX design · Design system · Character animation</p>
+          <h1 class="pv-h1">Movement data that feels like <span class="pv-play" aria-label="play"><b>p</b><b>l</b><b>a</b><b>y</b></span>.</h1>
+          <p class="pv-lede">Playivity measures how children aged 3 to 11 move at school. I gave its platform one design system, four animated Pals and its five core screens, ready for its engineers to build.</p>
+          <div class="pv-ctas">
+            <a class="pv-btn pv-btn--cta" href="#pv-deck-sec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c.7 4.6 2.9 6.8 7.5 7.5-4.6.7-6.8 2.9-7.5 7.5-.7-4.6-2.9-6.8-7.5-7.5 4.6-.7 6.8-2.9 7.5-7.5z"/></svg>How did we do?</a>
+            <a class="pv-btn pv-btn--ghost" href="#pv-screens">See the screens</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================== NUMBERS ============================== -->
+    <section class="pv-nums" aria-label="Project in numbers">
+      <div class="pv-wrap pv-nums__row">
+        <div class="pv-num pv-num--green">
+          <span class="pv-num__kicker">The cast</span>
+          <span class="pv-num__val"><b data-count="4">4</b><i>Pals</i></span>
+          <span class="pv-num__lbl">characters, animated and placed across the platform</span>
+          <span class="pv-pill pv-pill--success">Move · Think · Feel · Connect</span>
+        </div>
+        <div class="pv-num pv-num--blue">
+          <span class="pv-num__kicker">The motion</span>
+          <span class="pv-num__val"><b data-count="12">12</b><i>loops</i></span>
+          <span class="pv-num__lbl">every Pal in three states, as video ready to embed</span>
+          <span class="pv-pill pv-pill--steps">Celebrate · Ready · Encourage</span>
+        </div>
+        <div class="pv-num pv-num--pink">
+          <span class="pv-num__kicker">The system</span>
+          <span class="pv-num__val"><b data-count="1">1</b><i>system</i></span>
+          <span class="pv-num__lbl">one set of tokens for every screen, light and dark</span>
+          <span class="pv-pill pv-pill--pupils">Dashboard + admin, together</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== PROBLEM ============================== -->
+    <section class="pv-problem">
+      <div class="pv-wrap pv-problem__grid">
+        <div class="pv-problem__copy">
+          <p class="pv-kicker">The problem</p>
+          <h2 class="pv-h2">It worked. It just didn’t feel like <em>play</em> yet.</h2>
+          <p>Playivity’s wearables and Playposts were already sending live data into a working React app. But the teacher dashboard and the admin area had grown into two different looks, and the interface didn’t feel playful or made for children.</p>
+          <p>Their engineers needed one source of truth to build from. The children needed something that celebrates moving and never shames sitting still.</p>
+        </div>
+        <ul class="pv-notes" aria-label="What the design had to handle">
+          <li class="pv-note pv-note--green"><i class="dd" style={`--m:url(${I}/doodles/people.webp)`} aria-hidden="true"></i><strong>Ages 3 to 11</strong><span>Big, clear and friendly, without talking down.</span></li>
+          <li class="pv-note pv-note--blue"><i class="dd" style={`--m:url(${I}/doodles/watch.webp)`} aria-hidden="true"></i><strong>Live data</strong><span>Streaming in from wearables and Playpost stations.</span></li>
+          <li class="pv-note pv-note--pink"><i class="dd" style={`--m:url(${I}/doodles/rainbow.webp)`} aria-hidden="true"></i><strong>Two rooms</strong><span>A teacher’s laptop and a whole-school assembly screen.</span></li>
+          <li class="pv-note pv-note--yellow"><i class="dd" style={`--m:url(${I}/doodles/flower.webp)`} aria-hidden="true"></i><strong>No shaming</strong><span>Celebrate moving. Nudge sitting still, gently.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== PALS ============================== -->
+    <section class="pv-cast" id="pv-cast">
+      <div class="pv-wrap">
+        <div class="pv-sechead">
+          <p class="pv-kicker">The Pals</p>
+          <h2 class="pv-h2">Four Pals, four ways to grow.</h2>
+          <p class="pv-sechead__p">Each Pal stands for one domain of physical literacy, and each one has three looping states. They turn up where they help: dashboard headers, Let’s Play, the Playpost screen and the assembly summary.</p>
+        </div>
+
+        <div class="pv-cast__grid">
+          <div class="pv-cast__states" aria-hidden="true">
+            <span></span>
+            {states.map((s) => <span><b>{s.label}</b><i>{s.note}</i></span>)}
+          </div>
+          {pals.map((pal) => (
+            <article class={`pv-castrow pv-castrow--${pal.id}`}>
+              <header class="pv-castrow__id">
+                <h3>{pal.name}</h3>
+                <span class="pv-castrow__dom">{pal.domain}</span>
+                <p>{pal.line}</p>
+              </header>
+              <ul class="pv-castrow__poses">
+                {states.map((s) => (
+                  <li>
+                    <img src={`${I}/poses/${pal.id}-${s.id}.webp`} alt={`${pal.name}, ${s.label} pose`} width="240" height="240" loading="lazy" decoding="async" />
+                    <span>{s.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== DECK ============================== -->
+    <section class="pv-decksec" id="pv-deck-sec">
+      <div class="pv-wrap">
+        <div class="pv-sechead pv-sechead--center">
+          <p class="pv-kicker">The big moment</p>
+          <h2 class="pv-h2">One pink button turns a week of data into an assembly.</h2>
+          <p class="pv-sechead__p">“How did we do?” walks the whole class through its week, one big number at a time, with a Pal for each win. Figma can’t play motion, so I also handed over a runnable reference for every entrance, count-up and confetti burst.</p>
+        </div>
+
+        <div class="pv-deck" id="pv-deck" aria-roledescription="carousel" aria-label="How did we do? assembly view">
+          <div class="pv-deck__stage">
+            <canvas class="pv-deck__confetti" aria-hidden="true"></canvas>
+
+            <div class="pv-slide is-live" data-tint="none" aria-label="Slide 1 of 7">
+              <div class="pv-slide__row">
+                {['lexi', 'movi', 'emmi', 'nexo'].map((id) => (
+                  <span class="pv-slot pv-slot--sm"><img src={`${I}/poses/${id}-celebrate.webp`} alt="" width="240" height="240" loading="lazy" /></span>
+                ))}
+              </div>
+              <p class="pv-slide__title">How did we do?</p>
+              <p class="pv-slide__sub">Owls school · Class C · this week</p>
+              <button class="pv-btn pv-btn--start" type="button" data-go="1">✦ Start</button>
+            </div>
+
+            <div class="pv-slide" data-tint="green" data-confetti aria-label="Slide 2 of 7">
+              <span class="pv-slot"><video muted loop playsinline preload="none" width="480" height="480" poster={`${I}/pals/movi.webp`} data-src={`${I}/pals/movi`}></video></span>
+              <p class="pv-slide__kicker">Movi · Power Play</p>
+              <p class="pv-slide__metric" data-tint="green"><b data-to="42">42</b><i>min</i></p>
+              <p class="pv-slide__head">We smashed Power Play!</p>
+              <span class="pv-pill pv-pill--success">+12 over goal</span>
+            </div>
+
+            <div class="pv-slide" data-tint="blue" aria-label="Slide 3 of 7">
+              <span class="pv-slot"><video muted loop playsinline preload="none" width="480" height="480" poster={`${I}/pals/movi.webp`} data-src={`${I}/pals/movi`}></video></span>
+              <p class="pv-slide__kicker">Movi · Steps</p>
+              <p class="pv-slide__metric" data-tint="blue"><b data-to="6842">6,842</b><i>steps</i></p>
+              <p class="pv-slide__head">Look how far we walked!</p>
+              <span class="pv-pill pv-pill--steps">+842 past goal</span>
+            </div>
+
+            <div class="pv-slide" data-tint="pink" aria-label="Slide 4 of 7">
+              <span class="pv-slot"><video muted loop playsinline preload="none" width="480" height="480" poster={`${I}/pals/emmi.webp`} data-src={`${I}/pals/emmi`}></video></span>
+              <p class="pv-slide__kicker">Emmi · Feeling good</p>
+              <p class="pv-slide__metric" data-tint="pink"><b data-to="46">46</b><i>%</i></p>
+              <p class="pv-slide__head">A brilliant balance!</p>
+              <p class="pv-slide__sub">Almost half our day was active, and we rested too!</p>
+            </div>
+
+            <div class="pv-slide" data-tint="pink" data-confetti aria-label="Slide 5 of 7">
+              <span class="pv-slot"><video muted loop playsinline preload="none" width="480" height="480" poster={`${I}/pals/nexo.webp`} data-src={`${I}/pals/nexo`}></video></span>
+              <p class="pv-slide__kicker">Nexo · Together</p>
+              <p class="pv-slide__metric" data-tint="pink"><b data-to="80">80</b><i>%</i></p>
+              <p class="pv-slide__head">We did it as a team!</p>
+              <span class="pv-pill pv-pill--pupils">Whole-class win</span>
+            </div>
+
+            <div class="pv-slide" data-tint="blue" aria-label="Slide 6 of 7">
+              <span class="pv-slot"><video muted loop playsinline preload="none" width="480" height="480" poster={`${I}/pals/lexi.webp`} data-src={`${I}/pals/lexi`}></video></span>
+              <p class="pv-slide__kicker">Lexi · Did you know?</p>
+              <p class="pv-slide__head pv-slide__head--big">Class C led the whole school in Power Play!</p>
+              <span class="pv-pill pv-pill--steps">Top of the school</span>
+            </div>
+
+            <div class="pv-slide" data-tint="none" data-confetti aria-label="Slide 7 of 7">
+              <div class="pv-slide__row">
+                {['lexi', 'movi', 'emmi', 'nexo'].map((id) => (
+                  <span class="pv-slot pv-slot--sm"><img src={`${I}/poses/${id}-celebrate.webp`} alt="" width="240" height="240" loading="lazy" /></span>
+                ))}
+              </div>
+              <p class="pv-slide__title">Brilliant week, Owls!</p>
+              <p class="pv-slide__sub">See you again next week 👋</p>
+              <div class="pv-slide__btns">
+                <button class="pv-btn pv-btn--start pv-btn--blue" type="button" data-go="0">✦ Watch again</button>
+              </div>
+            </div>
+
+            <button class="pv-deck__nav pv-deck__nav--prev" type="button" aria-label="Previous slide" data-step="-1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="pv-deck__nav pv-deck__nav--next" type="button" aria-label="Next slide" data-step="1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+            <div class="pv-deck__dots" role="tablist" aria-label="Choose a slide">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <button type="button" role="tab" class={i === 0 ? 'is-on' : ''} aria-label={`Slide ${i + 1}`} data-go={i}></button>
+              ))}
+            </div>
+          </div>
+          <p class="pv-deck__note">Rebuilt here from the delivered design and motion reference, with its demo data.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== SYSTEM ============================== -->
+    <section class="pv-system" id="pv-system">
+      <div class="pv-wrap">
+        <div class="pv-sechead">
+          <p class="pv-kicker">The system</p>
+          <h2 class="pv-h2">One system, from the laptop to the assembly hall.</h2>
+          <p class="pv-sechead__p">The dashboard and the admin area now share one set of tokens for colour, type, spacing and radius. Every colour has one job everywhere, so a chart reads the same way on every screen.</p>
+        </div>
+
+        <div class="pv-sys">
+          <!-- colour language -->
+          <div class="pv-card pv-card--colour">
+            <h3 class="pv-card__t">Every colour has one job</h3>
+            <ul class="pv-legend">
+              <li style="--c:#A4A7AE"><i class="dd" style={`--m:url(${I}/doodles/chair.webp)`} aria-hidden="true"></i><b>Sedentary</b><span>sitting still</span></li>
+              <li style="--c:#FEC84B"><i class="dd" style={`--m:url(${I}/doodles/footprints.webp)`} aria-hidden="true"></i><b>Light activity</b><span>moving about</span></li>
+              <li style="--c:#85D015"><i class="dd" style={`--m:url(${I}/doodles/flame.webp)`} aria-hidden="true"></i><b>Power Play</b><span>heart pumping</span></li>
+              <li style="--c:#53B1FD"><i class="dd" style={`--m:url(${I}/doodles/footprints.webp)`} aria-hidden="true"></i><b>Steps</b><span>every one counts</span></li>
+              <li style="--c:#F670C7"><i class="dd" style={`--m:url(${I}/doodles/people.webp)`} aria-hidden="true"></i><b>Pupils</b><span>who’s on target</span></li>
+            </ul>
+            <div class="pv-week" aria-label="Weekly activity composition, demo data">
+              {week.map((w) => (
+                <div class="pv-week__col">
+                  <div class="pv-week__bar">
+                    <span class="seg seg--m" style={`--h:${w.m}`}>{w.m}%</span>
+                    <span class="seg seg--l" style={`--h:${w.l}`}>{w.l}%</span>
+                    <span class="seg seg--s" style={`--h:${w.s}`}>{w.s}%</span>
+                  </div>
+                  <span class="pv-week__d">{w.d}</span>
+                </div>
+              ))}
+            </div>
+            <p class="pv-card__foot">Red is reserved for real errors. Sitting still is a calm grey, never a fail. <span>Charts here use the design’s demo data.</span></p>
+          </div>
+
+          <!-- charts a child can read -->
+          <div class="pv-card pv-card--charts">
+            <h3 class="pv-card__t">Charts a child can read</h3>
+            <p class="pv-card__p">Standard charts became things you get at a glance: buckets that fill up as the day adds up, and thermometers that warm up towards the goal.</p>
+            <div class="pv-buckets">
+              <div class="pv-movisays">
+                <img src={`${I}/poses/movi-celebrate.webp`} alt="" width="240" height="240" loading="lazy" />
+                <p><b>Movi says:</b> Awesome! Both goals are met today! 🎉</p>
+              </div>
+              <div class="pv-bucket pv-bucket--green" style="--fill:100">
+                <div class="pv-bucket__tank"><span class="pv-bucket__fill"></span><span class="pv-bucket__goal"></span><span class="pv-bucket__val"><b>35</b><i>/ 30 min</i></span></div>
+                <strong>MVPA time</strong><em>+5 over goal</em>
+              </div>
+              <div class="pv-bucket pv-bucket--blue" style="--fill:100">
+                <div class="pv-bucket__tank"><span class="pv-bucket__fill"></span><span class="pv-bucket__goal"></span><span class="pv-bucket__val"><b>6,480</b><i>/ 6k</i></span></div>
+                <strong>Daily steps</strong><em>+480 over goal</em>
+              </div>
+            </div>
+            <div class="pv-thermo" aria-label="This week's energy, demo data">
+              <div class="pv-thermo__head"><b>This week’s energy</b><span class="pv-thermo__key">Warming up → Goal!</span></div>
+              <div class="pv-thermo__row">
+                {energy.map((e) => (
+                  <div class="pv-thermo__col" style={`--v:${e.v}`}>
+                    <span class="pv-thermo__pct">{e.v}%</span>
+                    <span class="pv-thermo__tube"><span class="pv-thermo__fill"></span></span>
+                    <span class="pv-thermo__d">{e.d}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <!-- type, shape, icons -->
+          <div class="pv-card pv-card--type">
+            <div class="pv-type">
+              <div class="pv-type__spec">
+                <span class="pv-type__metric">8,420</span>
+                <span class="pv-type__title">School Overview</span>
+                <span class="pv-type__body">Average MVPA across all pupils this week.</span>
+                <span class="pv-type__cap">Mon–Fri · Weekly average</span>
+              </div>
+              <div class="pv-type__notes">
+                <p><b>Fredoka</b> for titles and numbers, big enough to read across a hall. <b>Inter</b> for everything a teacher reads up close.</p>
+                <div class="pv-type__btns">
+                  <button class="pv-btn pv-btn--cta pv-btn--sm" type="button" tabindex="-1">✦ How did we do?</button>
+                  <button class="pv-btn pv-btn--start pv-btn--sm" type="button" tabindex="-1">✦ Start game</button>
+                  <span class="pv-chip pv-chip--met">Met</span>
+                  <span class="pv-chip pv-chip--track">On track</span>
+                </div>
+                <p class="pv-type__small">Generous corners and chunky pills on an 8-point grid.</p>
+              </div>
+            </div>
+            <div class="pv-icons">
+              <p class="pv-icons__t">A hand-drawn icon set that matches the Pals’ ink lines</p>
+              <ul class="pv-icons__grid">
+                {doodles.map((d, i) => <li style={`--k:${i % 4}`}><i class="dd" style={`--m:url(${I}/doodles/${d}.webp)`} aria-hidden="true"></i></li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== SCREENS ============================== -->
+    <section class="pv-screens" id="pv-screens">
+      <div class="pv-wrap">
+        <div class="pv-sechead">
+          <p class="pv-kicker">The screens</p>
+          <h2 class="pv-h2">Every key screen, down to the empty state.</h2>
+          <p class="pv-sechead__p">School view, class view, Let’s Play, the 3.5-inch Playpost screen and the “How did we do?” summary, each with its default, hover, active, disabled and empty states, in one clickable Figma prototype.</p>
+        </div>
+
+        <div class="pv-shot" id="pv-theme" data-mode="light">
+          <div class="pv-shot__bar">
+            <span class="pv-shot__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="pv-shot__url">School Overview</span>
+            <div class="pv-seg" role="group" aria-label="Theme">
+              <button type="button" class="is-on" data-mode="light" aria-pressed="true">☀ Light</button>
+              <button type="button" data-mode="dark" aria-pressed="false">☾ Dark</button>
+            </div>
+          </div>
+          <div class="pv-shot__frame">
+            <img class="pv-shot__light" src={`${I}/school-light.webp`} alt="Playivity School Overview in the light theme" width="1280" height="1215" loading="lazy" decoding="async" />
+            <img class="pv-shot__dark" src={`${I}/school-dark.webp`} alt="Playivity School Overview in the dark theme" width="1280" height="1215" loading="lazy" decoding="async" />
+          </div>
+          <p class="pv-shot__cap"><b>Light for the teacher’s laptop. Dark for the big screen.</b> Same layout, same tokens.</p>
+        </div>
+
+        <div class="pv-shots2">
+          <figure class="pv-shot pv-shot--class">
+            <div class="pv-shot__frame"><img src={`${I}/class-view.webp`} alt="Class overview with buckets, thermometers and the Sedentary threshold chart" width="1280" height="1216" loading="lazy" decoding="async" /></div>
+            <figcaption>The class view: targets filling up, the week’s energy, and a gentle check-in from Emmi when sitting time runs high.</figcaption>
+          </figure>
+          <figure class="pv-phone">
+            <div class="pv-phone__body"><img src={`${I}/mobile-overview.webp`} alt="School Overview on a phone in the dark theme" width="440" height="1160" loading="lazy" decoding="async" /></div>
+            <figcaption>The same system on a phone.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== HOW ============================== -->
+    <section class="pv-how">
+      <div class="pv-wrap pv-how__grid">
+        <div class="pv-how__copy">
+          <p class="pv-kicker">How I built it</p>
+          <h2 class="pv-h2">Built to be built.</h2>
+          <p>Everything lives in one Figma file: tokens, type, icons, components and screens. Their engineers read it in Dev Mode and build it in React, against their Rust and GraphQL backend. My job was to make the calls that keep it consistent.</p>
+          <ol class="pv-decisions">
+            {decisions.map((d, i) => (
+              <li>
+                <span class="pv-decisions__n">{i + 1}</span>
+                <div><b>{d.t}</b><span>{d.b}</span></div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <aside class="pv-how__side">
+          <div class="pv-tree" aria-label="The handover pack">
+            <p class="pv-tree__t">The handover pack</p>
+            <ul>
+              <li><i class="dd" style={`--m:url(${I}/doodles/pencil.webp)`} aria-hidden="true"></i><b>Playivity_Figma.fig</b><span>the system and every screen</span></li>
+              <li><i class="dd" style={`--m:url(${I}/doodles/sparkle.webp)`} aria-hidden="true"></i><b>animation-reference-how-did-we-do.html</b><span>the motion spec for the assembly view</span></li>
+              <li><i class="dd" style={`--m:url(${I}/doodles/watch.webp)`} aria-hidden="true"></i><b>webm-tester.html</b><span>check each loop on light and dark</span></li>
+              <li><i class="dd" style={`--m:url(${I}/doodles/star.webp)`} aria-hidden="true"></i><b>Animations/</b><span>every Pal loop as WebM, MP4 and MOV</span></li>
+              <li><i class="dd" style={`--m:url(${I}/doodles/flag.webp)`} aria-hidden="true"></i><b>README</b><span>which file to use, and when</span></li>
+            </ul>
+          </div>
+          <div class="pv-pipe">
+            <p class="pv-tree__t">The loop pipeline</p>
+            <p>A small cleanup script I wrote cuts the white background from the edges inward, so teeth and eye highlights survive. It removes the halo and the audio, then exports transparent WebM for the web and ProRes masters for editors.</p>
+            <code>&lt;video autoplay loop muted playsinline&gt;</code>
+          </div>
+          <ul class="pv-stack" aria-label="Tools">
+            <li>Figma</li><li>Dev Mode</li><li>Design tokens</li><li>Python</li><li>FFmpeg</li><li>WebM + MP4</li>
+          </ul>
+        </aside>
+      </div>
+
+      <div class="pv-wrap">
+        <div class="pv-outcome">
+          <div class="pv-outcome__pals" aria-hidden="true">
+            {['lexi', 'movi', 'emmi', 'nexo'].map((id) => <img src={`${I}/poses/${id}-celebrate.webp`} alt="" width="240" height="240" loading="lazy" />)}
+          </div>
+          <p class="pv-outcome__t">Delivered.</p>
+          <p class="pv-outcome__p">The design system, the Pals and their 12 loops (shipped as 25 takes to pick from), five high-fidelity surfaces and the handover pack. Playivity’s own team builds it from here, from one source of truth.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <CaseNext current="playivity" />
+</Base>
+
+<style>
+  /* ------------------------------------------------------------------ tokens */
+  .pv {
+    --g25: #ffffff; --g50: #fafafa; --g100: #f5f5f5; --g200: #e9eaeb; --g300: #d5d7da; --g400: #a4a7ae;
+    --g500: #717680; --g600: #535862; --g700: #414651; --g900: #181d27; --g950: #0c0e14;
+    --green50: #f4ffeb; --green100: #e7fdd5; --green200: #cffba9; --green500: #85d015; --green600: #65a300; --green800: #3e6210;
+    --blue50: #eff8ff; --blue100: #d1e9ff; --blue200: #b2ddff; --blue300: #84caff; --blue400: #53b1fd; --blue500: #2e90fa; --blue700: #175cd3;
+    --pink50: #fdf2fa; --pink100: #fce7f6; --pink200: #fcceee; --pink300: #faa7e0; --pink400: #f670c7; --pink500: #ee46bc; --pink700: #c11574; --pink900: #851651;
+    --yellow50: #fffaeb; --yellow200: #fedf89; --yellow300: #fec84b; --yellow500: #f79009; --orange600: #dc6803; --orange700: #b54708;
+    --ink: var(--g900); --ink-2: var(--g600); --ink-3: var(--g500);
+    --display: 'Fredoka', 'Nunito', system-ui, sans-serif;
+    --ui: 'Inter', system-ui, sans-serif;
+    font-family: var(--ui);
+    color: var(--ink);
+    background: #fff;
+    overflow-x: clip;
+  }
+  :global(body) { background: #ffffff; }
+  :global(body[data-nav='light'] #site-nav.is-scrolled) { background: rgba(255, 255, 255, 0.82); }
+
+  .pv-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; position: relative; }
+  .pv-problem__grid > *, .pv-how__grid > *, .pv-sys > *, .pv-type > *, .pv-shots2 > * { min-width: 0; }
+  .pv-kicker {
+    font: 600 13px/1 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  }
+  .pv-kicker::before {
+    content: ''; width: 34px; height: 8px; border-radius: 99px;
+    background: linear-gradient(90deg, var(--green500) 0 25%, var(--blue500) 25% 50%, var(--pink500) 50% 75%, var(--yellow500) 75%);
+  }
+  .pv-h2 {
+    font-family: var(--display); font-weight: 600; letter-spacing: -0.01em; line-height: 1.04;
+    font-size: clamp(34px, 5vw, 60px); color: var(--ink); max-width: 860px;
+  }
+  .pv-h2 em { font-style: normal; color: var(--pink500); }
+  .pv-sechead { margin-bottom: clamp(36px, 5vw, 64px); }
+  .pv-sechead--center { text-align: center; }
+  .pv-sechead--center .pv-h2, .pv-sechead--center .pv-sechead__p { margin-left: auto; margin-right: auto; }
+  .pv-sechead__p { margin-top: 18px; max-width: 640px; font-size: 18px; line-height: 1.6; color: var(--ink-2); }
+
+  /* hand-drawn doodle, coloured by mask */
+  .dd {
+    display: inline-block; width: 40px; height: 40px; background: currentColor;
+    -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat;
+  }
+
+  /* chips + pills + buttons */
+  .pv-chips { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .pv-chip {
+    display: inline-flex; align-items: center; gap: 6px; font: 600 13px/1 var(--ui);
+    padding: 8px 12px; border-radius: 999px; background: var(--g100); border: 1.5px solid var(--g200); color: var(--g600);
+  }
+  .pv-chip--met { background: var(--green100); border-color: var(--green200); color: var(--green600); }
+  .pv-chip--track { background: #fef0c7; border-color: var(--yellow200); color: var(--orange700); }
+  .pv-pill {
+    display: inline-block; font: 600 15px/1 var(--ui); padding: 9px 16px; border-radius: 999px; border: 2px solid transparent;
+  }
+  .pv-pill--success { background: var(--green100); border-color: var(--green200); color: #027a48; }
+  .pv-pill--steps { background: var(--blue100); border-color: var(--blue200); color: var(--blue700); }
+  .pv-pill--pupils { background: var(--pink100); border-color: var(--pink200); color: var(--pink700); }
+
+  .pv-btn {
+    --face: var(--g25); --edge: var(--g300); --txt: var(--ink);
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font: 600 18px/1 var(--display); letter-spacing: 0.01em;
+    padding: 17px 28px 16px; border-radius: 999px; border: 0; cursor: pointer;
+    background: var(--face); color: var(--txt); box-shadow: 0 7px 0 var(--edge);
+    transform: translateY(0); transition: transform 0.12s ease, box-shadow 0.12s ease;
+    white-space: nowrap;
+  }
+  .pv-btn:hover { transform: translateY(2px); box-shadow: 0 5px 0 var(--edge); }
+  .pv-btn:active { transform: translateY(6px); box-shadow: 0 1px 0 var(--edge); }
+  .pv-btn--cta { --face: var(--pink300); --edge: var(--pink400); --txt: var(--pink900); }
+  .pv-btn--ghost { --face: #fff; --edge: var(--g300); box-shadow: 0 7px 0 var(--edge), inset 0 0 0 2px var(--g200); }
+  .pv-btn--ghost:hover { box-shadow: 0 5px 0 var(--edge), inset 0 0 0 2px var(--g200); }
+  .pv-btn--start { --face: var(--blue300); --edge: var(--blue500); --txt: #0b2a5b; }
+  .pv-btn--blue { --face: var(--blue300); --edge: var(--blue500); }
+  .pv-btn--sm { font-size: 15px; padding: 12px 18px 11px; box-shadow: 0 5px 0 var(--edge); }
+  .pv-btn--sm:hover { box-shadow: 0 3px 0 var(--edge); }
+
+  /* ------------------------------------------------------------------ hero */
+  .pv-hero { position: relative; padding: 112px 0 72px; overflow: hidden; background: #fff; }
+  .pv-hero__doodles .dd { position: absolute; opacity: 0.9; }
+  .dd--sun { width: 74px; height: 74px; left: 6%; top: 150px; color: var(--yellow300); transform: rotate(-8deg); }
+  .dd--sparkle { width: 46px; height: 46px; right: 9%; top: 140px; color: var(--pink400); }
+  .dd--rainbow { width: 92px; height: 60px; left: 4%; top: 58%; color: var(--blue300); transform: rotate(-10deg); }
+  .dd--bolt { width: 50px; height: 56px; right: 5%; top: 52%; color: var(--green500); transform: rotate(12deg); }
+  .dd--star { width: 64px; height: 56px; right: 15%; bottom: 9%; color: var(--yellow500); }
+  .dd--flower { width: 48px; height: 52px; left: 15%; bottom: 8%; color: var(--pink300); }
+
+  .pv-hero__grid { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; }
+  .pv-hero__meta { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .pv-hero__logo { width: 128px; height: auto; }
+
+  .pv-lineup { display: flex; justify-content: center; align-items: flex-end; gap: 6px; margin: 30px 0 4px; }
+  .pv-pal { margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .pv-pal__stage { position: relative; width: clamp(150px, 17vw, 236px); aspect-ratio: 1; }
+  .pv-pal__body { position: absolute; inset: 0; transform-origin: 50% 92%; }
+  .pv-pal__vid { width: 100%; height: 100%; display: block; object-fit: cover; background: #fff; }
+  .pv-pal__shadow {
+    position: absolute; left: 50%; bottom: 4%; width: 52%; height: 8%; transform: translateX(-50%);
+    border-radius: 50%; background: radial-gradient(closest-side, rgba(12, 14, 20, 0.16), rgba(12, 14, 20, 0));
+    pointer-events: none;
+  }
+  .pv-pal figcaption { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 2px; }
+  .pv-pal figcaption strong { font: 600 26px/1 var(--display); }
+  .pv-pal figcaption span { font: 600 12px/1 var(--ui); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-top: 6px; }
+  .pv-pal--movi strong { color: var(--green600); }
+  .pv-pal--lexi strong { color: var(--blue500); }
+  .pv-pal--emmi strong { color: var(--pink500); }
+  .pv-pal--nexo strong { color: var(--orange600); }
+
+  .pv-hero__copy { display: flex; flex-direction: column; align-items: center; margin-top: 36px; }
+  .pv-eyebrow { font: 600 13px/1.4 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+  .pv-h1 {
+    font-family: var(--display); font-weight: 600; color: var(--ink);
+    font-size: clamp(44px, 7.4vw, 104px); line-height: 0.98; letter-spacing: -0.015em;
+    max-width: 1000px; margin-top: 14px;
+  }
+  .pv-play { white-space: nowrap; }
+  .pv-play b { display: inline-block; font-weight: 700; }
+  .pv-play b:nth-child(1) { color: var(--green500); }
+  .pv-play b:nth-child(2) { color: var(--blue500); }
+  .pv-play b:nth-child(3) { color: var(--pink500); }
+  .pv-play b:nth-child(4) { color: var(--yellow500); }
+  .pv-lede { margin-top: 22px; max-width: 660px; font-size: 19px; line-height: 1.6; color: var(--ink-2); }
+  .pv-ctas { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 30px; padding-bottom: 8px; }
+
+  /* ------------------------------------------------------------------ numbers */
+  .pv-nums { background: var(--g50); border-top: 1.5px solid var(--g200); border-bottom: 1.5px solid var(--g200); padding: clamp(56px, 7vw, 88px) 0; }
+  .pv-nums__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .pv-num { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 8px 12px; }
+  .pv-num + .pv-num { border-left: 2px dashed var(--g300); }
+  .pv-num__kicker { font: 600 13px/1 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+  .pv-num__val { font-family: var(--display); font-weight: 500; line-height: 0.9; display: flex; align-items: baseline; gap: 10px; }
+  .pv-num__val b { font-weight: 500; font-size: clamp(88px, 10vw, 140px); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .pv-num__val i { font-style: normal; font-size: clamp(26px, 2.6vw, 38px); }
+  .pv-num--green i { color: var(--green600); }
+  .pv-num--blue i { color: var(--blue500); }
+  .pv-num--pink i { color: var(--pink500); }
+  .pv-num__lbl { font: 600 17px/1.4 var(--display); color: var(--g700); max-width: 260px; }
+
+  /* ------------------------------------------------------------------ problem */
+  .pv-problem { padding: clamp(80px, 10vw, 140px) 0; }
+  .pv-problem__grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(40px, 6vw, 88px); align-items: center; }
+  .pv-problem__copy p:not(.pv-kicker) { margin-top: 18px; font-size: 18px; line-height: 1.65; color: var(--ink-2); max-width: 560px; }
+  .pv-problem__copy .pv-h2 { margin-bottom: 8px; }
+  .pv-notes { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .pv-note {
+    position: relative; padding: 22px 20px 22px; border-radius: 22px; min-height: 172px;
+    display: flex; flex-direction: column; gap: 6px; box-shadow: 0 1px 0 rgba(12, 14, 20, 0.04), 0 14px 30px -16px rgba(12, 14, 20, 0.18);
+  }
+  .pv-note .dd { width: 40px; height: 40px; margin-bottom: 8px; }
+  .pv-note strong { font: 600 22px/1.1 var(--display); }
+  .pv-note span { font-size: 15px; line-height: 1.5; color: var(--g700); }
+  .pv-note--green { background: var(--green100); transform: rotate(-2deg); }
+  .pv-note--green .dd, .pv-note--green strong { color: var(--green800); }
+  .pv-note--blue { background: var(--blue100); transform: rotate(1.6deg) translateY(18px); }
+  .pv-note--blue .dd, .pv-note--blue strong { color: var(--blue700); }
+  .pv-note--pink { background: var(--pink100); transform: rotate(1.2deg); }
+  .pv-note--pink .dd, .pv-note--pink strong { color: var(--pink700); }
+  .pv-note--yellow { background: #fef0c7; transform: rotate(-1.8deg) translateY(18px); }
+  .pv-note--yellow .dd, .pv-note--yellow strong { color: var(--orange700); }
+
+  /* ------------------------------------------------------------------ cast */
+  .pv-cast { padding: clamp(80px, 10vw, 140px) 0; background: linear-gradient(180deg, #fff 0%, var(--g50) 100%); border-top: 1.5px solid var(--g200); }
+  .pv-cast__grid { display: grid; grid-template-columns: 300px repeat(3, 1fr); column-gap: 12px; }
+  .pv-cast__states { display: contents; }
+  .pv-cast__states span { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; padding-bottom: 14px; border-bottom: 2px dashed var(--g300); }
+  .pv-cast__states span:first-child { border-bottom: 2px dashed var(--g300); }
+  .pv-cast__states b { font: 600 20px/1 var(--display); }
+  .pv-cast__states i { font: 500 13px/1 var(--ui); font-style: normal; color: var(--ink-3); }
+  .pv-castrow { display: contents; }
+  .pv-castrow__id { padding: 26px 8px 22px 0; border-bottom: 2px dashed var(--g200); display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+  .pv-castrow__id h3 { font: 600 44px/1 var(--display); letter-spacing: -0.01em; }
+  .pv-castrow__dom { align-self: flex-start; font: 600 12px/1 var(--ui); letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; }
+  .pv-castrow__id p { font-size: 15px; line-height: 1.5; color: var(--ink-2); max-width: 260px; }
+  .pv-castrow__poses { display: contents; list-style: none; }
+  .pv-castrow__poses li { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 0 10px; border-bottom: 2px dashed var(--g200); }
+  .pv-castrow__poses img { width: clamp(110px, 12vw, 168px); height: auto; aspect-ratio: 1; transition: transform 0.4s cubic-bezier(0.2, 1.4, 0.4, 1); }
+  .pv-castrow__poses li:hover img { transform: translateY(-8px) rotate(-3deg) scale(1.06); }
+  .pv-castrow__poses span { display: none; }
+  .pv-castrow--movi h3 { color: var(--green600); } .pv-castrow--movi .pv-castrow__dom { background: var(--green100); color: var(--green800); }
+  .pv-castrow--lexi h3 { color: var(--blue500); } .pv-castrow--lexi .pv-castrow__dom { background: var(--blue100); color: var(--blue700); }
+  .pv-castrow--emmi h3 { color: var(--pink500); } .pv-castrow--emmi .pv-castrow__dom { background: var(--pink100); color: var(--pink700); }
+  .pv-castrow--nexo h3 { color: var(--orange600); } .pv-castrow--nexo .pv-castrow__dom { background: #fef0c7; color: var(--orange700); }
+  .pv-castrow:last-of-type .pv-castrow__id, .pv-castrow:last-of-type .pv-castrow__poses li { border-bottom: 0; }
+
+  /* ------------------------------------------------------------------ deck */
+  .pv-decksec { padding: clamp(80px, 10vw, 140px) 0; background: #fff; }
+  .pv-deck { max-width: 1080px; margin: 0 auto; }
+  .pv-deck__stage {
+    position: relative; height: clamp(560px, 62vw, 660px); border-radius: 36px; overflow: hidden; isolation: isolate;
+    background: #fff; border: 2px solid var(--g200);
+    box-shadow: 0 2px 0 rgba(12, 14, 20, 0.03), 0 40px 80px -40px rgba(12, 14, 20, 0.25);
+  }
+  .pv-deck__confetti { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+  /* Without JS the slides sit side by side and swipe natively; JS stacks them into the timed deck. */
+  .pv-deck__stage:not(.is-js) { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
+  .pv-deck__stage:not(.is-js) .pv-slide { position: relative; flex: 0 0 100%; display: flex; scroll-snap-align: start; }
+  .pv-deck__stage:not(.is-js) .pv-deck__nav, .pv-deck__stage:not(.is-js) .pv-deck__dots { display: none; }
+  .pv-slide {
+    --tint: #fff; position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 28px 84px 64px; background: radial-gradient(120% 90% at 50% 118%, var(--tint), #fff 62%);
+  }
+  .pv-slide[data-tint='green'] { --tint: var(--green100); }
+  .pv-slide[data-tint='blue'] { --tint: var(--blue100); }
+  .pv-slide[data-tint='pink'] { --tint: var(--pink100); }
+  .pv-slide.is-live { display: flex; }
+  .pv-slot { display: block; width: clamp(150px, 20vw, 220px); aspect-ratio: 1; position: relative; }
+  .pv-slot video, .pv-slot img { width: 100%; height: 100%; display: block; object-fit: cover; background: #fff; }
+  .pv-slot img { background: transparent; }
+  .pv-slot--sm { width: clamp(64px, 11vw, 124px); }
+  .pv-slide__row { display: flex; gap: clamp(2px, 1.4vw, 18px); align-items: flex-end; margin-bottom: 14px; }
+  .pv-slide__title { font: 600 clamp(44px, 8vw, 96px)/0.98 var(--display); color: var(--ink); letter-spacing: -0.01em; }
+  .pv-slide__sub { font: 400 clamp(16px, 2vw, 22px)/1.4 var(--display); color: var(--ink-2); margin-top: 12px; max-width: 520px; }
+  .pv-slide__kicker { font: 600 clamp(12px, 1.4vw, 15px)/1 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-top: 4px; }
+  .pv-slide__metric { font-family: var(--display); font-weight: 500; line-height: 0.92; margin-top: 6px; display: flex; align-items: baseline; gap: 8px; }
+  .pv-slide__metric b { font-weight: 500; font-size: clamp(72px, 12vw, 148px); font-variant-numeric: tabular-nums; }
+  .pv-slide__metric i { font-style: normal; font-size: clamp(22px, 3vw, 38px); }
+  .pv-slide__metric[data-tint='green'] i { color: var(--green600); }
+  .pv-slide__metric[data-tint='blue'] i { color: var(--blue500); }
+  .pv-slide__metric[data-tint='pink'] i { color: var(--pink500); }
+  .pv-slide__head { font: 600 clamp(22px, 3.2vw, 36px)/1.15 var(--display); margin-top: 8px; }
+  .pv-slide__head--big { font-size: clamp(28px, 4.4vw, 50px); max-width: 720px; margin-top: 14px; }
+  .pv-slide .pv-pill { margin-top: 16px; }
+  .pv-slide .pv-btn { margin-top: 26px; }
+  .pv-slide__btns { display: flex; gap: 12px; }
+
+  .pv-deck__nav {
+    position: absolute; top: 50%; z-index: 5; width: 56px; height: 56px; margin-top: -28px; border-radius: 50%;
+    display: grid; place-items: center; border: 0; cursor: pointer; background: #fff; color: var(--ink);
+    box-shadow: 0 4px 18px rgba(12, 14, 20, 0.14); transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .pv-deck__nav:hover { transform: scale(1.06); box-shadow: 0 6px 22px rgba(12, 14, 20, 0.18); }
+  .pv-deck__nav--prev { left: 20px; }
+  .pv-deck__nav--next { right: 20px; }
+  .pv-deck__dots { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; }
+  .pv-deck__dots button { width: 11px; height: 11px; padding: 0; border: 0; border-radius: 999px; background: var(--g300); cursor: pointer; transition: width 0.25s ease, background 0.25s ease; }
+  .pv-deck__dots button.is-on { width: 30px; background: var(--pink500); }
+  .pv-deck__note { text-align: center; font-size: 13px; color: var(--ink-3); margin-top: 16px; }
+
+  /* motion-reference keyframes, applied by JS when a slide goes live */
+  .pv-slide.is-anim .pv-slot { animation: pv-jump 0.8s cubic-bezier(0.2, 1.3, 0.4, 1) both; transform-origin: 50% 100%; }
+  .pv-slide.is-anim .pv-slot--sm:nth-child(2) { animation-delay: 0.12s; }
+  .pv-slide.is-anim .pv-slot--sm:nth-child(3) { animation-delay: 0.24s; }
+  .pv-slide.is-anim .pv-slot--sm:nth-child(4) { animation-delay: 0.36s; }
+  .pv-slide.is-anim .pv-slide__kicker { animation: pv-rise 0.5s ease 0.5s both; }
+  .pv-slide.is-anim .pv-slide__metric { animation: pv-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) 0.62s both; }
+  .pv-slide.is-anim .pv-slide__title { animation: pv-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) 0.5s both; }
+  .pv-slide.is-anim .pv-slide__head { animation: pv-rise 0.5s ease 0.85s both; }
+  .pv-slide.is-anim .pv-slide__sub { animation: pv-rise 0.5s ease 1s both; }
+  .pv-slide.is-anim .pv-pill, .pv-slide.is-anim .pv-btn { animation: pv-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 1.15s both; }
+  @keyframes pv-jump {
+    0% { transform: translateY(70%) scale(0.6, 1.25); opacity: 0; }
+    40% { opacity: 1; }
+    55% { transform: translateY(-8%) scale(1.1, 0.9); }
+    72% { transform: translateY(0) scale(0.95, 1.06); }
+    100% { transform: translateY(0) scale(1, 1); }
+  }
+  @keyframes pv-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes pv-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+
+  /* ------------------------------------------------------------------ system */
+  .pv-system { padding: clamp(80px, 10vw, 140px) 0; background: var(--g50); border-top: 1.5px solid var(--g200); }
+  .pv-sys { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
+  .pv-card {
+    background: #fff; border-radius: 28px; padding: clamp(22px, 3vw, 34px); border: 1.5px solid var(--g200);
+    box-shadow: 0 1px 0 rgba(12, 14, 20, 0.03), 0 24px 50px -36px rgba(12, 14, 20, 0.25);
+  }
+  .pv-card__t { font: 600 26px/1.1 var(--display); }
+  .pv-card__p { font-size: 15px; line-height: 1.6; color: var(--ink-2); margin-top: 10px; max-width: 440px; }
+  .pv-card__foot { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin-top: 18px; }
+  .pv-card__foot span { display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-3); }
+  .pv-card--type { grid-column: 1 / -1; }
+  .pv-type { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(24px, 4vw, 56px); }
+
+  .pv-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .pv-legend li {
+    display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px;
+    background: color-mix(in srgb, var(--c) 16%, #fff); border: 1.5px solid color-mix(in srgb, var(--c) 45%, #fff);
+  }
+  .pv-legend .dd { width: 26px; height: 26px; color: color-mix(in srgb, var(--c) 70%, #181d27); }
+  .pv-legend b { font: 600 15px/1 var(--display); }
+  .pv-legend span { font-size: 12px; color: var(--ink-3); }
+
+  .pv-week { display: flex; gap: clamp(10px, 2vw, 22px); align-items: flex-end; justify-content: space-between; margin-top: 26px; height: 250px; padding: 0 4px; }
+  .pv-week__col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; }
+  .pv-week__bar { flex: 1; width: 100%; max-width: 64px; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; transform-origin: 50% 100%; }
+  .pv-week__bar .seg { display: grid; place-items: center; font: 600 12px/1 var(--ui); color: rgba(24, 29, 39, 0.78); flex: var(--h) 0 0; min-height: 0; }
+  .seg--m { background: var(--green500); }
+  .seg--l { background: var(--yellow300); }
+  .seg--s { background: var(--g300); }
+  .pv-week__d { font: 500 14px/1 var(--ui); color: var(--ink-3); }
+
+  .pv-buckets { display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 14px; align-items: end; margin-top: 22px; }
+  .pv-movisays {
+    align-self: stretch; border-radius: 18px; background: var(--green50); border: 2px solid var(--green200);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 12px 10px;
+  }
+  .pv-movisays img { width: 64px; height: 64px; }
+  .pv-movisays p { font: 500 14px/1.35 var(--display); color: var(--g700); }
+  .pv-movisays b { display: block; font-weight: 600; }
+  .pv-bucket { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+  .pv-bucket__tank {
+    --c: var(--green500); --c2: var(--green600);
+    position: relative; width: 100%; max-width: 132px; height: 150px; border-radius: 16px 16px 22px 22px; overflow: hidden;
+    background: color-mix(in srgb, var(--c) 10%, #fff); border: 3px solid var(--c2);
+  }
+  .pv-bucket--blue .pv-bucket__tank { --c: var(--blue400); --c2: var(--blue500); }
+  .pv-bucket__fill { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--fill) * 1%); background: var(--c); transform-origin: 50% 100%; }
+  .pv-bucket__goal { position: absolute; left: 0; right: 0; top: 18%; border-top: 2.5px dashed rgba(255, 255, 255, 0.95); }
+  .pv-bucket__val { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
+  .pv-bucket__val b { font: 600 34px/1 var(--display); }
+  .pv-bucket__val i { font: 600 13px/1.4 var(--ui); font-style: normal; opacity: 0.9; }
+  .pv-bucket strong { font: 600 16px/1.2 var(--display); margin-top: 6px; }
+  .pv-bucket em { font: 600 13px/1 var(--ui); font-style: normal; color: var(--green600); }
+  .pv-bucket--blue em { color: var(--blue500); }
+
+  .pv-thermo { margin-top: 26px; padding-top: 22px; border-top: 2px dashed var(--g200); }
+  .pv-thermo__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pv-thermo__head b { font: 600 18px/1 var(--display); }
+  .pv-thermo__key { font: 600 12px/1 var(--ui); color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
+  .pv-thermo__key::before { content: ''; width: 46px; height: 8px; border-radius: 9px; background: linear-gradient(90deg, var(--yellow500), var(--yellow300), var(--green500)); }
+  .pv-thermo__row { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pv-thermo__col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .pv-thermo__pct { font: 600 13px/1 var(--ui); color: var(--ink-2); }
+  .pv-thermo__tube { position: relative; width: 22px; height: 120px; border-radius: 999px; background: var(--g100); border: 2px solid var(--g200); overflow: hidden; }
+  .pv-thermo__fill { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--v) * 1%); border-radius: 999px; background: linear-gradient(0deg, var(--yellow500) 0%, var(--yellow300) 45%, var(--green500) 100%); transform-origin: 50% 100%; }
+  .pv-thermo__d { font: 500 13px/1 var(--ui); color: var(--ink-3); }
+
+  .pv-type__spec { display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 22px; background: var(--g50); border: 1.5px solid var(--g200); }
+  .pv-type__metric { font: 500 clamp(64px, 8vw, 104px)/0.95 var(--display); }
+  .pv-type__title { font: 500 clamp(28px, 3vw, 36px)/1.1 var(--display); }
+  .pv-type__body { font: 600 17px/1.45 var(--ui); }
+  .pv-type__cap { font: 600 12px/1.3 var(--ui); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+  .pv-type__notes { display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+  .pv-type__notes > p { font-size: 17px; line-height: 1.6; color: var(--ink-2); }
+  .pv-type__notes b { color: var(--ink); }
+  .pv-type__btns { display: flex; flex-wrap: wrap; gap: 14px 12px; align-items: center; padding-bottom: 6px; }
+  .pv-type__small { font-size: 14px !important; color: var(--ink-3) !important; }
+  .pv-icons { border-top: 2px dashed var(--g200); padding-top: 22px; margin-top: 26px; }
+  .pv-icons__t { font: 600 18px/1.3 var(--display); }
+  .pv-icons__grid { list-style: none; display: grid; grid-template-columns: repeat(16, 1fr); gap: 10px; margin-top: 16px; }
+  .pv-icons__grid li { aspect-ratio: 1; display: grid; place-items: center; border-radius: 16px; background: var(--g50); transition: background 0.25s ease; }
+  .pv-icons__grid .dd { width: 62%; height: 62%; color: var(--g700); transition: color 0.25s ease, transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1); }
+  .pv-icons__grid li:hover .dd { transform: translateY(-3px) rotate(-8deg) scale(1.08); }
+  .pv-icons__grid li[style*='--k:0']:hover { background: var(--green100); } .pv-icons__grid li[style*='--k:0']:hover .dd { color: var(--green800); }
+  .pv-icons__grid li[style*='--k:1']:hover { background: var(--blue100); } .pv-icons__grid li[style*='--k:1']:hover .dd { color: var(--blue700); }
+  .pv-icons__grid li[style*='--k:2']:hover { background: var(--pink100); } .pv-icons__grid li[style*='--k:2']:hover .dd { color: var(--pink700); }
+  .pv-icons__grid li[style*='--k:3']:hover { background: #fef0c7; } .pv-icons__grid li[style*='--k:3']:hover .dd { color: var(--orange700); }
+
+  /* ------------------------------------------------------------------ screens */
+  .pv-screens { padding: clamp(80px, 10vw, 140px) 0; background: #fff; }
+  .pv-shot { margin: 0; }
+  .pv-shot__bar { display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 18px; background: var(--g100); border: 1.5px solid var(--g200); border-bottom: 0; border-radius: 22px 22px 0 0; }
+  .pv-shot__dots { display: flex; gap: 6px; }
+  .pv-shot__dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--g300); }
+  .pv-shot__url { flex: 1; font: 600 14px/1 var(--ui); color: var(--ink-3); }
+  .pv-seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--g200); gap: 2px; }
+  .pv-seg button { font: 600 14px/1 var(--display); border: 0; background: transparent; color: var(--ink-2); padding: 9px 14px; border-radius: 999px; cursor: pointer; transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease; }
+  .pv-seg button.is-on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(12, 14, 20, 0.12); }
+  .pv-shot__frame { position: relative; border: 1.5px solid var(--g200); border-radius: 0 0 22px 22px; overflow: hidden; background: var(--g50); aspect-ratio: 1280 / 1215; }
+  .pv-shot__frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; transition: opacity 0.7s ease; }
+  .pv-shot__dark { opacity: 0; }
+  #pv-theme[data-mode='dark'] .pv-shot__dark { opacity: 1; }
+  .pv-shot__cap { margin-top: 14px; font-size: 15px; line-height: 1.5; color: var(--ink-3); }
+  .pv-shot__cap b { color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 17px; }
+  #pv-theme .pv-shot__frame { max-height: 760px; aspect-ratio: auto; height: min(62vw, 760px); }
+
+  .pv-shots2 { display: grid; grid-template-columns: 1fr 300px; gap: 28px; margin-top: 44px; align-items: start; }
+  .pv-shot--class .pv-shot__frame { border-radius: 22px; border: 1.5px solid var(--g200); aspect-ratio: 1280 / 1216; }
+  .pv-shots2 figcaption { margin-top: 12px; font-size: 14px; line-height: 1.55; color: var(--ink-3); max-width: 560px; }
+  .pv-phone { margin: 0; }
+  .pv-phone__body { border-radius: 40px; padding: 10px; background: #0c0e14; box-shadow: 0 30px 60px -30px rgba(12, 14, 20, 0.45); }
+  .pv-phone__body img { display: block; width: 100%; height: auto; border-radius: 31px; aspect-ratio: 440 / 1160; object-fit: cover; object-position: top; max-height: 620px; }
+
+  /* ------------------------------------------------------------------ how */
+  .pv-how { padding: clamp(80px, 10vw, 140px) 0 clamp(64px, 8vw, 110px); background: var(--g50); border-top: 1.5px solid var(--g200); }
+  .pv-how__grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(36px, 6vw, 80px); align-items: start; }
+  .pv-how__copy > p:not(.pv-kicker) { margin-top: 18px; font-size: 18px; line-height: 1.65; color: var(--ink-2); max-width: 560px; }
+  .pv-decisions { list-style: none; margin-top: 30px; display: flex; flex-direction: column; gap: 14px; counter-reset: d; }
+  .pv-decisions li { display: flex; gap: 16px; align-items: flex-start; padding: 18px 20px; border-radius: 20px; background: #fff; border: 1.5px solid var(--g200); }
+  .pv-decisions__n { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 17px/1 var(--display); color: #fff; }
+  .pv-decisions li:nth-child(4n+1) .pv-decisions__n { background: var(--green500); }
+  .pv-decisions li:nth-child(4n+2) .pv-decisions__n { background: var(--blue500); }
+  .pv-decisions li:nth-child(4n+3) .pv-decisions__n { background: var(--pink500); }
+  .pv-decisions li:nth-child(4n+4) .pv-decisions__n { background: var(--yellow500); }
+  .pv-decisions b { display: block; font: 600 19px/1.25 var(--display); }
+  .pv-decisions div > span { display: block; font-size: 15px; line-height: 1.55; color: var(--ink-2); margin-top: 4px; }
+
+  .pv-how__side { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 96px; }
+  .pv-tree, .pv-pipe { background: #fff; border-radius: 24px; border: 1.5px solid var(--g200); padding: 24px; }
+  .pv-tree__t { font: 600 20px/1.1 var(--display); margin-bottom: 14px; }
+  .pv-tree ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .pv-tree li { display: grid; grid-template-columns: 34px 1fr; column-gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1.5px dashed var(--g200); }
+  .pv-tree li:last-child { border-bottom: 0; }
+  .pv-tree .dd { grid-row: span 2; width: 30px; height: 30px; color: var(--g700); }
+  .pv-tree b { font: 600 14px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); word-break: break-word; }
+  .pv-tree span { font-size: 13.5px; color: var(--ink-3); line-height: 1.4; }
+  .pv-pipe p:not(.pv-tree__t) { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+  .pv-pipe code { display: block; margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--g950); color: #e7fdd5; font: 500 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: normal; overflow-wrap: anywhere; }
+  .pv-stack { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .pv-stack li { font: 600 13px/1 var(--ui); padding: 9px 13px; border-radius: 999px; background: #fff; border: 1.5px solid var(--g200); color: var(--g700); }
+
+  .pv-outcome { margin-top: clamp(64px, 8vw, 110px); text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .pv-outcome__pals { display: flex; gap: 4px; }
+  .pv-outcome__pals img { width: clamp(64px, 9vw, 110px); height: auto; }
+  .pv-outcome__t { font: 600 clamp(56px, 9vw, 120px)/0.95 var(--display); margin-top: 8px; letter-spacing: -0.015em; }
+  .pv-outcome__p { margin-top: 18px; font-size: 19px; line-height: 1.6; color: var(--ink-2); max-width: 640px; }
+
+  /* ------------------------------------------------------------------ responsive */
+  @media (max-width: 1180px) {
+    .dd--rainbow, .dd--bolt { display: none; }
+  }
+  @media (max-width: 1023px) {
+    .pv-sys { grid-template-columns: minmax(0, 1fr); }
+    .pv-num .pv-pill { font-size: 13px; padding: 8px 12px; }
+    .pv-type { grid-template-columns: minmax(0, 1fr); }
+    .pv-icons__grid { grid-template-columns: repeat(8, 1fr); }
+    .pv-cast__grid { grid-template-columns: 220px repeat(3, 1fr); }
+    .pv-how__grid { grid-template-columns: minmax(0, 1fr); }
+    .pv-how__side { position: static; }
+  }
+  @media (max-width: 767px) {
+    .pv-wrap { padding: 0 20px; }
+    .pv-hero { padding: 92px 0 56px; }
+    .pv-hero__grid { display: grid; grid-template-columns: 100%; justify-items: center; }
+    .pv-hero__meta { order: 1; }
+    .pv-hero__copy { display: contents; }
+    .pv-eyebrow { order: 2; margin-top: 22px; }
+    .pv-h1 { order: 3; font-size: clamp(40px, 11.6vw, 52px); }
+    .pv-lineup { order: 4; flex-wrap: wrap; max-width: 340px; gap: 0 4px; margin: 18px auto 0; }
+    .pv-pal { width: calc(50% - 2px); }
+    .pv-pal__stage { width: 100%; max-width: 160px; }
+    .pv-pal figcaption strong { font-size: 22px; }
+    .pv-lede { order: 5; font-size: 17px; margin-top: 18px; }
+    .pv-ctas { order: 6; width: 100%; }
+    .pv-ctas .pv-btn { flex: 1 1 100%; }
+    .pv-hero__logo { width: 104px; }
+    .dd--sun { width: 48px; height: 48px; left: 3%; top: 96px; }
+    .dd--sparkle { width: 30px; height: 30px; right: 5%; top: 104px; }
+    .dd--rainbow, .dd--bolt { display: none; }
+    .dd--star { width: 40px; height: 36px; right: 4%; bottom: 3%; }
+    .dd--flower { width: 32px; height: 34px; left: 4%; bottom: 3%; }
+
+    .pv-nums__row { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .pv-num { padding: 26px 0; }
+    .pv-num + .pv-num { border-left: 0; border-top: 2px dashed var(--g300); }
+
+    .pv-problem__grid { grid-template-columns: minmax(0, 1fr); }
+    .pv-notes { gap: 12px; }
+    .pv-note { min-height: 0; padding: 18px 16px; }
+    .pv-note strong { font-size: 19px; }
+    .pv-note span { font-size: 14px; }
+    .pv-note--blue, .pv-note--yellow { transform: rotate(1.4deg) translateY(10px); }
+
+    .pv-cast__grid { display: flex; flex-direction: column; gap: 14px; }
+    .pv-cast__states { display: none; }
+    .pv-castrow { display: block; background: #fff; border-radius: 24px; border: 1.5px solid var(--g200); padding: 20px 16px 14px; }
+    .pv-castrow__id { padding: 0 4px; border: 0; }
+    .pv-castrow__id h3 { font-size: 36px; }
+    .pv-castrow__poses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 8px; }
+    .pv-castrow__poses li { border: 0; padding: 4px 0 0; }
+    .pv-castrow__poses img { width: 100%; max-width: 108px; }
+    .pv-castrow__poses span { display: block; font: 600 12px/1 var(--ui); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin-top: 2px; }
+
+    .pv-deck__stage { height: 560px; border-radius: 28px; }
+    .pv-slide { padding: 24px 18px 76px; }
+    .pv-deck__nav { top: auto; bottom: 14px; margin-top: 0; width: 44px; height: 44px; }
+    .pv-deck__nav--prev { left: 14px; }
+    .pv-deck__nav--next { right: 14px; }
+    .pv-deck__dots { bottom: 30px; gap: 6px; }
+    .pv-deck__dots button { width: 9px; height: 9px; }
+    .pv-deck__dots button.is-on { width: 22px; }
+
+    .pv-buckets { grid-template-columns: 1fr 1fr; }
+    .pv-movisays { grid-column: 1 / -1; flex-direction: row; text-align: left; justify-content: flex-start; padding: 10px 14px; }
+    .pv-movisays img { width: 52px; height: 52px; }
+    .pv-thermo__tube { height: 100px; }
+    .pv-week { height: 220px; }
+    .pv-week__bar .seg { font-size: 10px; }
+    .pv-icons__grid { grid-template-columns: repeat(4, 1fr); }
+
+    .pv-shot__bar { padding: 10px 10px 10px 14px; gap: 8px; }
+    .pv-shot__dots { display: none; }
+    .pv-shot__url { font-size: 13px; }
+    .pv-seg button { padding: 8px 10px; font-size: 13px; }
+    #pv-theme .pv-shot__frame { height: auto; aspect-ratio: 1280 / 1215; }
+    .pv-shots2 { grid-template-columns: minmax(0, 1fr); }
+    .pv-phone { max-width: 280px; margin: 0 auto; }
+
+    .pv-decisions li { padding: 16px; gap: 12px; }
+    .pv-btn { font-size: 17px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pv-slide.is-anim * { animation: none !important; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- hero videos: pause when off-screen, respect reduced motion ---------- */
+    const heroVids = Array.from(document.querySelectorAll<HTMLVideoElement>('.pv-pal__vid'));
+    if (reduce) heroVids.forEach((v) => { v.removeAttribute('autoplay'); v.pause(); });
+    else {
+      const vio = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          const v = e.target as HTMLVideoElement;
+          if (e.isIntersecting) v.play().catch(() => {}); else v.pause();
+        });
+      }, { threshold: 0.05 });
+      heroVids.forEach((v) => vio.observe(v));
+    }
+
+    /* ---------- theme toggle (light / dark school overview) ---------- */
+    const theme = document.getElementById('pv-theme');
+    let themeTimer: number | undefined;
+    let themeTouched = false;
+    const setMode = (m: string) => {
+      if (!theme) return;
+      theme.dataset.mode = m;
+      theme.querySelectorAll<HTMLButtonElement>('.pv-seg button').forEach((b) => {
+        const on = b.dataset.mode === m;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+    };
+    theme?.querySelectorAll<HTMLButtonElement>('.pv-seg button').forEach((b) =>
+      b.addEventListener('click', () => { themeTouched = true; window.clearInterval(themeTimer); setMode(b.dataset.mode || 'light'); })
+    );
+    // Auto-play only starts once the visitor has scrolled (keeps static captures and anchor jumps calm).
+    let scrolled = false;
+    const kicks: (() => void)[] = [];
+    window.addEventListener('scroll', () => { if (scrolled) return; scrolled = true; kicks.forEach((k) => k()); }, { passive: true });
+
+    let themeInView = false;
+    const themeAuto = () => {
+      window.clearInterval(themeTimer);
+      if (theme && themeInView && scrolled && !themeTouched) {
+        themeTimer = window.setInterval(() => setMode(theme.dataset.mode === 'light' ? 'dark' : 'light'), 3200);
+      }
+    };
+    if (theme && !reduce) {
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => { themeInView = e.isIntersecting; themeAuto(); });
+      }, { threshold: 0.35 }).observe(theme);
+      kicks.push(themeAuto);
+    }
+
+    /* ---------- the "How did we do?" deck ---------- */
+    const deck = document.getElementById('pv-deck');
+    deck?.querySelector('.pv-deck__stage')?.classList.add('is-js');
+    const slides = deck ? Array.from(deck.querySelectorAll<HTMLElement>('.pv-slide')) : [];
+    const dots = deck ? Array.from(deck.querySelectorAll<HTMLButtonElement>('.pv-deck__dots button')) : [];
+    const canvas = deck?.querySelector<HTMLCanvasElement>('.pv-deck__confetti') || null;
+    let idx = 0;
+    let auto: number | undefined;
+    let userDriven = false;
+    let inView = false;
+
+    const loadVideo = (v: HTMLVideoElement) => {
+      if (v.dataset.loaded) return;
+      const base = v.dataset.src;
+      if (!base) return;
+      v.innerHTML = `<source src="${base}.webm" type="video/webm"><source src="${base}.mp4" type="video/mp4">`;
+      v.preload = 'auto';
+      v.load();
+      v.dataset.loaded = '1';
+    };
+
+    const countUp = (b: HTMLElement) => {
+      const to = Number(b.dataset.to || 0);
+      if (!to || reduce) return;
+      const t0 = performance.now();
+      const dur = 1100;
+      const fmt = (n: number) => n.toLocaleString('en-GB');
+      const tick = (t: number) => {
+        const p = Math.min(1, (t - t0) / dur);
+        const e = 1 - Math.pow(1 - p, 3);
+        b.textContent = fmt(Math.round(to * e));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      b.textContent = '0';
+      requestAnimationFrame(tick);
+    };
+
+    /* confetti, from the motion reference */
+    type Part = { x: number; y: number; vx: number; vy: number; r: number; c: string; a: number; rot: number; vr: number };
+    let parts: Part[] = [];
+    let running = false;
+    const ctx = canvas?.getContext('2d') || null;
+    const sizeCanvas = () => {
+      if (!canvas) return;
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    const burst = () => {
+      if (!canvas || !ctx || reduce) return;
+      sizeCanvas();
+      const r = canvas.getBoundingClientRect();
+      const cols = ['#EE46BC', '#85D015', '#2E90FA', '#F79009', '#FEC84B', '#FAA7E0'];
+      for (let i = 0; i < 110; i++) {
+        parts.push({ x: r.width / 2, y: r.height * 0.36, vx: (Math.random() - 0.5) * 13, vy: Math.random() * -13 - 3, r: Math.random() * 7 + 4, c: cols[i % cols.length], a: 1, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4 });
+      }
+      if (running) return;
+      running = true;
+      const frame = () => {
+        const w = r.width, h = r.height;
+        ctx.clearRect(0, 0, w, h);
+        parts.forEach((p) => {
+          p.vy += 0.38; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.a -= 0.009;
+          ctx.save(); ctx.globalAlpha = Math.max(0, p.a); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6); ctx.restore();
+        });
+        parts = parts.filter((p) => p.a > 0 && p.y < h + 40);
+        if (parts.length) requestAnimationFrame(frame);
+        else { running = false; ctx.clearRect(0, 0, w, h); }
+      };
+      requestAnimationFrame(frame);
+    };
+
+    const go = (n: number) => {
+      if (!slides.length) return;
+      const next = (n + slides.length) % slides.length;
+      slides.forEach((s, i) => {
+        const live = i === next;
+        s.classList.toggle('is-live', live);
+        s.classList.remove('is-anim');
+        s.querySelectorAll('video').forEach((v) => { if (!live) v.pause(); });
+      });
+      idx = next;
+      const s = slides[idx];
+      void s.offsetWidth;
+      if (!reduce) s.classList.add('is-anim');
+      s.querySelectorAll<HTMLVideoElement>('video').forEach((v) => { loadVideo(v); if (!reduce) v.play().catch(() => {}); });
+      s.querySelectorAll<HTMLElement>('[data-to]').forEach(countUp);
+      if (s.hasAttribute('data-confetti')) window.setTimeout(burst, 650);
+      dots.forEach((d, i) => d.classList.toggle('is-on', i === idx));
+      slides.forEach((sl, i) => sl.setAttribute('aria-hidden', String(i !== idx)));
+      schedule();
+    };
+    const schedule = () => {
+      window.clearTimeout(auto);
+      if (userDriven || !inView || reduce || !scrolled) return;
+      auto = window.setTimeout(() => go(idx + 1), idx === 0 ? 3000 : 4200);
+    };
+    deck?.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((b) =>
+      b.addEventListener('click', () => { userDriven = true; if (deck) deck.dataset.started = '1'; go(Number(b.dataset.go)); })
+    );
+    deck?.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+      b.addEventListener('click', () => { userDriven = true; if (deck) deck.dataset.started = '1'; go(idx + Number(b.dataset.step)); })
+    );
+    const deckKick = () => {
+      if (!deck || !inView || !scrolled) return;
+      if (!deck.dataset.started) { deck.dataset.started = '1'; go(0); } else schedule();
+    };
+    if (deck) {
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          inView = e.isIntersecting;
+          if (inView) deckKick();
+          else { window.clearTimeout(auto); slides[idx]?.querySelectorAll('video').forEach((v) => v.pause()); }
+        });
+      }, { threshold: 0.45 }).observe(deck);
+      kicks.push(deckKick);
+    }
+
+    /* ---------- GSAP: entrances and scroll reveals ---------- */
+    if (reduce) return;
+    try {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Hero: the Pals jump in, exactly like the brand's motion reference
+      const bodies = gsap.utils.toArray<HTMLElement>('.pv-pal__body');
+      const shadows = gsap.utils.toArray<HTMLElement>('.pv-pal__shadow');
+      const tl = gsap.timeline({ delay: 0.15 });
+      bodies.forEach((b, i) => {
+        const at = 0.1 + i * 0.13;
+        tl.fromTo(b, { yPercent: 70, scaleX: 0.6, scaleY: 1.25, autoAlpha: 0 }, { yPercent: -8, scaleX: 1.1, scaleY: 0.9, autoAlpha: 1, duration: 0.42, ease: 'power2.out' }, at)
+          .to(b, { yPercent: 0, scaleX: 0.95, scaleY: 1.06, duration: 0.14, ease: 'power1.in' }, at + 0.42)
+          .to(b, { scaleX: 1, scaleY: 1, duration: 0.3, ease: 'elastic.out(1, 0.5)' }, at + 0.56);
+        tl.fromTo(shadows[i], { scale: 0.3, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'back.out(2)' }, at + 0.3);
+      });
+      tl.from('.pv-pal figcaption', { y: 12, autoAlpha: 0, duration: 0.45, stagger: 0.08, ease: 'power3.out' }, 0.75)
+        .from('.pv-play b', { yPercent: 60, scale: 0.4, autoAlpha: 0, duration: 0.5, stagger: 0.07, ease: 'back.out(3)' }, 0.55)
+        .from('.pv-hero__doodles .dd', { scale: 0, rotate: -40, autoAlpha: 0, duration: 0.7, stagger: 0.06, ease: 'back.out(2.2)' }, 0.4);
+
+      // Numbers: count up
+      document.querySelectorAll<HTMLElement>('.pv-num__val b').forEach((b) => {
+        const to = Number(b.dataset.count || 0);
+        const o = { v: 0 };
+        ScrollTrigger.create({
+          trigger: b, start: 'top 85%', once: true,
+          onEnter: () => gsap.to(o, { v: to, duration: 1.1, ease: 'power3.out', onUpdate: () => { b.textContent = String(Math.round(o.v)); } }),
+        });
+      });
+      gsap.from('.pv-num', { y: 26, autoAlpha: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out', scrollTrigger: { trigger: '.pv-nums', start: 'top 80%' } });
+
+      // Problem: sticky notes slap down
+      gsap.from('.pv-note', { y: 50, rotate: (i: number) => (i % 2 ? 14 : -14), scale: 0.85, autoAlpha: 0, duration: 0.7, stagger: 0.1, ease: 'back.out(1.8)', scrollTrigger: { trigger: '.pv-notes', start: 'top 80%' } });
+
+      // Cast: poses pop row by row
+      gsap.utils.toArray<HTMLElement>('.pv-castrow').forEach((row) => {
+        gsap.from(row.querySelectorAll('.pv-castrow__poses li'), { y: 40, scale: 0.7, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: 'back.out(2)', scrollTrigger: { trigger: row, start: 'top 85%' } });
+        gsap.from(row.querySelector('h3'), { x: -20, autoAlpha: 0, duration: 0.6, ease: 'power3.out', scrollTrigger: { trigger: row, start: 'top 85%' } });
+      });
+
+      // System: bars grow, buckets fill, thermometers warm up
+      gsap.from('.pv-week__bar', { scaleY: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: '.pv-week', start: 'top 85%' } });
+      gsap.from('.pv-bucket__fill', { scaleY: 0, duration: 1.4, stagger: 0.2, ease: 'power2.inOut', scrollTrigger: { trigger: '.pv-buckets', start: 'top 85%' } });
+      gsap.from('.pv-bucket__val', { autoAlpha: 0, y: 10, duration: 0.5, stagger: 0.2, delay: 0.9, scrollTrigger: { trigger: '.pv-buckets', start: 'top 85%' } });
+      gsap.from('.pv-thermo__fill', { scaleY: 0, duration: 1.2, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: '.pv-thermo', start: 'top 88%' } });
+      gsap.from('.pv-icons__grid li', { scale: 0.5, autoAlpha: 0, duration: 0.45, stagger: 0.03, ease: 'back.out(2.4)', scrollTrigger: { trigger: '.pv-icons__grid', start: 'top 88%' } });
+
+      // Section heads and lists rise
+      gsap.utils.toArray<HTMLElement>('.pv-sechead, .pv-problem__copy, .pv-how__copy > .pv-h2').forEach((el) => {
+        gsap.from(el, { y: 30, autoAlpha: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } });
+      });
+      gsap.from('.pv-decisions li', { x: -24, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: '.pv-decisions', start: 'top 85%' } });
+      gsap.from('.pv-outcome__pals img', { yPercent: 60, scale: 0.6, autoAlpha: 0, duration: 0.7, stagger: 0.1, ease: 'back.out(2.4)', scrollTrigger: { trigger: '.pv-outcome', start: 'top 85%' } });
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    } catch {
+      /* motion is decoration; content is already visible */
+    }
+  })();
+</script>

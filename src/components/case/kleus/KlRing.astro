@@ -1,0 +1,140 @@
+---
+// The hero's ring of saved material, rebuilt from kleus.ai's own hero: a tilted ring of
+// books, videos, a podcast and a PDF turning toward you. The front item is full size and
+// sharp; round the back they shrink, blur and fade. It turns one slot, holds, turns again.
+// The resting positions are rendered at build time, so it looks right without JS.
+import KlMedia from './KlMedia.astro';
+
+const ITEMS = ['napoleon', 'negotiation', 'music', 'thermo', 'rome', 'japanese', 'stoic'] as const;
+const n = ITEMS.length;
+const MIN_SCALE = 0.32;
+const MOBILE_FRONT = 0.72;
+const MOBILE_MIN = 0.16;
+const MAX_BLUR = 10;
+const MIN_OPACITY = 0.15;
+
+const items = ITEMS.map((id, i) => {
+  const a = ((0 - i) / n) * Math.PI * 2;
+  const depth = (Math.cos(a) + 1) / 2;
+  return {
+    id,
+    vars: [
+      `--x:${Math.sin(a).toFixed(4)}`,
+      `--d:${depth.toFixed(4)}`,
+      `--s:${(MIN_SCALE + (1 - MIN_SCALE) * Math.pow(depth, 1.6)).toFixed(4)}`,
+      `--sm:${(MOBILE_MIN + (MOBILE_FRONT - MOBILE_MIN) * Math.pow(depth, 3)).toFixed(4)}`,
+      `--b:${(MAX_BLUR * Math.pow(1 - depth, 1.3)).toFixed(2)}px`,
+      `--o:${(MIN_OPACITY + (1 - MIN_OPACITY) * Math.pow(depth, 1.2)).toFixed(3)}`,
+      `z-index:${Math.round(depth * 100)}`,
+    ].join(';'),
+  };
+});
+---
+
+<div class="kr" data-kl-ring aria-hidden="true">
+  <div class="kr__stage">
+    <div class="kr__orbit"></div>
+    {items.map((it) => (
+      <div class="kr__item" style={it.vars} data-ring-item>
+        <KlMedia id={it.id} decorative />
+      </div>
+    ))}
+  </div>
+  <div class="kr__floor"></div>
+</div>
+
+<script>
+  // Turn the ring: hold, move one slot, hold. Pauses off screen and for reduced motion.
+  const ring = document.querySelector<HTMLElement>('[data-kl-ring]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (ring && !reduce) {
+    const els = Array.from(ring.querySelectorAll<HTMLElement>('[data-ring-item]'));
+    const n = els.length;
+    const HOLD = 2200, MOVE = 900;
+    const RY = 90;
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let rx = 380, small = false;
+    const fit = () => {
+      rx = Math.min(380, window.innerWidth * 0.36);
+      small = window.innerWidth < 640;
+    };
+    fit();
+    window.addEventListener('resize', fit, { passive: true });
+
+    const paint = (rot: number) => {
+      for (let i = 0; i < n; i++) {
+        const a = ((rot - i) / n) * Math.PI * 2;
+        const depth = (Math.cos(a) + 1) / 2;
+        const x = Math.sin(a) * rx;
+        const y = -(1 - depth) * RY * 2 * (small ? 0.72 : 1);
+        const s = small ? 0.16 + (0.72 - 0.16) * Math.pow(depth, 3) : 0.32 + 0.68 * Math.pow(depth, 1.6);
+        const el = els[i];
+        el.style.transform = `translate(-50%, -50%) translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${s.toFixed(4)})`;
+        el.style.filter = `blur(${(10 * Math.pow(1 - depth, 1.3) * (small ? 0.6 : 1)).toFixed(2)}px)`;
+        el.style.opacity = (0.15 + 0.85 * Math.pow(depth, 1.2)).toFixed(3);
+        el.style.zIndex = String(Math.round(depth * 100));
+      }
+    };
+
+    let raf = 0;
+    let running = false;
+    let start: number | null = null;
+    let offset = 0; // elapsed ms carried across pauses
+    const tick = (now: number) => {
+      if (start === null) start = now - offset;
+      const el = now - start;
+      const period = HOLD + MOVE;
+      const step = Math.floor(el / period);
+      const inStep = el - step * period;
+      const t = inStep < HOLD ? 0 : ease((inStep - HOLD) / MOVE);
+      paint(step + t);
+      offset = el;
+      raf = requestAnimationFrame(tick);
+    };
+    const play = () => { if (running) return; running = true; start = null; raf = requestAnimationFrame(tick); };
+    const stop = () => { running = false; cancelAnimationFrame(raf); };
+    new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting && !document.hidden ? play() : stop()));
+    }).observe(ring);
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()));
+  }
+</script>
+
+<style>
+  .kr {
+    position: relative;
+    height: 500px;
+    overflow-x: clip;
+    --rx: min(380px, 36vw);
+    --ry: 90px;
+  }
+  .kr__stage { position: absolute; left: 50%; top: 318px; width: 0; height: 0; }
+  .kr__item {
+    position: absolute; left: 0; top: 0;
+    transform: translate(-50%, -50%) translate(calc(var(--x) * var(--rx)), calc((1 - var(--d)) * var(--ry) * -2)) scale(var(--s));
+    filter: blur(var(--b));
+    opacity: var(--o);
+    will-change: transform, filter, opacity;
+  }
+  /* the track the ring turns on, engraved into the paper */
+  .kr__orbit {
+    position: absolute; left: 0; top: calc(var(--ry) * -1); z-index: 0;
+    width: calc(var(--rx) * 2.2); height: calc(var(--ry) * 2.3);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgb(27 26 24 / 0.14);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.5);
+  }
+  /* a soft contact shadow under the front of the ring */
+  .kr__floor {
+    position: absolute; left: 50%; top: 470px; width: min(640px, 80%); height: 40px; transform: translateX(-50%);
+    background: radial-gradient(50% 50% at 50% 50%, rgb(52 40 24 / 0.16), transparent 70%);
+    filter: blur(6px); pointer-events: none;
+  }
+  @media (max-width: 639px) {
+    .kr { height: 380px; --ry: 65px; }
+    .kr__stage { top: 236px; }
+    .kr__item { transform: translate(-50%, -50%) translate(calc(var(--x) * var(--rx)), calc((1 - var(--d)) * var(--ry) * -2)) scale(var(--sm)); filter: blur(calc(var(--b) * 0.6)); }
+    .kr__floor { top: 356px; height: 28px; }
+  }
+</style>

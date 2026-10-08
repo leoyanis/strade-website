@@ -1,0 +1,283 @@
+---
+// Hero: giant wordmark, the promise, chips, CTAs, floating portfolio cards (as on vaultt.io) and the mono marquee.
+import AppleLogo from './AppleLogo.astro';
+interface Props { appStore: string }
+const { appStore } = Astro.props;
+
+const base = '/images/work/vaultt/';
+const cards = [
+  { img: 'hc-1.webp', video: 'hc-1.mp4', title: 'Interrupt Autopilot', tag: 'Creative Arts', by: 'Giacomo C.', kudos: 63 },
+  { img: 'hc-3.webp', title: 'Portrait series', tag: 'Photography', by: 'Laura', kudos: 42 },
+  { img: 'hc-2.webp', title: 'Magazine spread', tag: 'Graphic Design', by: 'Jenny', kudos: 54 },
+  { img: 'hc-4.webp', video: 'hc-4.mp4', title: 'Cinematic film trailer', tag: 'Film & Video', by: 'Oliver W.', kudos: 48 },
+];
+const cols = [cards.slice(0, 2), cards.slice(2, 4)];
+const words = ['Projects', 'Portfolios', 'Real output', 'Case studies', 'Hired on evidence', 'Beyond the CV'];
+const marquee = [...words, ...words];
+---
+
+<section class="vt-hero" id="vt-hero">
+  <script is:inline>
+    // Hold the intro elements back until the motion script takes over (never longer than 3.5s).
+    (function () {
+      try {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var h = document.getElementById('vt-hero');
+        h.classList.add('is-intro');
+        setTimeout(function () { h.classList.remove('is-intro'); }, 3500);
+      } catch (e) {}
+    })();
+  </script>
+  <div class="vt-hero__glow" aria-hidden="true"></div>
+  <div class="vt-hero__grain" aria-hidden="true"></div>
+
+  <div class="vt-wrap vt-hero__grid">
+    <div class="vt-hero__copy">
+      <p class="vt-tag vt-hero__eyebrow"><span class="vt-hero__pulse" aria-hidden="true"></span>Main quest <span class="no">·</span> Case study</p>
+
+      <h1 class="vt-hero__word">
+        <span class="vt-sr">Vaultt</span>
+        <span class="vt-hero__letters" aria-hidden="true">{'Vaultt'.split('').map((c) => <span class="vt-hero__ch">{c}</span>)}</span>
+        <img class="vt-hero__icon" src={`${base}icon.webp`} alt="" width="256" height="256" />
+      </h1>
+
+      <p class="vt-hero__line">Young talent builds in public and gets hired on <span class="ac">proof, not a CV.</span></p>
+      <p class="vt-hero__sub">
+        I designed and built it from zero for founder Liam Jeffery. Live in three months, then rebuilt, rebranded and shipped to iOS.
+        It has 12.4k users, and I'm still building it with him as fractional CTO.
+      </p>
+
+      <ul class="vt-hero__chips" aria-label="Project facts">
+        <li><span>Client</span> Liam Jeffery</li>
+        <li>2025 – now</li>
+        <li class="is-live"><i aria-hidden="true"></i>Live</li>
+        <li>Design + build + fractional CTO</li>
+      </ul>
+
+      <div class="vt-hero__cta">
+        <a class="vt-btn vt-btn--blue" href="https://vaultt.io" target="_blank" rel="noopener">Visit vaultt.io <span class="arw" aria-hidden="true">↗</span></a>
+        <a class="vt-store" href={appStore} target="_blank" rel="noopener" aria-label="Vaultt on the App Store (Beta)">
+          <AppleLogo />
+          <span><small>Download on the</small><em>App Store <b>(Beta)</b></em></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="vt-hero__stage" aria-hidden="true">
+      <div class="vt-hero__cards">
+        {cols.map((col, ci) => (
+          <div class="vt-hero__col" data-col={ci}>
+            {col.map((c, i) => (
+              <div class="vt-hero__card">
+                <article class="vt-pcard">
+                  <div class="vt-pcard__img">
+                    {c.video ? (
+                      <video muted loop autoplay playsinline preload="metadata" poster={`${base}${c.img}`} width="720" height="400">
+                        <source src={`${base}${c.video}`} type="video/mp4" />
+                      </video>
+                    ) : (
+                      <img src={`${base}${c.img}`} alt="" width="520" height="390" loading={ci + i === 0 ? 'eager' : 'eager'} />
+                    )}
+                  </div>
+                  <div class="vt-pcard__body">
+                    <h3 class="vt-pcard__title">{c.title}</h3>
+                    <span class="vt-tg">{c.tag}</span>
+                    <div class="vt-pcard__foot">
+                      <span class="vt-av">{c.by[0]}</span>
+                      <span class="vt-pcard__by">{c.by}</span>
+                      <span class="vt-pcard__kudos">♥ {c.kudos}</span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <span class="vt-gchip vt-gchip--a"><i class="vt-gchip__live"></i>Building in public</span>
+      <span class="vt-gchip vt-gchip--b"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>Hired on <b>proof</b></span>
+      <span class="vt-gchip vt-gchip--c is-heart"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.3C1 8.4 3.1 5 6.6 5c2 0 3.6 1.1 4.4 2.6h2C13.8 6.1 15.4 5 17.4 5c3.5 0 5.6 3.4 4.2 6.7C19.5 16.4 12 21 12 21Z" /></svg><b>63</b> kudos</span>
+    </div>
+  </div>
+
+  <div class="vt-marquee" aria-hidden="true">
+    <div class="vt-marquee__track">
+      {[0, 1].map(() => (
+        <div class="vt-marquee__set">
+          {marquee.map((w) => (<><span class="vt-marquee__item">{w}</span><span class="vt-marquee__dot"></span></>))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-hero {
+    position: relative; overflow: hidden;
+    min-height: 100svh; padding-top: 108px;
+    display: flex; flex-direction: column;
+    border-bottom: 1px solid var(--vt-line);
+    background:
+      radial-gradient(90% 60% at 100% 0%, rgba(47, 128, 238, 0.14), transparent 60%),
+      var(--vt-navy);
+  }
+  .vt-hero.is-intro :is(.vt-hero__ch, .vt-hero__icon, .vt-hero__eyebrow, .vt-hero__line, .vt-hero__sub, .vt-hero__chips li, .vt-hero__cta > *, .vt-hero__card, .vt-gchip, .vt-marquee) { opacity: 0; }
+  .vt-hero__glow {
+    position: absolute; top: -25%; right: -12%; width: 64%; height: 130%; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(111, 168, 255, 0.2), transparent 70%);
+  }
+  .vt-hero__grain {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+    background-image: radial-gradient(rgba(232, 241, 255, 0.07) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(70% 60% at 70% 40%, #000 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(70% 60% at 70% 40%, #000 0%, transparent 75%);
+  }
+  .vt-hero__grid {
+    flex: 1; width: 100%;
+    display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: 48px; align-items: center; padding-bottom: 64px;
+  }
+  .vt-hero__copy { position: relative; z-index: 2; }
+  .vt-hero__eyebrow { gap: 10px; }
+  .vt-hero__pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--vt-blue);
+    box-shadow: 0 0 0 0 rgba(111, 168, 255, 0.6); animation: vt-pulse 2.2s ease-out infinite;
+  }
+  @keyframes vt-pulse { 0% { box-shadow: 0 0 0 0 rgba(111, 168, 255, 0.55); } 80%, 100% { box-shadow: 0 0 0 12px rgba(111, 168, 255, 0); } }
+
+  .vt-hero__word {
+    display: flex; align-items: flex-start; gap: 0.07em;
+    margin: 18px 0 26px;
+    font-family: var(--vt-display); font-weight: 800;
+    font-size: clamp(76px, 13.4vw, 196px); line-height: 0.86; letter-spacing: -0.055em;
+    color: var(--vt-light);
+  }
+  .vt-hero__letters { display: inline-flex; padding-bottom: 0.04em; }
+  .vt-hero__ch { display: inline-block; will-change: transform; }
+  .vt-hero__icon { display: inline-block; width: 0.52em; height: 0.52em; margin-top: 0.035em; flex-shrink: 0; filter: drop-shadow(0 10px 30px rgba(47, 128, 238, 0.45)); }
+
+  .vt-hero__line {
+    font-family: var(--vt-display); font-weight: 700;
+    font-size: clamp(25px, 2.5vw, 36px); line-height: 1.1; letter-spacing: -0.03em;
+    max-width: 580px; color: var(--vt-light); text-wrap: balance;
+  }
+  .vt-hero__line .ac { color: var(--vt-blue); }
+  .vt-hero__sub { margin-top: 18px; max-width: 540px; font-size: 17px; line-height: 1.6; color: var(--vt-soft); }
+
+  .vt-hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .vt-hero__chips li {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--vt-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--vt-light); padding: 8px 12px; border-radius: 999px;
+    border: 1px solid var(--vt-line-2); background: rgba(232, 241, 255, 0.03);
+  }
+  .vt-hero__chips li span { color: var(--vt-faint); }
+  .vt-hero__chips li.is-live { color: #9FF0C1; border-color: rgba(84, 214, 140, 0.35); }
+  .vt-hero__chips li.is-live i { width: 6px; height: 6px; border-radius: 50%; background: #54D68C; box-shadow: 0 0 10px #54D68C; }
+
+  .vt-hero__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 30px; }
+
+  /* stage */
+  .vt-hero__stage { position: relative; display: flex; justify-content: center; align-items: center; min-height: 560px; perspective: 1600px; }
+  .vt-hero__cards { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: min(100%, 470px); transform-style: preserve-3d; }
+  .vt-hero__col { display: flex; flex-direction: column; gap: 16px; will-change: transform; }
+  .vt-hero__col[data-col='1'] { margin-top: 72px; }
+  .vt-hero__card { will-change: transform; }
+
+  .vt-pcard {
+    background: linear-gradient(162deg, var(--vt-panel), var(--vt-navy-3));
+    border: 1px solid var(--vt-line-2); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 34px 70px -38px rgba(0, 0, 0, 0.8);
+  }
+  .vt-pcard__img { position: relative; aspect-ratio: 16 / 10.5; background: var(--vt-navy-2); overflow: hidden; }
+  .vt-pcard__img img, .vt-pcard__img video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vt-pcard__body { padding: 12px 13px 13px; }
+  .vt-pcard__title { font-family: var(--vt-sans); font-size: 14.5px; font-weight: 600; line-height: 1.25; letter-spacing: -0.005em; color: var(--vt-light); }
+  .vt-tg {
+    display: inline-block; margin-top: 8px;
+    font-family: var(--vt-mono); font-size: 9px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; line-height: 1;
+    color: var(--vt-blue); background: var(--vt-glow); border-radius: 20px; padding: 5px 8px;
+  }
+  .vt-pcard__foot {
+    display: flex; align-items: center; gap: 7px; margin-top: 11px;
+    font-family: var(--vt-mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--vt-faint);
+  }
+  .vt-av {
+    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center;
+    font-family: var(--vt-sans); font-size: 9px; font-weight: 700; color: var(--vt-navy);
+    background: linear-gradient(135deg, #B9D4FF, #6FA8FF);
+  }
+  .vt-pcard__by { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vt-pcard__kudos { margin-left: auto; white-space: nowrap; }
+
+  .vt-gchip {
+    position: absolute; z-index: 3;
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+    font-family: var(--vt-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;
+    color: var(--vt-light); background: var(--vt-navy-2);
+    border: 1px solid var(--vt-line-2); border-radius: 22px; padding: 9px 13px;
+    box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.7);
+  }
+  .vt-gchip svg { width: 14px; height: 14px; display: block; fill: none; stroke: var(--vt-blue); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-gchip.is-heart svg { fill: var(--vt-blue); stroke: none; }
+  .vt-gchip b { color: var(--vt-blue); font-weight: 600; }
+  .vt-gchip__live { width: 7px; height: 7px; border-radius: 50%; background: #54D68C; box-shadow: 0 0 10px #54D68C; }
+  .vt-gchip--a { top: 4%; left: -2%; }
+  .vt-gchip--b { bottom: 9%; left: -8%; }
+  .vt-gchip--c { top: 44%; right: -6%; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-pcard { animation: vt-float 7s ease-in-out infinite; }
+    .vt-hero__col[data-col='0'] .vt-hero__card:nth-child(2) .vt-pcard { animation-delay: -3.1s; animation-duration: 8s; }
+    .vt-hero__col[data-col='1'] .vt-hero__card:nth-child(1) .vt-pcard { animation-delay: -1.6s; animation-duration: 7.6s; }
+    .vt-hero__col[data-col='1'] .vt-hero__card:nth-child(2) .vt-pcard { animation-delay: -4.4s; animation-duration: 8.6s; }
+    .vt-gchip { animation: vt-float 6s ease-in-out infinite; }
+    .vt-gchip--b { animation-delay: -2s; }
+    .vt-gchip--c { animation-delay: -4s; }
+  }
+  @keyframes vt-float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -11px, 0); } }
+
+  /* marquee band */
+  .vt-marquee { position: relative; overflow: hidden; border-top: 1px solid var(--vt-line); padding: 17px 0; background: rgba(10, 33, 64, 0.45); }
+  .vt-marquee__track { display: flex; width: max-content; }
+  .vt-marquee__set { display: flex; align-items: center; gap: 32px; padding-right: 32px; flex-shrink: 0; }
+  .vt-marquee__item { font-family: var(--vt-mono); font-size: 12.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vt-soft); white-space: nowrap; }
+  .vt-marquee__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--vt-blue); flex-shrink: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-marquee__track { animation: vt-marquee 46s linear infinite; }
+  }
+  @keyframes vt-marquee { to { transform: translate3d(-50%, 0, 0); } }
+
+  @media (max-width: 1023px) {
+    .vt-hero__grid { grid-template-columns: 1fr; gap: 40px; padding-bottom: 56px; }
+    .vt-hero__stage { min-height: 0; padding: 8px 0 24px; }
+    .vt-hero__cards { width: min(100%, 520px); }
+  }
+  @media (max-width: 600px) {
+    .vt-hero { padding-top: 92px; min-height: 0; }
+    .vt-hero__word { font-size: min(25vw, 112px); margin: 14px 0 20px; }
+    .vt-hero__sub { font-size: 16px; }
+    .vt-hero__chips li { font-size: 9.5px; padding: 7px 10px; }
+    .vt-hero__cta { gap: 10px; flex-wrap: nowrap; }
+    .vt-hero__cta .vt-btn { flex: 1 1 auto; padding: 15px 16px; font-size: 14.5px; }
+    .vt-hero__cta .vt-store { flex: 0 0 auto; padding: 8px 13px 8px 11px; gap: 8px; border-radius: 12px; }
+    .vt-hero__cta .vt-store svg { width: 20px; height: 20px; }
+    .vt-hero__cta .vt-store > span { font-size: 14.5px; }
+    .vt-hero__cta .vt-store small { font-size: 9px; }
+    .vt-hero__cards { gap: 10px; }
+    .vt-hero__col { gap: 10px; }
+    .vt-hero__col[data-col='1'] { margin-top: 40px; }
+    .vt-pcard__body { padding: 9px 10px 10px; }
+    .vt-pcard__title { font-size: 12px; }
+    .vt-tg { font-size: 7.5px; padding: 4px 6px; margin-top: 6px; }
+    .vt-pcard__foot { font-size: 7.5px; gap: 5px; margin-top: 8px; }
+    .vt-av { width: 14px; height: 14px; font-size: 7px; }
+    .vt-gchip { font-size: 9px; padding: 7px 10px; }
+    .vt-gchip--a { top: -6px; left: 4px; }
+    .vt-gchip--b { bottom: 4%; left: auto; right: 4px; }
+    .vt-gchip--c { display: none; }
+    .vt-marquee__item { font-size: 11px; }
+  }
+</style>

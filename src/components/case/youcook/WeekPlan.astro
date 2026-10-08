@@ -1,0 +1,364 @@
+---
+// Meal plan cards use the real week from youcookapp.com (names, times, cuisines, photos).
+type Meal = { d: string; m: string; n: string; t: string; c: string; img: string };
+const rowA: Meal[] = [
+  { d: 'Mon', m: 'Breakfast', n: 'Greek Yogurt Berry Smoothie Bowl', t: '10 mins', c: 'Western', img: 'monday-1' },
+  { d: 'Mon', m: 'Lunch', n: 'Mediterranean Quinoa Salad', t: '15 mins', c: 'Mediterranean', img: 'monday-2' },
+  { d: 'Mon', m: 'Dinner', n: 'One-Skillet Lemon Herb Chicken', t: '20 mins', c: 'Mediterranean', img: 'monday-3' },
+  { d: 'Tue', m: 'Breakfast', n: 'Avocado Toast with Poached Eggs', t: '15 mins', c: 'American', img: 'tuesday-1' },
+  { d: 'Tue', m: 'Lunch', n: 'Asian Chicken Lettuce Wraps', t: '20 mins', c: 'Asian', img: 'tuesday-2' },
+  { d: 'Tue', m: 'Dinner', n: 'Sheet-Pan Sweet Potato & Salmon', t: '30 mins', c: 'American', img: 'tuesday-3' },
+  { d: 'Wed', m: 'Breakfast', n: 'Overnight Oats with Banana', t: '5 mins', c: 'Western', img: 'wednesday-1' },
+  { d: 'Wed', m: 'Dinner', n: 'Beef Stir-Fry with Broccoli', t: '25 mins', c: 'Asian', img: 'wednesday-3' },
+  { d: 'Thu', m: 'Breakfast', n: 'Spinach & Feta Omelette', t: '12 mins', c: 'Mediterranean', img: 'thursday-1' },
+  { d: 'Thu', m: 'Lunch', n: 'Thai Peanut Noodle Bowl', t: '15 mins', c: 'Thai', img: 'thursday-2' },
+];
+const rowB: Meal[] = [
+  { d: 'Thu', m: 'Dinner', n: 'Grilled Shrimp Tacos', t: '20 mins', c: 'Mexican', img: 'thursday-3' },
+  { d: 'Fri', m: 'Breakfast', n: 'Banana Pancakes with Maple Syrup', t: '20 mins', c: 'American', img: 'friday-1' },
+  { d: 'Fri', m: 'Lunch', n: 'Greek Chicken Pita Wrap', t: '15 mins', c: 'Greek', img: 'friday-2' },
+  { d: 'Fri', m: 'Dinner', n: 'Creamy Tuscan Pasta', t: '25 mins', c: 'Italian', img: 'friday-3' },
+  { d: 'Sat', m: 'Breakfast', n: 'Eggs Benedict with Hollandaise', t: '25 mins', c: 'French', img: 'saturday-1' },
+  { d: 'Sat', m: 'Lunch', n: 'Vietnamese Banh Mi Sandwich', t: '20 mins', c: 'Vietnamese', img: 'saturday-2' },
+  { d: 'Sat', m: 'Dinner', n: 'Herb-Crusted Rack of Lamb', t: '35 mins', c: 'French', img: 'saturday-3' },
+  { d: 'Sun', m: 'Breakfast', n: 'French Toast with Berries', t: '15 mins', c: 'French', img: 'sunday-1' },
+  { d: 'Sun', m: 'Lunch', n: 'Caesar Salad with Grilled Chicken', t: '15 mins', c: 'American', img: 'sunday-2' },
+  { d: 'Sun', m: 'Dinner', n: 'Sunday Roast Chicken', t: '45 mins', c: 'American', img: 'sunday-3' },
+];
+const shopping = [
+  { e: '🌾', n: 'Steel-Cut Oats', q: '40g' },
+  { e: '🥛', n: 'Plant Milk', q: '320ml' },
+  { e: '🫘', n: 'Chickpeas', q: '1 cup cooked' },
+  { e: '🍚', n: 'Brown Rice', q: '1 cup cooked' },
+  { e: '🍌', n: 'Banana', q: '1 medium' },
+  { e: '🎃', n: 'Pumpkin Seeds', q: '30g' },
+];
+---
+
+<section class="week" id="yc-week">
+  <div class="week__head" data-yc-reveal>
+    <p class="yc-eyebrow">Meal plans</p>
+    <h2 class="week__title">Your week, <span>planned in seconds</span></h2>
+    <p class="week__lede">Full meal plans generated on demand, built around your diet and your schedule. No searching, no comparing, no thinking.</p>
+  </div>
+
+  {[rowA, rowB].map((row, r) => (
+    <div class:list={['mq', r === 1 && 'mq--rev']}>
+      <ul class="mq__track">
+        {[0, 1].map((dup) =>
+          row.map((m) => (
+            <li class="meal" aria-hidden={dup === 1 ? 'true' : undefined}>
+              <img src={`/images/work/youcook/meals/${m.img}.webp`} alt={dup === 1 ? '' : m.n} width="300" height="300" loading="lazy" />
+              <span class="meal__info">
+                <span class="meal__when">{m.d} · {m.m}</span>
+                <strong class="meal__name">{m.n}</strong>
+                <span class="meal__tags"><em>⏳ {m.t}</em><em class="meal__c">{m.c}</em></span>
+              </span>
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  ))}
+</section>
+
+<section class="duo" id="yc-duo">
+  <div class="duo__panel duo__panel--list">
+    <div class="duo__copy" data-yc-reveal>
+      <p class="yc-eyebrow yc-eyebrow--light">Shopping lists</p>
+      <h3 class="duo__title">One tap.<br />Shopping list.</h3>
+      <p class="duo__lede">Every meal plan writes its own list, grouped and measured. Tick things off as you shop.</p>
+    </div>
+    <div class="nb" role="img" aria-label="An automatic YouCook shopping list with quantities, ticking itself off">
+      <div class="nb__rings" aria-hidden="true">{Array.from({ length: 13 }).map(() => <i></i>)}</div>
+      <p class="nb__title"><img src="/images/work/youcook/hat.webp" alt="" width="200" height="200" loading="lazy" />Shopping List</p>
+      <p class="nb__meta">Created a moment ago · Double tap to edit, swipe to delete</p>
+      <p class="nb__date">Shopping · Tuesday</p>
+      <ul class="nb__list">
+        {shopping.map((s) => (
+          <li class="nb__item"><span class="nb__e">{s.e}</span><span class="nb__n">{s.n}</span><span class="nb__q">{s.q}</span><i class="nb__c">✓</i></li>
+        ))}
+      </ul>
+      <p class="nb__add">Add ingredient</p>
+    </div>
+  </div>
+
+  <div class="duo__panel duo__panel--remind">
+    <div class="duo__copy" data-yc-reveal>
+      <p class="yc-eyebrow yc-eyebrow--light">Cook reminders</p>
+      <h3 class="duo__title">Your meals<br />run themselves.</h3>
+      <p class="duo__lede">A nudge at the time you choose, and tonight’s recipe is waiting when you open the app.</p>
+    </div>
+    <div class="lock" role="img" aria-label="Lock screen notification from YouCook: time to start dinner, lemon herb chicken, 25 minutes">
+      <div class="lock__island" aria-hidden="true"></div>
+      <p class="lock__date" aria-hidden="true">Tuesday</p>
+      <p class="lock__time" aria-hidden="true">17:30</p>
+      <div class="notif" aria-hidden="true">
+        <img class="notif__icon" src="/images/work/youcook/app-icon.webp" alt="" width="256" height="256" loading="lazy" />
+        <div class="notif__body">
+          <p class="notif__top"><b>YouCook</b><span>now</span></p>
+          <p>Time to start dinner</p>
+          <p>Tonight: Lemon Herb Chicken (25 min)</p>
+          <p>Tap to cook.</p>
+        </div>
+      </div>
+      <div class="lock__bar" aria-hidden="true"><span>🔦</span><span>📷</span></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---------- week ---------- */
+  .week {
+    position: relative;
+    overflow: clip;
+    background: #fff;
+    padding: clamp(80px, 10vw, 140px) 0 clamp(70px, 8vw, 110px);
+  }
+  .week::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--yc-pattern);
+    background-size: clamp(380px, 38vw, 560px);
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  .week__head { position: relative; max-width: 820px; margin: 0 auto 48px; padding: 0 var(--yc-gutter); text-align: center; }
+  .week__head .yc-eyebrow { justify-content: center; }
+  .week__title {
+    font-size: clamp(40px, 5.4vw, 72px);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--yc-ink-strong);
+    margin: 0 0 18px;
+  }
+  .week__title span { color: var(--yc-coral); display: block; }
+  .week__lede { font-size: clamp(17px, 1.45vw, 19.5px); font-weight: 500; line-height: 1.6; color: #555; margin: 0 auto; max-width: 620px; }
+
+  .mq {
+    position: relative;
+    overflow: hidden;
+    padding: 10px 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .mq__track { list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; width: max-content; }
+  .meal {
+    flex: none;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    width: 330px;
+    padding: 12px 16px 12px 12px;
+    border-radius: 22px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 10px 26px -14px rgba(60, 20, 10, 0.25);
+  }
+  .meal img { flex: none; width: 92px; height: 92px; border-radius: 16px; object-fit: cover; }
+  .meal__info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .meal__when { font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--yc-coral); }
+  .meal__name { font-size: 16px; font-weight: 700; line-height: 1.25; color: #222; }
+  .meal__tags { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .meal__tags em {
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 8px;
+    background: var(--yc-salmon);
+    color: #1d1d1d;
+  }
+  .meal__tags .meal__c { background: #fff; border: 1px solid #f1c5bc; color: #a1503f; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mq__track { animation: yc-mq 70s linear infinite; }
+    .mq--rev .mq__track { animation-name: yc-mq-rev; animation-duration: 76s; }
+    .mq:hover .mq__track { animation-play-state: paused; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mq { overflow-x: auto; }
+  }
+  @keyframes yc-mq { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 9px)); } }
+  @keyframes yc-mq-rev { from { transform: translateX(calc(-50% - 9px)); } to { transform: translateX(0); } }
+
+  /* ---------- duo ---------- */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; }
+  .duo__panel {
+    position: relative;
+    overflow: clip;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: clamp(70px, 8vw, 110px) clamp(24px, 5vw, 72px);
+    color: #fff;
+  }
+  .duo__panel--list {
+    background: var(--yc-pattern-light), linear-gradient(165deg, #fa8a70 0%, #f87f64 40%, #d85b40 100%);
+    background-size: clamp(380px, 38vw, 560px), auto;
+  }
+  .duo__panel--remind {
+    background: var(--yc-pattern-light), linear-gradient(165deg, #3a4862 0%, #323f54 45%, #1b2536 100%);
+    background-size: clamp(380px, 38vw, 560px), auto;
+  }
+  .duo__copy { text-align: center; max-width: 440px; }
+  .duo__copy .yc-eyebrow { justify-content: center; }
+  .duo__title {
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    margin: 0 0 16px;
+    color: #fff;
+  }
+  .duo__lede { font-size: 17px; font-weight: 500; line-height: 1.6; color: rgba(255, 255, 255, 0.9); margin: 0; }
+
+  /* notebook */
+  .nb {
+    position: relative;
+    width: min(100%, 380px);
+    padding: 34px 22px 22px;
+    border-radius: 26px;
+    background: #fdfdfd;
+    color: #222;
+    box-shadow: 0 40px 70px -30px rgba(90, 20, 5, 0.6);
+    transform: rotate(-2deg);
+  }
+  .nb__rings { position: absolute; top: -9px; left: 22px; right: 22px; display: flex; justify-content: space-between; }
+  .nb__rings i { width: 9px; height: 22px; border-radius: 6px; background: linear-gradient(#9b9b9b, #4a4a4a); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15); }
+  .nb__title { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-size: 25px; font-weight: 600; color: var(--yc-salmon); }
+  .nb__title img { width: 34px; height: auto; }
+  .nb__meta { margin: 2px 0 14px; text-align: center; font-size: 11px; color: #999; }
+  .nb__date { margin: 0 0 10px; padding: 8px 14px; border-radius: 12px; border: 1px solid #e3e3e3; font-size: 14px; font-weight: 600; color: #444; }
+  .nb__list { list-style: none; margin: 0; padding: 0; }
+  .nb__item {
+    --done: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    border-bottom: 1px dashed #e6e6e6;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .nb__e { width: 22px; text-align: center; }
+  .nb__n {
+    flex: 1;
+    color: color-mix(in srgb, #a3a3a3 calc(var(--done) * 100%), #333);
+    background: linear-gradient(#9a9a9a, #9a9a9a) no-repeat 0 56% / calc(var(--done) * 100%) 1.5px;
+  }
+  .nb__q { font-size: 13px; font-weight: 600; color: #777; }
+  .nb__c {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, var(--done));
+    border: 1.5px solid color-mix(in srgb, var(--yc-teal) calc(var(--done) * 100%), #9a9a9a);
+    background: color-mix(in srgb, var(--yc-teal) calc(var(--done) * 100%), #fff);
+    transform: scale(calc(1 + var(--pop, 0) * 0.35));
+  }
+  .nb__add { margin: 14px 0 0; padding: 9px 14px; border-radius: 12px; border: 1px solid #e3e3e3; font-size: 13px; color: #aaa; }
+
+  /* lock screen */
+  .lock {
+    position: relative;
+    width: min(100%, 330px);
+    aspect-ratio: 9 / 15.5;
+    border-radius: 46px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 70% at 50% 110%, rgba(255, 138, 116, 0.55) 0%, rgba(255, 138, 116, 0) 60%),
+      radial-gradient(90% 60% at 80% 0%, rgba(80, 158, 151, 0.45) 0%, rgba(80, 158, 151, 0) 60%),
+      linear-gradient(180deg, #172238 0%, #1f2c4a 55%, #3a2c48 100%);
+    box-shadow:
+      0 0 0 10px #0d0d0f,
+      0 0 0 11.5px #3a3a3c,
+      0 40px 80px -30px rgba(0, 0, 0, 0.7);
+    text-align: center;
+    color: #fff;
+  }
+  .lock__island { position: absolute; top: 12px; left: 50%; width: 92px; height: 26px; border-radius: 99px; background: #000; transform: translateX(-50%); }
+  .lock__date { margin: 64px 0 0; font-size: 17px; font-weight: 600; color: rgba(255, 255, 255, 0.85); }
+  .lock__time { margin: -4px 0 0; font-size: 82px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; color: rgba(255, 255, 255, 0.95); font-family: -apple-system, 'SF Pro Display', 'Quicksand', system-ui, sans-serif; }
+  .notif {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 96px;
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 13px 14px;
+    border-radius: 22px;
+    text-align: left;
+    background: rgba(40, 46, 66, 0.62);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 30px -12px rgba(0, 0, 0, 0.6);
+    font-family: -apple-system, 'SF Pro Text', 'Quicksand', system-ui, sans-serif;
+  }
+  .notif__icon { width: 38px; height: 38px; border-radius: 9px; flex: none; }
+  .notif__body { flex: 1; min-width: 0; }
+  .notif__body p { margin: 0; font-size: 14px; line-height: 1.32; color: #fff; }
+  .notif__top { display: flex; justify-content: space-between; }
+  .notif__top span { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); }
+  .lock__bar { position: absolute; left: 34px; right: 34px; bottom: 34px; display: flex; justify-content: space-between; }
+  .lock__bar span { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.14); font-size: 18px; }
+
+  @media (max-width: 900px) {
+    .duo { grid-template-columns: 1fr; }
+    .meal { width: 290px; padding: 10px 14px 10px 10px; }
+    .meal img { width: 80px; height: 80px; }
+    .meal__name { font-size: 15px; }
+  }
+</style>
+
+<script>
+  import { loadMotion } from './motion';
+
+  (async () => {
+    const root = document.getElementById('yc-duo');
+    if (!root) return;
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap, ScrollTrigger } = m;
+
+    // Shopping list ticks itself off
+    const items = Array.from(root.querySelectorAll<HTMLElement>('.nb__item'));
+    const list = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.8 });
+    list.set(items, { '--done': 0 });
+    items.forEach((it, i) => {
+      list.to(it, { '--done': 1, duration: 0.35, ease: 'power2.out' }, 0.6 + i * 0.75)
+        .fromTo(it.querySelector('.nb__c'), { '--pop': 1 }, { '--pop': 0, duration: 0.4 }, '<');
+    });
+    list.to({}, { duration: 1.6 }).to(items, { '--done': 0, duration: 0.4, stagger: 0.04 });
+
+    // Reminder lands on the lock screen
+    const notif = root.querySelector<HTMLElement>('.notif')!;
+    const ping = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 1 });
+    ping.fromTo(notif, { y: -260, autoAlpha: 0, scale: 0.9 }, { y: 0, autoAlpha: 1, scale: 1, duration: 0.8, ease: 'back.out(1.3)' }, 0.4)
+      .to(notif, { x: 5, duration: 0.06, repeat: 5, yoyo: true, ease: 'none' }, 1.2)
+      .to(notif, { x: 0, duration: 0.06 })
+      .to(notif, { scale: 0.97, duration: 0.15, yoyo: true, repeat: 1 }, 4)
+      .to(notif, { y: 40, autoAlpha: 0, duration: 0.5, ease: 'power2.in' }, 5.2);
+
+    [[root.querySelector('.nb'), list], [root.querySelector('.lock'), ping]].forEach(([el, tl]) => {
+      ScrollTrigger.create({
+        trigger: el as Element,
+        start: 'top 85%',
+        end: 'bottom 10%',
+        onToggle: (self) => ((self.isActive ? (tl as gsap.core.Timeline).play() : (tl as gsap.core.Timeline).pause())),
+      });
+    });
+    m.refresh();
+  })();
+</script>

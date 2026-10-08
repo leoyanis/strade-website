@@ -1,0 +1,139 @@
+---
+// YouCook: branded case study (main quest). Looks and talks like youcookapp.com.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import { getProject } from '../../data/work';
+import { hatPattern } from '../../components/case/youcook/hat';
+import Hero from '../../components/case/youcook/Hero.astro';
+import Ribbon from '../../components/case/youcook/Ribbon.astro';
+import Problem from '../../components/case/youcook/Problem.astro';
+import HowItWorks from '../../components/case/youcook/HowItWorks.astro';
+import CookMode from '../../components/case/youcook/CookMode.astro';
+import ChefChat from '../../components/case/youcook/ChefChat.astro';
+import WeekPlan from '../../components/case/youcook/WeekPlan.astro';
+import StoreRail from '../../components/case/youcook/StoreRail.astro';
+import UnderTheHood from '../../components/case/youcook/UnderTheHood.astro';
+import Lesson from '../../components/case/youcook/Lesson.astro';
+import TryIt from '../../components/case/youcook/TryIt.astro';
+
+const p = getProject('youcook')!;
+const link = (label: string) => p.links?.find((l) => l.label === label)?.href ?? '#';
+const appStore = link('App Store');
+const playStore = link('Google Play');
+const site = link('youcookapp.com');
+const fonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap';
+---
+
+<Base
+  title={`${p.name}: case study | Yanis Schweizer`}
+  description={p.summary}
+  path="/work/youcook"
+  noAlternates
+  bare
+  navTheme={p.brand.light ? 'light' : 'dark'}
+  ogImage="/og/work-youcook.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={fonts} />
+  <link slot="head" rel="preload" as="image" href="/images/work/youcook/phone-home.webp" />
+
+  <div class="yc" style={`--yc-pattern:${hatPattern()};--yc-pattern-light:${hatPattern('#ffffff', 0.09)}`}>
+    <Hero appStore={appStore} playStore={playStore} site={site} year={p.year} />
+    <Ribbon />
+    <Problem problem={p.problem} />
+    <HowItWorks />
+    <CookMode />
+    <ChefChat />
+    <WeekPlan />
+    <StoreRail />
+    <UnderTheHood year={p.year} />
+    <Lesson />
+    <TryIt appStore={appStore} playStore={playStore} site={site} />
+  </div>
+
+  <CaseNext current="youcook" />
+</Base>
+
+<style>
+  :global(body) { background: #ffffff; }
+  :global(body[data-nav='light'] #site-nav.is-scrolled) { background: rgba(255, 255, 255, 0.82); }
+
+  .yc {
+    --yc-surface: #fff5f3;
+    --yc-ink: #333333;
+    --yc-ink-strong: #222222;
+    --yc-muted: #6b6b6b;
+    --yc-coral: #ff6b6b;
+    --yc-salmon: #f3765e;
+    --yc-teal: #509e97;
+    --yc-teal-deep: #17857e;
+    --yc-cream: #f4edde;
+    --yc-blue: #2f80cc;
+    --yc-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --yc-font: 'Quicksand', ui-rounded, system-ui, sans-serif;
+    --yc-hand: 'Caveat', 'Quicksand', cursive;
+    --yc-gutter: clamp(20px, 5vw, 48px);
+    position: relative;
+    font-family: var(--yc-font);
+    color: var(--yc-ink);
+    background: #fff;
+    overflow-x: clip;
+  }
+  .yc :global(h1),
+  .yc :global(h2),
+  .yc :global(h3),
+  .yc :global(h4) { font-family: var(--yc-font); }
+  .yc :global(.yc-eyebrow) {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--yc-coral);
+    margin: 0 0 18px;
+  }
+  .yc :global(.yc-eyebrow::before) {
+    content: '';
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .yc :global(.yc-eyebrow--light) { color: rgba(255, 255, 255, 0.92); }
+</style>
+
+<script>
+  import { loadMotion } from '../../components/case/youcook/motion';
+
+  (async () => {
+    const m = await loadMotion();
+    if (!m) return;
+    const { gsap } = m;
+
+    // Generic reveal
+    gsap.utils.toArray<HTMLElement>('[data-yc-reveal]').forEach((el) => {
+      gsap.from(el, {
+        y: 40, opacity: 0, duration: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+      });
+    });
+
+    // Problem: the old way gets crossed out, the new way slides over it
+    const vs = document.querySelector<HTMLElement>('.vs');
+    if (vs) {
+      const strikes = vs.querySelectorAll('.vs__strike');
+      const ticks = vs.querySelectorAll('.vs__tick');
+      gsap.set(strikes, { '--strike': 0 });
+      const tl = gsap.timeline({ scrollTrigger: { trigger: vs, start: 'top 75%', once: true } });
+      tl.from('.vs__card--no', { y: 50, rotate: -8, opacity: 0, duration: 0.9, ease: 'power3.out' })
+        .to(strikes, { '--strike': 1, duration: 0.45, stagger: 0.28, ease: 'power2.inOut' }, '-=0.2')
+        .from('.vs__card--yes', { y: 80, x: 30, rotate: 8, opacity: 0, duration: 0.9, ease: 'back.out(1.4)' }, '-=0.1')
+        .from(ticks, { scale: 0, rotate: -40, duration: 0.5, stagger: 0.14, ease: 'back.out(3)' }, '-=0.35');
+    }
+
+    m.refresh();
+  })();
+</script>
