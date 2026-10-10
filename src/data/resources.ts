@@ -61,7 +61,7 @@ export interface Resource {
   /** Small line under the download button; with `href` it becomes a link. */
   note?: { text: string; href?: string };
   /** Custom animated preview beside or under the hero. */
-  preview?: 'ship-safe' | 'design-system' | 'ssot';
+  preview?: 'ship-safe' | 'design-system' | 'ssot' | 'beautifier';
   /** "What's inside" bullets above the fold. */
   inside?: string[];
   sections?: ResourceSection[];
@@ -289,6 +289,89 @@ export const RESOURCES: Resource[] = [
       },
     ],
     date: '2026-10-08',
+    published: true,
+  },
+  {
+    slug: 'landing-page-beautifier',
+    title: 'Landing Page Beautifier',
+    kind: 'Skill',
+    eyebrow: 'Free Claude skill',
+    accent: '#ff6a3d',
+    summary:
+      'Your landing page works, but it looks like everyone else’s. This skill asks what look you want, then rebuilds it with fancy animations and whatnot. Your words stay exactly as they are.',
+    ogLine: 'Fancy animations and whatnot, without touching your words.',
+    note: SKILL_NOTE,
+    preview: 'beautifier',
+    downloads: [
+      { label: 'Download the Beautifier', href: '/free/landing-page-beautifier/landing-page-beautifier.zip', download: true },
+    ],
+    sections: [
+      {
+        type: 'steps',
+        heading: 'How to use it',
+        steps: [
+          { text: 'Download and unzip it.', art: { kind: 'zip', file: 'landing-page-beautifier.zip', folder: 'landing-page-beautifier' } },
+          {
+            text: '**Claude Code:** drop the folder into `.claude/skills/` in your project and type `/landing-page-beautifier`. **Any other AI chat:** paste in the [all-in-one file](/free/landing-page-beautifier/landing-page-beautifier-all-in-one.md).',
+            art: { kind: 'cmd', folder: 'landing-page-beautifier', cmd: '/landing-page-beautifier' },
+          },
+          {
+            text: 'Answer a few questions about the look you want. No idea? Say “you decide” and it picks a style that fits your brand.',
+            art: { kind: 'chips', label: 'The feel', q: 'How should it feel?', items: ['Calm and editorial', 'Playful', 'Clean and technical', 'Cinematic', 'You decide'], picked: 4 },
+          },
+          {
+            text: 'Approve the plan: how every section looks and how it moves into the next one.',
+            art: {
+              kind: 'review',
+              label: 'The plan',
+              note: 'Home page, 6 sections',
+              rows: [
+                { text: 'Hero builds itself like a film intro', fix: 'Approved' },
+                { text: 'Diagonal wipe into the menu', fix: 'Approved' },
+                { text: 'Two typos in your copy', warn: true, fix: 'Flagged, not changed' },
+              ],
+              reply: 'go',
+            },
+          },
+          {
+            text: 'It builds it, checks it on phones and desktops, and writes down the rules so every future page matches.',
+            art: {
+              kind: 'files',
+              files: [
+                { name: 'DESIGN.md', lines: ['Fonts, sizes, colours', 'Every component'] },
+                { name: 'MOTION.md', lines: ['How each section moves', 'How to add more'] },
+                { name: 'REVAMP-LOG.md', lines: ['✓ 14 things fixed', '→ 3 for you to decide'] },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        type: 'cards',
+        heading: 'What it does',
+        cards: [
+          { tag: 'Motion', title: 'Fancy animations and whatnot', text: 'Scroll scenes, transitions between sections, headlines that build themselves. Phones get the same show as a loop.' },
+          { tag: 'Type and sizing', title: 'Proper typography', text: 'A font pairing, a real size scale, spacing and line lengths that make the page feel expensive.' },
+          { tag: 'System', title: 'One set of rules', text: 'Every colour, size and animation comes from one design system, written down so it stays consistent.' },
+        ],
+        note: 'It never rewrites your copy. Typos and contradictions get flagged for you to decide.',
+      },
+      {
+        type: 'works',
+        heading: 'Works with',
+        groups: [
+          ['Restaurants', 'SaaS', 'Agencies', 'Shops', 'Clinics', 'Portfolios', 'Nonprofits'],
+          ['React/Next.js', 'Astro', 'Vue', 'Svelte', 'Plain HTML', 'WordPress', 'Shopify', 'Webflow'],
+        ],
+      },
+      {
+        type: 'callout',
+        tone: 'promise',
+        text: 'No fixed look. It has nine styles to choose from, from calm editorial to loud and brutalist, and uses the one that fits your brand.',
+      },
+    ],
+    related: ['vaultt', 'youcook'],
+    date: '2026-10-10',
     published: true,
   },
   {

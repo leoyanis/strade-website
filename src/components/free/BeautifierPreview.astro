@@ -1,0 +1,265 @@
+---
+// Landing Page Beautifier preview, pinned: a plain default-looking page gets read, the
+// interview picks a feel, a diagonal wipe turns it into a designed page (letters rise,
+// tiles deal in, a tilted band straightens), the next section irises in, and a stamp
+// confirms not a single word changed. motion/beautifier.ts scrubs it on desktop and
+// loops it on phones. Without JS it shows the finished page and the full log.
+
+const log = [
+  { cls: 'is-cmd', html: '<span class="lpb-p">›</span> /landing-page-beautifier' },
+  { cls: '', html: 'Reading your site… <b class="lpb-read">4</b>/4 pages' },
+  { cls: '', html: 'Feel: Warm &amp; crafted' },
+  { cls: 'is-ok', html: '✓ Type: big headline, serif accent' },
+  { cls: 'is-ok', html: '✓ One spacing, colour and corner system' },
+  { cls: 'is-ok', html: '✓ Section transitions + scroll scenes' },
+  { cls: 'is-ok', html: '✓ Your words: 0 changed' },
+];
+const feels = ['Calm', 'Playful', 'Warm & crafted', 'You decide'];
+const picked = 2;
+const tiles = [
+  { t: 'Sourdough', r: -4 },
+  { t: 'Pastries', r: 3 },
+  { t: 'Coffee', r: -2 },
+];
+const stats = [
+  { n: 1987, label: 'since' },
+  { n: 12, label: 'breads a day' },
+  { n: 7, suffix: 'am', label: 'doors open' },
+];
+const band = Array.from({ length: 2 }, () => 'Sourdough ✦ Croissants ✦ Coffee ✦ Rye ✦ ').join('');
+---
+
+<section class="sk-preview lpb" data-fx="beautifier">
+  <div class="lpb__pin">
+    <div class="container lpb__grid">
+      <div class="lpb__stage">
+        <div class="fp-win lpb-win" role="img" aria-label="A plain bakery landing page in default fonts and grey boxes gets read. After a quick interview picks a warm, crafted feel, a diagonal wipe turns it into a designed page: a big headline with a serif accent, tilted colour tiles, a moving band and a dark second section that opens with a circular reveal. A stamp confirms 0 words were changed.">
+          <div class="fp-win__bar" aria-hidden="true"><i></i><i></i><i></i><span>crumbandco.com</span></div>
+          <div class="lpb-view" aria-hidden="true">
+            <!-- Before: what most sites look like out of the box -->
+            <div class="lpb-before">
+              <div class="lpb-b-nav"><b>Crumb &amp; Co.</b><span><u>Menu</u> <u>Visit</u></span><em>Order ahead</em></div>
+              <div class="lpb-b-hero">
+                <div>
+                  <small>Bakery · Since 1987</small>
+                  <h4>Fresh bread, baked before you wake up.</h4>
+                  <p>Sourdough, pastries and coffee on Mill Street. Open from 7am.</p>
+                  <em>Order ahead</em>
+                </div>
+                <div class="lpb-b-img"></div>
+              </div>
+              <div class="lpb-b-tiles">{tiles.map((t) => <span>{t.t}</span>)}</div>
+            </div>
+
+            <!-- After: same words, designed -->
+            <div class="lpb-after">
+              <div class="lpb-page">
+                <div class="lpb-a1">
+                  <div class="lpb-a-nav"><b>Crumb &amp; Co.</b><span>Menu</span><span>Visit</span><em>Order ahead</em></div>
+                  <div class="lpb-a-hero">
+                    <div class="lpb-a-text">
+                      <small>Bakery · Since 1987</small>
+                      <h4 class="lpb-h">Fresh bread, baked <em>before you wake up.</em></h4>
+                      <p>Sourdough, pastries and coffee on Mill Street. Open from 7am.</p>
+                      <span class="lpb-btn">Order ahead <i>→</i></span>
+                    </div>
+                    <div class="lpb-a-art">
+                      <span class="lpb-loaf"></span>
+                      <span class="lpb-sticker">since<br />1987</span>
+                    </div>
+                  </div>
+                  <div class="lpb-a-tiles">
+                    {tiles.map((t, i) => (
+                      <span class="lpb-tile" style={`--r:${t.r}deg`}><small>0{i + 1}</small>{t.t}</span>
+                    ))}
+                  </div>
+                  <div class="lpb-band"><div class="lpb-band__track"><span>{band}</span><span>{band}</span></div></div>
+                </div>
+                <div class="lpb-a2">
+                  <h5>Baked at 4am. <em>Gone by noon.</em></h5>
+                  <div class="lpb-stats">
+                    {stats.map((s) => (
+                      <div><b data-n={s.n} data-suffix={s.suffix ?? ''}>{s.n}{s.suffix ?? ''}</b><span>{s.label}</span></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <span class="lpb-edge"></span>
+            <span class="lpb-beam"></span>
+            <span class="lpb-stamp">0 words changed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lpb__side">
+        <div class="fp-win lpb-log" aria-hidden="true">
+          <div class="fp-win__bar"><i></i><i></i><i></i><span>claude · landing-page-beautifier</span></div>
+          <ol>{log.map((l) => <li class={l.cls} set:html={l.html} />)}</ol>
+        </div>
+        <div class="lpb-ask" aria-hidden="true">
+          <header>How should it feel?</header>
+          <ul>{feels.map((f, i) => <li class:list={[i === picked && 'is-pick']}>{f}</li>)}</ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* ================================================================
+     LANDING PAGE BEAUTIFIER: pinned before -> after
+     ================================================================ */
+  .lpb { padding: 24px 0 24px; }
+  .lpb__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  @media (min-width: 901px) {
+    .lpb__grid { grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.75fr); gap: 40px; align-items: center; }
+    .lpb.is-pinned { padding: 0; }
+    .lpb.is-pinned .lpb__pin { height: 100vh; display: flex; align-items: center; padding: 72px 0 16px; }
+    .lpb.is-pinned .lpb__grid { width: 100%; }
+    .lpb.is-pinned .lpb__stage { width: min(100%, calc((100vh - 170px) * 1.52)); justify-self: center; }
+  }
+
+  .lpb-win { --fp-bg: #0b0d0f; position: relative; }
+  .lpb-view {
+    --w: 1;
+    position: relative; aspect-ratio: 16 / 10; overflow: hidden; container-type: inline-size;
+  }
+
+  /* ---------- Before: browser defaults ---------- */
+  .lpb-before {
+    position: absolute; inset: 0; padding: 2.2cqw 3cqw; background: #fff; color: #111;
+    font-family: 'Times New Roman', Times, serif; font-size: 1.9cqw; line-height: 1.3;
+  }
+  .lpb:not(.is-live) .lpb-before { display: none; }
+  .lpb-b-nav { display: flex; align-items: center; gap: 3cqw; padding-bottom: 1.4cqw; border-bottom: 1px solid #ccc; }
+  .lpb-b-nav b { font-size: 2.2cqw; }
+  .lpb-b-nav span { flex: 1; color: #0000ee; }
+  .lpb-before em { font-style: normal; display: inline-block; padding: 0.4cqw 1.2cqw; border: 1px solid #999; background: #e9e9e9; border-radius: 3px; }
+  .lpb-b-hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3cqw; margin-top: 3cqw; }
+  .lpb-b-hero small { font-size: 1.6cqw; color: #555; }
+  .lpb-b-hero h4 { font-size: 3.6cqw; margin: 0.6cqw 0 1cqw; }
+  .lpb .lpb-b-hero p { margin-bottom: 1.4cqw; font-size: 1.9cqw; line-height: 1.3; color: #111; }
+  .lpb-b-img {
+    background:
+      linear-gradient(to top right, transparent calc(50% - 1px), #bbb 50%, transparent calc(50% + 1px)),
+      linear-gradient(to top left, transparent calc(50% - 1px), #bbb 50%, transparent calc(50% + 1px)), #eee;
+    border: 1px solid #ccc; min-height: 20cqw;
+  }
+  .lpb-b-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6cqw; margin-top: 3cqw; }
+  .lpb-b-tiles span { padding: 3cqw 1.4cqw; border: 1px solid #bbb; border-radius: 4px; text-align: center; }
+
+  /* ---------- After: same words, designed ---------- */
+  .lpb-after {
+    position: absolute; inset: 0;
+    clip-path: polygon(0 0, calc(var(--w) * 130%) 0, calc(var(--w) * 130% - 30%) 100%, 0 100%);
+  }
+  .lpb-page { height: 200%; }
+  .lpb-a1, .lpb-a2 { position: relative; height: 50%; overflow: hidden; }
+  .lpb-a1 {
+    padding: 2.4cqw 3.4cqw 0; color: #1c1714; font-family: Inter, system-ui, sans-serif;
+    background: radial-gradient(60% 70% at 78% 30%, color-mix(in srgb, var(--acc) 22%, transparent), transparent 70%), #f4ede1;
+  }
+  .lpb-a-nav { display: flex; align-items: center; gap: 2.6cqw; font-size: 1.45cqw; font-weight: 500; color: #5d544c; }
+  .lpb-a-nav b { margin-right: auto; font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; font-size: 2.4cqw; color: #1c1714; letter-spacing: -0.01em; }
+  .lpb-a-nav em { font-style: normal; font-weight: 700; color: #f4ede1; background: #1c1714; padding: 0.7cqw 1.5cqw; border-radius: 99px; }
+  .lpb-a-hero { display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 2cqw; align-items: center; margin-top: 3.2cqw; }
+  .lpb-a-text small { display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 1.15cqw; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #8a5a3c; }
+  .lpb-h { margin: 1cqw 0 1.4cqw; font-size: 5.9cqw; font-weight: 800; line-height: 0.95; letter-spacing: -0.05em; text-wrap: balance; }
+  .lpb-h em { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: -0.03em; font-size: 1.06em; color: color-mix(in srgb, var(--acc) 82%, #1c1714); }
+  .lpb-h .fx-w { padding-bottom: 0.1em; }
+  .lpb .lpb-a-text p { max-width: 34ch; font-size: 1.6cqw; line-height: 1.5; color: #5d544c; }
+  .lpb-btn {
+    display: inline-flex; align-items: center; gap: 0.8cqw; margin-top: 1.8cqw; padding: 1cqw 1.9cqw; border-radius: 99px;
+    font-size: 1.5cqw; font-weight: 700; color: #1c1714; background: var(--acc); box-shadow: 0.45cqw 0.45cqw 0 #1c1714;
+  }
+  .lpb-btn i { font-style: normal; }
+  .lpb-a-art { position: relative; height: 22cqw; }
+  .lpb-loaf {
+    position: absolute; left: 8%; right: 4%; top: 18%; bottom: 10%; border-radius: 48% 52% 44% 46% / 58% 56% 44% 42%;
+    background:
+      repeating-linear-gradient(-58deg, transparent 0 2.6cqw, rgba(255, 236, 204, 0.55) 2.6cqw 3cqw, transparent 3cqw 5.4cqw),
+      radial-gradient(80% 70% at 40% 30%, #e7b77a, #b8733d 62%, #8b4f25);
+    box-shadow: 0 2.4cqw 3cqw -1.6cqw rgba(60, 30, 10, 0.55), inset 0 -1cqw 2cqw rgba(80, 40, 15, 0.35);
+    rotate: -8deg;
+  }
+  .lpb-sticker {
+    position: absolute; right: 0; top: 0; width: 8.6cqw; height: 8.6cqw; display: grid; place-items: center; border-radius: 50%;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 1.15cqw; font-weight: 700; line-height: 1.15; letter-spacing: 0.1em;
+    text-transform: uppercase; text-align: center; color: #f4ede1; background: #1c1714; rotate: 12deg;
+    box-shadow: 0 0 0 0.4cqw #f4ede1, 0 0 0 0.6cqw #1c1714;
+  }
+  .lpb-a-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.2cqw; margin-top: 2.6cqw; padding: 0 0.6cqw; }
+  .lpb-tile {
+    display: flex; flex-direction: column; justify-content: space-between; height: 9.4cqw; padding: 1.3cqw 1.6cqw; border-radius: 1.2cqw;
+    font-size: 2.3cqw; font-weight: 800; letter-spacing: -0.03em; rotate: var(--r);
+    box-shadow: 0.55cqw 0.55cqw 0 #1c1714;
+  }
+  .lpb-tile small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 1.05cqw; font-weight: 600; letter-spacing: 0.12em; opacity: 0.7; }
+  .lpb-tile:nth-child(1) { background: #1c1714; color: #f4ede1; }
+  .lpb-tile:nth-child(2) { background: var(--acc); color: #1c1714; }
+  .lpb-tile:nth-child(3) { background: #6b7a3c; color: #f4ede1; }
+  .lpb-band { position: absolute; left: -4%; right: -4%; bottom: 2.4cqw; padding: 1cqw 0; overflow: hidden; background: #1c1714; color: #f4ede1; }
+  .lpb-band__track { display: flex; width: max-content; animation: lpb-mq 16s linear infinite; }
+  .lpb-band__track span { font-size: 1.7cqw; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; white-space: pre; }
+  @keyframes lpb-mq { to { transform: translateX(-50%); } }
+
+  .lpb-a2 {
+    --ir: 1;
+    display: flex; flex-direction: column; justify-content: center; gap: 4cqw; padding: 0 5cqw;
+    font-family: Inter, system-ui, sans-serif; color: #f4ede1; background: radial-gradient(70% 60% at 50% 110%, color-mix(in srgb, var(--acc) 34%, transparent), transparent 70%), #1c1714;
+    clip-path: circle(calc(var(--ir) * 150%) at 50% 100%);
+  }
+  .lpb-a2 h5 { font-size: 6.4cqw; font-weight: 800; line-height: 0.95; letter-spacing: -0.05em; }
+  .lpb-a2 h5 em { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: -0.03em; color: var(--acc); }
+  .lpb-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3cqw; padding-top: 2.4cqw; border-top: 1px solid rgba(244, 237, 225, 0.18); }
+  .lpb-stats b { display: block; font-size: 5.4cqw; font-weight: 800; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  .lpb-stats span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 1.2cqw; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(244, 237, 225, 0.6); }
+
+  /* ---------- Scene furniture ---------- */
+  .lpb-edge {
+    position: absolute; top: 0; bottom: 0; left: calc(var(--w) * 130%); z-index: 4; width: 2px; opacity: 0; pointer-events: none;
+    transform-origin: top; transform: skewX(-25.64deg);
+    background: var(--acc); box-shadow: 0 0 18px 3px color-mix(in srgb, var(--acc) 70%, transparent);
+  }
+  .lpb-beam {
+    position: absolute; left: 0; right: 0; top: -30%; height: 22%; z-index: 4; opacity: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--acc) 14%, transparent) 70%, color-mix(in srgb, var(--acc) 50%, transparent) 98%, transparent);
+  }
+  .lpb-beam::after { content: ''; position: absolute; left: 0; right: 0; bottom: 1px; height: 1.5px; background: var(--acc); box-shadow: 0 0 14px var(--acc); }
+  .lpb-stamp {
+    position: absolute; left: 50%; top: 50%; z-index: 6; translate: -50% -50%; rotate: -9deg;
+    padding: 1.2cqw 2.6cqw; border-radius: 1.2cqw; border: 3px solid var(--acc); white-space: nowrap;
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: clamp(14px, 3.6cqw, 30px); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--acc); background: rgba(12, 9, 7, 0.88); box-shadow: 0 0 40px -6px var(--acc), inset 0 0 24px -10px var(--acc);
+  }
+
+  .lpb:not(.is-live) .lpb-stamp { opacity: 0; }
+
+  .lpb__side { display: flex; flex-direction: column; gap: 16px; }
+  .lpb-log ol { list-style: none; display: flex; flex-direction: column; gap: 5px; padding: 12px 16px 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: var(--text-secondary); min-height: 172px; }
+  .lpb-log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lpb-log li.is-cmd, .lpb-log li b { color: var(--text-primary); }
+  .lpb-log .lpb-p { color: var(--acc); font-weight: 700; }
+  .lpb-log li.is-ok { color: color-mix(in srgb, var(--acc) 80%, #fff); }
+
+  .lpb-ask { padding: 16px 18px; border-radius: 14px; background: #121110; box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent), 0 30px 70px -30px color-mix(in srgb, var(--acc) 45%, transparent); }
+  .lpb-ask header { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc); }
+  .lpb-ask ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .lpb-ask li {
+    --on: 0;
+    font-size: 13.5px; font-weight: 600; padding: 8px 13px; border-radius: 999px;
+    color: color-mix(in srgb, #050505 calc(var(--on) * 100%), var(--text-secondary));
+    background: color-mix(in srgb, var(--acc) calc(var(--on) * 100%), rgba(255, 255, 255, 0.06));
+  }
+  .lpb-ask li.is-pick { --on: 1; }
+
+  @media (max-width: 600px) {
+    .lpb-log ol { font-size: 11px; min-height: 160px; }
+    .lpb-ask li { font-size: 12.5px; padding: 7px 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lpb-band__track { animation: none; }
+  }
+</style>

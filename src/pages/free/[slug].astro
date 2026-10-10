@@ -9,6 +9,7 @@ import QuestPanel from '../../components/QuestPanel.astro';
 import ShipSafePreview from '../../components/free/ShipSafePreview.astro';
 import DesignSystemPreview from '../../components/free/DesignSystemPreview.astro';
 import SsotPreview from '../../components/free/SsotPreview.astro';
+import BeautifierPreview from '../../components/free/BeautifierPreview.astro';
 import ShipSafeScan from '../../components/free/ShipSafeScan.astro';
 import StyleMorph from '../../components/free/StyleMorph.astro';
 import HowTo from '../../components/free/HowTo.astro';
@@ -95,6 +96,7 @@ const DownloadIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none
         </section>
       )}
       {r.preview === 'ssot' && <SsotPreview />}
+      {r.preview === 'beautifier' && <BeautifierPreview />}
 
       {r.sections!.map((sec) => {
         if (sec.type === 'cards' && sec.stage === 'ship-safe-scan') return <ShipSafeScan heading={sec.heading} cards={sec.cards} note={sec.note} />;

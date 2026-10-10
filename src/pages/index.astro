@@ -6,10 +6,9 @@ import { visibleResources } from '../data/resources';
 import '../styles/home.css';
 
 const vaultt = getProject('vaultt')!;
-const youcook = getProject('youcook')!;
-const kleus = getProject('kleus')!;
+const ep = getProject('endless-pursuit')!;
 const freebie = visibleResources()[0];
-const marquee = ['Vaultt', 'Kleus', 'YouCook', 'Endless Pursuit', 'Sequenced', 'Fallow', 'Outreach & CRM', 'Playivity', 'Noteless'];
+const marquee = ['Vaultt', 'Kleus', 'Endless Pursuit', 'YouCook', 'Sequenced', 'Fallow', 'Outreach & CRM', 'Playivity', 'Noteless'];
 const stat = (i: number) => STATS[i];
 const fmt = (n: number, d: number) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
@@ -19,6 +18,20 @@ const inkFor = (hex: string) => {
   const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#111' : '#fff';
 };
+
+// Endless Pursuit's infinity loop (a lemniscate, same curve as its case study).
+const loop = (() => {
+  const a = 560;
+  let d = '';
+  for (let i = 0; i <= 160; i++) {
+    const t = (i / 160) * Math.PI * 2;
+    const s = Math.sin(t);
+    const c = Math.cos(t);
+    const den = 1 + s * s;
+    d += `${i ? 'L' : 'M'}${((a * c) / den).toFixed(1)} ${(((a * s * c) / den) * 1.18).toFixed(1)} `;
+  }
+  return d.trim() + 'Z';
+})();
 
 // Act II decoration: stark palette, scattered at random (seeded so it's stable
 // between builds). Stripes are spaced far apart so they never stack into bands.
@@ -47,7 +60,7 @@ const shapes = [
 
 <Base
   title="Yanis Schweizer: I build apps, automations and AI tools"
-  description="Yanis Schweizer builds apps, automations and AI tools at a fixed price, and you own the code. Vaultt, Kleus, YouCook and more."
+  description="Yanis Schweizer builds apps, automations and AI tools at a fixed price, and you own the code. Vaultt, Kleus, Endless Pursuit and more."
   locale="en"
   path="/"
   pageType="profile"
@@ -102,14 +115,14 @@ const shapes = [
           <small>12.4k users and climbing</small>
         </div>
       </a>
-      <a class="world world--stripes" href="#mq-youcook">
+      <a class="world world--stripes" href="#mq-endless-pursuit">
         <div class="world__art" aria-hidden="true">
-          <img src="/images/work/youcook/phone-home.webp" alt="" width="560" height="1103" />
+          <img src="/images/work/endless-pursuit/onboarding.webp" alt="" width="780" height="1688" />
         </div>
         <div class="world__meta">
-          <span class="world__kind"><span class="world__num">II</span>Stripes · My product</span>
-          <strong>YouCook</strong>
-          <small>Dinner from your fridge</small>
+          <span class="world__kind"><span class="world__num">II</span>Stripes · Client</span>
+          <strong>Endless <em>Pursuit</em></strong>
+          <small>{ep.status}</small>
         </div>
       </a>
       <a class="world world--blueprint" href="#mq-kleus">
@@ -198,20 +211,48 @@ const shapes = [
        ACT II — STRIPES
        ============================================================ -->
   <section id="act-stripes" class="act act--stripes" data-nav-theme="light">
-    <div id="mq-youcook" class="container h-yc__grid">
-      <div class="h-yc__text knock">
-        <span class="h-label" data-reveal>Main quest 02 · My product · iOS + Android</span>
-        <h2 class="h-yc__name h-split" data-split>You<span class="yc-accent">Cook</span></h2>
-        <p class="h-yc__line" data-reveal>Tell it what's in your fridge. Get dinner, a weekly plan and the shopping list.</p>
+    <div id="mq-endless-pursuit" class="container h-ep__grid">
+      <div class="h-ep__text knock">
+        <span class="h-label" data-reveal>Main quest 02 · Client · {ep.status}</span>
+        <h2 class="h-ep__name h-split" data-split>Endless <em>Pursuit</em></h2>
+        <p class="h-ep__line" data-reveal>You say you'll train, build or read. Your circle sees whether you did. I'm building it with founder Nickolas Lazarev.</p>
         <div class="h-chips" data-reveal>
-          <span class="h-chip">🥚 Eggs</span><span class="h-chip">🧀 Parmesan</span><span class="h-chip">🍝 Pasta</span><span class="h-chip">🍋 Lemon</span>
+          <span class="h-chip"><i style="--dot:#DE7546"></i>Train &amp; fuel</span><span class="h-chip"><i style="--dot:#948AEA"></i>Build &amp; ship</span><span class="h-chip"><i style="--dot:#84BE71"></i>Read &amp; reflect</span>
         </div>
-        <a class="h-btn-dark" href="/work/youcook" data-reveal>Open the case study <span aria-hidden="true">→</span></a>
+        <div class="h-ep__go" data-reveal>
+          <a class="h-btn-dark" href={`/work/${ep.slug}`}>Open the case study <span aria-hidden="true">→</span></a>
+          <span class="h-ep__wip"><i aria-hidden="true"></i>Not published yet</span>
+        </div>
       </div>
-      <div class="h-yc__visual" aria-hidden="true">
-        <span class="h-yc__blob"></span>
-        <div class="h-phone h-phone--back"><img src="/images/work/youcook/g3.webp" alt="" width="736" height="1600" loading="lazy" /></div>
-        <div class="h-phone h-phone--front"><img src="/images/work/youcook/g1.webp" alt="" width="736" height="1600" loading="lazy" /></div>
+      <div class="h-ep__visual" aria-hidden="true">
+        <svg class="h-ep__art" viewBox="-600 -600 1200 1200">
+          <defs>
+            <radialGradient id="h-ep-sun" cx="50%" cy="36%" r="64%">
+              <stop offset="0" stop-color="#2c261e" />
+              <stop offset="1" stop-color="#121110" />
+            </radialGradient>
+            <linearGradient id="h-ep-gold" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#F0DCAF" />
+              <stop offset="1" stop-color="#D9B678" />
+            </linearGradient>
+            <clipPath id="h-ep-clip"><circle r="450" /></clipPath>
+            <filter id="h-ep-blur" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="10" /></filter>
+          </defs>
+          <circle class="h-ep__sun" r="450" fill="url(#h-ep-sun)" />
+          <path class="h-ep__track" d={loop} pathLength="1000" />
+          <path class="h-ep__track h-ep__track--in" d={loop} pathLength="1000" clip-path="url(#h-ep-clip)" />
+          <path class="h-ep__glow" d={loop} pathLength="1000" filter="url(#h-ep-blur)" />
+          <path class="h-ep__comet" d={loop} pathLength="1000" />
+        </svg>
+        <div class="h-phone h-phone--back"><img src="/images/work/endless-pursuit/tribe.webp" alt="" width="780" height="1688" loading="lazy" /></div>
+        <div class="h-phone h-phone--front"><img src="/images/work/endless-pursuit/today.webp" alt="" width="780" height="1688" loading="lazy" /></div>
+        <span class="h-ep__stamp">
+          <svg class="h-ep__stamp-ring" viewBox="0 0 120 120">
+            <defs><path id="h-ep-ring" d="M60 60m-45 0a45 45 0 1 1 90 0a45 45 0 1 1-90 0" /></defs>
+            <text><textPath href="#h-ep-ring" textLength="282" lengthAdjust="spacing">WORK IN PROGRESS ✦ NOT PUBLISHED YET ✦ </textPath></text>
+          </svg>
+          <svg class="h-ep__stamp-inf" viewBox="0 0 24 24"><path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" /></svg>
+        </span>
       </div>
     </div>
 
@@ -586,10 +627,16 @@ const shapes = [
     gsap.to('.h-v-phone', { yPercent: -26, ease: 'none', scrollTrigger: { trigger: '#mq-vaultt', start: 'top bottom', end: 'bottom top', scrub: true } });
     gsap.to('.h-planet', { rotate: 40, yPercent: 12, ease: 'none', scrollTrigger: { trigger: '#mq-vaultt', start: 'top bottom', end: 'bottom top', scrub: true } });
 
-    /* ---------- act II: YouCook pops, tiles land ---------- */
-    gsap.from('.h-yc__blob', { scale: 0.3, ease: 'none', scrollTrigger: { trigger: '#mq-youcook', start: 'top 85%', end: 'center center', scrub: 0.6 } });
-    gsap.from('.h-phone--front', { rotate: -14, scale: 0.75, yPercent: 18, ease: 'none', scrollTrigger: { trigger: '#mq-youcook', start: 'top 85%', end: 'center center', scrub: 0.6 } });
-    gsap.from('.h-phone--back', { rotate: 16, xPercent: 30, yPercent: 10, ease: 'none', scrollTrigger: { trigger: '#mq-youcook', start: 'top 85%', end: 'center center', scrub: 0.6 } });
+    /* ---------- act II: Endless Pursuit's sun rises and the loop draws itself, tiles land ---------- */
+    const epScroll = () => ({ trigger: '#mq-endless-pursuit', start: 'top 85%', end: 'center center', scrub: 0.6 });
+    gsap.from('.h-ep__sun', { scale: 0.3, transformOrigin: '50% 50%', ease: 'none', scrollTrigger: epScroll() });
+    gsap.fromTo('.h-ep__track', { strokeDashoffset: 1000 }, { strokeDashoffset: 0, ease: 'none', scrollTrigger: epScroll() });
+    gsap.from('.h-phone--front', { rotate: -14, scale: 0.75, yPercent: 18, ease: 'none', scrollTrigger: epScroll() });
+    gsap.from('.h-phone--back', { rotate: 16, xPercent: 30, yPercent: 10, ease: 'none', scrollTrigger: epScroll() });
+    gsap.from('.h-ep__stamp', {
+      scale: 0, rotate: -120, duration: 1, ease: 'back.out(1.6)',
+      scrollTrigger: { trigger: '#mq-endless-pursuit', start: 'top 55%', once: true },
+    });
     gsap.from('.h-tile', {
       y: 70, opacity: 0, rotate: (i: number) => (i % 2 ? 5 : -5), duration: 0.9, ease: 'back.out(1.4)', stagger: 0.07,
       scrollTrigger: { trigger: '.h-tiles', start: 'top 85%', once: true },

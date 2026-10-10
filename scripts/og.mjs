@@ -77,12 +77,12 @@ ${image ? `<div class="r"><img src="${file(image)}"></div>` : ''}
 
 const cards = [
   { name: 'default', html: card({ kicker: 'Builder · apps, automations, AI tools', title: 'AI made the code free. I make the decisions.', line: 'Fixed price. You own the code.', image: SITE.portrait, imageFit: 'cover' }) },
-  { name: 'work', html: card({ kicker: 'My work', title: 'Everything I’ve built.', line: 'Vaultt, Kleus, YouCook and every side quest.', image: '/images/work/vaultt/cards.webp' }) },
+  { name: 'work', html: card({ kicker: 'My work', title: 'Everything I’ve built.', line: 'Vaultt, Kleus, Endless Pursuit and every side quest.', image: '/images/work/vaultt/cards.webp' }) },
   { name: 'free', html: card({ kicker: 'Free stuff · no email needed', title: 'Skills, prompts and templates I actually use.', line: 'Everything I give away in my DMs.', accent: '#FFB000' }) },
   ...PROJECTS.map((p) => ({
     name: `work-${p.slug}`,
     html: card({
-      kicker: `${p.tier === 'main' ? 'Main quest' : 'Side quest'} · ${p.kind === 'product' ? 'My product' : 'Case study'}`,
+      kicker: `${p.tier === 'main' ? 'Main quest' : 'Side quest'} · ${p.status === 'Work in progress' ? p.status : p.kind === 'product' ? 'My product' : 'Case study'}`,
       title: p.name,
       line: p.summary,
       accent: p.accent,

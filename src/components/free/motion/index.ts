@@ -8,6 +8,7 @@ import { shipScan } from './ship-scan';
 import { dsPreview } from './ds-preview';
 import { styleMorph, styleMorphBasic } from './style-morph';
 import { ssot } from './ssot';
+import { beautifier } from './beautifier';
 
 const FX: Record<string, (el: HTMLElement, m: Motion) => void> = {
   hero,
@@ -16,6 +17,7 @@ const FX: Record<string, (el: HTMLElement, m: Motion) => void> = {
   'ds-preview': dsPreview,
   'style-morph': styleMorph,
   ssot,
+  beautifier,
   steps,
   cards,
   chips,

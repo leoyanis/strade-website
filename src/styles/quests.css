@@ -166,7 +166,7 @@
   position: absolute; z-index: 7; top: 18px; left: 52px; right: 40px;
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.62); white-space: nowrap;
 }
 .qp__state { display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; }
 .qp__state i { width: 7px; height: 7px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 10px #3ddc84; }
@@ -254,7 +254,10 @@
   .qp__summary, .qp__cta { opacity: 0; pointer-events: none; }
   .qp__more { display: none; }
   .qp__content { padding: 22px 22px 26px; }
-  .qp--main .qp__title { font-size: clamp(26px, 13cqi, 40px); }
+  .qp--main .qp__title { font-size: clamp(26px, 13cqi, 40px); white-space: normal; }
+  /* the status runs down the right edge, so a long one ("Work in progress") still fits */
+  .qp--main .qp__hud { align-items: flex-start; }
+  .qp--main .qp__state { writing-mode: vertical-rl; }
 }
 /* the expanded panel shows its stats without needing hover */
 @container (min-width: 560px) {

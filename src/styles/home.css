@@ -144,12 +144,20 @@ html:not(.has-themes) .act--finale { background: #050505; }
 .world--astral:hover img { transform: rotate(-1deg) translateY(-10px); }
 .world--astral .world__meta strong { color: #6FA8FF; }
 
-/* II — stripes */
-.world--stripes { background: #E9E4D8; color: #111; }
+/* II — stripes: Endless Pursuit's dark app on the cream */
+.world--stripes { background: #E9E4D8; color: #121110; }
 .world--stripes .world__art { overflow: hidden; }
-.world--stripes img { width: 56%; left: 22%; top: 64%; transform: rotate(6deg); filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.25)); }
+.world--stripes img {
+  width: 50%; left: 25%; top: 62%; border-radius: 24px; box-shadow: 0 0 0 6px #121110;
+  transform: rotate(6deg); filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.25));
+}
 .world--stripes:hover img { transform: rotate(0deg) translateY(-12px); }
-.world--stripes .world__meta strong { color: #FF6B6B; }
+/* the longest name: it may wrap to two lines on narrow panels instead of being cut off */
+.world--stripes .world__meta strong { white-space: normal; }
+.world--stripes .world__meta strong em {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400;
+  font-size: 1.12em; letter-spacing: -0.01em; color: #8A6414;
+}
 
 /* III — blueprint */
 .world--blueprint {
@@ -291,18 +299,24 @@ html:not(.has-themes) .act--finale { background: #050505; }
    ================================================================ */
 .act--stripes { padding: 140px 0 120px; }
 .knock { background: #F5F1E8; box-shadow: 0 0 0 18px #F5F1E8; }
-.h-yc__grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
-.h-yc__text { padding: 8px 0; }
-.h-yc__text .h-label { color: #E5484D; }
-.h-yc__name { white-space: nowrap; font-size: clamp(64px, 11vw, 160px); font-weight: 900; letter-spacing: -0.065em; line-height: 0.86; margin-top: 16px; color: #111; }
-.h-yc__name .yc-accent { color: #FF6B6B; }
-.h-yc__line { font-size: clamp(19px, 2vw, 24px); font-weight: 600; letter-spacing: -0.015em; margin-top: 22px; max-width: 470px; line-height: 1.35; color: #222; }
+/* main quest 02: Endless Pursuit, its own dark world dropped onto the stripes */
+.h-ep__grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+.h-ep__text { padding: 8px 0; }
+.h-ep__text .h-label { color: #8A6414; }
+.h-ep__name { font-size: clamp(60px, 9.4vw, 136px); font-weight: 900; letter-spacing: -0.065em; line-height: 0.88; margin-top: 16px; color: #121110; }
+/* "Pursuit" in the app's serif, always on its own line (the split script sets inline display) */
+.h-ep__name em {
+  display: block !important; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400;
+  font-size: 1.14em; letter-spacing: -0.02em; line-height: 0.92; padding-right: 0.1em;
+}
+.h-ep__line { font-size: clamp(19px, 2vw, 24px); font-weight: 600; letter-spacing: -0.015em; margin-top: 22px; max-width: 480px; line-height: 1.35; color: #222; }
 .h-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
 .h-chip {
   display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px;
   background: #fff; font-weight: 600; font-size: 15px; color: #222; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   animation: chip-bob 3.2s ease-in-out infinite;
 }
+.h-chip i { width: 9px; height: 9px; border-radius: 50%; background: var(--dot); flex: none; }
 .h-chip:nth-child(2) { animation-delay: -0.8s; } .h-chip:nth-child(3) { animation-delay: -1.6s; } .h-chip:nth-child(4) { animation-delay: -2.4s; }
 @keyframes chip-bob { 50% { transform: translateY(-6px); } }
 .h-btn-dark {
@@ -310,13 +324,42 @@ html:not(.has-themes) .act--finale { background: #050505; }
   background: #111; color: #fff; padding: 15px 26px; border-radius: 999px; font-weight: 600; font-size: 16px;
   transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s;
 }
-.h-btn-dark:hover { transform: translate(-3px, -3px); box-shadow: 5px 5px 0 #FF6B6B; }
-.h-yc__visual { position: relative; display: grid; place-items: center; min-height: 560px; }
-.h-yc__blob { position: absolute; width: 78%; aspect-ratio: 1; border-radius: 50%; background: #FF6B6B; opacity: 0.9; }
+.h-btn-dark:hover { transform: translate(-3px, -3px); box-shadow: 5px 5px 0 #E3C588; }
+.h-ep__go { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; margin-top: 30px; }
+.h-ep__go .h-btn-dark { margin-top: 0; }
+.h-ep__wip {
+  display: inline-flex; align-items: center; gap: 10px; color: #5C5446;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.h-ep__wip i { width: 8px; height: 8px; border-radius: 50%; background: #D9A93F; animation: ep-wip 2s ease-out infinite; }
+@keyframes ep-wip { 0% { box-shadow: 0 0 0 0 rgba(217, 169, 63, 0.55); } 70%, 100% { box-shadow: 0 0 0 9px rgba(217, 169, 63, 0); } }
+
+.h-ep__visual { position: relative; display: grid; place-items: center; min-height: 600px; }
+/* black sun + the app's gold infinity loop: dark line on the cream, gold inside the sun */
+.h-ep__art { position: absolute; left: 50%; top: 50%; width: 112%; transform: translate(-50%, -50%); overflow: visible; }
+.h-ep__art path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.h-ep__track { stroke: #121110; stroke-width: 4; stroke-dasharray: 1000; }
+.h-ep__track--in { stroke: rgba(227, 197, 136, 0.4); stroke-width: 3; }
+.h-ep__glow, .h-ep__comet { stroke: url(#h-ep-gold); stroke-dasharray: 70 930; animation: h-ep-orbit 7s linear infinite; }
+.h-ep__glow { stroke-width: 18; opacity: 0.6; }
+.h-ep__comet { stroke-width: 6; }
+@keyframes h-ep-orbit { to { stroke-dashoffset: -1000; } }
+/* rotating "work in progress" sticker */
+.h-ep__stamp {
+  position: absolute; left: 0; bottom: 5%; z-index: 2; width: clamp(104px, 10vw, 136px); aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center; background: #E3C588; color: #121110;
+  box-shadow: 0 18px 40px rgba(18, 17, 16, 0.28);
+}
+.h-ep__stamp-ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: h-ep-spin 18s linear infinite; }
+.h-ep__stamp-ring text { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; font-weight: 600; fill: currentColor; }
+.h-ep__stamp-inf { width: 36%; height: 36%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes h-ep-spin { to { transform: rotate(360deg); } }
+
 .h-phone {
   position: absolute; width: min(42%, 230px); aspect-ratio: 736 / 1600; border-radius: 34px; padding: 9px;
   background: #111; box-shadow: 0 40px 70px rgba(0, 0, 0, 0.28), inset 0 0 0 2px #2a2a2a;
 }
+.h-ep__visual .h-phone { width: min(36%, 210px); aspect-ratio: 780 / 1688; }
 .h-phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 26px; display: block; }
 .h-phone--back { transform: translate(-46%, -4%) rotate(-8deg); }
 .h-phone--front { transform: translate(38%, 6%) rotate(6deg); }
@@ -452,7 +495,7 @@ html:not(.has-themes) .act--finale { background: #050505; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 1023px) {
-  .h-mq__grid, .h-yc__grid, .bp-k__grid, .bp-about__grid, .h-free__box { grid-template-columns: 1fr; }
+  .h-mq__grid, .h-ep__grid, .bp-k__grid, .bp-about__grid, .h-free__box { grid-template-columns: 1fr; }
   .h-v-visual { height: 480px; }
   .h-tiles { grid-template-columns: repeat(2, 1fr); }
   .bp-flow__steps { grid-template-columns: repeat(2, 1fr); row-gap: 48px; }
@@ -491,7 +534,7 @@ html:not(.has-themes) .act--finale { background: #050505; }
   .h-v-visual { height: 360px; }
   .h-planet { width: 320px; height: 320px; right: -80px; }
   .act--stripes { padding: 110px 0 90px; }
-  .h-yc__visual { min-height: 380px; }
+  .h-ep__visual { min-height: 440px; }
   .h-side { padding-top: 130px; }
   .h-tiles { grid-template-columns: 1fr; }
   .h-tile { min-height: 190px; }
@@ -511,7 +554,8 @@ html:not(.has-themes) .act--finale { background: #050505; }
   .knock { box-shadow: 0 0 0 12px #F5F1E8; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .h-marquee__track, .hero-me__orbit::before, .h-chip, .bp-cross, .theme--finale .stars, .theme--finale .stars--2 { animation: none; }
+  .h-marquee__track, .hero-me__orbit::before, .h-chip, .bp-cross, .theme--finale .stars, .theme--finale .stars--2,
+  .h-ep__glow, .h-ep__comet, .h-ep__stamp-ring, .h-ep__wip i { animation: none; }
 }
 
 /* letter-rise headlines: clip the rising letters */

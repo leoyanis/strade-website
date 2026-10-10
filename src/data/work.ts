@@ -5,7 +5,7 @@
 // - Never name the end client of the white-label outreach build.
 // - Never list leads that did not close.
 
-export type Status = 'Live' | 'In build' | 'Delivered' | 'Handover' | 'Launching';
+export type Status = 'Live' | 'Work in progress' | 'In build' | 'Delivered' | 'Handover' | 'Launching';
 
 export interface Brand {
   bg: string;
@@ -109,35 +109,39 @@ export const PROJECTS: Project[] = [
     },
   },
   {
-    slug: 'endless-pursuit',
+    slug: 'youcook',
     tier: 'side',
-    brand: { bg: '#121110', surface: '#1b1916', text: '#F3EEE4', muted: '#9a917f', accent: '#E8C784', display: "'Inter', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },
-    name: 'Endless Pursuit',
-    client: 'Nickolas Lazarev, Founder',
-    kind: 'client',
-    year: '2026',
-    status: 'In build',
-    featured: true,
-    summary: 'A mobile app where ambitious people track their progress with a small circle that holds them accountable.',
-    accent: '#E8C784',
-    cover: { type: 'image', src: '/images/work/endless-pursuit/onboarding.webp', fit: 'contain', bg: '#121110' },
-    tags: ['Flutter', 'Supabase', 'Realtime', 'iOS + Android'],
-    metrics: [
-      { value: 'iOS + Android', label: 'one codebase' },
-      { value: 'Fixed scope', label: 'fixed price, fixed date' },
-    ],
-    problem:
-      "Nickolas wanted an app for people who say they'll work on themselves and then don't. Tracking apps are lonely, and accountability groups live in messy group chats. The idea only works if logging takes seconds and your group can see whether you showed up.",
+    brand: { bg: '#FFFFFF', surface: '#FFF5F3', text: '#333333', muted: '#6b6b6b', accent: '#FF6B6B', display: "'Quicksand', system-ui, sans-serif", body: "'Quicksand', system-ui, sans-serif", fontsHref: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap', light: true },
+    name: 'YouCook',
+    client: 'My product',
+    kind: 'product',
+    year: '2024 – 2025',
+    status: 'Live',
+    summary: 'An AI cooking app: snap your ingredients and get recipes, meal plans and shopping lists. Live on iOS and Android.',
+    accent: '#F26B4F',
+    cover: { type: 'image', src: '/images/work/youcook/panel.webp', fit: 'cover', bg: '#ffffff' },
+    tags: ['Flutter', 'Firebase', 'OpenAI + Groq', 'RevenueCat'],
+    problem: '"What can I cook with what I have?" is a daily question, and recipe sites answer it badly.',
     built: [
-      'Onboarding that drops you straight into your "tribe"',
-      'One-tap logging for focus, training, food, sleep and reading',
-      'A live "who showed up today" view, with streaks and a nudge button',
-      'A group feed, privacy controls and a custom design system',
-      'App settings the founder can change without a new release',
+      'Photo or voice input for your ingredients, turned into recipes',
+      'Weekly meal plans with automatic shopping lists',
+      'Step-by-step cook mode with timers and reminders',
+      'An AI chef chat for substitutions and tips',
     ],
     how:
-      'Before writing app code I built a clickable prototype of the whole app, so every screen was agreed up front. The app is Flutter for iOS and Android, on Supabase with live updates and row-level security.',
-    links: [],
+      'One Flutter codebase on Firebase. Cloud Functions give every job its own model: Groq for fast recipe previews, OpenAI for steps and reading fridge photos, Whisper for voice. RevenueCat handles subscriptions. I designed, built, published and marketed it myself.',
+    outcome:
+      'Getting downloads was cheap: about £0.60 each on Meta ads. Getting people to pay was much harder. That lesson shapes how I scope every client product now: validate the moment someone pays before building everything around it.',
+    gallery: [
+      { src: '/images/work/youcook/g1.webp', alt: 'Recipe detail with nutrition' },
+      { src: '/images/work/youcook/g2.webp', alt: 'AI chef tip chat' },
+      { src: '/images/work/youcook/g3.webp', alt: 'Main menu with favourites' },
+    ],
+    links: [
+      { label: 'youcookapp.com', href: 'https://youcookapp.com' },
+      { label: 'App Store', href: 'https://apps.apple.com/app/youcook-personalized-recipes/id6677050461' },
+      { label: 'Google Play', href: 'https://play.google.com/store/apps/details?id=com.strade.youcook' },
+    ],
   },
   {
     slug: 'outreach-crm',
@@ -258,39 +262,35 @@ export const PROJECTS: Project[] = [
     links: [{ label: 'kleus.ai', href: 'https://www.kleus.ai' }],
   },
   {
-    slug: 'youcook',
+    slug: 'endless-pursuit',
     tier: 'main',
-    brand: { bg: '#FFFFFF', surface: '#FFF5F3', text: '#333333', muted: '#6b6b6b', accent: '#FF6B6B', display: "'Quicksand', system-ui, sans-serif", body: "'Quicksand', system-ui, sans-serif", fontsHref: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap', light: true },
-    name: 'YouCook',
-    client: 'My product',
-    kind: 'product',
-    year: '2024 – 2025',
-    status: 'Live',
-    summary: 'An AI cooking app: snap your ingredients and get recipes, meal plans and shopping lists. Live on iOS and Android.',
-    accent: '#F26B4F',
-    cover: { type: 'image', src: '/images/work/youcook/panel.webp', fit: 'cover', bg: '#ffffff' },
-    tags: ['Flutter', 'Firebase', 'OpenAI + Groq', 'RevenueCat'],
-    problem: '"What can I cook with what I have?" is a daily question, and recipe sites answer it badly.',
+    brand: { bg: '#121110', surface: '#1b1916', text: '#F3EEE4', muted: '#9a917f', accent: '#E8C784', display: "'Inter', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },
+    name: 'Endless Pursuit',
+    client: 'Nickolas Lazarev, Founder',
+    kind: 'client',
+    year: '2026',
+    status: 'Work in progress',
+    featured: true,
+    summary: 'A mobile app where ambitious people track their progress with a small circle that holds them accountable.',
+    accent: '#E8C784',
+    cover: { type: 'image', src: '/images/work/endless-pursuit/onboarding.webp', fit: 'contain', bg: '#121110' },
+    tags: ['Flutter', 'Supabase', 'Realtime', 'iOS + Android'],
+    metrics: [
+      { value: 'iOS + Android', label: 'one codebase' },
+      { value: 'Fixed scope', label: 'fixed price, fixed date' },
+    ],
+    problem:
+      "Nickolas wanted an app for people who say they'll work on themselves and then don't. Tracking apps are lonely, and accountability groups live in messy group chats. The idea only works if logging takes seconds and your group can see whether you showed up.",
     built: [
-      'Photo or voice input for your ingredients, turned into recipes',
-      'Weekly meal plans with automatic shopping lists',
-      'Step-by-step cook mode with timers and reminders',
-      'An AI chef chat for substitutions and tips',
+      'Onboarding that drops you straight into your "tribe"',
+      'One-tap logging for focus, training, food, sleep and reading',
+      'A live "who showed up today" view, with streaks and a nudge button',
+      'A group feed, privacy controls and a custom design system',
+      'App settings the founder can change without a new release',
     ],
     how:
-      'One Flutter codebase on Firebase. Cloud Functions give every job its own model: Groq for fast recipe previews, OpenAI for steps and reading fridge photos, Whisper for voice. RevenueCat handles subscriptions. I designed, built, published and marketed it myself.',
-    outcome:
-      'Getting downloads was cheap: about £0.60 each on Meta ads. Getting people to pay was much harder. That lesson shapes how I scope every client product now: validate the moment someone pays before building everything around it.',
-    gallery: [
-      { src: '/images/work/youcook/g1.webp', alt: 'Recipe detail with nutrition' },
-      { src: '/images/work/youcook/g2.webp', alt: 'AI chef tip chat' },
-      { src: '/images/work/youcook/g3.webp', alt: 'Main menu with favourites' },
-    ],
-    links: [
-      { label: 'youcookapp.com', href: 'https://youcookapp.com' },
-      { label: 'App Store', href: 'https://apps.apple.com/app/youcook-personalized-recipes/id6677050461' },
-      { label: 'Google Play', href: 'https://play.google.com/store/apps/details?id=com.strade.youcook' },
-    ],
+      'Before writing app code I built a clickable prototype of the whole app, so every screen was agreed up front. The app is Flutter for iOS and Android, on Supabase with live updates and row-level security.',
+    links: [],
   },
   {
     slug: 'fallow',
@@ -355,7 +355,7 @@ export const PROJECTS: Project[] = [
 
 export const getProject = (slug: string) => PROJECTS.find((p) => p.slug === slug);
 
-export const MAIN_QUESTS = ['vaultt', 'kleus', 'youcook'].map((s) => getProject(s)!);
+export const MAIN_QUESTS = ['vaultt', 'kleus', 'endless-pursuit'].map((s) => getProject(s)!);
 export const SIDE_QUESTS = PROJECTS.filter((p) => p.tier === 'side');
 
 /** Bragging numbers for the top of /work. Update by hand. */
