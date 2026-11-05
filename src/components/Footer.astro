@@ -1,5 +1,6 @@
 ---
 import { t, type Locale, getLocalizedPath } from '../i18n/utils';
+import StradeMark from './StradeMark.astro';
 
 interface Props { locale: Locale; }
 const { locale } = Astro.props;
@@ -14,7 +15,10 @@ const EMAIL = 'yanis@strade.tech';
     <div class="footer-grid">
       <!-- Brand -->
       <div class="footer-brand">
-        <a href={getLocalizedPath('/', locale)} class="footer-logo">Strade</a>
+        <a href={getLocalizedPath('/', locale)} class="footer-logo" aria-label="Strade home">
+          <StradeMark class="footer-logo-mark" />
+          <span>Strade</span>
+        </a>
         <p class="caption" style="margin-top:12px;max-width:220px">
           AI consulting and development for startups.
         </p>
@@ -58,9 +62,11 @@ const EMAIL = 'yanis@strade.tech';
     gap: 48px;
   }
   .footer-logo {
+    display: inline-flex; align-items: center; gap: 10px;
     font-size: 20px; font-weight: 700; color: var(--text-primary);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.02em; line-height: 1;
   }
+  .footer-logo :global(.footer-logo-mark) { height: 24px; width: auto; aspect-ratio: 380 / 484; flex: none; }
   .footer-heading {
     font-size: 12px; font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.08em; color: var(--text-muted);

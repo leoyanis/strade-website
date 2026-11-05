@@ -1,5 +1,6 @@
 ---
 import { t, type Locale, LOCALES, LOCALE_NAMES, getLocalizedPath } from '../i18n/utils';
+import StradeMark from './StradeMark.astro';
 
 interface Props {
   locale: Locale;
@@ -14,7 +15,8 @@ const CALENDLY = 'https://cal.com/yanis-schweizer-lfdylj/discovery-call?overlayC
   <div class="container nav-inner">
     <!-- Logo -->
     <a href={getLocalizedPath('/', locale)} class="nav-logo" aria-label="Strade home">
-      <img src="/images/logo-white.png" alt="Strade" width="74" height="28" style="height:28px;width:auto;display:block" />
+      <StradeMark class="nav-logo-mark" />
+      <span class="nav-logo-word">Strade</span>
     </a>
 
     <!-- Desktop nav links -->
@@ -95,7 +97,18 @@ const CALENDLY = 'https://cal.com/yanis-schweizer-lfdylj/discovery-call?overlayC
     display: flex; align-items: center; justify-content: space-between;
     height: 64px;
   }
-  .nav-logo { display: flex; align-items: center; }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text-primary);
+  }
+  .nav-logo :global(.nav-logo-mark) {
+    height: 24px; width: auto; aspect-ratio: 380 / 484; flex: none;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav-logo:hover :global(.nav-logo-mark) { transform: rotate(-12deg); }
+  .nav-logo-word {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+  }
   .nav-links {
     display: flex; gap: 32px; list-style: none;
   }

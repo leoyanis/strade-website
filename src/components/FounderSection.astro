@@ -1,5 +1,6 @@
 ---
 import { t, type Locale } from '../i18n/utils';
+import StradeMark from './StradeMark.astro';
 interface Props { locale: Locale; }
 const { locale } = Astro.props;
 const LINKEDIN = 'https://linkedin.com/in/yanis-schweizer';
@@ -15,7 +16,7 @@ const EMAIL = 'yanis@strade.tech';
     <div class="founder-photo-wrap reveal-left" id="founder-photo">
       <div class="founder-photo-placeholder">
         <!-- Placeholder until yanis.webp is added to /public/images/ -->
-        <img src="/images/logo-white.png" alt="" aria-hidden="true" class="founder-logo-placeholder" width="120" height="45" loading="lazy" decoding="async" />
+        <StradeMark class="founder-logo-placeholder" />
       </div>
     </div>
 
@@ -71,8 +72,8 @@ const EMAIL = 'yanis@strade.tech';
     width: 100%; height: 100%; object-fit: cover;
     border-radius: 8px; border: none;
   }
-  .founder-logo-placeholder {
-    width: 120px; height: auto; opacity: 0.2;
+  .founder-photo-placeholder :global(.founder-logo-placeholder) {
+    height: 96px; width: auto; aspect-ratio: 380 / 484; opacity: 0.2; color: var(--text-primary);
   }
   .founder-links { display: flex; gap: 24px; }
   .founder-link {

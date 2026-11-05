@@ -1,0 +1,30 @@
+---
+// The Strade mark: the four-point star with its tilted ring (the SSI emblem), as a small static inline SVG.
+// Source of truth: public/images/ssi/emblem-star.svg (read at build time, so the two never drift apart).
+// The animatable version is src/components/vision/ssi/Emblem.astro.
+// Size it with CSS (height; the width follows the 380:484 viewBox). It inherits `color` for its fill.
+import raw from '../../public/images/ssi/emblem-star.svg?raw';
+
+interface Props { class?: string; title?: string }
+const { class: cls, title } = Astro.props;
+
+// each instance needs its own mask id, or two marks on one page would share (and fight over) it
+const uid = `sm-${Math.random().toString(36).slice(2, 8)}`;
+const inner = raw
+  .slice(raw.indexOf('>', raw.indexOf('<svg')) + 1, raw.lastIndexOf('</svg>'))
+  .replace(/<!--[\s\S]*?-->/g, '')
+  .replace(/\sid="ssi-(?!cut)[\w-]+"/g, '')
+  .replace(/ssi-cut/g, `${uid}-cut`)
+  .replace(/\s+/g, ' ')
+  .trim();
+---
+<svg
+  class:list={['strade-mark', cls]}
+  viewBox="-190 -246 380 484"
+  fill="currentColor"
+  role={title ? 'img' : undefined}
+  aria-label={title}
+  aria-hidden={title ? undefined : 'true'}
+  focusable="false"
+  set:html={inner}
+></svg>
