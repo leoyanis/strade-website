@@ -14,36 +14,58 @@
 //   day's cache with revalidation), tagged with the sRGB transfer like the poster (with BT.709, Chromium played the
 //   dark sky up to 3.7 levels darker than the poster). Landscape screens get the desktop composition, portrait
 //   ones the phone one.
+// - The phone files (2026-11-09, scripts/hole/site-media.mjs): at 1.4 to 1.9 Mbit/s (0.014 bits a pixel) the dark
+//   dust and the fine stars came apart in blocks on an iPhone ("extremely compressed", Yanis). They are now HEVC
+//   Main10 and AV1 10-bit at about 8 Mbit/s (H.264 at 9 for the browsers with neither), x265 tuned for dark
+//   gradients and fine detail (aq-mode 3, psy-rd and psy-rdoq, no SAO, a lighter deblock), each under 12 MB.
 // - Which file: navigator.mediaCapabilities.decodingInfo() for each candidate, the first that decodes smoothly AND
 //   power-efficiently (hardware) wins, then the first that is merely smooth. AV1 comes first, then HEVC (Safari,
 //   and Chrome where the platform decodes HEVC in hardware), then H.264. The smaller files come first when the full
-//   size would be shrunk on screen anyway (under 0.72 device pixels per frame pixel: a 1080p monitor at 1x).
+//   size would be shrunk on screen below 0.72 device pixels per frame pixel (a 1080p monitor at 1x; a phone at 2x,
+//   where 1080x2400 is about 1:1; a phone at 3x keeps the full 1440x3200, which it shows at about 0.85).
 //   Without the API, canPlayType's "probably", smaller files first.
 // - Placement: the frame is scaled so the shadow has the radius free-act.css lays the words out around (wide
 //   screens min(7.8vw, 13vh) at x 0.68, y 0.52; narrow ones min(15.5vw, 8.5vh) at x 0.5, y 0.31; the same rules as
 //   black-hole.ts), and placed so the hole lands there. Where the frame would then not cover the screen at every
 //   drift (21:9, 4:3, tall desktop windows), it is scaled up until it does, so the hole grows a little there.
-// - The scroll's camera drift is now a transform-only parallax on the frame, about the hole's centre: it rises 5%
-//   of the screen's height across the act (the live hole did, and the words are laid out for it), turns from -1 to
-//   +1 degree and pushes in 4%. Written only when it changes.
-// - Loading: nothing until the act is within three screens; then the poster (loop frame 0, AVIF or WebP, the
-//   srcset width the frame needs), which covers the CSS drawing (.hole-art) as soon as it is decoded. Within two
-//   screens the video's source is chosen and set (preload auto: Chromium buffers it then; Safari only once it
-//   plays). It plays only while some of the layer can be seen (free-act.ts: the dome is up and the blueprint's
-//   sheet has not covered it) and the tab is visible, and pauses otherwise.
+// - The scroll's camera drift is a parallax on the frame, about the hole's centre: it rises 5% of the screen's
+//   height across the act (the live hole did, and the words are laid out for it). Wide screens also turn it from -1
+//   to +1 degree and push in 4%, written from the scroll (desktop unchanged). Portrait screens only rise, in whole
+//   device pixels, from a box placed on whole device pixels, so the frame is never turned or zoomed and at rest its
+//   pixels land on the screen's grid (sys-08: the turn and zoom resampled every frame of the video on a phone, a
+//   soft picture on top of the compression). Where the browser has scroll-driven animations the rise is one
+//   (free-act.css hole-lift, steps of one device pixel over the range free-act.ts measures), so no script writes it.
+// - Loading: nothing until the act is within three screens; then, in an idle task, the poster (loop frame 0, AVIF or
+//   WebP, the srcset width the frame needs), which covers the CSS drawing (.hole-art) as soon as it is decoded, and
+//   the video's source (preload auto: Chromium buffers it then; Safari only once it plays). Both used to wait for
+//   the act's observer callbacks, two screens out for the video, on the frame a fling crossed that point (P7, 75 to
+//   250 ms hitches). It plays only while enough of the layer can be seen (free-act.ts: the dome a seventh of the way
+//   up the screen, the blueprint's sheet not yet over it, or on a phone the hole not yet faded out under it) and the
+//   tab is visible, and pauses otherwise.
 // - The video sits UNDER the poster, at full opacity, and the poster fades out once the video has presented a
 //   frame: iOS will not start a muted video that is hidden (atlas-final.ts found the same). Its first frame is the
-//   poster's frame, so the fade shows nothing changing.
+//   poster's frame, so the fade shows nothing changing. Once faded, the poster is hidden too (free-act.css), so it
+//   is not a composited layer for the whole act.
+// - Hidden layer: the homepage's layer manager (src/scripts/backdrops.ts) hides .theme--hole (visibility, on the
+//   root) once the blueprint's sheet has had the screen for a while. The video is paused then and, in Blink only,
+//   its decoder is let go (src removed); it comes back in an idle task when the layer is shown again, with the poster
+//   over it until it plays. Blink reloads it from its media cache; WebKit fetched the whole file again (Playwright
+//   WebKit, 2026-11-09: 1.8 MB served twice), so there it stays loaded and paused.
 // - Poster only, for good: reduced motion (and ?still), the data saver, no playable file, a refused play() (iOS
 //   Low Power Mode refuses muted autoplay), a decode error after the H.264 retry.
 // Finding index: scripts/hole/ (render.mjs, site-media.mjs makes every file), .hole-stage / .hole-poster / .hole-video
-// (free-act.css), HoleWorld.astro, data-hole-video on .theme--hole (the file chosen, or none / refused / error).
+// (free-act.css), HoleWorld.astro, data-hole-video on .theme--hole (the file chosen, or none / refused / error),
+// .is-portrait / .is-lift / .is-playing on .theme--hole.
 
 export type Hole = {
   /** The camera's drift through the act: 0 as the act enters the screen, 1 as it leaves (drives the parallax). */
   setDrift: (v: number) => void;
-  /** Whether any of the layer can be seen right now (the page knows its wipes); the video plays only then. */
+  /** The scroll range (document px) over which the drift runs 0 to 1, for the scroll-driven rise (portrait). */
+  setLiftRange: (from: number, to: number) => void;
+  /** Whether enough of the layer can be seen right now (the page knows its wipes); the video plays only then. */
   setVisible: (on: boolean) => void;
+  /** Whether the phone composition is showing (portrait screens): the act fades the hole out under the sheet. */
+  readonly portrait: boolean;
   destroy: () => void;
 };
 
@@ -58,8 +80,9 @@ type Comp = {
   r: number;
   full: Variant[];
   small: Variant[];
-  /** poster widths: [small, full] */
-  posters: [number, number];
+  /** the posters' file prefix and widths (the srcset's candidates) */
+  poster: string;
+  posters: number[];
 };
 
 const DIR = '/images/hole/';
@@ -83,6 +106,7 @@ const COMPS: Record<'desktop' | 'phone', Comp> = {
       { file: 'hole-desktop-1440-hevc.mp4', codec: 'hvc1.2.4.L150.B0', w: 2560, h: 1440, kbps: 2030 },
       { file: 'hole-desktop-1440-h264.mp4', codec: 'avc1.640032', w: 2560, h: 1440, kbps: 2300 },
     ],
+    poster: 'hole-desktop',
     posters: [1920, 3840],
   },
   phone: {
@@ -92,17 +116,21 @@ const COMPS: Record<'desktop' | 'phone', Comp> = {
     hx: 0.5,
     hy: 0.298,
     r: 212,
+    // 2026-11-09: 11 MB at 3200 and 9 to 10 MB at 2400 (they were 1.8 to 2.4 MB)
     full: [
-      { file: 'hole-phone-3200-av1.mp4', codec: 'av01.0.12M.10', w: 1440, h: 3200, kbps: 1850 },
-      { file: 'hole-phone-3200-hevc.mp4', codec: 'hvc1.2.4.L150.B0', w: 1440, h: 3200, kbps: 1940 },
-      { file: 'hole-phone-3200-h264.mp4', codec: 'avc1.640032', w: 1440, h: 3200, kbps: 1780 },
+      { file: 'hole-phone2-3200-av1.mp4', codec: 'av01.0.12M.10', w: 1440, h: 3200, kbps: 8869 },
+      { file: 'hole-phone2-3200-hevc.mp4', codec: 'hvc1.2.4.L150.B0', w: 1440, h: 3200, kbps: 8758 },
+      { file: 'hole-phone2-3200-h264.mp4', codec: 'avc1.640032', w: 1440, h: 3200, kbps: 8800 },
     ],
     small: [
-      { file: 'hole-phone-2400-av1.mp4', codec: 'av01.0.12M.10', w: 1080, h: 2400, kbps: 1830 },
-      { file: 'hole-phone-2400-hevc.mp4', codec: 'hvc1.2.4.L150.B0', w: 1080, h: 2400, kbps: 1650 },
-      { file: 'hole-phone-2400-h264.mp4', codec: 'avc1.640032', w: 1080, h: 2400, kbps: 1450 },
+      { file: 'hole-phone2-2400-av1.mp4', codec: 'av01.0.12M.10', w: 1080, h: 2400, kbps: 7603 },
+      { file: 'hole-phone2-2400-hevc.mp4', codec: 'hvc1.2.4.L150.B0', w: 1080, h: 2400, kbps: 7299 },
+      { file: 'hole-phone2-2400-h264.mp4', codec: 'avc1.640032', w: 1080, h: 2400, kbps: 7719 },
     ],
-    posters: [720, 1440],
+    // hole-phone2: the files of 2026-11-09 under new names, so a phone that cached the old ones fetches these at once.
+    // 1080 for phones at 2x (their frame is about 870 device px wide), 1440 at 3x
+    poster: 'hole-phone2',
+    posters: [720, 1080, 1440],
   },
 };
 
@@ -117,6 +145,7 @@ const SMALL_BELOW = 0.72;
  * Where the frame goes for a W x H screen: its scale (CSS px per frame px) and offset so the hole lands on the
  * layout's spot at drift 0, and the hole's centre inside the frame (the parallax's transform origin). Scales up
  * past the layout's radius only where the frame would otherwise leave a screen corner bare at some drift.
+ * (Portrait screens no longer turn or zoom, but keep the scale worked out with them, so the hole keeps its size.)
  */
 function place(c: Comp, W: number, H: number) {
   const narrow = W < 900;
@@ -169,6 +198,16 @@ async function pick(c: Comp, density: number): Promise<Variant | null> {
   return (ok.find((o) => o.info!.smooth && o.info!.powerEfficient) ?? ok.find((o) => o.info!.smooth))?.v ?? null;
 }
 
+/** Runs fn in an idle task (Safari has no requestIdleCallback: a short timeout, after the frame in progress). */
+const idle = (fn: () => void) => {
+  const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+  if (ric) ric(fn, { timeout: 600 });
+  else setTimeout(fn, 60);
+};
+
+/** Scroll-driven animations (CSS animation-timeline): the rise then runs without a script write per frame. */
+const TIMELINE = typeof CSS !== 'undefined' && !!CSS.supports?.('animation-timeline: scroll()');
+
 /**
  * Starts the loop on the free act's world layer (HoleWorld.astro: .hole-stage with .hole-poster and .hole-video
  * inside .hole-dome__in) and returns its controls, or null when the markup is missing. act: the section whose
@@ -193,11 +232,14 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   video.muted = true;
   const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
   const posterOnly = opts.reduced || conn?.saveData === true;
+  // Blink reloads a released video from its media cache; WebKit and Gecko fetch it again (header above)
+  const canRelease = !!(navigator as Navigator & { userAgentData?: unknown }).userAgentData;
 
   let comp: Comp | null = null;
   let fit = place(COMPS.desktop, 1, 1);
   let W = 0;
   let H = 0;
+  let dpr = devicePixelRatio || 1;
   let drift = 0.5;
   let lastT = '';
   let posterWanted = false;
@@ -208,36 +250,71 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   let variant: Variant | null = null;
   let retried = false;
   let dead = false;
+  let hidden = false;
+  let released = false;
+  let liftA = NaN;
+  let liftB = NaN;
+  let liftKey = '';
 
   const markReady = () => {
     if (ready) return;
     ready = true;
     opts.onReady?.();
   };
+  const isPortrait = () => comp === COMPS.phone;
+  // the rise runs as a scroll-driven animation on portrait screens (free-act.css .is-lift) once its range is known,
+  // not under reduced motion
+  const lifts = () => TIMELINE && isPortrait() && !opts.reduced && Number.isFinite(liftA) && Number.isFinite(liftB) && liftB > liftA;
 
-  // the parallax for the current drift (reduced motion keeps the middle of the act, as the live hole did)
+  // the parallax for the current drift (reduced motion keeps the middle of the act, as the live hole did). Portrait:
+  // the rise only, in whole device pixels; nothing to write while the scroll-driven rise runs
   const paint = () => {
     const d = opts.reduced ? 0.5 : drift;
-    const t = `translate3d(0, ${(-LIFT * H * d).toFixed(2)}px, 0) rotate(${(TURN * (2 * d - 1)).toFixed(5)}rad) scale(${(1 + ZOOM * d).toFixed(5)})`;
+    let t: string;
+    if (isPortrait()) {
+      if (lifts()) return;
+      t = `translate3d(0, ${-Math.round(LIFT * H * d * dpr) / dpr}px, 0)`;
+    } else t = `translate3d(0, ${(-LIFT * H * d).toFixed(2)}px, 0) rotate(${(TURN * (2 * d - 1)).toFixed(5)}rad) scale(${(1 + ZOOM * d).toFixed(5)})`;
     if (t === lastT) return;
     lastT = t;
     stage.style.transform = t;
   };
 
+  // the scroll-driven rise: its range (from free-act.ts) and its steps of one device pixel; written when they change
+  const writeLift = () => {
+    const on = lifts();
+    layer.classList.toggle('is-lift', on);
+    if (!on) {
+      liftKey = '';
+      return;
+    }
+    const n = Math.max(1, Math.round(LIFT * H * dpr));
+    const key = `${liftA}|${liftB}|${n}|${dpr}`;
+    if (key === liftKey) return;
+    liftKey = key;
+    layer.style.setProperty('--hl-a', `${liftA.toFixed(3)}px`);
+    layer.style.setProperty('--hl-b', `${liftB.toFixed(3)}px`);
+    layer.style.setProperty('--hl-y', `${-n / dpr}px`);
+    // n + 1 positions, 0 to n device pixels: jump-none puts the first at the start and the last at the end
+    stage.style.animationTimingFunction = `steps(${n + 1}, jump-none)`;
+    // the inline transform from the script path would sit under the animation; drop it so the two never disagree
+    stage.style.transform = '';
+    lastT = '';
+  };
+
   const loadPoster = () => {
     if (!comp) return;
-    const n = comp.name;
-    const [a, b] = comp.posters;
-    avif.srcset = `${DIR}hole-${n}-${a}.avif ${a}w, ${DIR}hole-${n}-${b}.avif ${b}w`;
+    const set = (ext: string) => comp!.posters.map((w) => `${DIR}${comp!.poster}-${w}.${ext} ${w}w`).join(', ');
+    avif.srcset = set('avif');
     // no src: with one, Chromium fetched the WebP too while it settled on the AVIF source (every browser that
     // plays these videos reads srcset)
-    img.srcset = `${DIR}hole-${n}-${a}.webp ${a}w, ${DIR}hole-${n}-${b}.webp ${b}w`;
+    img.srcset = set('webp');
     // decode() can reject for a source that changed under it; the load event is the fallback
     img.decode().then(markReady, () => img.addEventListener('load', markReady, { once: true }));
   };
 
   const play = () => {
-    if (!visible || document.hidden || refused || !video.src || dead) return;
+    if (!visible || hidden || document.hidden || refused || released || !video.src || dead) return;
     const p = video.play();
     p?.catch((e: DOMException) => {
       // a pause() that lands before play() resolves rejects it with AbortError: that is not a refusal
@@ -250,7 +327,7 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   const loadVideo = async () => {
     if (!comp || posterOnly) return;
     const c = comp;
-    const v = await pick(c, fit.s * (devicePixelRatio || 1));
+    const v = await pick(c, fit.s * dpr);
     // the screen turned while the answer was coming: the new composition loads its own
     if (dead || c !== comp) return;
     variant = v;
@@ -265,7 +342,7 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   // the poster fades out over the video once it has presented a frame (requestVideoFrameCallback where there is
   // one: 'playing' can fire before the first frame is on screen)
   const shown = () => {
-    if (dead) return;
+    if (dead || released) return;
     layer.classList.add('is-playing');
     markReady();
   };
@@ -276,7 +353,7 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   };
   // a file that will not decode: the same frame in H.264 once, then the poster for good
   const onError = () => {
-    if (dead || !comp || !variant) return;
+    if (dead || released || !comp || !variant || !video.getAttribute('src')) return;
     const h264 = [...comp.full, ...comp.small].find((x) => x.codec.startsWith('avc1') && x.w === variant!.w);
     if (!retried && h264 && h264 !== variant) {
       retried = true;
@@ -297,17 +374,31 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   const layout = () => {
     W = inner.offsetWidth || innerWidth;
     H = inner.offsetHeight || innerHeight;
+    dpr = devicePixelRatio || 1;
     const next = H > W ? COMPS.phone : COMPS.desktop;
     const turned = comp !== null && next !== comp;
     comp = next;
     fit = place(comp, W, H);
-    stage.style.width = `${(comp.w * fit.s).toFixed(2)}px`;
-    stage.style.height = `${(comp.h * fit.s).toFixed(2)}px`;
-    stage.style.left = `${fit.left.toFixed(2)}px`;
-    stage.style.top = `${fit.top.toFixed(2)}px`;
-    stage.style.transformOrigin = `${fit.ox.toFixed(2)}px ${fit.oy.toFixed(2)}px`;
+    layer.classList.toggle('is-portrait', isPortrait());
+    if (isPortrait()) {
+      // whole device pixels: the frame's corner and size on the screen's grid, so at rest no pixel is resampled
+      // beyond the frame's own scale
+      const px = (v: number) => `${Math.round(v * dpr) / dpr}px`;
+      stage.style.width = px(comp.w * fit.s);
+      stage.style.height = px(comp.h * fit.s);
+      stage.style.left = px(fit.left);
+      stage.style.top = px(fit.top);
+      stage.style.transformOrigin = `${fit.ox.toFixed(2)}px ${fit.oy.toFixed(2)}px`;
+    } else {
+      stage.style.width = `${(comp.w * fit.s).toFixed(2)}px`;
+      stage.style.height = `${(comp.h * fit.s).toFixed(2)}px`;
+      stage.style.left = `${fit.left.toFixed(2)}px`;
+      stage.style.top = `${fit.top.toFixed(2)}px`;
+      stage.style.transformOrigin = `${fit.ox.toFixed(2)}px ${fit.oy.toFixed(2)}px`;
+    }
     img.sizes = avif.sizes = `${Math.round(comp.w * fit.s)}px`;
     lastT = '';
+    writeLift();
     paint();
     if (turned) {
       // the other composition: its own poster and file (the old video stops; the poster covers until the new plays)
@@ -316,6 +407,7 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
       video.load();
       variant = null;
       retried = false;
+      released = false;
       if (posterWanted) loadPoster();
       if (videoWanted) loadVideo();
     }
@@ -324,35 +416,75 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
   ro.observe(inner);
   layout();
 
-  // nothing loads until the act is near: the poster within three screens, the video within two
-  const io3 = new IntersectionObserver(
+  // nothing loads until the act is near: within three screens, the poster and the video's source, in an idle task
+  // (whether or not the layer manager shows the layer yet: it shows it about two screens out)
+  const io = new IntersectionObserver(
     (es) => {
       if (!es.some((e) => e.isIntersecting)) return;
-      io3.disconnect();
-      posterWanted = true;
-      loadPoster();
+      io.disconnect();
+      idle(() => {
+        if (dead) return;
+        posterWanted = true;
+        loadPoster();
+        if (posterOnly) return;
+        videoWanted = true;
+        loadVideo();
+      });
     },
     { rootMargin: '300% 0px 300% 0px' },
   );
-  io3.observe(act);
-  const io2 = new IntersectionObserver(
-    (es) => {
-      if (!es.some((e) => e.isIntersecting)) return;
-      io2.disconnect();
-      videoWanted = true;
-      loadVideo();
-    },
-    { rootMargin: '200% 0px 200% 0px' },
-  );
-  if (!posterOnly) io2.observe(act);
+  io.observe(act);
+
+  // The layer manager (backdrops.ts) hides the whole layer while it is covered or far: pause, and in Blink, once the
+  // act is behind (above the screen: the blueprint has covered it), let the decoder go. Read from the root's own
+  // style (it writes visibility there), only when an attribute changes, never per frame; the act's place is read
+  // only then
+  const onHidden = (on: boolean) => {
+    if (on === hidden) return;
+    hidden = on;
+    if (on) {
+      video.pause();
+      if (canRelease && video.getAttribute('src') && act.getBoundingClientRect().bottom < 0) {
+        released = true;
+        layer.classList.remove('is-playing');
+        video.removeAttribute('src');
+        video.load();
+      }
+      return;
+    }
+    if (!released) {
+      play();
+      return;
+    }
+    idle(() => {
+      if (dead || hidden || !released) return;
+      released = false;
+      if (variant) {
+        video.src = DIR + variant.file;
+        video.load();
+        play();
+      } else if (videoWanted) loadVideo();
+    });
+  };
+  const mo = new MutationObserver(() => onHidden(layer.style.visibility === 'hidden'));
+  mo.observe(layer, { attributes: true, attributeFilter: ['style'] });
 
   const onVis = () => (document.hidden ? video.pause() : play());
   document.addEventListener('visibilitychange', onVis);
 
   return {
+    get portrait() {
+      return isPortrait();
+    },
     setDrift: (v) => {
       drift = Math.min(1, Math.max(0, v));
       paint();
+    },
+    // (whole px from free-act.ts, plus the thousandth it uses to make the browser resolve its ranges again)
+    setLiftRange: (from, to) => {
+      liftA = from;
+      liftB = to;
+      writeLift();
     },
     setVisible: (on) => {
       if (on === visible) return;
@@ -363,8 +495,8 @@ export function createHoleVideo(layer: HTMLElement, act: HTMLElement, opts: { re
     destroy: () => {
       dead = true;
       ro.disconnect();
-      io3.disconnect();
-      io2.disconnect();
+      io.disconnect();
+      mo.disconnect();
       document.removeEventListener('visibilitychange', onVis);
       video.removeEventListener('playing', onPlaying);
       video.removeEventListener('error', onError);

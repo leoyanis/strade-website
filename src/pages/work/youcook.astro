@@ -39,6 +39,9 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;6
     // that reads on each colour, and a knockout in it; the white app screens on them (the cook-mode and chef-chat
     // phones, the shopping list) count as light where they pass under the links, and their pool keeps off the colour
     '#yc-cook': 'dark', '#yc-cook .cphone': 'light', '#yc-chat': 'dark', '#yc-chat .xphone': 'light',
+    // the cook-mode bar's teal Next pill and violet AI button, their own colours: Results over them took the screen's
+    // white knockout, a white box on the teal (1440 at 4650 to 4800, 2026-11-09 final check)
+    '#yc-cook .cm__next': { tone: 'auto', surface: 'auto' }, '#yc-cook .cm__ai': { tone: 'auto', surface: 'auto' },
     '#yc-duo': 'dark', '#yc-duo .nb': 'light', '#yc-store': 'dark',
     // each store screenshot says what the nav sees in it (StoreRail.astro, `nav`): its colour as a flat surface, its
     // phone and the cards past it as light bands (the lock screen dark)
@@ -52,7 +55,13 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;6
     // lies behind. The fridge scan's camera view is dark, like a lock screen: light ink on a dark pool. Before, a white
     // fog lay over the photo and the camera's black bar under dark ink (390 at 2738 to 2834). It fades out with
     // autoAlpha as it slides away (HowItWorks.astro), so it only counts while it shows (hides).
-    '.hero__phone': 'light',
+    // Since 2026-11-09 (final check) white flat surfaces: the light pool over them read as a white haze with Free stuff
+    // grey beside a dark Results (1440 at 500 to 700, 390 at 595 to 1075); now no pool, full ink and a white knockout,
+    // which cuts the app's labels away round the glyphs. The floating ingredient chips over them likewise, and on a
+    // phone the black store badges in their own black (a light pool lay over them under the links, 390 at 600)
+    '.hero__phone': { tone: 'light', surface: '#ffffff' },
+    '.fchip__in': { tone: 'light', surface: 'auto' },
+    '.hero__stores a': { tone: 'dark', surface: '#000000' },
     '.stage__phone': { tone: 'dark', hides: true },
     // the split section's two halves are bands of their own (the section itself paints nothing): the salmon one is a
     // flat colour by its saturation, the navy one by declaration (its own gradient, surface 'auto'), so each half takes

@@ -245,7 +245,10 @@
 @media (max-width: 767px) {
   /* --xe eases out: the stack is nearly at its small size by half way open (shrinking in step with the split let
      its corner touch the screen's edge while it opened and folded) */
-  .ar--flyer { --xs: 0.44; --lab: 9.5em; --xe: calc(1 - (1 - var(--x)) * (1 - var(--x))); }
+  /* Since 2026-11-09 the card is held at 55% of the screen's width (index.astro measure(), V-07; it was 38%), so the
+     stack shrinks more as it opens (0.6) to leave the names their room, and they come out about 11px (10.4 before):
+     larger and the longest no longer fits beside the stack on a 390px screen */
+  .ar--flyer { --xs: 0.6; --lab: 10em; --xe: calc(1 - (1 - var(--x)) * (1 - var(--x))); }
   .ar--flyer .ar-lead { width: 2em; }
 }
 

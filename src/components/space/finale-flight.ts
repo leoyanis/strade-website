@@ -32,6 +32,7 @@
 
 import type { ScrollTrigger as ST } from 'gsap/ScrollTrigger';
 import type { Stardust, StardustFlight } from './stardust';
+import { setScrollRanges } from './scroll-ranges';
 
 /** The shooting star's lean: px across (to the right) per px up. */
 const TILT = 0.07;
@@ -55,6 +56,8 @@ export type FinaleFlight = {
    * arguments are kept for index.astro's call. Returns the radius of the night's circle in px (index.astro clips the
    * sky and the tint to it). */
   paint: (s: number, ww: number, wh: number, hc: number) => number;
+  /** The circle as the plan has it (radius rk * s / sWipe up to rk), for the night's disc (finale-disc.ts). */
+  circle: () => { rk: number; sWipe: number };
 };
 
 /**
@@ -94,8 +97,17 @@ export function mountFinaleFlight(o: {
   const rl = rng(20261108);
   const L = chars.map((el) => ({
     el, r: [rl(), rl(), rl(), rl(), rl(), rl(), rl()],
-    w0: 0, w1: 1, dx: 0, dy: 0, bl: 0, pw: 2, at: -1,
+    w0: 0, w1: 1, dx: 0, dy: 0, bl: 0, pw: 2, sc0: 1, at: -1, moving: false,
   }));
+  // The blur only where it stays cheap: Chromium on a wide screen (number-chaos.ts makes the same call). In WebKit and
+  // on phones each letter's blur re-rasterized every frame, 30 filtered layers alive from the page's load (audit P6),
+  // so there each letter starts a little larger instead, settling to its size as it fades in: out of focus, the way
+  // number-chaos.ts brings its digits in. Desktop Chromium keeps the approved blur, unchanged
+  const chromium = (() => {
+    const ua = (navigator as Navigator & { userAgentData?: { brands?: { brand: string }[] } }).userAgentData;
+    return !!ua?.brands?.some((b) => b.brand === 'Chromium');
+  })();
+  let blurOK = chromium && innerWidth > 900;
   const FL = followers.map((el, i) => ({ el, i, w0: 0, w1: 1, at: -1 }));
 
   /* ---------- the plan: the whole timeline from the screen, and the section's lengths (on refresh) ---------- */
@@ -188,6 +200,8 @@ export function mountFinaleFlight(o: {
     t: 0, plan: 0, head: () => {}, dirX: DIR_X, dirY: DIR_Y, streak: 0,
     shed0: 0, shed1: 1, burst: 1, cool: 1, reach: 1, drift: 0, suck0: 0, suck1: 1,
     ox: 0, oy: 0, clipX: 0, clipY: 0, clipR: 0,
+    // the flight canvas sits in a disc of its own (finale-disc.ts), cut by the circle on the compositor
+    clip: false,
   };
   const measure = () => {
     dirty = false;
@@ -213,11 +227,9 @@ export function mountFinaleFlight(o: {
     D.offY = innerTop + cr.top - fr.top;
     // The brake and the letting go as scroll-driven animations (home.css), where the browser has them: their
     // ranges in px of the page's scroll and their lengths; the script then leaves the two shifts alone
+    // (and again a frame later, for Chromium: scroll-ranges.ts)
     const abs = st.start;
-    section.style.setProperty('--fin-a', `${(abs + D.sA).toFixed(2)}px`);
-    section.style.setProperty('--fin-b', `${(abs + D.sB).toFixed(2)}px`);
-    section.style.setProperty('--fin-g', `${(abs + D.sG).toFixed(2)}px`);
-    section.style.setProperty('--fin-e', `${(abs + D.sEnd).toFixed(2)}px`);
+    setScrollRanges('fin-stage', section, { '--fin-a': abs + D.sA, '--fin-b': abs + D.sB, '--fin-g': abs + D.sG, '--fin-e': abs + D.sEnd });
     section.style.setProperty('--fin-d', `${D.delta}px`);
     section.style.setProperty('--fin-lr', `${T.Lr}px`);
     section.classList.toggle('is-timeline', timeline);
@@ -229,6 +241,7 @@ export function mountFinaleFlight(o: {
     flightCanvas.style.left = `${D.left}px`;
     flightCanvas.style.width = `${D.W}px`;
     D.font = parseFloat(getComputedStyle(h1).fontSize) || 64;
+    blurOK = chromium && innerWidth > 900;
     // the spray's constants for this plan
     FR.plan++;
     FR.shed0 = T.sH0;
@@ -252,7 +265,10 @@ export function mountFinaleFlight(o: {
       c.dy = (0.8 + 1.6 * c.r[3]) * D.font;
       c.bl = (0.1 + 0.08 * c.r[4]) * D.font;
       c.pw = 1.7 + 2.2 * c.r[5];
+      // without the blur: from 1.22 to 1.42 of its size (its seventh draw, unused before, so the rest stay as they were)
+      c.sc0 = 1.22 + 0.2 * c.r[6];
       c.at = -1;
+      c.moving = false;
     }
     // the buttons and the socials: from just before the letters end, one after the other
     for (const f of FL) {
@@ -266,9 +282,13 @@ export function mountFinaleFlight(o: {
   let yWas = NaN; // the stage's shift and the words' last written (script fallback)
   let gWas = NaN;
   ScrollTrigger.addEventListener('refreshInit', plan);
-  ScrollTrigger.addEventListener('refresh', () => (dirty = true));
+  ScrollTrigger.addEventListener('refresh', () => {
+    dirty = true;
+  });
   // the headline's font can land after the last refresh, and the emblem is centred on the headline's box
-  document.fonts?.ready.then(() => (dirty = true));
+  document.fonts?.ready.then(() => {
+    dirty = true;
+  });
 
   /* ---------- the circle, the star's path, the stage's stop and start ---------- */
   // The circle's radius at s: straight with the scroll, full at the wipe's end
@@ -323,11 +343,15 @@ export function mountFinaleFlight(o: {
   let hold = false; // keyboard focus is inside the finale: everything stays in place
   let lastS = 0;
   const clearChar = (el: HTMLElement) => {
+    el.style.visibility = '';
     el.style.opacity = '';
     el.style.transform = '';
     el.style.filter = '';
     el.style.willChange = '';
   };
+  // A letter waiting for its stretch is only hidden (no layer, no filter: before, every letter carried its blurred,
+  // promoted start from the page's load); it gets will-change for its move alone, and its inline styles are cleared
+  // once it lands (home.css drops the base will-change global.css gives every .hero-h1 letter, for the finale's)
   const letters = (s: number) => {
     for (const c of L) {
       const t = clamp((s - c.w0) / (c.w1 - c.w0));
@@ -337,14 +361,28 @@ export function mountFinaleFlight(o: {
       const el = c.el;
       if (q >= 1) {
         clearChar(el);
+        c.moving = false;
         continue;
       }
-      // fades in over the first part of its move, sharpens all the way into place
-      el.style.willChange = 'transform, opacity, filter';
+      if (q <= 0) {
+        el.style.willChange = el.style.transform = el.style.filter = el.style.opacity = '';
+        el.style.visibility = 'hidden';
+        c.moving = false;
+        continue;
+      }
+      if (!c.moving) {
+        c.moving = true;
+        el.style.visibility = '';
+        el.style.willChange = blurOK ? 'transform, opacity, filter' : 'transform, opacity';
+      }
+      // fades in over the first part of its move, sharpens (or settles to its size) all the way into place
       el.style.opacity = String(Math.round(Math.min(1, q * 1.8) * 1000) / 1000);
-      el.style.transform = `translate3d(${(c.dx * (1 - q)).toFixed(2)}px, ${(c.dy * (1 - q)).toFixed(2)}px, 0)`;
-      const b = c.bl * Math.pow(1 - q, 1.4);
-      el.style.filter = b > 0.05 ? `blur(${b.toFixed(2)}px)` : '';
+      const tr = `translate3d(${(c.dx * (1 - q)).toFixed(2)}px, ${(c.dy * (1 - q)).toFixed(2)}px, 0)`;
+      if (blurOK) {
+        el.style.transform = tr;
+        const b = c.bl * Math.pow(1 - q, 1.4);
+        el.style.filter = b > 0.05 ? `blur(${b.toFixed(2)}px)` : '';
+      } else el.style.transform = `${tr} scale(${(c.sc0 + (1 - c.sc0) * q).toFixed(3)})`;
     }
     for (const f of FL) {
       const t = clamp((s - f.w0) / (f.w1 - f.w0));
@@ -365,6 +403,7 @@ export function mountFinaleFlight(o: {
     for (const c of L) {
       clearChar(c.el);
       c.at = 1;
+      c.moving = false;
     }
     for (const f of FL) {
       f.el.style.opacity = '';
@@ -381,7 +420,10 @@ export function mountFinaleFlight(o: {
   section.addEventListener('focusout', (e) => {
     if (section.contains(e.relatedTarget as Node | null)) return;
     hold = false;
-    for (const c of L) c.at = -1;
+    for (const c of L) {
+      c.at = -1;
+      c.moving = false;
+    }
     for (const f of FL) f.at = -1;
     letters(lastS);
   });
@@ -395,7 +437,9 @@ export function mountFinaleFlight(o: {
     // from the layout's own rule, plus the shift)
     const y = Math.round((D.delta + brakePart(s)) * 100) / 100;
     const g = Math.round(letGo(s) * 100) / 100;
-    if (!timeline && (y !== yWas || g !== gWas)) {
+    // (written with the scroll-driven animations too: they win over these while they run, and these stay when the
+    // animations are cancelled, as in the perf harness's screenshots)
+    if (y !== yWas || g !== gWas) {
       yWas = y;
       gWas = g;
       stage.style.translate = `0 ${y}px`;
@@ -436,5 +480,5 @@ export function mountFinaleFlight(o: {
       },
     };
   }
-  return { paint: (s) => paint(s) };
+  return { paint: (s) => paint(s), circle: () => ({ rk: T.Rk, sWipe: T.sWipe }) };
 }

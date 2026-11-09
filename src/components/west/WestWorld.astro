@@ -140,10 +140,15 @@ for (let x = 23; x < TEAR_W; x += 24) gridX.push({ x, major: (x + 1) % 120 === 0
 
 // ---- dust motes in the low sun: three depths (far: small, sharp, slow; near: big, soft, faster).
 // Each depth is one strip two screens wide that drifts right by one screen width a cycle (west.css), with its motes
-// drawn twice, a screen apart, so the loop has no seam; a second element bobs the strip. Two CSS animations per
+// drawn twice, a screen apart, so the loop has no seam; the same strip bobs on its own clock (the drift is its
+// `translate`, the bob its `transform`: one element, where a second, nested one bobbed it). Two CSS animations per
 // depth instead of one per mote (W6): on this page every running CSS animation is serviced on the main thread at
 // every frame (see west.css, "Loops and their cost"). Motes past `phone` in a depth are left out on tall screens.
+// The strip is only as tall as its depth's band of heights (2% above it, 4% below for the motes' size), not the
+// whole screen: a composited layer two screens wide was six of them, three of them nested (audit B02). Each mote's
+// height is given in the band so it lands exactly where it did on the screen.
 const dust: { style: string; x: boolean }[][] = [];
+const dustBand: { top: number; h: number }[] = [];
 {
   const r = rng(77);
   const kinds = [
@@ -153,6 +158,8 @@ const dust: { style: string; x: boolean }[][] = [];
   ];
   for (const k of kinds) {
     const out: { style: string; x: boolean }[] = [];
+    const band = { top: k.y[0] - 2, h: k.y[1] - k.y[0] + 6 };
+    dustBand.push(band);
     for (let i = 0; i < k.n; i++) {
       // the same draws in the same order as when each mote had its own drift (its duration first, its delay last,
       // both unused now), so every mote keeps its height, size, brightness and resting place
@@ -164,7 +171,8 @@ const dust: { style: string; x: boolean }[][] = [];
       const s = f(k.s[0] + r() * (k.s[1] - k.s[0]));
       const o = f(k.o[0] + r() * (k.o[1] - k.o[0]));
       r();
-      for (const copy of [0, 100]) out.push({ style: `left:${f(left + copy)}vw;top:${y}%;width:${s}px;height:${s}px;opacity:${o}`, x: i >= k.phone });
+      const top = Math.round(((y - band.top) / band.h) * 1e6) / 1e4;
+      for (const copy of [0, 100]) out.push({ style: `left:${f(left + copy)}vw;top:${top}%;width:${s}px;height:${s}px;opacity:${o}`, x: i >= k.phone });
     }
     dust.push(out);
   }
@@ -212,7 +220,13 @@ const hopAt = [...new Set([...Array.from({ length: 41 }, (_, i) => i * 2.5), ...
 const hopKeys = hopAt.map((p) => `${p}%{transform:translateY(${f2(hopY(p))}%) rotate(${f((1080 * p) / 100)}deg)}`).join('');
 const sampledKeyframes = `@keyframes w-hawk{${hawkKeys}}@keyframes w-hop-spin{${hopKeys}}`;
 
-// ---- the first stars of the evening, in the night layer that darkens the sky as the act scrolls
+// ---- the first stars of the evening, in the night layer that darkens the sky as the act scrolls.
+// Each star is a background layer only as big as its glow (a tile 2 px wider than its diameter, centred where the star
+// is: a background-position of x% sets the tile's x% point on the box's x% point, so x% plus (x% of the tile less half
+// of it) puts the tile's centre at x% of the box). They were 34 radial gradients each the size of the whole screen, and
+// a gradient shades its whole tile, transparent or not: rastering that layer cost more than the town, the mesas, the
+// sun and the boardwalk together (2026-11-09, software raster, 390x844 @3x: 38 to 42 ms of the west's 70)
+const f3 = (n: number) => Math.round(n * 1000) / 1000;
 const stars: string[] = [];
 {
   const r = rng(2026);
@@ -221,7 +235,11 @@ const stars: string[] = [];
     const sz = big ? 1.6 + r() * 0.8 : 0.8 + r() * 0.6;
     const a = big ? 0.85 + r() * 0.15 : 0.45 + r() * 0.4;
     const warm = r() < 0.2;
-    stars.push(`radial-gradient(${f(sz)}px ${f(sz)}px at ${f(2 + r() * 96)}% ${f(2 + r() * 40)}%, rgba(${warm ? '255,232,200' : '235,240,255'},${f(a)}), transparent)`);
+    // (the same draws in the same order as before: every star keeps its place, size and colour)
+    const x = f(2 + r() * 96);
+    const y = f(2 + r() * 40);
+    const t = 2 * Math.ceil(f(sz)) + 2;
+    stars.push(`radial-gradient(${f(sz)}px ${f(sz)}px at 50% 50%, rgba(${warm ? '255,232,200' : '235,240,255'},${f(a)}), transparent) calc(${x}% + ${f3((x / 100) * t - t / 2)}px) calc(${y}% + ${f3((y / 100) * t - t / 2)}px) / ${t}px ${t}px no-repeat`);
   }
 }
 const nightBg = `${stars.join(',')}`;
@@ -381,7 +399,7 @@ const nightBg = `${stars.join(',')}`;
       </div>
 
       <!-- night falls: darkens the sky and the distant hills, with the first stars (west.ts scrubs its opacity) -->
-      <div class="w-night" style={`background-image:${nightBg},linear-gradient(180deg, rgba(4,6,22,0.95) 0%, rgba(8,8,30,0.82) 30%, rgba(18,10,34,0.5) 60%, rgba(24,12,30,0.18) 82%, rgba(24,12,30,0) 100%)`}></div>
+      <div class="w-night" style={`background:${nightBg},linear-gradient(180deg, rgba(4,6,22,0.95) 0%, rgba(8,8,30,0.82) 30%, rgba(18,10,34,0.5) 60%, rgba(24,12,30,0.18) 82%, rgba(24,12,30,0) 100%) no-repeat`}></div>
 
       <!-- the town: a saloon, a small adobe, the general store and the water tower, backlit by the sunset -->
       <div class="w-l w-l--town">
@@ -754,10 +772,10 @@ const nightBg = `${stars.join(',')}`;
         </div>
       </div>
 
-      <!-- dust in the low sun, nearest of all: per depth a drifting strip (.w-dust__g) and its bob (.w-dust__b) -->
+      <!-- dust in the low sun, nearest of all: per depth one strip, the height of its band, that drifts and bobs -->
       <div class="w-dust">
         {['far', 'mid', 'near'].map((depth, i) => (
-          <span class={`w-dust__g w-dust__g--${depth}`}><span class="w-dust__b">{dust[i].map((m) => <i class={m.x ? 'x' : undefined} style={m.style}></i>)}</span></span>
+          <span class={`w-dust__g w-dust__g--${depth}`} style={`top:${dustBand[i].top}%;height:${dustBand[i].h}%`}>{dust[i].map((m) => <i class={m.x ? 'x' : undefined} style={m.style}></i>)}</span>
         ))}
       </div>
     </div>

@@ -75,6 +75,8 @@ interface Panel {
 }
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+// one column: the share of a switch the leaving number takes to go, before the arriving one starts (apply())
+const SEQ = 0.35;
 const smooth = (v: number) => {
   const t = clamp01(v);
   return t * t * (3 - 2 * t);
@@ -206,6 +208,8 @@ export function initVaulttHome(o: { gsap?: Gsap; ScrollTrigger?: ST; reduced: bo
   /* ---------- measuring (layout reads, never per frame) ---------- */
   function measure() {
     const y0 = window.scrollY;
+    // (the render at the end takes this scroll: measure() runs outside the scroll path)
+    sy = y0;
     vh = stage!.offsetHeight || innerHeight;
     layerH = layer!.offsetHeight || vh;
     // everything at rest for the reads (the render at the end puts the scroll's state back)
@@ -280,13 +284,24 @@ export function initVaulttHome(o: { gsap?: Gsap; ScrollTrigger?: ST; reduced: bo
     if (reduced) return;
     const v = it.v;
     if (it.kind === 'num') {
-      it.chaos?.set(v);
+      // One column (phones): the numbers take turns instead of crossing. On a short screen the leaving number
+      // scattered up through the arriving one and over its cards, two numerals at once ("1,200+" over a ghost
+      // "10,500"; 2026-11-09 phone audit, V-04). The leaving number and its label are gone by SEQ of the switch, and
+      // the arriving one gathers over the rest, so they never show together; the cards keep their own timing, and
+      // the holds are as they were.
+      it.chaos?.set(!narrow() ? v : v <= 1 ? clamp01((v - SEQ) / (1 - SEQ)) : 1 + clamp01((v - 1) / SEQ));
       it.cards?.set(v, it.dwell);
       return;
     }
     // the copy and the phones: fade in lifting up into place, fade out lifting away (the copy blurred to sharp on a
     // wide Chromium screen); waiting below or gone above, the phones are not painted at all. The copy only goes
-    // transparent, never hidden: its links stay in the tab order (see the focus handler below)
+    // transparent, never hidden: its links stay in the tab order (see the focus handler below). (One column: they
+    // leave by SEQ of the switch as well, before the first number gathers, V-04.)
+    if (v > 1 && v < 2 && narrow()) return applyLook(it, 1 + clamp01((v - 1) / SEQ));
+    applyLook(it, v);
+  }
+  /** The copy's or the phones' look for v (apply()). */
+  function applyLook(it: Item, v: number) {
     const hidden = v <= 0 || v >= 2;
     let key: string;
     let y = 0;
@@ -435,9 +450,11 @@ export function initVaulttHome(o: { gsap?: Gsap; ScrollTrigger?: ST; reduced: bo
     most = Math.max(0, Math.min(last, Math.floor((y - T[0] - W / 2) / (W + H))));
   }
 
-  /** Writes every panel's place and every item's look for the scroll (no layout reads). */
+  /** Writes every panel's place and every item's look for the scroll (no layout reads: the scroll is the one the
+   *  scroll event read, sy, below). */
   function render() {
-    place(window.scrollY);
+    place(sy);
+    restSide = sideOf(sy);
     let any = false;
     for (let k = 0; k <= last; k++) {
       const P = panels[k];
@@ -466,13 +483,26 @@ export function initVaulttHome(o: { gsap?: Gsap; ScrollTrigger?: ST; reduced: bo
     syncMap();
   }
 
-  /* ---------- one render per scrolled frame; nothing runs while the page is still ---------- */
+  /* ---------- one render per scrolled frame; nothing runs while the page is still ----------
+     The scroll is read in the scroll event (sy), before anything in the frame writes a style, and render() uses it in
+     the next animation frame. It used to read window.scrollY there, after the other frame callbacks had written
+     theirs: a forced style and layout pass on every scrolled frame (WebKit, 1.6 to 3.7 ms a frame on the iPhone
+     profile, 2026-11-09 audit). Outside the act (a switch and a screen above the intro's switch, or a screen past
+     where the jobs have left the screen) every panel is in its final state: one render there, then nothing until
+     the scroll comes back (it used to render on every scrolled frame of the whole page, the finale included). */
+  let sy = window.scrollY;
   let raf = 0;
+  // the side of the act the last render was done for: -1 above, 1 below, 0 within it
+  let restSide = 0;
+  const sideOf = (y: number) => (y < T[0] - W - vh ? -1 : y > clearAt + vh ? 1 : 0);
   const frame = () => {
     raf = 0;
     render();
   };
   const kick = () => {
+    sy = window.scrollY;
+    const side = sideOf(sy);
+    if (side !== 0 && side === restSide) return;
     if (!raf) raf = requestAnimationFrame(frame);
   };
   addEventListener('scroll', kick, { passive: true });
@@ -633,7 +663,8 @@ export function initVaulttHome(o: { gsap?: Gsap; ScrollTrigger?: ST; reduced: bo
       stillMost = most;
       repaintStill();
     }
-    const on = !reduced && phoneItem.v > 0.02 && phoneItem.v < 1.98 && !document.hidden;
+    // (one column: the phones are gone by SEQ of their switch out, apply())
+    const on = !reduced && phoneItem.v > 0.02 && phoneItem.v < (narrow() ? 1 + SEQ - 0.02 : 1.98) && !document.hidden;
     if (on === mapOn || !iMap) return;
     mapOn = on;
     if (on) iMap.start();

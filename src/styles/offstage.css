@@ -1,0 +1,60 @@
+/* ================================================================
+   OFFSTAGE: what an act holds for the whole visit, taken off while the act is far from the screen.
+   Owned by the global performance pass (2026-11-09); the owners' component files are not touched.
+
+   index.astro sets .is-offstage on an act (section.act) once its whole box, top to bottom, is more than a screen
+   and a half from the view, and takes it off as soon as any of the box comes within a screen of it: two
+   IntersectionObservers, so an act resting between the two edges keeps what it had and nothing flickers, and
+   everything below is back a screen before any of the act can show. A pinned or sticky stage is inside its act's
+   box, so a hold (the finale's) is never offstage. Without JavaScript nothing is ever offstage.
+
+   Why: on a phone every will-change, every CSS loop (running or paused) and every backdrop filter is a composited
+   layer for the rest of the visit, and each frame's layerize and commit walk all of them. Chromium phone-4x layer
+   dump, 2026-11-09: from Endless Pursuit to the footer, 72 to 83 of the page's 95 to 135 layers sat in acts more
+   than a screen away (Atlas 41 to 53, Endless Pursuit 14 to 17, the free act 10, the finale 5 to 6). With these
+   rules (same tree, with and without, phone-4x): 1257 to 845 layers summed over the ten acts' tops (drawing ones 889
+   to 519; Atlas's far ones 43 to 53 down to 15), estimated tiles 34 to 46 MB lower from Endless Pursuit to the
+   blueprint; at low load, commit and paint about 10% lower over the whole scroll, layerize unchanged.
+
+   Each rule only takes something off, and only what returns without a visible seam:
+   - will-change: the layer is made again a screen before it shows;
+   - infinite CSS loops: one restarted while offstage cannot be seen;
+   - scroll-driven animations: their state is a function of the scroll (and the finale's script writes the same
+     values inline), so taking them off and back never jumps;
+   - backdrop filters: re-sampled whenever anything under them changes, drawn again when the act comes back.
+   Never visibility or display: the acts stay readable to assistive tech and find-in-page.
+   Every selector starts with the act's id, so it beats the components' class rules; !important only where a script
+   writes the property inline (the finale's letters). Owners may key their own rules on .is-offstage (free-act.css
+   does, for its heading's fade).
+   ================================================================ */
+
+/* Atlas (#mq-atlas): its world's glow, the editor's halo, playhead, bar, music strip and placeholder, and the reel in
+   the editor's preview (its camera, grade, captions, wave bars and caret). The hero's wheel card and the flying card
+   carry their own copies of the reel; they live in #hero and are left alone. */
+#mq-atlas.is-offstage :is(.h-aw__glow, .ae-mus, .ae-mus svg, .ae-ph, .ae-play__head, .ae-play__bar b, .ar-cam, .ar-pic, .ar-cg b),
+#mq-atlas.is-offstage .h-a-editor::before { will-change: auto; }
+#mq-atlas.is-offstage :is(.ar-wave i, .ar-cam img, .ar-caret, .ae-spark) { animation: none; }
+
+/* Endless Pursuit: the glass buttons' blur (desktop; phones already have none). Its ambient loops (.is-amb) need
+   nothing here: ep-section.ts runs them only while the section is on screen, and lets each one finish its beat on
+   animationiteration before it stops, which an animation taken off here would never send. */
+#mq-endless-pursuit.is-offstage :is(.ep3__btn--glass, .ep3-sound) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* the free act: the band, its track and its cards (scrubbed only while the act is on screen) */
+#act-free.is-offstage :is(.fa-band, .fa-track, .fa-slot) { will-change: auto; }
+
+/* the west act (#about): the poster's sway and its layer, and the cards' fade layer the finale's wipe leaves on
+   (.is-fading stays while they are faded out). The west world itself is in .themes: the layer manager's. */
+#act-west.is-offstage .w-poster { will-change: auto; animation: none; }
+/* held at the sway's first pose (w-sway's from, west.css), where the restarted sway picks up: a jump straight into the
+   act (the footer's About link) lands a frame before the observer's callback, and the poster would twitch from upright
+   to -0.7deg there. Reduced motion has no sway and stays upright. */
+@media (prefers-reduced-motion: no-preference) { #act-west.is-offstage .w-poster { transform: rotate(-0.7deg); } }
+#act-west.is-offstage .bp-about__grid.is-fading { will-change: auto; }
+
+/* the finale: the stage's brake and letting go (fin-brake, fin-letgo; the script writes the same translate inline),
+   the ghost button's blur, and the letters' will-change (finale-flight.ts writes it inline). The discs need nothing
+   here: they are display: none unless their own observer marks the finale .is-near. */
+#finale.is-offstage :is(.fin-stage, .fin-inner) { animation: none; }
+#finale.is-offstage .sx-btn--ghost { -webkit-backdrop-filter: none; backdrop-filter: none; }
+#finale.is-offstage .hero-h1 .char { will-change: auto !important; }

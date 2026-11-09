@@ -26,12 +26,52 @@
   border-radius: 50%; overflow: hidden;
   transform: translate3d(0, 110vh, 0); will-change: transform;
   background: #020306;
+  /* nothing inside it lays out or paints past its box (P7) */
+  contain: strict;
 }
+/* Held (free-act.ts: half a screen after the dome's edge has cleared the screen's top corners): no round clip. The
+   circle covers every screen corner there anyway, and so does its square box, so nothing on screen changes; a round
+   clip over the playing video was a mask pass for every one of its frames (sys-08). The box still clips (contain). */
+.theme--hole.is-held .hole-dome { border-radius: 0; overflow: visible; }
 /* undoes the dome's move, so the black hole stays still on the screen. 100vh, not the fixed stack's height:
    a phone's URL bar showing or hiding resized that, and with it the video's frame (hole-video.ts reads this box) */
 .hole-dome__in {
   position: absolute; top: 0; left: calc(var(--R) - 50vw); width: 100vw; height: 100vh;
   transform: translate3d(0, -110vh, 0); will-change: transform;
+}
+/* nothing of the hole can show (faded out on a phone, or under the blueprint's sheet): its layers are not drawn,
+   the dome's own near-black stays (free-act.ts, with a margin either way) */
+.theme--hole.is-faded .hole-dome__in { visibility: hidden; }
+
+/* The dome's rise as animations on the page's own scroll (.is-timeline, free-act.ts): the dome from parked to held,
+   1:1 with the scroll, and its inside back by as much, over the ranges free-act.ts writes in px on every refresh
+   (--hd-a to --hd-b; --hd-park and --hd-hold, the two ends). They move in the same frame as the page, on the
+   compositor where the browser runs them there, where the script's writes trailed it by a frame or more on a phone
+   (sys-01). Phones (.is-portrait): the hole fades out under the rising blueprint sheet (--hf-a to --hf-b, V-02), and
+   the frame rises with the act in steps of one device pixel (--hl-a to --hl-b, by --hl-y; hole-video.ts writes the
+   steps), so at rest it sits on the screen's pixel grid. Longhands only: the animation shorthand would reset the
+   timeline. Without scroll-driven animations the script writes the same values. */
+@keyframes hole-dome-rise { from { transform: translate3d(0, var(--hd-park), 0); } to { transform: translate3d(0, var(--hd-hold), 0); } }
+@keyframes hole-dome-back { from { transform: translate3d(0, calc(-1 * var(--hd-park)), 0); } to { transform: translate3d(0, calc(-1 * var(--hd-hold)), 0); } }
+@keyframes hole-fade { from { opacity: 1; } to { opacity: 0; } }
+@keyframes hole-lift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, var(--hl-y), 0); } }
+@supports (animation-timeline: scroll()) {
+  .theme--hole.is-timeline .hole-dome,
+  .theme--hole.is-timeline .hole-dome__in {
+    animation-name: hole-dome-rise; animation-duration: auto; animation-timing-function: linear; animation-fill-mode: both;
+    animation-timeline: scroll(root); animation-range: var(--hd-a) var(--hd-b);
+  }
+  .theme--hole.is-timeline .hole-dome__in { animation-name: hole-dome-back; }
+  .theme--hole.is-timeline.is-portrait .hole-dome__in {
+    animation-name: hole-dome-back, hole-fade; animation-duration: auto, auto; animation-timing-function: linear, linear;
+    animation-fill-mode: both, both; animation-timeline: scroll(root), scroll(root);
+    animation-range: var(--hd-a) var(--hd-b), var(--hf-a) var(--hf-b);
+  }
+  /* (its timing function, steps of one device pixel, is written by hole-video.ts with the range) */
+  .theme--hole.is-lift .hole-stage {
+    animation-name: hole-lift; animation-duration: auto; animation-fill-mode: both;
+    animation-timeline: scroll(root); animation-range: var(--hl-a) var(--hl-b);
+  }
 }
 /* The black hole, a pre-rendered loop (hole-video.ts). The stage is the video's frame: the script sizes and places
    it (left, top, width, height on resize) so the hole lands where the CSS drawing below has it, and drives the
@@ -42,8 +82,12 @@
 .hole-stage { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; opacity: 0; will-change: transform; }
 .theme--hole.has-hole .hole-stage { opacity: 1; transition: opacity 0.6s ease; }
 .hole-video, .hole-poster, .hole-poster img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* phones: the stage is sized in whole device pixels (hole-video.ts), a hair off the frame's own shape; fill it,
+   so no sub-pixel bar can open along an edge */
+.theme--hole.is-portrait .hole-video { object-fit: fill; }
 .hole-poster { transition: opacity 0.45s ease; }
-.theme--hole.is-playing .hole-poster { opacity: 0; }
+/* once the video shows, the poster fades out and is then hidden, so it is no layer of its own while the act plays */
+.theme--hole.is-playing .hole-poster { opacity: 0; visibility: hidden; transition: opacity 0.45s ease, visibility 0s linear 0.45s; }
 /* The CSS drawing under the stage cross-fades with it: once the poster is on (.has-hole) the stage fades in over
    the drawing, which then goes, the instant that fade has finished, so the two never dim each other halfway */
 .hole-art { transition: opacity 0.6s ease; }
@@ -205,6 +249,24 @@ html:not(.has-themes) .act--free::before {
 .fa-card:hover .fa-card__go i { translate: 5px 0; }
 
 .fa-all { position: relative; z-index: 2; display: flex; justify-content: flex-end; margin-top: clamp(84px, 12vh, 130px); }
+/* Phones (V-08): the heading and the All free stuff pill fade out on their way under the nav, gone by the time their
+   top is 72px from the screen's top (the nav's pool reaches 56px), from 96px before. An animation on the page's
+   scroll over the range free-act.ts measures (--nf-a to --nf-b, set with .is-navfade); without it the script writes
+   the same opacity. On the pill's link, not .fa-all: the reveal tweens .fa-all's own opacity. */
+@keyframes fa-nav-out { from { opacity: 1; } to { opacity: 0; } }
+@media (max-width: 767px) {
+  @supports (animation-timeline: scroll()) {
+    .act--free.is-navfade .fa-h,
+    .act--free.is-navfade .fa-all__link {
+      animation-name: fa-nav-out; animation-duration: auto; animation-timing-function: linear; animation-fill-mode: both;
+      animation-timeline: scroll(root); animation-range: var(--nf-a) var(--nf-b);
+    }
+    /* more than a screen away (.is-offstage, the global perf pass's act class): no fade, so no layer for either; the
+       class goes a screen before the act can be seen, and the fade picks the scroll up again from there */
+    .act--free.is-navfade.is-offstage .fa-h,
+    .act--free.is-navfade.is-offstage .fa-all__link { animation: none; }
+  }
+}
 .fa-all__link {
   display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.24); background: rgba(4, 5, 8, 0.62);

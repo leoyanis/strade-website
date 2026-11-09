@@ -41,7 +41,7 @@ interface Props {
    * box on the page while it is invisible): it counts only while it is visible and 90% opaque or more, and the script
    * dispatches 'nav:moved' on the frames it fades it (an opacity change moves nothing an observer sees).
    */
-  navBands?: Record<string, 'light' | 'dark' | 'auto' | 'busy' | { tone: 'light' | 'dark' | 'auto' | 'busy'; inset?: string; media?: string; surface?: string; hides?: boolean }>;
+  navBands?: Record<string, 'light' | 'dark' | 'auto' | 'busy' | 'bare' | 'none' | { tone: 'light' | 'dark' | 'auto' | 'busy' | 'bare'; inset?: string; media?: string; surface?: string; hides?: boolean }>;
 }
 
 const {
@@ -97,7 +97,9 @@ const jsonLd = {
 <html lang={locale}>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- viewport-fit=cover: in landscape on a notched iPhone the worlds run edge to edge instead of between black bars;
+       the nav and the footer keep their content inside the safe area (nav.css, global.css env(safe-area-inset-*)) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
@@ -157,12 +159,14 @@ const jsonLd = {
        the section under its text, and on Book a call the tone under the pill itself; each text link carries one
        too, its corner's unless a card's edge runs between the links. The nav script below writes them (with
        data-cut, the pool edges pulled in to the text); the server renders the page's navTheme. -->
-  <nav id="site-nav" aria-label="Site navigation" data-bands={navBands ? JSON.stringify(navBands) : undefined} data-nav-auto={navPath === '/' ? undefined : ''}>
+  <nav id="site-nav" aria-label="Site navigation" data-bands={navBands ? JSON.stringify(navBands) : undefined} data-nav-auto={navPath === '/' ? undefined : ''} data-nav-full={process.env.STRADE_NAV_FULL === '1' ? '' : undefined}>
     <div class="nav-side nav-side--l" data-tone={navTheme}>
       <span class="nav-pool" aria-hidden="true"><i class="nav-pool__tint nav-pool__tint--dark"></i><i class="nav-pool__tint nav-pool__tint--light"></i></span>
       <a href="/" class="nav-brand" aria-label="Strade, home">
         <StradeMark class="nav-brand-mark" />
         <span>Strade</span>
+        <!-- a phone's tap target round the mark (nav.css .nav-hit): positioned, so the logo's box stays the mark's -->
+        <i class="nav-hit" aria-hidden="true"></i>
       </a>
     </div>
     <div class="nav-side nav-side--r" data-tone={navTheme}>
@@ -275,7 +279,9 @@ const jsonLd = {
       // so the icon's own SVG, a smaller box on the same centre, takes the same stop (nav.css)
       // (`cover`: a corner, an upright edge and a level one meeting under the link: the rows past the level edge, `y`
       // down from the link's top for `h`, all take the ink of the split's side `side`, nav.css --cover-*)
-      let linkSplit: ({ at: number; dir: string; flat: boolean; full: boolean; mid?: Tone; at2?: number; ang?: number; off?: number; cover?: { y: number; h: number; side: 'a' | 'b' } } | null)[] = linkEls.map(() => null);
+      // (`shape`: two or more bands' edges under the link at once, each band drawn in its own ink as background layers,
+      // the link's own ink beneath them: nav.css data-shape, --shape-bg; shapesUnder, below. `dir` and `at` unused then)
+      let linkSplit: ({ at: number; dir: string; flat: boolean; full: boolean; mid?: Tone; at2?: number; ang?: number; off?: number; cover?: { y: number; h: number; side: 'a' | 'b' }; shape?: string } | null)[] = linkEls.map(() => null);
       const linkSplitWas: string[] = linkEls.map(() => '');
       // The logo's split by a slanted edge under a script's paint (the free act's dome, its left flank): as a link's
       // (off, ang, dir), with offM the same edge measured from the mark's own centre (markOff: the mark's centre from the
@@ -283,6 +289,14 @@ const jsonLd = {
       let brandSplit: { off: number; ang: number; dir: string; offM: number } | null = null;
       let brandSplitWas = '';
       let markOff = { x: 0, y: 0 };
+      // the mark's own box on screen (the nav is fixed: read in watch()), for the logo over shapes (below)
+      let markBox = { left: 0, top: 0, right: 0, bottom: 0 };
+      // The logo over shapes (shapesUnder, wordTones): the layers in the mark's box (drawn by the logo's ::after through
+      // the mark's own file as its mask) and in the logo's box (the word, clipped to its text), each band in its own ink
+      // over the logo's (the side's tone, set to the one outside the shapes). Written on the logo's side (data-shape,
+      // --shape-bg-m, --shape-bg-w, nav.css)
+      let brandShape: { m: string; w: string } | null = null;
+      let brandShapeWas = '';
       // Over a flat, saturated colour (flatTone, below; data-flat, nav.css): whether each corner's pool would lie only
       // on such a colour (it is hidden then), and whether each text link sits mostly on one (its ink is then full
       // strength, with no glow and no accent)
@@ -290,6 +304,13 @@ const jsonLd = {
       // a corner on a thin strip of something else with a flat colour both above and below it (the cream between two
       // side quest tiles on a phone): its pool would only show as a pale fog over the two colours' edges, so it goes too
       const squeezed: Record<Key, boolean> = { l: false, r: false };
+      // A corner busy only with pictures the page marks bare (navBands 'bare': kleus's turning ring of cards, the quest
+      // covers on /work, youcook's hero phones): no pool, which lay over them as a white haze band, and the links' own
+      // full-strength ink with a glow tight to the glyphs instead (nav.css data-bare; 2026-11-09 final check)
+      const bareAt: Record<Key, boolean> = { l: false, r: false };
+      // the logo over shapes (logoShapes) off any busy picture: every part of the mark has its own ink, so no pool backs it
+      // (a dark pool over the white App Store button's end smeared it grey round the mark, vaultt 390 at 5760, 2026-11-09)
+      const shaped: Record<Key, boolean> = { l: false, r: false };
       let linkFlat: boolean[] = linkEls.map(() => false);
       // The knockout (data-ko, --ko "r g b", nav.css): a link lying wholly on a flat colour, and the logo, wear an outline
       // of that very colour round each glyph, so whatever the colour carries past the links (a side quest tile's title
@@ -302,7 +323,9 @@ const jsonLd = {
       // boundary passing the nav line: the orange knockout lay over the purple below it, youcook 1440).
       // `shade`: the casters whose drop shadow lies evenly over the part (trim): the knockout wears the paper as that
       // shadow darkens it there, read each time its colour is (koShade)
-      type KoPart = { band: Element; x: number; grad: boolean; l: number | null; r: number | null; t: number | null; b: number | null; shade?: Element[] };
+      // `rad`: the band's own corner radii (top left, top right, bottom right, bottom left) where the cut is its rounded
+      // box (a link over two bands, shapesUnder: vaultt's store badges): the copy is clipped to the rounded box, not the square
+      type KoPart = { band: Element; x: number; grad: boolean; l: number | null; r: number | null; t: number | null; b: number | null; shade?: Element[]; rad?: number[] };
       // One part, or two where the text sits on two colours either side of an edge (Free stuff over a side quest
       // tile's edge, with the cream beside it a declared surface, data-nav-surface): the first part is drawn from
       // ::before (--ko, --ko-l/r/t/b, data-ko), the second from ::after (--ko2..., data-ko2), each cut at the edge.
@@ -333,6 +356,7 @@ const jsonLd = {
             const v = p ? p[k] : null;
             setVar(el, `${pre}-${k}`, rgb && v != null ? `${Math.round(v)}px` : null);
           }
+          setVar(el, `${pre}-rad`, rgb && p?.rad?.some((r) => r > 0) ? p.rad.map((r) => `${r.toFixed(1)}px`).join(' ') : null);
           el.toggleAttribute(i ? 'data-ko2' : 'data-ko', !!rgb);
         }
         // (a colour read through a tint keeps the tint watch going from any pass, a scroll frame's included: one read
@@ -345,6 +369,8 @@ const jsonLd = {
       // every knockout the last resolve wrote, and the watch that rewrites them while a band under one fades (below)
       let koAll: [HTMLElement, Ko][] = [];
       let fadeWatch: () => void = () => {};
+      // whether the last resolve read a colour through a band part way faded (a phone's rest passes go on while one is)
+      let lastFaded = false;
       // and the watch on the bands near the nav that do not show yet (hiddenWatch, below)
       let hiddenWatch: () => void = () => {};
       // the tone under Book a call's middle on the nav line, band or paint (set by the band observers)
@@ -356,8 +382,10 @@ const jsonLd = {
       // (1440 at 2000, 2026-11-09).
       let tintT = 0;
       let tintSync: () => void = () => { for (const [el, ko] of koAll) writeKo(el, ko); };
+      // (not on a phone: a tint drifting on its own clock is read again at the next scroll, the observers' next report or
+      // the next rest, not every 200ms; perf round 2026-11-09)
       const tintWatch = () => {
-        if (tintT) return;
+        if (tintT || lite) return;
         tintT = window.setTimeout(() => {
           tintT = 0;
           koTinted = false;
@@ -381,8 +409,114 @@ const jsonLd = {
       // counts the passes (each resolve, each sync): what is read from layout once per pass (the shadow casters' boxes,
       // trim) is read again on the next
       let navPass = 0;
+      /* Phones: no layout or style read inside a scrolled frame (perf round, audit P1, B07, VE-14, 2026-11-09). On a phone
+         at 4x the nav's frame callback was the largest script item of most sections: every frame it read the box of each
+         band near the nav after the page's own writes, a forced layout each time. So on phones (the nav's phone layout,
+         under 768px) every box the nav asks for inside a frame comes from a cache: read once per measure with the scroll it
+         was read at and moved by the scroll since (a fixed layer's does not move), and computed styles (opacity,
+         visibility, a turn) are read once per measure too. A measure is a new epoch: a rebuild, a resize, the document
+         changing size, a page script's nav:moved, a band the hidden-band poll sees come or go, and the scroll coming to
+         rest, where the nav also reads every box live once, as a laptop does every frame, so what a phone shows at rest is
+         what it showed before. In between, the observers' reports (worked out by the browser, no forced layout) are
+         gathered into one pass a frame, and only the bands that keep still in the page are carried by the scroll; those a
+         page script moves are left to the observers and to the rest. A laptop reads live boxes every frame, as before.
+         (STRADE_NAV_FULL=1 at build time keeps the laptop path on phones: the perf round's before/after.) */
+      const liteMq = matchMedia('(max-width: 767px)');
+      const liteOff = nav.hasAttribute('data-nav-full');
+      let lite = !liteOff && liteMq.matches;
+      let geoEpoch = 0;
+      // the scroll at this frame, read in the first scroll listener of the page's nav script, before its writes
+      let liteY = window.scrollY;
+      // and the last frames' scrolls, [time, scrollY]: an observer's report is of the frame it was measured in, which a
+      // report delivered late is not (scrollAt; null when it is older than all of them)
+      const scrolls: [number, number][] = [];
+      window.addEventListener('scroll', () => {
+        liteY = window.scrollY;
+        scrolls.push([performance.now(), liteY]);
+        if (scrolls.length > 8) scrolls.shift();
+      }, { passive: true });
+      const scrollAt = (t: number): number | null => {
+        for (let i = scrolls.length - 1; i >= 0; i--) if (scrolls[i][0] <= t) return scrolls[i][1];
+        return scrolls.length ? null : liteY;
+      };
+      // a cache's pass: each resolve or sync on a laptop, each measure on a phone
+      const passOf = () => (lite ? -1 - geoEpoch : navPass);
+      // how an element moves with the scroll, read once a measure: 'fixed' in a fixed layer (it does not), 'sticky' in
+      // a sticky one (it may stop), else with the page
+      const layerNow = new Map<Element, 'fixed' | 'sticky' | 'flow'>();
+      let layerEpoch = -1;
+      const scrollLayer = (el: Element | null): 'fixed' | 'sticky' | 'flow' => {
+        if (!el || el === document.body || el === document.documentElement) return 'flow';
+        if (layerEpoch !== geoEpoch) { layerEpoch = geoEpoch; layerNow.clear(); }
+        let v = layerNow.get(el);
+        if (v === undefined) {
+          // (a ScrollTrigger pin's content stops in the page while the pin holds, as a sticky one does)
+          const p = getComputedStyle(el).position;
+          v = p === 'fixed' ? 'fixed' : p === 'sticky' || el.classList.contains('pin-spacer') ? 'sticky' : scrollLayer(el.parentElement);
+          layerNow.set(el, v);
+        }
+        return v;
+      };
+      // an element's box: live on a laptop; on a phone the one read this measure, moved by the scroll since
+      const vboxes = new Map<Element, { r: DOMRectReadOnly; y: number; fixed: boolean; tick: number }>();
+      let vboxEpoch = -1;
+      // (a phone) the bands that move in the page by themselves (the band observers' `moving`: a scrub, a timer), each
+      // band's box as its last observer report gave it (the browser's own, no layout read) with the scroll it was
+      // measured at, and the observers in whose root it lay then (noteReport, below)
+      const selfMoving = new Set<Element>();
+      const seenBox = new Map<Element, { r: DOMRectReadOnly; y: number; tick: number }>();
+      const onRoots = new Map<Element, Set<IntersectionObserver>>();
+      let seenTick = 0;
+      const shifted = (r: DOMRectReadOnly, y: number) => (y === liteY ? r : new DOMRectReadOnly(r.x, r.y + y - liteY, r.width, r.height));
+      const vbox = (el: Element): DOMRectReadOnly => {
+        if (!lite) return el.getBoundingClientRect();
+        if (vboxEpoch !== geoEpoch) { vboxEpoch = geoEpoch; vboxes.clear(); }
+        let m = vboxes.get(el);
+        // A band that moves by itself, or rides in a pin or a sticky layer (stopped while it holds), does not follow
+        // the scroll: its box is its last report's when that is newer than the measure. While it lies in an observer's
+        // root each move it makes is reported (the thresholds there are a pixel or two apart), so the last box stands as
+        // it is; outside every root it is taken to move with the page. Moved by the scroll, a scrubbed or pinned band's
+        // box ran ahead of it: the knockout round Results and Free stuff went for 1000px of atlas's scroll while a
+        // caster's shadow was taken to lie under them, and kleus's ring left the logo without its glow (390, 2026-11-09).
+        if (selfMoving.has(el) || scrollLayer(el) === 'sticky') {
+          const s = seenBox.get(el);
+          const inRoot = !!onRoots.get(el)?.size;
+          if (s && (!m || s.tick > m.tick)) return inRoot ? s.r : shifted(s.r, s.y);
+          if (m && inRoot) return m.r;
+        }
+        if (!m) { m = { r: el.getBoundingClientRect(), y: window.scrollY, fixed: scrollLayer(el) === 'fixed', tick: ++seenTick }; vboxes.set(el, m); }
+        return m.fixed ? m.r : shifted(m.r, m.y);
+      };
+      // the box read live now, newer than any report: the rest's measure (liteRest), so at rest no box is a report's
+      const vmeasure = (el: Element) => {
+        if (vboxEpoch !== geoEpoch) { vboxEpoch = geoEpoch; vboxes.clear(); }
+        vboxes.set(el, { r: el.getBoundingClientRect(), y: window.scrollY, fixed: scrollLayer(el) === 'fixed', tick: ++seenTick });
+      };
+      // What a band observer's report (on a phone) says of its band: whether the band lies in that observer's root, its
+      // box, and whether that box is where the measure (or its last report), moved by the scroll, put it. One that is
+      // not moves in the page by itself (a scrub, a pin, a timer: kleus's ring, the finale's pill rising, youcook's
+      // swipe cards) and counts as moving from then on, left to the observers until the scroll rests and it is found
+      // still (edgeTick). Read off the report alone: no layout read.
+      const noteReport = (e: IntersectionObserverEntry, io: IntersectionObserver, first: boolean) => {
+        const el = e.target;
+        let on = onRoots.get(el);
+        if (!on) { on = new Set(); onRoots.set(el, on); }
+        if (e.isIntersecting) on.add(io);
+        else on.delete(io);
+        const y = scrollAt(e.time);
+        if (y === null) return;
+        const r = e.boundingClientRect;
+        if (!first && !selfMoving.has(el) && scrollLayer(el) === 'flow') {
+          const m = vboxEpoch === geoEpoch ? vboxes.get(el) : undefined;
+          const s = seenBox.get(el);
+          const ref = m && (!s || m.tick > s.tick) ? m : s;
+          if (ref && (Math.abs(r.top - (ref.r.top + ref.y - y)) > 1 || Math.abs(r.left - ref.r.left) > 1 || Math.abs(r.width - ref.r.width) > 1 || Math.abs(r.height - ref.r.height) > 1)) selfMoving.add(el);
+        }
+        seenBox.set(el, { r, y, tick: ++seenTick });
+      };
       // what a page script paints under the nav, if it says (see 'nav:paint' below)
-      const painted = nav as HTMLElement & { toneAt?: ((x: number, y: number) => string | Element | null) | null };
+      // (or the circle it paints, as its geometry: `paintCircle`, below the band observers)
+      const painted = nav as HTMLElement & { toneAt?: ((x: number, y: number) => string | Element | null) | null; paintCircle?: { cx: number; cy: number; r: (scrollY: number) => number } | null };
 
       /* Resolve each corner's tone and write it where the CSS reads it: data-tone on the two sides (ink and
          pool, nav.css) and on Book a call, data-cut on the sides, and body[data-nav] (the scroll progress line
@@ -394,10 +528,19 @@ const jsonLd = {
       const resolve = () => {
         navPass++;
         const force = asTone(body.dataset.navForce);
-        const forcedL = asTone(body.dataset.navForceL) ?? force;
-        const forcedR = asTone(body.dataset.navForceR) ?? force;
-        forceOf.l = forcedL;
-        forceOf.r = forcedR;
+        const forcedL0 = asTone(body.dataset.navForceL) ?? force;
+        const forcedR0 = asTone(body.dataset.navForceR) ?? force;
+        forceOf.l = forcedL0;
+        forceOf.r = forcedR0;
+        // A force with no paint that only says what a corner's bands already say (the finale's night, forced dark by its
+        // circle and declared as its own flat near-black, once the stage has let go and the section itself lies under the
+        // links) is no force there: the corner follows its bands, so it shows no pool on the flat night and each link keeps
+        // its own ink and knockout. Held as a force, the dark pool smeared the white headline grey under the whole nav
+        // row, "Let's talk." went murky teal and the finale's white Book a call pill chrome grey (390 at 18230 to 18450,
+        // and in reduced motion at 1440 and 390, 2026-11-09 final check).
+        const said = (k: Key, f: Tone | null) => !!f && !painted.toneAt && banded[k] === f && (flat[k] || (k === 'l' && shaped.l));
+        const forcedL = said('l', forcedL0) ? null : forcedL0;
+        const forcedR = said('r', forcedR0) ? null : forcedR0;
         // Under a script's paint (nav.toneAt: the stripes wipe's front, the free act's dome) each link takes the tone
         // painted under it even while its corner is forced, and each corner's pool the tone most of its glyphs sit
         // on (paintedWords): the pool then covers only those glyphs, and the others keep their own ink without one.
@@ -434,10 +577,19 @@ const jsonLd = {
           if (ko?.some((q) => q.grad) || f) live.push([a, ko]);
           if (ko) all.push([a, ko]);
           faded ||= f;
-          const s = (!forcedR || painted.toneAt) && linkSplit[i] ? linkSplit[i] : null;
-          const key = s ? `${s.dir}@${s.off != null ? `c${s.off.toFixed(1)}` : Math.round(s.at)}${s.mid ? `+${s.mid}@${Math.round(s.at2 ?? 0)}` : ''}${s.ang != null ? `/${Math.round(s.ang)}` : ''}${s.cover ? `#${s.cover.side}${Math.round(s.cover.y)},${Math.round(s.cover.h)}` : ''}` : '';
+          const sh = (!forcedR || painted.toneAt) && linkSplit[i]?.shape ? linkSplit[i]!.shape! : '';
+          const s = (!forcedR || painted.toneAt) && linkSplit[i] && !sh ? linkSplit[i] : null;
+          const key = s ? `${s.dir}@${s.off != null ? `c${s.off.toFixed(1)}` : Math.round(s.at)}${s.mid ? `+${s.mid}@${Math.round(s.at2 ?? 0)}` : ''}${s.ang != null ? `/${Math.round(s.ang)}` : ''}${s.cover ? `#${s.cover.side}${Math.round(s.cover.y)},${Math.round(s.cover.h)}` : ''}` : sh;
           if (key !== linkSplitWas[i]) {
             linkSplitWas[i] = key;
+            // (the bands' shapes, nav.css data-shape: the layers, then the link's own ink under them)
+            if (sh) {
+              a.dataset.shape = '';
+              a.style.setProperty('--shape-bg', `${sh},linear-gradient(currentColor,currentColor)`);
+            } else if (a.hasAttribute('data-shape')) {
+              delete a.dataset.shape;
+              a.style.removeProperty('--shape-bg');
+            }
             if (s?.cover) {
               a.dataset.splitCover = s.cover.side;
               a.style.setProperty('--cover-y', `${Math.round(s.cover.y)}px`);
@@ -485,18 +637,37 @@ const jsonLd = {
             }
           }
         }
+        if (sideL) {
+          // the logo over shapes (brandShape, nav.css data-shape): not on a forced corner, as a link's
+          const bs = !forcedL ? brandShape : null;
+          const key = bs ? `${bs.m}|${bs.w}` : '';
+          if (key !== brandShapeWas) {
+            brandShapeWas = key;
+            if (bs) {
+              sideL.dataset.shape = '';
+              sideL.style.setProperty('--shape-bg-m', bs.m || 'none');
+              sideL.style.setProperty('--shape-bg-w', `${bs.w ? `${bs.w},` : ''}linear-gradient(currentColor,currentColor)`);
+            } else if (sideL.hasAttribute('data-shape')) {
+              delete sideL.dataset.shape;
+              sideL.style.removeProperty('--shape-bg-m');
+              sideL.style.removeProperty('--shape-bg-w');
+            }
+          }
+        }
         // toggleAttribute with a force argument leaves the DOM alone when nothing changes
         sideL?.toggleAttribute('data-mixed', !forcedL && mixed.l);
         sideR?.toggleAttribute('data-mixed', !forcedR && mixed.r);
+        sideL?.toggleAttribute('data-bare', !forcedL && bareAt.l);
+        sideR?.toggleAttribute('data-bare', !forcedR && bareAt.r);
         // Over a flat colour, no pool (nav.css). On a forced corner only under a script's paint, which says where it
         // paints and leaves the bands to decide everywhere else (wordTones reads both): the free act forces both
         // corners light while its dome rises, which is while the side quest tiles pass under the nav at 1460x920,
         // and the forced corners kept a dark pool over the blue tile (2026-11-08 fix round). A force with no paint
         // (the finale's circle) still holds its whole corner.
-        sideL?.toggleAttribute('data-flat', (!forcedL || paint) && (flat.l || squeezed.l));
+        sideL?.toggleAttribute('data-flat', (!forcedL || paint) && (flat.l || squeezed.l || shaped.l));
         sideR?.toggleAttribute('data-flat', (!forcedR || paint) && (flat.r || squeezed.r));
         const agree = (k: Key, f: Tone | null) => !!f && (sideKo[k]?.every((q) => bandTone(q.band) === f) ?? false);
-        for (const [side, key, on] of [[sideL, 'l', (!forcedL || paint || agree('l', forcedL)) && flat.l], [sideR, 'r', (!forcedR || paint) && flat.r]] as const) {
+        for (const [side, key, on] of [[sideL, 'l', (!forcedL || paint || agree('l', forcedL)) && (flat.l || shaped.l)], [sideR, 'r', (!forcedR || paint) && flat.r]] as const) {
           // only the logo's side: the right side has no brand, and its knockout's variables reached its links' copies
           // by inheritance, so a link with no cut of its own took the side's (Results lost its knockout on the west
           // slip to the side's 64px right cut while the finale's circle opened, 1440, 2026-11-09 re-check)
@@ -513,6 +684,7 @@ const jsonLd = {
         }
         koLive = live;
         koAll = all;
+        lastFaded = faded;
         if (faded) fadeWatch();
         if (koTinted) tintWatch();
         hiddenWatch();
@@ -630,9 +802,9 @@ const jsonLd = {
         else if (parts[0].startsWith('to ')) return null;
         const stops: { p: number; c: number[] }[] = [];
         for (const s of parts) {
-          const t = s.match(/^(rgba?\([^)]*\))(?:\s+(-?[\d.]+)%)?$/);
+          const t = s.match(/^((?:rgba?|color)\([^)]*\))(?:\s+(-?[\d.]+)%)?$/);
           if (!t) return null;
-          const c = (t[1].match(/[\d.]+/g) ?? []).map(Number);
+          const c = (colourNums(t[1]) ?? []).map(Number);
           if (c.length < 3 || (c[3] !== undefined && c[3] < 0.9)) return null;
           stops.push({ c, p: t[2] === undefined ? NaN : +t[2] / 100 });
         }
@@ -700,6 +872,9 @@ const jsonLd = {
       // and the links keep their own ink (Free stuff its accent: cyan reads on the night). What passes over it and
       // needs a pool (the poster's photo, the label, the headline) is tagged 'busy'.
       const plainBand = new WeakSet<Element>();
+      // a plain surface's colour where the page gives one ("plain #rrggbb"): only for what shows through a band faded over
+      // it (koColour, toneIn), never a knockout of its own
+      const plainRgb = new WeakMap<Element, string>();
       /* Grain: a background that is only an SVG noise tile (feTurbulence) over the colour, the paper of kleus, or one
          laid over a whole page from a pseudo-element (noteless's film). It counts as the flat colour it averages to:
          its mean, drawn once in a canvas, shifts the colour the knockout wears. In the CSS colour alone the knockout
@@ -761,6 +936,9 @@ const jsonLd = {
         let v = overlayMemo.get(el);
         if (v) return v;
         v = [];
+        // (the stacking levels between the band and each ancestor: a grain layer laid in that ancestor as a child of its
+        // own paints over the band unless something on the way up is stacked at its level or higher)
+        let lift = -Infinity;
         for (let e: Element | null = el; e && e !== document.documentElement; e = e.parentElement) {
           for (const ps of ['::before', '::after']) {
             const cs = getComputedStyle(e, ps);
@@ -769,6 +947,21 @@ const jsonLd = {
             if (g === undefined) { grainLater(cs.backgroundImage, cs.backgroundSize); continue; }
             if (g) v.push({ bg: cs.backgroundImage, o: +cs.opacity });
           }
+          // A grain laid as an element of its own over a section (vaultt's hero: a span at 4.5% over the navy, z-index 1):
+          // as a pseudo, it lightens what shows round the glyphs, and without it the navy knockout read 8 levels darker
+          // than the grained navy round Results and Free stuff (390 at 390, 2026-11-09 final check)
+          for (const k of Array.from(e.children)) {
+            if (k === el || k.contains(el)) continue;
+            const cs = getComputedStyle(k);
+            if (!/absolute|fixed/.test(cs.position) || !GRAIN.test(cs.backgroundImage)) continue;
+            const z = parseFloat(cs.zIndex) || 0;
+            if (e !== el && lift >= z) continue;
+            const g = grainMemo.get(cs.backgroundImage);
+            if (g === undefined) { grainLater(cs.backgroundImage, cs.backgroundSize); continue; }
+            if (g) v.push({ bg: cs.backgroundImage, o: +cs.opacity });
+          }
+          const ecs = getComputedStyle(e);
+          if (ecs.position !== 'static' && ecs.zIndex !== 'auto') lift = Math.max(lift, parseFloat(ecs.zIndex) || 0);
         }
         overlayMemo.set(el, v);
         return v;
@@ -804,9 +997,9 @@ const jsonLd = {
       const parseStops = (parts: string[]): Stop[] | null => {
         const stops: Stop[] = [];
         for (const s of parts) {
-          const t = s.match(/^(rgba?\([^)]*\))(?:\s+(-?[\d.]+)%)?$/);
+          const t = s.match(/^((?:rgba?|color)\([^)]*\))(?:\s+(-?[\d.]+)%)?$/);
           if (!t) return null;
-          const c = (t[1].match(/[\d.]+/g) ?? []).map(Number);
+          const c = (colourNums(t[1]) ?? []).map(Number);
           if (c.length < 3) return null;
           stops.push({ c: [c[0], c[1], c[2], c[3] ?? 1], p: t[2] === undefined ? NaN : +t[2] / 100 });
         }
@@ -840,7 +1033,7 @@ const jsonLd = {
           const m = parts[0].match(/^(-?[\d.]+)(deg|turn)$/);
           if (m) { a = m[2] === 'turn' ? +m[1] * 360 : +m[1]; parts.shift(); }
           else if (parts[0] in sides) { a = sides[parts[0]]; parts.shift(); }
-          else if (!/^rgba?\(/.test(parts[0])) return null;
+          else if (!/^(?:rgba?|color)\(/.test(parts[0])) return null;
           const stops = parseStops(parts);
           return stops && { kind: 'linear', a, stops };
         }
@@ -851,7 +1044,7 @@ const jsonLd = {
         let sy: string | null = null;
         let ax = '50%';
         let ay = '50%';
-        if (!/^rgba?\(/.test(parts[0])) {
+        if (!/^(?:rgba?|color)\(/.test(parts[0])) {
           const [shape, at] = parts.shift()!.split(/\s*\bat\b\s*/);
           const toks = (shape ?? '').trim().split(/\s+/).filter(Boolean);
           const lens: string[] = [];
@@ -917,15 +1110,16 @@ const jsonLd = {
         return stopsAt(L.stops, t);
       };
       // the box a tint paints in now: an element's own, a pseudo-element's from its offsets in its host's padding box
-      const tintBoxes = new Map<Tint, { left: number; top: number; width: number; height: number }>();
+      const tintBoxes = new Map<Tint, { left: number; top: number; width: number; height: number; y: number; fixed: boolean }>();
       let tintBoxPass = -1;
+      // (per pass on a laptop; on a phone per measure, moved by the scroll since, as vbox)
       const tintBox = (t: Tint) => {
-        if (tintBoxPass !== navPass) { tintBoxPass = navPass; tintBoxes.clear(); }
-        const was = tintBoxes.get(t);
-        if (was) return was;
-        const v = tintBoxNow(t);
-        tintBoxes.set(t, v);
-        return v;
+        const pk = passOf();
+        if (tintBoxPass !== pk) { tintBoxPass = pk; tintBoxes.clear(); }
+        let v = tintBoxes.get(t);
+        // (copied field by field: a DOMRect's sides are getters, which a spread leaves behind)
+        if (!v) { const b = tintBoxNow(t); v = { left: b.left, top: b.top, width: b.width, height: b.height, y: window.scrollY, fixed: lite && scrollLayer(t.el) === 'fixed' }; tintBoxes.set(t, v); }
+        return !lite || v.fixed || v.y === liteY ? v : { left: v.left, top: v.top + v.y - liteY, width: v.width, height: v.height };
       };
       const tintBoxNow = (t: Tint) => {
         const r = t.el.getBoundingClientRect();
@@ -959,7 +1153,9 @@ const jsonLd = {
         return v;
       };
       // the colour after the tints over a band at (x, y)
-      const tclipMemo = new WeakMap<Element, Element[]>();
+      // (each clipping ancestor with the axes it clips, read once: they were read again on every sample of every word, six
+      // hundred style reads a frame on vaultt's phone page, perf round 2026-11-09)
+      const tclipMemo = new WeakMap<Element, [Element, boolean, boolean][]>();
       const tclipBox = new Map<Element, DOMRect>();
       let tclipPass = -1;
       const tintClipped = (el: Element, x: number, y: number) => {
@@ -968,23 +1164,34 @@ const jsonLd = {
           cl = [];
           for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
             const cs = getComputedStyle(e);
-            if (cs.overflowX !== 'visible' || cs.overflowY !== 'visible') cl.push(e);
+            const cx = cs.overflowX !== 'visible';
+            const cy = cs.overflowY !== 'visible';
+            if (cx || cy) cl.push([e, cx, cy]);
             if (cs.position === 'fixed') break;
           }
           tclipMemo.set(el, cl);
         }
         if (tclipPass !== navPass) { tclipPass = navPass; tclipBox.clear(); }
-        for (const e of cl) {
+        for (const [e, cx, cy] of cl) {
           let r = tclipBox.get(e);
-          if (!r) { r = e.getBoundingClientRect(); tclipBox.set(e, r); }
-          const cs = getComputedStyle(e);
-          if ((cs.overflowX !== 'visible' && (x < r.left || x >= r.right)) || (cs.overflowY !== 'visible' && (y < r.top || y >= r.bottom))) return true;
+          if (!r) { r = lite ? DOMRect.fromRect(vbox(e)) : e.getBoundingClientRect(); tclipBox.set(e, r); }
+          if ((cx && (x < r.left || x >= r.right)) || (cy && (y < r.top || y >= r.bottom))) return true;
         }
         return false;
       };
       // (an inline element's gradient is painted on each of its line boxes, not on the box round them all: a highlight
       // over two lines of vaultt's quote laid its blue over the gap between them under the links, 1440 at 13200)
       const inlineMemo = new WeakMap<Element, boolean>();
+      // a tint pseudo-element's own opacity, per pass on a laptop, per measure on a phone
+      const pseudoNow = new Map<Tint, number>();
+      let pseudoPass = -1;
+      const pseudoAlpha = (t: Tint) => {
+        const pk = passOf();
+        if (pseudoPass !== pk) { pseudoPass = pk; pseudoNow.clear(); }
+        let v = pseudoNow.get(t);
+        if (v === undefined) { v = +getComputedStyle(t.el, t.pseudo).opacity; pseudoNow.set(t, v); }
+        return v;
+      };
       const tinted = (band: Element, rgb: number[], x: number, y: number) => {
         let c = rgb;
         for (const t of tintsOver(band)) {
@@ -999,7 +1206,7 @@ const jsonLd = {
           // reveals with a fade after the scroll has stopped, fallow's escape sheet, left the knockout at the colour read
           // a third of the way into its fade, dark boxes round the links on it, 390 at 2080)
           koTinted = true;
-          const o = (t.pseudo ? +getComputedStyle(t.el, t.pseudo).opacity : 1) * alphaOf(t.el) / (alphaOf(band) || 1);
+          const o = (t.pseudo ? pseudoAlpha(t) : 1) * alphaOf(t.el) / (alphaOf(band) || 1);
           if (o <= 0) continue;
           // CSS paints the first layer on top
           for (let i = t.layers.length - 1; i >= 0; i--) {
@@ -1025,9 +1232,11 @@ const jsonLd = {
         // "plain": see plainBand, above; the tone is the band's tag.
         const surface = el.dataset.navSurface;
         const auto = surface?.trim() === 'auto';
-        if (surface?.trim() === 'plain') {
+        if (/^plain\b/.test(surface?.trim() ?? '')) {
           const t = asTone(el.dataset.navTheme);
           if (t) { flatTone.set(el, t); plainBand.add(el); }
+          const h = surface!.trim().match(/^plain\s+#([0-9a-f]{6})/i);
+          if (h) plainRgb.set(el, [0, 2, 4].map((i) => parseInt(h[1].slice(i, i + 2), 16)).join(' '));
           return;
         }
         // A declared gradient, "linear-gradient(<angle>, rgb() <p>%, ...)": a picture's colour that darkens down it,
@@ -1085,7 +1294,7 @@ const jsonLd = {
           // the base gradient (the last layer, under any pattern): the mean of its stops, when every stop is opaque
           const grads = cs.backgroundImage.match(/(?:linear|radial)-gradient\((?:[^()]|\([^()]*\))*\)/g);
           const base = grads?.[grads.length - 1];
-          const stops = base?.match(/rgba?\([^)]*\)/g)?.map((c) => (c.match(/[\d.]+/g) ?? []).map(Number));
+          const stops = base?.match(/(?:rgba?|color)\([^)]*\)/g)?.map((c) => (colourNums(c) ?? []).map(Number));
           if (stops?.length && stops.every((c) => c.length >= 3 && (c[3] === undefined || c[3] >= 0.9))) {
             rgb = [0, 1, 2].map((i) => stops.reduce((sum, c) => sum + c[i], 0) / stops.length);
             grad = base!.startsWith('linear') ? parseGrad(base!) : null;
@@ -1135,14 +1344,17 @@ const jsonLd = {
       // band a page tags on a hidden box of its own, the west act's .w-navband; only the auto bands, which can be
       // faded, count as hidden when they are)
       const alphaOf = (el: Element) => {
-        if (alphaPass !== navPass) { alphaPass = navPass; alphaNow.clear(); }
+        const pk = passOf();
+        if (alphaPass !== pk) { alphaPass = pk; alphaNow.clear(); }
         let v = alphaNow.get(el);
-        if (v === undefined) {
-          const host = markerBoxes.has(el) || (!hideable.has(el) && getComputedStyle(el).visibility === 'hidden') ? el.parentElement ?? el : el;
-          v = (host as HTMLElement).checkVisibility && !(host as HTMLElement).checkVisibility({ visibilityProperty: true }) ? 0 : 1;
-          for (let e: Element | null = host; v > 0 && e && e !== document.documentElement; e = e.parentElement) v *= +getComputedStyle(e).opacity;
-          alphaNow.set(el, v);
-        }
+        if (v === undefined) { v = alphaRead(el); alphaNow.set(el, v); }
+        return v;
+      };
+      // (read now, uncached: the hidden-band poll on a phone, whose cache only changes at a measure)
+      const alphaRead = (el: Element) => {
+        const host = markerBoxes.has(el) || (!hideable.has(el) && getComputedStyle(el).visibility === 'hidden') ? el.parentElement ?? el : el;
+        let v = (host as HTMLElement).checkVisibility && !(host as HTMLElement).checkVisibility({ visibilityProperty: true }) ? 0 : 1;
+        for (let e: Element | null = host; v > 0 && e && e !== document.documentElement; e = e.parentElement) v *= +getComputedStyle(e).opacity;
         return v;
       };
       // the flat bands over a point of the nav line, bottom first (set by the band observers)
@@ -1174,7 +1386,7 @@ const jsonLd = {
           if (a < 0.99) {
             for (let j = i - 1; j >= 0; j--) {
               if (!live(st[j])) continue;
-              const u = shownKo(st[j], p.x);
+              const u = shownKo(st[j], p.x) ?? plainRgb.get(st[j]) ?? null;
               if (u) { rgb = mixRgb(u, rgb, Math.min(1, a / (alphaOf(st[j]) || 1))); koFaded = true; }
               break;
             }
@@ -1223,7 +1435,8 @@ const jsonLd = {
       const shownNow = new Map<Element, boolean>();
       let shownPass = -1;
       const shown = (el: Element) => {
-        if (shownPass !== navPass) { shownPass = navPass; shownNow.clear(); }
+        const pk = passOf();
+        if (shownPass !== pk) { shownPass = pk; shownNow.clear(); }
         let v = shownNow.get(el);
         if (v === undefined) {
           const cs = getComputedStyle(el);
@@ -1231,7 +1444,7 @@ const jsonLd = {
           const seen = !(el as HTMLElement).checkVisibility || (el as HTMLElement).checkVisibility({ opacityProperty: true, visibilityProperty: true });
           // (a picture counts while it shows at all: fallow's interlude photo stands at 55% over the dark page, and as
           // absent there the page's dark knockout ringed the links over it, 390 at 1440, 2026-11-09)
-          v = seen && cs.visibility !== 'hidden' && +cs.opacity >= ((el as HTMLElement).dataset.navTheme === 'busy' ? 0.15 : 0.9);
+          v = seen && cs.visibility !== 'hidden' && +cs.opacity >= (/^(busy|bare)$/.test((el as HTMLElement).dataset.navTheme ?? '') ? 0.15 : 0.9);
           shownNow.set(el, v);
         }
         return v;
@@ -1261,7 +1474,12 @@ const jsonLd = {
           }
           if (el.dataset.navTheme) return;
           const raw = spec ? spec.tone : (t as string);
-          const v = raw === 'auto' ? readColour(el, null) : raw === 'busy' ? 'busy' : asTone(raw) && readColour(el, asTone(raw));
+          // 'none': no band at all, and none for the auto bands either (a faint decoration they would take for a picture:
+          // vaultt's hero network, thin lines on the navy, made the whole hero busy, and its navy pool smeared the white
+          // store badges rising under the links, 390 at 400 to 460, 2026-11-09 final check)
+          if (raw === 'none') { el.dataset.navTheme = 'none'; return; }
+          // ('bare': a picture like 'busy' that takes no pool, below)
+          const v = raw === 'auto' ? readColour(el, null) : raw === 'busy' || raw === 'bare' ? raw : asTone(raw) && readColour(el, asTone(raw));
           if (!v) return;
           el.dataset.navTheme = v;
           if (spec?.surface && !el.dataset.navSurface) el.dataset.navSurface = spec.surface;
@@ -1303,7 +1521,7 @@ const jsonLd = {
           const layers = bi.match(/(?:repeating-)?(?:linear|radial)-gradient\((?:[^()]|\([^()]*\))*\)/g);
           const last = layers?.[layers.length - 1];
           if (!last || !last.startsWith('repeating-linear-gradient(') || bi.includes('url(')) return null;
-          const stops = [...last.matchAll(/(rgba?\([^)]*\))\s+(-?[\d.]+)px/g)].map((m) => ({ c: (m[1].match(/[\d.]+/g) ?? []).map(Number), p: +m[2] }));
+          const stops = [...last.matchAll(/((?:rgba?|color)\([^)]*\))\s+(-?[\d.]+)px/g)].map((m) => ({ c: (colourNums(m[1]) ?? []).map(Number), p: +m[2] }));
           if (stops.length < 2 || stops.some((st) => st.c.length < 3 || (st.c[3] !== undefined && st.c[3] < 0.99))) return null;
           const span = new Map<string, number>();
           for (let i = 1; i < stops.length; i++) {
@@ -1320,7 +1538,7 @@ const jsonLd = {
           if (!layers.every((l) => /^\s*(?:linear|radial)-gradient\(/.test(l) || GRAIN.test(l.trim()))) return null;
           const grads = bi.match(/(?:linear|radial)-gradient\((?:[^()]|\([^()]*\))*\)/g);
           const base = grads?.[grads.length - 1];
-          const stops = base?.match(/rgba?\([^)]*\)/g)?.map((c) => (c.match(/[\d.]+/g) ?? []).map(Number));
+          const stops = base?.match(/(?:rgba?|color)\([^)]*\)/g)?.map((c) => (colourNums(c) ?? []).map(Number));
           if (!base || !stops?.length || !stops.every((c) => c.length >= 3 && (c[3] === undefined || c[3] >= 0.99))) return null;
           return { stops, linear: base.startsWith('linear') };
         };
@@ -1391,7 +1609,7 @@ const jsonLd = {
           const tagged = el.closest<HTMLElement>('[data-nav-theme]');
           // Inside a band the page tags, only a small picture (under half the band: an avatar, a thumbnail, an icon)
           // becomes busy, so the band's flat colour does not ring it with a knockout; the rest is the page's call
-          if (tagged && (!media || tagged === el || tagged.dataset.navTheme === 'busy')) continue;
+          if (tagged && (!media || tagged === el || tagged.dataset.navTheme === 'busy' || tagged.dataset.navTheme === 'bare')) continue;
           const r = el.getBoundingClientRect();
           // (a surface: 200 by 100px, or a pill or a bar a word fits on, 120 by 40: kleus's "Try a free lesson", whose
           // brass took a cream knockout box round Results and Free stuff, 390 at 480)
@@ -1426,8 +1644,28 @@ const jsonLd = {
           }
           const mean = [0, 1, 2].map((i) => g.stops.reduce((s, c) => s + c[i], 0) / g.stops.length);
           const even = [0, 1, 2].every((i) => Math.max(...g.stops.map((c) => c[i])) - Math.min(...g.stops.map((c) => c[i])) <= 16);
+          // (and a tall section's linear gradient that changes gently, at most 6 levels per 100px along its line and on one
+          // tone all along: read at the nav line as it passes, like an even one. Vaultt's apps section, navy to near black
+          // over 1290px, was a toned band with a navy pool, which smeared the white store buttons rising under the links,
+          // 390 at 5780, 2026-11-09 final check)
+          const gentle = !even && g.linear && (() => {
+            const all = getComputedStyle(el).backgroundImage.match(/linear-gradient\((?:[^()]|\([^()]*\))*\)/g) ?? [];
+            const pg = all.length ? parseGrad(all[all.length - 1]) : null;
+            const box = el.getBoundingClientRect();
+            if (!pg || box.height < 400) return false;
+            const ra = (pg.a * Math.PI) / 180;
+            const len = Math.abs(box.width * Math.sin(ra)) + Math.abs(box.height * Math.cos(ra));
+            const tones = new Set(pg.stops.map((st) => toneOf(st.c)));
+            if (tones.size > 1) return false;
+            for (let i = 1; i < pg.stops.length; i++) {
+              const d = Math.max(...[0, 1, 2].map((k) => Math.abs(pg.stops[i].c[k] - pg.stops[i - 1].c[k])));
+              const run = (pg.stops[i].p - pg.stops[i - 1].p) * len;
+              if (d > 0 && (run <= 0 || d / run > 0.06)) return false;
+            }
+            return true;
+          })();
           const hex = '#' + mean.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
-          grads.push([el, toneOf(mean), even ? (g.linear ? 'auto' : hex) : null]);
+          grads.push([el, toneOf(mean), even || gentle ? (g.linear ? 'auto' : hex) : null]);
         }
         // A surface mostly covered by a picture inside it (half its area or more) shows the picture, not its colour: the
         // quest cards on /work paint white under a shaded screenshot, and as a white surface they gave the links dark
@@ -1448,7 +1686,7 @@ const jsonLd = {
       // 'busy' marks a picture or a screenshot: it leaves the tone alone and only makes the pool stronger while it
       // passes under a corner's text, instead of flipping the ink for every card in a list
       const bands = Array.from(document.querySelectorAll<HTMLElement>('[data-nav-theme]'))
-        .filter((el) => asTone(el.dataset.navTheme) || el.dataset.navTheme === 'busy');
+        .filter((el) => asTone(el.dataset.navTheme) || el.dataset.navTheme === 'busy' || el.dataset.navTheme === 'bare');
       // the bands tagged in the markup get their pool colour too (read once, here)
       bands.forEach((el) => { const t = asTone(el.dataset.navTheme); if (t && !bandColour.has(el)) readColour(el, t); });
       bands0 = bands;
@@ -1531,15 +1769,17 @@ const jsonLd = {
         let toneEpoch = 0;
 
         // a point's tone is its innermost light or dark band; it is busy when a 'busy' band sits inside (after) that
-        const pointOf = (p: Point): { tone: Tone | null; busy: boolean; band: Element | null } => {
+        // (`bare`: every picture making the point busy is one the page marks bare, navBands 'bare')
+        const pointOf = (p: Point): { tone: Tone | null; busy: boolean; band: Element | null; bare: boolean } => {
           let busy = false;
+          let plainBusy = false;
           for (let i = bands.length - 1; i >= 0; i--) {
             if (!p.under.has(bands[i]) || !live(bands[i])) continue;
             const v = bands[i].dataset.navTheme;
-            if (v === 'busy') { busy = true; continue; }
-            return { tone: bandTone(bands[i]), busy, band: bands[i] };
+            if (v === 'busy' || v === 'bare') { busy = true; if (v === 'busy') plainBusy = true; continue; }
+            return { tone: bandTone(bands[i]), busy, band: bands[i], bare: busy && !plainBusy };
           }
-          return { tone: null, busy, band: null };
+          return { tone: null, busy, band: null, bare: busy && !plainBusy };
         };
         // the tone at (x, y) in a corner's region: what a script paints there if it says, otherwise the innermost
         // band whose visible rectangle holds the point
@@ -1557,11 +1797,31 @@ const jsonLd = {
           const under = pv && typeof pv === 'object' ? pv : null;
           let best = -1;
           let tone: Tone | null = null;
+          // (and the band right under it, for a band part way faded, below)
+          let under2: Element | null = null;
+          let best2 = -1;
           // on the nav line the line observer's rectangles (exact there), elsewhere the region's
           for (const [el, r] of y >= NAV_LINE - 4 && y < NAV_LINE + 4 && c.line.io ? c.lineRects : c.rects) {
             if (x < r.left || x >= r.right || y < r.top || y >= r.bottom || !live(el)) continue;
             const i = order.get(el) ?? -1;
-            if (i > best) { best = i; lastBand = el; tone = bandTone(el) ?? pageTone; }
+            if (i > best) { best2 = best; under2 = lastBand; best = i; lastBand = el; tone = bandTone(el) ?? pageTone; }
+            else if (i > best2) { best2 = i; under2 = el; }
+          }
+          // A flat band part way faded over another of known colour (the west act's papers under the finale's cross-fade
+          // in reduced motion, over the dusk) shows the mix, whose lightness is its tone, as the mix is its knockout's
+          // colour (koColour): the papers kept their dark ink and a parchment knockout while they faded to a murky grey,
+          // and once their bands went, the night's cyan Free stuff sat on the grey (1440 at 13550 to 13830, 2026-11-09)
+          if (tone && lastBand && under2 && !tintsOver(lastBand).length && (flatRgb.has(lastBand) || flatGrad.has(lastBand))) {
+            const a = alphaOf(lastBand);
+            if (a < 0.99) {
+              const own = shownKo(lastBand, x);
+              const u = shownKo(under2, x) ?? plainRgb.get(under2) ?? null;
+              if (own && u) {
+                const m = mixRgb(u, own, Math.min(1, a / (alphaOf(under2) || 1))).split(' ').map(Number);
+                const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+                tone = 0.2126 * lin(m[0]) + 0.7152 * lin(m[1]) + 0.0722 * lin(m[2]) > 0.187 ? 'light' : 'dark';
+              }
+            }
           }
           // A flat band whose tints change its lightness where they lie (a dark shade drawn over a white card: the
           // quest cards on /work) takes the tone of its colour as tinted there
@@ -1739,13 +1999,15 @@ const jsonLd = {
         // shadows dark enough to show on a paper (alpha 0.25 and up) and reaching 24px or more; null for none. A knockout
         // keeps off it, since the knockout's colour is the paper's and not the shade's (trim, the casters).
         const castMemo = new WeakMap<Element, Reach | null>();
+        // whether each caster's drop shadow reached the nav's strip at the last frame (edgeTick)
+        const castIn = new WeakMap<Element, boolean>();
         const castReach = (el: Element): Reach | null => {
           if (castMemo.has(el)) return castMemo.get(el)!;
           let m: Reach | null = null;
           for (const sh of getComputedStyle(el).boxShadow.split(/,(?![^(]*\))/)) {
             if (sh.includes('inset')) continue;
-            const col = sh.match(/rgba?\([^)]*\)/)?.[0] ?? '';
-            const c = (col.match(/[\d.]+/g) ?? []).map(Number);
+            const col = sh.match(/(?:rgba?|color)\([^)]*\)/)?.[0] ?? '';
+            const c = (colourNums(col) ?? []).map(Number);
             if (c.length < 3 || (c[3] ?? 1) < 0.25) continue;
             const [ox = 0, oy = 0, blur = 0, spread = 0] = (sh.replace(col, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat);
             const g = blur + spread;
@@ -1770,8 +2032,8 @@ const jsonLd = {
           v = [];
           for (const sh of getComputedStyle(el).boxShadow.split(/,(?![^(]*\))/)) {
             if (sh.includes('inset') || sh === 'none') continue;
-            const col = sh.match(/rgba?\([^)]*\)/)?.[0] ?? '';
-            const c = (col.match(/[\d.]+/g) ?? []).map(Number);
+            const col = sh.match(/(?:rgba?|color)\([^)]*\)/)?.[0] ?? '';
+            const c = (colourNums(col) ?? []).map(Number);
             if (c.length < 3) continue;
             const [ox = 0, oy = 0, blur = 0, spread = 0] = (sh.replace(col, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat);
             v.push({ ox, oy, sd: blur / 2, sp: spread, c: c.slice(0, 3), a: c[3] ?? 1 });
@@ -1859,7 +2121,7 @@ const jsonLd = {
           if (castSeen === navPass) return castBoxes;
           castSeen = navPass;
           casters ??= toned.filter((el) => castReach(el));
-          castBoxes = casters.filter((el) => live(el)).map((el) => [el, el.getBoundingClientRect(), castReach(el)!] as [Element, DOMRect, Reach]).filter(([, r]) => r.width > 0 && r.height > 0);
+          castBoxes = casters.filter((el) => live(el)).map((el) => [el, DOMRect.fromRect(vbox(el)), castReach(el)!] as [Element, DOMRect, Reach]).filter(([, r]) => r.width > 0 && r.height > 0);
           return castBoxes;
         };
         // A band's solid ring: box-shadows with no offset and no blur, a spread and an opaque colour, painted round the
@@ -1874,8 +2136,8 @@ const jsonLd = {
           const cs = getComputedStyle(el);
           for (const sh of cs.boxShadow.split(/,(?![^(]*\))/)) {
             if (sh.includes('inset')) continue;
-            const col = sh.match(/rgba?\([^)]*\)/)?.[0] ?? '';
-            const c = (col.match(/[\d.]+/g) ?? []).map(Number);
+            const col = sh.match(/(?:rgba?|color)\([^)]*\)/)?.[0] ?? '';
+            const c = (colourNums(col) ?? []).map(Number);
             const [ox = 0, oy = 0, blur = 0, spread = 0] = (sh.replace(col, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat);
             if (ox || oy || blur || spread <= 0 || c.length < 3 || (c[3] !== undefined && c[3] < 0.9)) continue;
             const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
@@ -2052,14 +2314,18 @@ const jsonLd = {
         // samples on either side without it). Two flat runs side by side and nothing else: two parts, one colour each
         // side of the edge between them, which is the inner band's edge (the tile's on the cream). Anything else (a run
         // with off-colour samples on both sides, three runs): none.
-        const koFor = (c: Corner, xs: number[], bs: (Element | null)[], fs: boolean[], w0: number, w1: number, y0: number, y1: number): Ko => {
+        // (rs: the samples on a band's solid ring, ringAt: no part over a ring, which is no colour the band paints. Taken as
+        // the screen's own, the cook-mode phone's #F4F4F4 knockout ran on over its black bezel to the orange, a pale square
+        // on the bezel that swallowed the r of Free stuff, youcook 1440 at 4650 to 5100, 2026-11-09 final check)
+        const koFor = (c: Corner, xs: number[], bs: (Element | null)[], fs: boolean[], w0: number, w1: number, y0: number, y1: number, rs?: boolean[]): Ko => {
           const n = fs.length;
-          const runs: { band: Element | null; i0: number; i1: number }[] = [];
+          const runs: { band: Element | null; i0: number; i1: number; ring?: boolean }[] = [];
           for (let i = 0; i < n; i++) {
-            const band = fs[i] ? bs[i] : null;
+            const ring = !!rs?.[i];
+            const band = fs[i] && !ring ? bs[i] : null;
             const last = runs[runs.length - 1];
-            if (last && last.band === band) last.i1 = i;
-            else runs.push({ band, i0: i, i1: i });
+            if (last && last.band === band && !!last.ring === ring) last.i1 = i;
+            else runs.push({ band, i0: i, i1: i, ring });
           }
           const on = runs.filter((u) => u.band);
           // where a run ends between two samples: at `edge` (a band's own edge on the nav line) when it lies there,
@@ -2079,6 +2345,22 @@ const jsonLd = {
             part.r = r;
             const t = trim(c, part, w0, w1, y0, y1);
             return t ? [t] : null;
+          }
+          // two colours either side of a ring (the cook-mode phone's screen, its bezel, the orange): a part each, cut at the
+          // ring's inner and outer edges, the screen's at its box (the ring lies outside it)
+          if (on.length === 2 && runs.length === 3 && runs[1].ring) {
+            const [a, m, b] = runs;
+            const ringEl = bs[m.i0];
+            const er = ringEl ? c.lineRects.get(ringEl) : undefined;
+            const inner = ringEl === a.band ? er?.right : ringEl === b.band ? er?.left : undefined;
+            const cutA = at(xs[a.i1], xs[m.i0], ringEl === a.band ? inner : undefined);
+            const cutB = at(xs[m.i1], xs[b.i0], ringEl === b.band ? inner : undefined);
+            const pa = partOf(a.band!, (w0 + cutA) / 2);
+            const pb = partOf(b.band!, (cutB + w1) / 2);
+            if (pa) pa.r = Math.max(0, w1 - cutA);
+            if (pb) pb.l = Math.max(0, cutB - w0);
+            const parts = [pa && trim(c, pa, w0, w1, y0, y1), pb && trim(c, pb, w0, w1, y0, y1)].filter((q): q is KoPart => !!q);
+            return parts.length ? parts : null;
           }
           if (on.length !== 2 || runs.length !== 2) return null;
           const [a, b] = runs;
@@ -2209,7 +2491,7 @@ const jsonLd = {
           flat[c.key] = false;
           mixedFlat[c.key] = false;
           sideKo[c.key] = null;
-          if (c.key === 'l') brandSplit = null;
+          if (c.key === 'l') { brandSplit = null; brandShape = null; }
           // mixedFlat: the bands under the first and last glyph the pool backs (see the edges, below)
           let leaveOut = false;
           let band0: Element | null = null;
@@ -2221,7 +2503,7 @@ const jsonLd = {
             let onTone = 0;
             let onFlat = 0;
             const busy = busyAt[c.key];
-            const seen: { xs: number[]; ts: Tone[]; fs: boolean[]; bs: (Element | null)[] }[] = [];
+            const seen: { xs: number[]; ts: Tone[]; fs: boolean[]; bs: (Element | null)[]; rs: boolean[] }[] = [];
             c.words.forEach(([w0, w1], j) => {
               const xs: number[] = [];
               const ts: Tone[] = [];
@@ -2244,10 +2526,36 @@ const jsonLd = {
               }
               const n = ts.length;
               if (!n) return;
-              seen.push({ xs, ts, fs, bs });
+              seen.push({ xs, ts, fs, bs, rs });
               ts.forEach((v, i) => { if (v === tone) { onTone++; if (fs[i]) onFlat++; } });
               if (c.key === 'r') {
                 const link = c.wordLink[j];
+                // two or more bands' edges under the glyphs (shapesUnder): every band in its own ink, the link's own ink
+                // (the band holding them all, else the page) beneath, and a knockout per flat band clipped to its box
+                const su = linkEls[link].querySelector('svg') ? null : shapesUnder(c, w0, w1);
+                if (su && su.shapes.length >= 2) {
+                  const base = su.base;
+                  const free = linkEls[link].classList.contains('nav-free');
+                  // the link's own ink: the tone most samples outside the shapes read (a tint over the base can shade
+                  // it), on the line, else on the glyphs' top and foot rows; else the base band's, else the page's
+                  let dark = 0;
+                  let all = 0;
+                  for (const y of [NAV_LINE + 2, GLY_T, GLY_B]) {
+                    for (let x = w0 + 1; x < w1; x += 3) if (!su.shapes.some((s) => inShape(s, x, y))) { all++; if (toneIn(c, x, y) === 'dark') dark++; }
+                    if (all) break;
+                  }
+                  linkTone[link] = all ? (dark * 2 >= all ? 'dark' : 'light') : base ? bandTone(base) ?? pageTone : pageTone;
+                  linkFlat[link] = !busy && !!base && flatTone.has(base) && !plainBand.has(base);
+                  const inkOf = (s: Shape) => {
+                    const full = !busy && flatTone.has(s.el) && !plainBand.has(s.el);
+                    return s.tone === 'light' ? (full ? 'var(--ink-on-light)' : 'var(--ink-on-light-soft)') : full ? 'var(--ink-on-dark)' : free ? 'var(--nav-accent)' : 'var(--ink-on-dark-soft)';
+                  };
+                  const [sy0, sy1] = c.wordY[j] ?? [0, 0];
+                  const layers = su.shapes.flatMap((s) => shapeLayers(s, w0, sy0, w1 - w0, sy1 - sy0, inkOf(s)));
+                  linkSplit[link] = layers.length ? { at: 0, dir: '', flat: false, full: false, shape: layers.join(',') } : null;
+                  linkKo[link] = koShape(c, su.shapes, w0, w1, sy0, sy1);
+                  return;
+                }
                 const other = ts.filter((v) => v !== tone).length / n;
                 if (other >= 0.5) linkTone[link] = tone === 'dark' ? 'light' : 'dark';
                 // (a plain surface leaves the link its own ink: plainBand)
@@ -2281,7 +2589,19 @@ const jsonLd = {
                 const upright = k > 0 && other > 0.1 && other < 0.9 && !svg;
                 const sl = midRun ? null : painted.toneAt ? slantOf(c, w0, w1, ly0, ly1) : upright ? null : levelOf(c, w0, w1, ly0, ly1);
                 if (midRun && !svg) {
-                  linkSplit[link] = { at: (xs[runs[1][0] - 1] + xs[runs[1][0]]) / 2 - w0, at2: (xs[runs[1][1]] + xs[runs[1][1] + 1]) / 2 - w0, mid: ts[runs[1][0]], dir: `${ts[0]}-${ts[n - 1]}`, flat: midRing || ts.every((v, i) => v !== 'dark' || fs[i]), full: linkFlat[link] };
+                  let at = (xs[runs[1][0] - 1] + xs[runs[1][0]]) / 2 - w0;
+                  let at2 = (xs[runs[1][1]] + xs[runs[1][1] + 1]) / 2 - w0;
+                  // a ring's own edges, the band's box and its spread past it, where they lie near the samples' (3px apart):
+                  // between them the e of Free stuff kept the bezel's white ink 1.5px onto the orange (1440 at 4800)
+                  const rel = midRing ? bs[runs[1][0]] : null;
+                  const rg = rel ? ringOf(rel) : null;
+                  const lr = rel ? c.lineRects.get(rel) : undefined;
+                  if (rel && rg && lr) {
+                    const [i0, i1] = rel === bs[runs[0][1]] ? [lr.right, lr.right + rg.s] : rel === bs[runs[2][0]] ? [lr.left - rg.s, lr.left] : [NaN, NaN];
+                    if (Math.abs(i0 - w0 - at) <= 3) at = i0 - w0;
+                    if (Math.abs(i1 - w0 - at2) <= 3) at2 = i1 - w0;
+                  }
+                  linkSplit[link] = { at, at2, mid: ts[runs[1][0]], dir: `${ts[0]}-${ts[n - 1]}`, flat: midRing || ts.every((v, i) => v !== 'dark' || fs[i]), full: linkFlat[link] };
                 } else if (sl) {
                   linkSplit[link] = { at: 0, off: sl.off, ang: sl.ang, dir: sl.dir, flat: ts.every((v, i) => v !== 'dark' || fs[i]), full: fs.every(Boolean) };
                 } else if (k > 0 && other > 0.1 && other < 0.9 && !svg) {
@@ -2310,14 +2630,25 @@ const jsonLd = {
                 // showed as a green glow round "stuff" on the cream beside a tile (1460). The icon is cut whole or not
                 // at all (its outline is a filter, which cannot be cut).
                 const [y0, y1] = c.wordY[j] ?? [0, 0];
-                linkKo[link] = koFor(c, xs, bs, fs, w0, w1, y0, y1);
+                linkKo[link] = koFor(c, xs, bs, fs, w0, w1, y0, y1, rs);
               }
             });
             // the logo's, the same way: on a phone its mark starts 4px left of a side quest tile, so whole it got none
             const [sy0, sy1] = c.wordY[0] ?? [0, 0];
+            // over shapes (logoShapes): each band in its own ink over the mark and the word, and the knockout of the one
+            // covering most of the mark, clipped to its rounded box (one only: the logo's ::after draws the shapes' inks)
+            const ls = c.key === 'l' ? logoShapes(c) : null;
+            if (ls) {
+              const ink = (s: Shape) => (s.tone === 'light' ? 'var(--ink-on-light)' : 'var(--ink-on-dark)');
+              const m = ls.su.shapes.flatMap((s) => shapeLayers(s, markBox.left, markBox.top, markBox.right - markBox.left, markBox.bottom - markBox.top, ink(s)));
+              const w = ls.su.shapes.flatMap((s) => shapeLayers(s, c.span0, sy0, c.span1 - c.span0, sy1 - sy0, ink(s)));
+              brandShape = m.length || w.length ? { m: m.join(','), w: w.join(',') } : null;
+            }
             // and its split under a slanted paint edge, like a link's (slantOf): one ink left "de" dark on the dome's black,
             // then the mark white on the cream, while the dome's left flank crossed the logo (1440 at 8280 and 8300)
-            if (c.key === 'l' && painted.toneAt) {
+            if (ls) {
+              // (no split: the shapes are the split)
+            } else if (c.key === 'l' && painted.toneAt) {
               const sl = slantOf(c, c.span0, c.span1, sy0, sy1);
               if (sl) brandSplit = { off: sl.off, ang: sl.ang, dir: sl.dir, offM: sl.off - (markOff.x * sl.dx + markOff.y * sl.dy) };
             } else if (c.key === 'l' && seen[0] && levelOf(c, c.span0, c.span1, sy0, sy1)) {
@@ -2335,7 +2666,9 @@ const jsonLd = {
                 brandSplit = { off, ang: 90, dir: `${ts[0]}-${ts[ts.length - 1]}`, offM: off - markOff.x };
               }
             }
-            sideKo[c.key] = koFor(c, seen.flatMap((s) => s.xs), seen.flatMap((s) => s.bs), seen.flatMap((s) => s.fs), c.span0, c.span1, sy0, sy1);
+            sideKo[c.key] = ls
+              ? koShape(c, ls.su.shapes, c.span0, c.span1, sy0, sy1, 1, markBox.top, markBox.bottom)
+              : koFor(c, seen.flatMap((s) => s.xs), seen.flatMap((s) => s.bs), seen.flatMap((s) => s.fs), c.span0, c.span1, sy0, sy1, seen.flatMap((s) => s.rs));
             // two samples (6px) off the colour or fewer count as all on it: on a phone the logo's mark starts 4px left
             // of a side quest tile, and a pool backing that sliver blurred the tile's green edge into the cream
             sampledOn = onTone;
@@ -2448,8 +2781,12 @@ const jsonLd = {
               }
               if (all && dark / all <= 0.42) t = 'light';
             }
+            // the logo over shapes takes the tone outside them (logoShapes; the glyphs on the shapes take theirs)
+            const ls = !painted.toneAt ? logoShapes(c) : null;
+            if (ls) t = ls.tone;
             banded[c.key] = t;
             busyAt[c.key] = info.some((x) => x.busy);
+            bareAt[c.key] = busyAt[c.key] && info.every((x) => !x.busy || x.bare);
             // A flat colour anywhere on the corner's line: the words are sampled, so wordTones can tell which glyphs lie
             // on it (flat, mixedFlat). Before, a corner was only flat with both its ends on one flat band, so a phone
             // under Results with Free stuff on the orange beside it left the cream pool spread over the orange.
@@ -2458,12 +2795,12 @@ const jsonLd = {
             // each link's own tone (or both, where an edge runs through it) and the pool's span: wordTones, above
             sampledOn = 0;
             sampledAll = 0;
-            wordTones(c, t ?? pageTone, split || !!painted.toneAt || onFlatLine);
+            wordTones(c, t ?? pageTone, split || !!painted.toneAt || onFlatLine || !!ls);
             // Ends that agree while every word's sample lies on the other tone: the points (4px squares under the nav
             // line) still catch an edge the words' line (2px lower in them) has already left. Follow the words: for
             // those 2px of scroll the corner took the violet tile's dark tone over the cream between two tiles, and a
             // dark pool spread behind the dark ink of the links (390, 2026-11-08).
-            if (!split && !painted.toneAt && t && sampledAll > 0 && sampledOn === 0) {
+            if (!split && !painted.toneAt && !ls && t && sampledAll > 0 && sampledOn === 0) {
               t = t === 'dark' ? 'light' : 'dark';
               banded[c.key] = t;
               wordTones(c, t, true);
@@ -2476,6 +2813,7 @@ const jsonLd = {
             for (const el of c.rects.keys()) if (flatTone.has(el) && live(el)) { flatNear = true; break; }
             squeezed[c.key] = flatNear && !flat[c.key] && !busyAt[c.key] && !painted.toneAt && c.io !== null
               && flatRows(c, ABOVE) >= 0.4 && flatRows(c, BELOW) >= 0.4;
+            shaped[c.key] = !!ls && !busyAt[c.key];
             const band = info[0].band;
             // never a flat colour's own: over one the corner shows no pool, and in the moment its edge passes between the
             // points and the words' line (the points still on a side quest tile, the words already on the cream below)
@@ -2491,6 +2829,9 @@ const jsonLd = {
         // stayed as last read under the paint, no flat colour and all: after the stripes wipe handed over, the stripes
         // act's cream kept its pools for 280px of scroll at 1440 (2026-11-08). Read them again from the bands.
         nav.addEventListener('nav:paint', () => { if (!painted.toneAt) sync(); });
+        // one pass in the next frame for every report in this one (phones: the observers' callbacks, a measure)
+        let syncQ = 0;
+        const syncSoon = () => { if (!syncQ) syncQ = requestAnimationFrame(() => { syncQ = 0; sync(); }); };
         // the root of an observer: the viewport shrunk to x0..x1 across and y0..y1 down
         const margin = (x0: number, x1: number, y0: number, y1: number, vw: number, vh: number) =>
           `-${Math.max(0, y0)}px -${Math.max(0, vw - x1)}px -${Math.max(0, vh - y1)}px -${Math.max(0, x0)}px`;
@@ -2502,15 +2843,23 @@ const jsonLd = {
         for (let v = 10; v <= 100; v += 1) DENSE.push(v / 100);
         // One observer for `owner` (a point or a corner, which keeps it in .io). A callback still queued from an
         // observer a rebuild replaced is dropped: it would write stale entries into the new one's set.
+        // (on a phone, after an observer's first report, the bands the scroll carries are the frame's own (edgeTick): their
+        // reports come a frame late, and taken as well they put last frame's box back every other frame, a pass a frame)
+        const carried = (el: Element) => lite && !moving.has(el) && scrollLayer(el) === 'flow';
         const observe = (owner: { io: IntersectionObserver | null }, targets: HTMLElement[], rootMargin: string, threshold: number | number[], take: (e: IntersectionObserverEntry) => void) => {
           if (!targets.length) return null;
           let first = true;
           unreported++;
           const io: IntersectionObserver = new IntersectionObserver((entries) => {
             if (owner.io !== io) return;
-            entries.forEach(take);
+            if (lite) for (const e of entries) noteReport(e, io, first);
+            const mine = first ? entries : entries.filter((e) => !carried(e.target));
+            if (!mine.length) return;
+            mine.forEach(take);
             if (first) { first = false; unreported--; }
-            sync();
+            // (on a phone every observer's report of a frame gathered into one pass, in the next frame)
+            if (lite) syncSoon();
+            else sync();
           }, { rootMargin, threshold });
           targets.forEach((el) => io.observe(el));
           return io;
@@ -2537,9 +2886,19 @@ const jsonLd = {
            its rectangle is cut to where its sides cross the line (the knockout's side cut is read there), from its
            transform's angle, its own size and its box's middle (the default origin). Before, the result sheet's white
            patch behind the logo hung 6px over the dark gutter beside the sheet (390 at 6700 to 6820, 2026-11-09). */
+        // (read once a pass: the shapes ask it of every band under every word)
+        const turnNow = new Map<Element, number>();
+        let turnPass = -1;
         const turnOf = (el: Element) => {
-          const m = getComputedStyle(el).transform.match(/^matrix\(([^)]*)\)/)?.[1].split(',').map(Number);
-          return m && Math.abs(m[1]) > 0.002 ? Math.atan2(m[1], m[0]) : 0;
+          const pk = passOf();
+          if (turnPass !== pk) { turnPass = pk; turnNow.clear(); }
+          let v = turnNow.get(el);
+          if (v === undefined) {
+            const m = getComputedStyle(el).transform.match(/^matrix\(([^)]*)\)/)?.[1].split(',').map(Number);
+            v = m && Math.abs(m[1]) > 0.002 ? Math.atan2(m[1], m[0]) : 0;
+            turnNow.set(el, v);
+          }
+          return v;
         };
         // (and a rounded box, unturned: where the line crosses a corner's curve, the box covers only what lies inside
         // the curve there. The Endless Pursuit phone's rounded corner left "Resu" light ink on the pale shade beside
@@ -2566,12 +2925,22 @@ const jsonLd = {
           }
           return v;
         };
+        // a turned band's own size (offsetWidth/Height), read once a pass on a laptop, once a measure on a phone
+        const sizeNow = new Map<Element, [number, number]>();
+        let sizePass = -1;
+        const sizeOf = (el: Element): [number, number] => {
+          const pk = passOf();
+          if (sizePass !== pk) { sizePass = pk; sizeNow.clear(); }
+          let v = sizeNow.get(el);
+          if (!v) { v = [(el as HTMLElement).offsetWidth, (el as HTMLElement).offsetHeight]; sizeNow.set(el, v); }
+          return v;
+        };
         // A turned band's top and bottom edges across x0..x1 (straight lines: their ends decide), or null unturned
         const slantEdges = (el: Element, x0: number, x1: number) => {
           const th = turnOf(el);
           if (!th) return null;
-          const box = el.getBoundingClientRect();
-          const h = (el as HTMLElement).offsetHeight;
+          const box = vbox(el);
+          const h = sizeOf(el)[1];
           const cx = (box.left + box.right) / 2;
           const cy = (box.top + box.bottom) / 2;
           const sn = Math.sin(th);
@@ -2601,8 +2970,7 @@ const jsonLd = {
           }
           // inside the turned box where |u| <= w/2 and |v| <= h/2 in its own axes (u along its width, v along its
           // height, from its middle): for the line y both are straight in x, so each gives an interval
-          const w = (el as HTMLElement).offsetWidth;
-          const h = (el as HTMLElement).offsetHeight;
+          const [w, h] = sizeOf(el);
           const cx = (box.left + box.right) / 2;
           const cy = (box.top + box.bottom) / 2;
           const sn = Math.sin(th);
@@ -2616,6 +2984,157 @@ const jsonLd = {
           xl = Math.max(xl, cx + Math.min(a, b));
           xr = Math.min(xr, cx + Math.max(a, b));
           return xr > xl ? new DOMRectReadOnly(xl, line.top, xr - xl, line.height) : null;
+        };
+        /* Two or more bands' edges under a link's glyphs at once: vaultt's App Store and Google Play badges sit side by
+           side and rise under Results on a phone, so their tops, their rounded corners (12px) and the navy gap between
+           them all run through the word together. No split along one edge, level or upright, follows that: Results kept
+           the navy's light ink on the badges' top half, or took the badges' dark ink on the navy above them, and with
+           three runs on the line it had no knockout at all (390 at 400 to 460, 2026-11-09 final check). Then each band is
+           drawn under the glyphs as its own shape in its own ink (its box with its rounded corners, cut where the
+           observers cut it), the topmost first, over the link's own ink for what lies outside them (nav.css data-shape,
+           --shape-bg), and each of up to two flat ones gets a knockout clipped to its rounded box (koShape). Only with
+           every band under the glyphs unturned and without a ring, no tint on those crossing them, outside a script's paint; anywhere else, and
+           under one band's edge alone, the edge rules in wordTones decide as before. */
+        type Shape = { el: Element; tone: Tone; x0: number; y0: number; x1: number; y1: number; rad: number[]; clip: DOMRectReadOnly; order: number; cover: number };
+        const inShape = (s: Shape, x: number, y: number) => {
+          if (x < Math.max(s.x0, s.clip.left) || x > Math.min(s.x1, s.clip.right) || y < Math.max(s.y0, s.clip.top) || y > Math.min(s.y1, s.clip.bottom)) return false;
+          const [tl, tr, br, bl] = s.rad;
+          const out = (cx: number, cy: number, r: number) => (x - cx) ** 2 + (y - cy) ** 2 > r * r;
+          if (x < s.x0 + tl && y < s.y0 + tl) return !out(s.x0 + tl, s.y0 + tl, tl);
+          if (x > s.x1 - tr && y < s.y0 + tr) return !out(s.x1 - tr, s.y0 + tr, tr);
+          if (x > s.x1 - br && y > s.y1 - br) return !out(s.x1 - br, s.y1 - br, br);
+          if (x < s.x0 + bl && y > s.y1 - bl) return !out(s.x0 + bl, s.y1 - bl, bl);
+          return true;
+        };
+        // the bands crossing the glyph rows of x0..x1 above the topmost band that holds them all (`base`, null: the page),
+        // topmost first; null when one is turned or ringed, when one of those crossing is tinted, or under a paint
+        const shapesUnder = (c: Corner, x0: number, x1: number, gy0 = GLY_T - 2, gy1 = GLY_B + 2): { base: Element | null; shapes: Shape[] } | null => {
+          if (painted.toneAt) return null;
+          const gx0 = x0 + 1;
+          const gx1 = x1 - 1;
+          let base: Element | null = null;
+          let baseOrd = -1;
+          const cross: Shape[] = [];
+          for (const [el, clip] of c.rects) {
+            if (clip.right <= gx0 || clip.left >= gx1 || clip.bottom <= gy0 || clip.top >= gy1 || !live(el)) continue;
+            const tone = bandTone(el);
+            if (!tone) continue;
+            if (turnOf(el) || ringOf(el)) return null;
+            const [tl, tr, br, bl] = radiiOf(el);
+            // (a band whose box holds the rows with room for its corners is a base: no box to read)
+            const m = Math.max(tl, tr, br, bl);
+            if (clip.left <= gx0 - m && clip.right >= gx1 + m && clip.top <= gy0 - m && clip.bottom >= gy1 + m) {
+              const o = order.get(el) ?? -1;
+              if (o > baseOrd) { baseOrd = o; base = el; }
+              continue;
+            }
+            const b = vbox(el);
+            const f = Math.min(1, b.width / ((tl + tr) || 1), b.width / ((bl + br) || 1), b.height / ((tl + bl) || 1), b.height / ((tr + br) || 1));
+            const s: Shape = { el, tone, x0: b.left, y0: b.top, x1: b.right, y1: b.bottom, rad: [tl * f, tr * f, br * f, bl * f], clip, order: order.get(el) ?? -1, cover: 0 };
+            if ([[gx0, gy0], [gx1, gy0], [gx0, gy1], [gx1, gy1]].every(([x, y]) => inShape(s, x, y))) {
+              if (s.order > baseOrd) { baseOrd = s.order; base = el; }
+            } else cross.push(s);
+          }
+          const shapes = cross.filter((s) => s.order > baseOrd).sort((a, b) => b.order - a.order);
+          // (a tint over a band that holds them all only shades the ink beneath, read on the line: vaultt's hero glows)
+          return shapes.some((s) => tintsOver(s.el).length) ? null : { base, shapes };
+        };
+        // The logo over shapes: two or more, or one whose rounded corner lies under the mark (vaultt's App Store badge
+        // rising under it on a phone, the badge's 12px corner through the mark's foot: the mark took one ink, white on the
+        // badge or dark on the navy, and its square patch stood out past the badge's corner, 390 at 400 to 450, 2026-11-09
+        // final check). The shapes, and the tone outside them (the logo's own ink), or null.
+        let logoMemo: { pass: number; v: { su: { base: Element | null; shapes: Shape[] }; tone: Tone } | null } = { pass: -1, v: null };
+        const logoShapes = (c: Corner): { su: { base: Element | null; shapes: Shape[] }; tone: Tone } | null => {
+          if (c.key !== 'l') return null;
+          if (logoMemo.pass === navPass) return logoMemo.v;
+          logoMemo = { pass: navPass, v: logoShapesNow(c) };
+          return logoMemo.v;
+        };
+        const logoShapesNow = (c: Corner): { su: { base: Element | null; shapes: Shape[] }; tone: Tone } | null => {
+          if (c.key !== 'l' || !c.io || markBox.right <= markBox.left) return null;
+          const su = shapesUnder(c, markBox.left, Math.max(markBox.right, c.span1), markBox.top, markBox.bottom);
+          if (!su || !su.shapes.length) return null;
+          const corner = (s: Shape) => {
+            const [tl, tr, br, bl] = s.rad;
+            const hit = (x0: number, y0: number, x1: number, y1: number) => x1 > markBox.left && x0 < markBox.right && y1 > markBox.top && y0 < markBox.bottom;
+            return (tl > 2 && hit(s.x0, s.y0, s.x0 + tl, s.y0 + tl)) || (tr > 2 && hit(s.x1 - tr, s.y0, s.x1, s.y0 + tr))
+              || (br > 2 && hit(s.x1 - br, s.y1 - br, s.x1, s.y1)) || (bl > 2 && hit(s.x0, s.y1 - bl, s.x0 + bl, s.y1));
+          };
+          if (su.shapes.length < 2 && !corner(su.shapes[0])) return null;
+          let dark = 0;
+          let all = 0;
+          for (let y = markBox.top + 2; y < markBox.bottom; y += 4) {
+            for (let x = markBox.left + 1; x < Math.max(markBox.right, c.span1); x += 3) if (!su.shapes.some((s) => inShape(s, x, y))) { all++; if (toneIn(c, x, y) === 'dark') dark++; }
+          }
+          const tone: Tone = all ? (dark * 2 >= all ? 'dark' : 'light') : su.base ? bandTone(su.base) ?? pageTone : pageTone;
+          return { su, tone };
+        };
+        // A shape as background layers in the link's box (ox, oy: its top left), cut to the box: up to three rectangles
+        // and a disc per rounded corner, each in `ink`. The discs lie inside the rounded box, so the union is exact.
+        const shapeLayers = (s: Shape, ox: number, oy: number, ow: number, oh: number, ink: string): string[] => {
+          const out: string[] = [];
+          const L = Math.max(s.x0, s.clip.left, ox - 1);
+          const R = Math.min(s.x1, s.clip.right, ox + ow + 1);
+          const T = Math.max(s.y0, s.clip.top, oy - 1);
+          const B = Math.min(s.y1, s.clip.bottom, oy + oh + 1);
+          const px = (v: number) => `${v.toFixed(2)}px`;
+          const rect = (x0: number, y0: number, x1: number, y1: number) => {
+            const a = Math.max(x0, L), b = Math.min(x1, R), t = Math.max(y0, T), u = Math.min(y1, B);
+            if (b - a > 0.05 && u - t > 0.05) out.push(`linear-gradient(${ink},${ink}) ${px(a - ox)} ${px(t - oy)}/${px(b - a)} ${px(u - t)} no-repeat`);
+          };
+          const disc = (cx: number, cy: number, r: number) => {
+            if (r <= 0.5) return;
+            const a = Math.max(cx - r, L), b = Math.min(cx + r, R), t = Math.max(cy - r, T), u = Math.min(cy + r, B);
+            if (b - a <= 0.05 || u - t <= 0.05) return;
+            out.push(`radial-gradient(circle ${px(r)} at ${px(cx - a)} ${px(cy - t)},${ink} ${px(r - 0.6)},transparent ${px(r + 0.4)}) ${px(a - ox)} ${px(t - oy)}/${px(b - a)} ${px(u - t)} no-repeat`);
+          };
+          const [tl, tr, br, bl] = s.rad;
+          const { x0, y0, x1, y1 } = s;
+          const top = Math.max(tl, tr);
+          const bot = Math.max(bl, br);
+          rect(x0, y0 + top, x1, y1 - bot);
+          rect(x0 + tl, y0, x1 - tr, y0 + top);
+          if (tl < tr) rect(x0, y0 + tl, x0 + tl, y0 + tr);
+          if (tr < tl) rect(x1 - tr, y0 + tr, x1, y0 + tl);
+          rect(x0 + bl, y1 - bot, x1 - br, y1);
+          if (bl < br) rect(x0, y1 - br, x0 + bl, y1 - bl);
+          if (br < bl) rect(x1 - br, y1 - bl, x1, y1 - br);
+          disc(x0 + tl, y0 + tl, tl);
+          disc(x1 - tr, y0 + tr, tr);
+          disc(x1 - br, y1 - br, br);
+          disc(x0 + bl, y1 - bl, bl);
+          return out;
+        };
+        // The knockouts of a link over shapes: up to two flat ones that no other shape overlaps under the link, those
+        // covering most of its glyph rows, each trimmed as any part (shadows, casters) and clipped to its rounded box
+        // where the cut is the box's own edge (KoPart rad)
+        const koShape = (c: Corner, shapes: Shape[], w0: number, w1: number, y0: number, y1: number, most = 2, gy0 = GLY_T - 2, gy1 = GLY_B + 2): Ko => {
+          for (const s of shapes) {
+            let n = 0;
+            for (let x = w0 + 1; x < w1; x += 3) for (let y = gy0; y <= gy1; y += 3) if (inShape(s, x, y) && shapes.find((q) => inShape(q, x, y)) === s) n++;
+            s.cover = n;
+          }
+          const alone = (s: Shape) => !shapes.some((q) => q !== s && q.order > s.order && Math.max(q.x0, q.clip.left, s.x0, s.clip.left, w0 - 16) < Math.min(q.x1, q.clip.right, s.x1, s.clip.right, w1 + 16) && Math.max(q.y0, q.clip.top, s.y0, s.clip.top, y0 - 16) < Math.min(q.y1, q.clip.bottom, s.y1, s.clip.bottom, y1 + 16));
+          const parts: KoPart[] = [];
+          for (const s of shapes.filter((q) => q.cover > 0 && alone(q)).sort((a, b) => b.cover - a.cover).slice(0, most)) {
+            const part = partOf(s.el, Math.min(w1, Math.max(w0, (Math.max(s.x0, w0) + Math.min(s.x1, w1)) / 2)));
+            if (!part) continue;
+            // the cut at the band's box as the observers see it, in from the link's edges (negative: past them), as far
+            // as the copy reaches (16px past the link); a side that is the band's own edge keeps its rounded corners
+            const ins = { l: s.clip.left - w0, r: w1 - s.clip.right, t: s.clip.top - y0, b: y1 - s.clip.bottom };
+            const own = { l: Math.abs(s.clip.left - s.x0) < 0.5, r: Math.abs(s.clip.right - s.x1) < 0.5, t: Math.abs(s.clip.top - s.y0) < 0.5, b: Math.abs(s.clip.bottom - s.y1) < 0.5 };
+            part.l = Math.max(-16, ins.l);
+            part.r = Math.max(-16, ins.r);
+            part.t = Math.max(-16, ins.t);
+            part.b = Math.max(-16, ins.b);
+            const was = { l: part.l, r: part.r, t: part.t, b: part.b };
+            const q = trim(c, part, w0, w1, y0, y1);
+            if (!q) continue;
+            const kept = (k: 'l' | 'r' | 't' | 'b') => own[k] && q[k] === was[k] && was[k] === ins[k];
+            q.rad = [kept('t') && kept('l') ? s.rad[0] : 0, kept('t') && kept('r') ? s.rad[1] : 0, kept('b') && kept('r') ? s.rad[2] : 0, kept('b') && kept('l') ? s.rad[3] : 0];
+            parts.push(q);
+          }
+          return parts.length ? parts : null;
         };
         // The knockouts on a gradient follow the scroll: their colour moves along it as the band passes under the nav
         // line. One frame's arithmetic for the few links on it; writeKo only touches a link whose colour changed.
@@ -2654,7 +3173,8 @@ const jsonLd = {
           if (still && fadeQuiet < 20) { fadeRaf = requestAnimationFrame(fadeTick); return; }
           if (fadeMoved) { fadeMoved = false; sync(); }
         };
-        fadeWatch = () => { fadeQuiet = 0; if (!fadeRaf) fadeRaf = requestAnimationFrame(fadeTick); };
+        // (not on a phone: there a fade's colour is read again at the next measure, the rest or a band coming or going)
+        fadeWatch = () => { if (lite) return; fadeQuiet = 0; if (!fadeRaf) fadeRaf = requestAnimationFrame(fadeTick); };
         // A band near the nav that does not show yet (a card the page reveals with a tween once it nears, kleus's
         // lessons) can come to show without moving, so no observer reports it: while one lies in a corner's region,
         // its opacity is read every 100ms. A change starts the fade watch, and coming to show (or going) reads the
@@ -2673,7 +3193,7 @@ const jsonLd = {
             for (const el of c.rects.keys()) {
               if (!hideable.has(el) || seen.has(el)) continue;
               seen.add(el);
-              const a = alphaOf(el);
+              const a = lite ? alphaRead(el) : alphaOf(el);
               const was = hiddenWas.get(el);
               if (was !== undefined && Math.abs(a - was) > 0.01) moved = true;
               if (was !== undefined && (was >= 0.9) !== (a >= 0.9)) flipped = true;
@@ -2682,6 +3202,8 @@ const jsonLd = {
             }
           }
           for (const el of hiddenWas.keys()) if (!seen.has(el)) hiddenWas.delete(el);
+          // (on a phone a band coming or going is a new measure: every cache read again)
+          if (flipped && lite) geoEpoch++;
           if (flipped) sync();
           else if (moved) fadeWatch();
           if (any && !hiddenT) hiddenT = window.setTimeout(hiddenPoll, 100);
@@ -2691,6 +3213,14 @@ const jsonLd = {
         koRefresh = () => sync();
         tintSync = () => sync();
         const watch = () => {
+          // (a rebuild is a new measure, and a resize can cross the phone layout's edge)
+          lite = !liteOff && liteMq.matches;
+          geoEpoch++;
+          // (the observers are made again, and report again: what the old ones said goes)
+          onRoots.clear();
+          seenBox.clear();
+          // (a restored scroll lands with no scroll event: the scroll the boxes are moved by starts where the page is)
+          liteY = window.scrollY;
           const vw = document.documentElement.clientWidth;
           const vh = window.innerHeight;
           reach = parseFloat(getComputedStyle(nav).getPropertyValue('--pool-reach')) || 0;
@@ -2700,6 +3230,7 @@ const jsonLd = {
           const brand = nav.querySelector<HTMLElement>('.nav-brand')?.getBoundingClientRect();
           const markR = nav.querySelector('.nav-brand-mark')?.getBoundingClientRect();
           if (brand && markR) markOff = { x: markR.left + markR.width / 2 - (brand.left + brand.width / 2), y: markR.top + markR.height / 2 - (brand.top + brand.height / 2) };
+          if (markR) markBox = { left: markR.left, top: markR.top, right: markR.right, bottom: markR.bottom };
           const linkBoxes = linkEls.map((a, i) => ({ r: a.getBoundingClientRect(), i })).filter((l) => l.r.width);
           const links = linkBoxes.map((l) => l.r);
           const book = pill?.getBoundingClientRect();
@@ -2779,8 +3310,8 @@ const jsonLd = {
            that frame is painted. Near: within 240px of the nav in the document as last seen, or seen to move at the last
            read (read every frame while it moves), or in a corner already. The observers still report after; what they
            add is a frame old, and the next scroll frame corrects it before it is painted. */
-        const docBox = new Map<Element, { t: number; b: number }>();
-        const moving = new Set<Element>();
+        const docBox = new Map<Element, { t: number; b: number; l: number; r: number }>();
+        const moving = selfMoving;
         const clipMemo = new WeakMap<Element, [Element, boolean, boolean][]>();
         const clipsOf = (el: Element) => {
           let v = clipMemo.get(el);
@@ -2798,10 +3329,13 @@ const jsonLd = {
         };
         let lastScroll = 0;
         let edgeRaf = 0;
-        const edgeTick = () => {
+        // (`live`: read every box now, as a laptop does each frame; on a phone only at rest, liteRest. A phone's frame takes
+        // the boxes from the measure, moved by the scroll, and leaves the bands that move in the page or sit in a fixed or
+        // sticky layer to the observers: their boxes do not follow the scroll)
+        const edgeTick = (now = !lite): boolean => {
           edgeRaf = 0;
-          if (!corners.some((c) => c.io)) return;
-          const sy = window.scrollY;
+          if (!corners.some((c) => c.io)) return false;
+          const sy = now ? window.scrollY : liteY;
           const lo = sy - 240;
           const hi = sy + POOL_FOOT + 240;
           const near = new Set<Element>();
@@ -2811,18 +3345,32 @@ const jsonLd = {
           }
           for (const c of corners) { c.rects.forEach((_, el) => near.add(el)); c.lineRects.forEach((_, el) => near.add(el)); c.ends.forEach((p) => p.under.forEach((el) => near.add(el))); }
           pillPoint.under.forEach((el) => near.add(el));
-          const anc = new Map<Element, DOMRect>();
-          const boxOf = (e: Element) => { let r = anc.get(e); if (!r) { r = e.getBoundingClientRect(); anc.set(e, r); } return r; };
+          const anc = new Map<Element, DOMRectReadOnly>();
+          const boxOf = (e: Element) => { let r = anc.get(e); if (!r) { r = now ? e.getBoundingClientRect() : vbox(e); anc.set(e, r); } return r; };
           let changed = false;
           let regions = false;
           const pts: Point[] = [...corners.flatMap((c) => c.ends), pillPoint].filter((p) => p.io && p.x >= 0);
           near.forEach((el) => {
-            const r = el.getBoundingClientRect();
+            const own = !now && (moving.has(el) || scrollLayer(el) !== 'flow');
+            const r = now ? el.getBoundingClientRect() : vbox(el);
+            // A drop shadow coming into the nav's strip or leaving it: the knockouts are cut again (trim, castNow), which
+            // no region's rectangles changing asks for while the caster's own box stays above or below the strip. They
+            // were cut where the shadow had been at the last pass: on atlas the knockout round Results and Free stuff
+            // stayed off for 1000px of scroll after a card's shadow had passed, at rest too (390, both paths, 2026-11-09).
+            const reach = castReach(el);
+            if (reach) {
+              const inStrip = r.bottom + reach.b > 0 && r.top - reach.t < POOL_FOOT;
+              if (inStrip !== (castIn.get(el) ?? false)) { castIn.set(el, inStrip); changed = true; }
+            }
+            if (own) return;
             const d = docBox.get(el);
             const t = r.top + sy;
-            if (d && (Math.abs(d.t - t) > 1 || Math.abs(d.b - (r.bottom + sy)) > 1)) moving.add(el);
-            else moving.delete(el);
-            docBox.set(el, { t, b: r.bottom + sy });
+            // (a band that slides sideways moves too: youcook's week of meals drifts across the page as it scrolls)
+            if (now) {
+              if (d && (Math.abs(d.t - t) > 1 || Math.abs(d.b - (r.bottom + sy)) > 1 || Math.abs(d.l - r.left) > 1 || Math.abs(d.r - r.right) > 1)) moving.add(el);
+              else moving.delete(el);
+            }
+            docBox.set(el, { t, b: r.bottom + sy, l: r.left, r: r.right });
             if (flatGrad.has(el) || flatStain.has(el)) gradDoc.set(el, { left: r.left, top: t, width: r.width, height: r.height });
             // the box as the observers see it: inside every ancestor that clips its overflow
             let l = r.left, tp = r.top, rt = r.right, bt = r.bottom;
@@ -2858,10 +3406,94 @@ const jsonLd = {
             }
           });
           if (regions) corners.forEach((c) => c.reports++);
-          if (changed) sync();
-          if (changed || performance.now() - lastScroll < 500) edgeRaf = requestAnimationFrame(edgeTick);
+          if (changed && !(lite && now)) sync();
+          if (!(lite && now) && (changed || performance.now() - lastScroll < 500)) edgeRaf = requestAnimationFrame(() => edgeTick());
+          return changed;
         };
-        window.addEventListener('scroll', () => { lastScroll = performance.now(); if (!edgeRaf) edgeRaf = requestAnimationFrame(edgeTick); }, { passive: true });
+        /* A circle a page paints under the nav, given as its geometry once per layout instead of an event a frame (the
+           finale's night: nav.paintCircle = { cx, cy, r(scrollY) }, its centre on the screen and its radius as a function
+           of the scroll, then a 'nav:circle' event; null to end it). Worked out here on the nav's own scroll frame from
+           the scroll value it already has: dark inside the circle, the bands elsewhere, as a toneAt paint, while the
+           circle is open and has not yet taken the screen's top corners (the page's force holds the nav from there). A
+           corner only sees a change while the circle's edge is inside the nav's strip, so the nav is told only then. */
+        let circleR = -1;
+        let circleIn = false;
+        const circleToneAt = (x: number, y: number) => {
+          const pc = painted.paintCircle;
+          return pc && Math.hypot(x - pc.cx, pc.cy - y) <= circleR ? 'dark' : null;
+        };
+        let circleQ = 0;
+        const circleTick = () => {
+          circleQ = 0;
+          const pc = painted.paintCircle;
+          const R = pc ? pc.r(lite ? liteY : window.scrollY) : 0;
+          if (!pc || !(R > 0) || R >= Math.hypot(pc.cx, pc.cy)) {
+            if (painted.toneAt === circleToneAt) {
+              painted.toneAt = null;
+              circleR = -1;
+              circleIn = false;
+              nav.dispatchEvent(new Event('nav:paint'));
+            }
+            return;
+          }
+          const mine = painted.toneAt === circleToneAt;
+          // (another script's paint holds the nav: it says when it ends)
+          if (!mine && painted.toneAt) return;
+          if (mine && R === circleR) return;
+          circleR = R;
+          const inStrip = R >= pc.cy - POOL_FOOT - 8;
+          if (!mine || inStrip || inStrip !== circleIn) {
+            circleIn = inStrip;
+            painted.toneAt = circleToneAt;
+            nav.dispatchEvent(new Event('nav:paint'));
+          }
+        };
+        const circleSoon = () => { if (!circleQ) circleQ = requestAnimationFrame(circleTick); };
+        nav.addEventListener('nav:circle', circleSoon);
+        circleSoon();
+        // On a phone, once the scroll has rested 150ms: a new measure, every band's box read live once (the moved ones
+        // found), and the words read again, so the nav at rest is exactly what it is on the laptop path
+        // (and again every 150ms for the next 450ms, then for as long as one finds anything moved or a colour read through
+        // a fade: a scrub catches up for about half a second after the scroll stops and a reveal fades in, and the last
+        // read must come after them; the laptop path goes on reading for half a second after the scroll too)
+        let restT = 0;
+        let rests = 0;
+        const liteRest = () => {
+          restT = 0;
+          if (!lite) return;
+          geoEpoch++;
+          liteY = window.scrollY;
+          const moved = edgeTick(true);
+          // (each band's box now, while the layout is clean, so the frames of the next scroll read none; read live even
+          // for a band followed from its reports, whose last report can be older than where it has come to rest)
+          for (const el of bands) { vmeasure(el); for (const [a] of clipsOf(el)) vmeasure(a); }
+          sync();
+          if ((moved || lastFaded || rests < 3) && ++rests < 12) restT = window.setTimeout(liteRest, 150);
+        };
+        // The laptop path reads every box each frame while the page scrolls and for half a second after, but works the
+        // knockouts out again only when a region changes: so one more pass 700ms after the scroll stops, and what it shows
+        // at rest is read at rest (a scrub that caught up after its last frame, a drop shadow that moved inside the strip).
+        // Without it, at rest, atlas's knockout round Results and Free stuff stayed off and outreach's logo kept a light
+        // knockout on the dark (390 on the laptop path, the perf round's state diff, 2026-11-09).
+        const lapRest = () => { restT = 0; if (!lite) sync(); };
+        window.addEventListener('scroll', () => {
+          lastScroll = performance.now();
+          if (!edgeRaf) edgeRaf = requestAnimationFrame(() => edgeTick());
+          clearTimeout(restT);
+          if (lite) { rests = 0; restT = window.setTimeout(liteRest, 150); }
+          else restT = window.setTimeout(lapRest, 700);
+          if (painted.paintCircle) circleSoon();
+        }, { passive: true });
+        // a document that changes size (a pin's spacer, an image landing, a section opening) moves the bands under the
+        // phone's measure: measure again
+        if (window.ResizeObserver) {
+          let roT = 0;
+          new ResizeObserver(() => {
+            if (!lite) return;
+            clearTimeout(roT);
+            roT = window.setTimeout(() => { geoEpoch++; syncSoon(); }, 100);
+          }).observe(document.documentElement);
+        }
         // A page script that slides bands sideways says so on each frame it moves them:
         // nav.dispatchEvent(new CustomEvent('nav:moved', { detail: el })), el holding the bands. The observers miss a
         // sideways slide (a band's share of a region stays the same while it moves inside it), so those bands' rectangles
@@ -2872,6 +3504,7 @@ const jsonLd = {
         nav.addEventListener('nav:moved', (e) => {
           const host = (e as CustomEvent<Element | null>).detail;
           if (!host) return;
+          if (lite) geoEpoch++;
           const moved = toned.filter((b) => host.contains(b));
           if (!moved.length) return;
           const boxes = moved.map((b) => b.getBoundingClientRect());

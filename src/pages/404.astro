@@ -33,4 +33,10 @@ import Base from '../layouts/Base.astro';
   }
   .nf-content { position: relative; z-index: 1; }
   .nf-content h1 { margin: 12px 0; }
+  /* Phones (2026-11-09): centred in the first screen below the 64px fixed nav, not in the whole screen (it sat 32px
+     high at 390x844): the section's top 64px stand under the nav, and it is one small viewport tall (svh, the height
+     with Safari's toolbars showing, where 100vh is the height with them hidden; 100vh above where svh is unknown). */
+  @media (max-width: 767px) {
+    .not-found { min-height: 100svh; padding-top: 64px; }
+  }
 </style>

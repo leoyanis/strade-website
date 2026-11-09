@@ -47,6 +47,8 @@ const labels = { explore: 'Explore', network: 'Network', work: 'Work', profile: 
     box-shadow: inset 0 0 0 calc(var(--u, 1px) * 1) rgba(238, 240, 241, 0.14), 0 calc(var(--u, 1px) * 8) calc(var(--u, 1px) * 22) rgba(0, 0, 0, 0.45);
     font-family: Inter, Roboto, system-ui, sans-serif;
   }
+  /* touch screens: the map's canvas under the pill draws its frost (network.ts drawGlass, .vs--glass on the screen) */
+  :global(.vs--glass) .ap { -webkit-backdrop-filter: none; backdrop-filter: none; }
   .ap__item { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u, 1px) * 3); color: #CDD1D5; }
   .ap__item.is-on { color: #70A9FF; }
   .ap__item svg { width: calc(var(--u, 1px) * 22); height: calc(var(--u, 1px) * 22); display: block; }
