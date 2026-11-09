@@ -1,0 +1,2 @@
+/* the scroll progress bar off (its width is written on every scroll event, after a scrollHeight read) */
+#scroll-progress { display: none !important; }

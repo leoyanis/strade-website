@@ -28,7 +28,6 @@ const resources = visibleResources();
 
   <section class="ql-hero free-index">
     <div class="container">
-      <span class="ql-hero__label">FREE // NO EMAIL NEEDED</span>
       <h1>Free <span>stuff.</span></h1>
       <p>Everything I give away in my DMs, in one place. Skills, prompts and templates I actually use to build with AI. Take them, use them, ship something.</p>
       <div class="social-row" style="margin-top:26px">
@@ -47,7 +46,7 @@ const resources = visibleResources();
           {resources.map((r, i) => (
             <a class="res-card" href={`/free/${r.slug}`} style={r.accent ? `--acc:${r.accent}` : undefined}>
               <span class="res-card__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-              <span class="res-kind">{r.kind}{!r.published && <span class="res-draft">draft</span>}</span>
+              {!r.published && <span class="res-draft">draft</span>}
               <h3>{r.title}</h3>
               <p>{r.summary}</p>
               <span class="res-go">Get it free <i aria-hidden="true">→</i></span>
@@ -67,13 +66,13 @@ const resources = visibleResources();
   <section class="ql-cta">
     <div class="container">
       <h2>Rather have it built for you?</h2>
-      <p>Apps, automations and AI tools at a fixed price. I make the decisions, AI does the typing, and you own the code.</p>
+      <p>The skills and prompts are free. The build isn't.</p>
       <div class="hero-actions">
         <a href={SITE.booking} class="btn-primary hero-cta" target="_blank" rel="noopener">
           Book a call
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="/work" class="btn-ghost">See my work</a>
+        <a href="/work" class="btn-ghost">See the results</a>
       </div>
     </div>
   </section>

@@ -1,7 +1,15 @@
 ---
 // StudentVenture → Vaultt. Desktop: pinned, the name morphs letter by letter while the page shifts
-// from v1 charcoal to Vaultt navy, then the v1 site wipes into today's site.
+// from v1 charcoal to Vaultt navy, then the v1 platform wipes into Vaultt today.
 // Mobile / no JS: both names and both screens, stacked.
+//
+// "Today" is drawn, not a screenshot: the app's Network map on the iPhone (the shared PhoneFrame and
+// NetworkScreen, one still frame, invented people) beside the new name and line. Tried a screenshot of
+// vaultt.io first: it carried real members' names, faces and work, and its headline still sold the old
+// "get hired" story, so it could not stand for the network for builders.
+import PhoneFrame from '../../vaultt/PhoneFrame.astro';
+import NetworkScreen from '../../vaultt/NetworkScreen.astro';
+import VaulttMark from '../../vaultt/VaulttMark.astro';
 const from = 'StudentVenture'.split('');
 const to = 'Vaultt'.split('');
 const base = '/images/work/vaultt/';
@@ -11,7 +19,7 @@ const base = '/images/work/vaultt/';
   <div class="vt-rb__stage">
     <div class="vt-wrap vt-rb__inner">
       <div class="vt-rb__top">
-        <p class="vt-tag vt-rb__tag"><span class="no">04</span> The rebrand</p>
+        <p class="vt-tag vt-rb__tag">The rebrand</p>
         <p class="vt-rb__years">
           <span class="vt-rb__y is-from">2025 · StudentVenture</span>
           <span class="vt-rb__y-arrow" aria-hidden="true">→</span>
@@ -24,10 +32,7 @@ const base = '/images/work/vaultt/';
           <span class="vt-morph__from" aria-hidden="true">{from.map((c) => <span class="ch">{c}</span>)}</span>
           <span class="vt-morph__to" aria-hidden="true">{to.map((c) => <span class="ch">{c}</span>)}<img class="vt-morph__icon" src={`${base}icon.webp`} alt="" width="256" height="256" loading="lazy" /></span>
         </div>
-        <p class="vt-rb__copy">
-          The platform outgrew its name. StudentVenture is still the initiative behind it, and the product became
-          <strong>Vaultt</strong>: a home for real work, for anyone who builds.
-        </p>
+        <p class="vt-rb__copy">The platform outgrew its name. It became <strong>Vaultt</strong>, the network for anyone who builds.</p>
       </div>
 
       <div class="vt-ba" id="vt-ba">
@@ -35,23 +40,31 @@ const base = '/images/work/vaultt/';
           <figure class="vt-ba__frame is-before">
             <div class="vt-ba__bar">
               <span class="vt-ba__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span class="vt-ba__url">platform.studentventure.io</span>
+              <span class="vt-ba__url"><span class="vt-ba__url-t">platform.studentventure.io</span></span>
               <span class="vt-ba__badge">v1 · 2025</span>
             </div>
             <div class="vt-ba__screen">
-              <img src={`${base}v1-foryou.webp`} width="1440" height="859" loading="lazy" decoding="async"
+              {/* v1-foryou-safe: the real v1 screenshot with the three cover photos that show people softened (stock
+                  looking, but nobody could confirm they were not members); the original v1-foryou.webp is untouched */}
+              <img src={`${base}v1-foryou-safe.webp`} width="1440" height="859" loading="lazy" decoding="async"
                 alt="StudentVenture v1: the For You page, with jobs, projects and events picked for each student" />
             </div>
           </figure>
           <figure class="vt-ba__frame is-after">
             <div class="vt-ba__bar">
               <span class="vt-ba__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span class="vt-ba__url">vaultt.io</span>
+              <span class="vt-ba__url is-app"><span class="vt-ba__url-t"><VaulttMark class="vt-ba__url-mark" />Vaultt · iPhone, Android and web</span></span>
               <span class="vt-ba__badge is-now">Today</span>
             </div>
-            <div class="vt-ba__screen">
-              <img src={`${base}now-site.webp`} width="1440" height="859" loading="lazy" decoding="async"
-                alt="vaultt.io today: Build in public. Connect. Get hired." />
+            <div class="vt-ba__screen vt-now" role="img" aria-label="Vaultt today: the network for builders, with the app's Network map on an iPhone">
+              <div class="vt-now__brand" aria-hidden="true">
+                <VaulttMark class="vt-now__mark" />
+                <strong class="vt-now__word">Vaultt</strong>
+                <span class="vt-now__line">The network for <em>builders.</em></span>
+              </div>
+              <div class="vt-now__phone" aria-hidden="true">
+                <PhoneFrame platform="ios"><NetworkScreen platform="ios" live={false} seed={9} /></PhoneFrame>
+              </div>
             </div>
           </figure>
           <span class="vt-ba__handle" aria-hidden="true"><i></i></span>
@@ -132,6 +145,32 @@ const base = '/images/work/vaultt/';
   .vt-ba__screen { position: relative; flex: 1; min-height: 0; overflow: hidden; aspect-ratio: 1440 / 859; }
   .vt-ba__screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
   .vt-ba__handle { display: none; }
+
+  /* today, drawn: the name and its line on the left, the iPhone on the right. Sized in cqw so the poster
+     keeps its proportions from the stacked phone layout to the pinned desktop frame */
+  .vt-ba__url.is-app { display: inline-flex; align-items: center; justify-content: center; font-family: var(--vt-sans); font-weight: 600; letter-spacing: 0; }
+  .vt-ba__url.is-app .vt-ba__url-t { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+  .vt-ba__url-mark { width: 12px; height: 12px; flex: none; }
+  .vt-now {
+    container-type: inline-size;
+    background:
+      radial-gradient(46% 70% at 76% 58%, rgba(47, 128, 238, 0.34), rgba(47, 128, 238, 0.08) 58%, transparent 76%),
+      radial-gradient(60% 60% at 18% 30%, rgba(111, 168, 255, 0.08), transparent 70%),
+      linear-gradient(160deg, #0E2C52 0%, #0B2443 56%, #0A2140 100%);
+  }
+  .vt-now__brand { position: absolute; left: 8cqw; top: 50%; translate: 0 -50%; display: flex; flex-direction: column; align-items: flex-start; }
+  .vt-now__mark { width: 6.4cqw; height: 6.4cqw; filter: drop-shadow(0 0.6cqw 1.6cqw rgba(47, 128, 238, 0.5)); }
+  .vt-now__word {
+    margin-top: 2.2cqw; font-family: var(--vt-display); font-weight: 800; font-size: 10.4cqw; line-height: 0.86;
+    letter-spacing: -0.05em; color: var(--vt-light);
+  }
+  .vt-now__line {
+    margin-top: 2.4cqw; font-family: var(--vt-display); font-weight: 700; font-size: max(11px, 3.3cqw); line-height: 1.08;
+    letter-spacing: -0.03em; color: var(--vt-light); white-space: nowrap;
+  }
+  .vt-now__line em { font-style: normal; color: var(--vt-blue); }
+  /* the iPhone, whole, standing in its own light (about 50cqw tall: it fits both the 1440 x 859 and 1440 x 900 frames) */
+  .vt .vt-now__phone { --phone-w: 24cqw; position: absolute; right: 11cqw; top: 50%; translate: 0 -50%; }
 
   /* pinned desktop mode (class added by JS) */
   .vt-rb.is-pinned { background: var(--rb-v1); }

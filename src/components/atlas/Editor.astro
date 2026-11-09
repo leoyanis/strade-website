@@ -1,0 +1,194 @@
+---
+// The Atlas editor, taking a raw take apart and putting it back together: the playhead watches the take
+// and marks what goes, the retakes and silences collapse out of the timeline, music, captions and
+// graphics land, the preview stands its layers apart in 3D, and the finished reel plays.
+// After the scene on getatlas.site's homepage.
+//
+// variant="compact": the homepage, on that scene's own take (take_02.mov, 3:42 cut to 0:41). Its preview is the
+//                    Atlas reel built in code (AtlasReel), the same one the wheel card plays and the flight takes
+//                    apart, so the card lands in it unseen. It loops while it is on screen: the posted video,
+//                    back to the raw take, cut, built, posted. Once an edit is posted, the preview plays the real
+//                    finished video (take-02-final.mp4, getatlas.site's final.mp4), all of it, as that site's demo
+//                    does; a bar under the window shows how far the loop is through each stage.
+// variant="full":    the case study, pinned and scrubbed by the scroll, every layer in 3D, on Yanis's own take
+//                    (take_02.mov there too, 2:07 cut to 0:51; unchanged).
+// The motion lives in src/scripts/atlas-editor.ts; without JS (or with reduced motion) this markup is
+// the finished frame.
+import '../../styles/atlas-editor.css';
+import AtlasReel from './AtlasReel.astro';
+
+interface Props {
+  variant?: 'compact' | 'full';
+}
+const { variant = 'compact' } = Astro.props;
+const full = variant === 'full';
+const img = (f: string) => `/images/work/atlas/${f}`;
+
+// The raw take on the timeline, in units of footage: kept (k) and cut (c) pieces, 70 units in, 28 kept.
+// The proportions are drawn, not measured (getatlas.site's own editor draws its 3:42 take the same way): the
+// clock in the title bar says the real lengths (`take` below). atlas-editor.ts reads 70 as RAW.
+const vid: [string, number, string?][] = [
+  ['k', 4.2], ['c', 4, 'silence'], ['k', 3.6], ['c', 6, 'retake'], ['k', 4.4], ['c', 3, 'um'], ['k', 3.8],
+  ['c', 7.5, 'retake'], ['k', 4], ['c', 4, 'silence'], ['k', 3.6], ['c', 9, 'retake'], ['k', 4.4], ['c', 8.5, 'silence'],
+];
+let off = 0;
+const pieces = vid.map(([t, w, label]) => {
+  const p = { t, w, label, o: off };
+  off += w;
+  return p;
+});
+// The homepage's video track moves by transforms only (atlas-editor.css, .ae--compact; atlas-editor.ts writes them):
+// the loop zooms it out and in and opens and closes the cuts every lap, and widths laid the page out again on every
+// frame of that. Each piece rests where it sits in the finished edit, k kept units in, and the script moves it from
+// there. The case study's track keeps its widths.
+let kept = 0;
+const track = pieces.map((p) => {
+  const piece = { ...p, k: +kept.toFixed(2) };
+  if (p.t === 'k') kept += p.w;
+  return piece;
+});
+// what lands after the cut, in kept units (0 to 28). The homepage's chips are the finished video's own captions
+// track, in order: the hook card's two chunks, then the reel's five caption groups (AtlasReel.astro), each as wide
+// as its words need.
+const caps: [number, number, string][] = full
+  ? [
+      [0, 3.4, 'i built danny'], [3.6, 4.2, 'an ai story machine'], [8, 3.6, 'for anybody who'], [11.8, 3, "doesn't know"],
+      [15, 3.8, 'a story sequence'], [19, 3.4, '43 billion'], [22.6, 3.2, 'tokens later'],
+    ]
+  : [
+      [0, 2.6, 'how i'], [2.8, 4.8, 'make 6 figures'], [7.8, 3, 'a month'], [11, 3.8, 'with media'],
+      [15, 3.9, 'trafficking'], [19.1, 4.4, 'explained in'], [23.7, 4.3, '29 seconds'],
+    ];
+// the take's real lengths, in seconds, as the title bar's clock shows them: the homepage runs getatlas.site's
+// take_02.mov (3:42 cut to 0:41, as that site says), the case study Yanis's own (2:07 cut to 0:51).
+// atlas-editor.ts reads them off data-from / data-to, so the clock's count down is never out of step with the text
+const take = full ? { from: 127, to: 51 } : { from: 222, to: 41 };
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+const gfx: [number, number, string, string][] = [
+  [0, 6.6, 'title card', img('gfx-title.png')],
+  [15.4, 6.2, 'screen recording', img('gfx-screen.webp')],
+];
+const sfx = [3.6, 7.9, 11.6, 15.2, 19, 22.5];
+const wave = (n: number, seed: number) => {
+  let s = seed;
+  const r = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+  let d = '';
+  for (let i = 0; i < n; i++) {
+    const x = ((i + 0.5) / n) * 320;
+    const h = 2 + Math.abs(Math.sin(i * 0.37)) * 5 + r() * 3;
+    d += `M${x.toFixed(1)} ${(10 - h).toFixed(1)}V${(10 + h).toFixed(1)}`;
+  }
+  return d;
+};
+const steps = ['wrote down the words', 'cut retakes and silences', 'fixed the colours', 'picked the music', 'built the graphics', 'added captions and sound', 'checked the whole edit'];
+// the homepage tells the whole loop: the idea and the script are done before the take ([text, done already]).
+// Present tense, under "what atlas does": it describes what Atlas does with a sample take, not a log of a real post
+const homeSteps: [string, boolean][] = [
+  ['finds an idea that worked', true], ['writes the script in your voice', true], ['cuts retakes and silences', false],
+  ['picks the music', false], ['adds captions and graphics', false], ['checks the whole edit', false], ['posts to your accounts', false],
+];
+const shownSteps: [string, boolean][] = full ? steps.map((s) => [s, false]) : homeSteps;
+const label = full
+  ? 'The Atlas editor cutting a raw take: it marks the retakes and silences, cuts them, adds music, captions and graphics, shows every layer apart in 3D, then plays the finished video.'
+  : 'The Atlas editor with a finished sample video. It goes back to the raw take, marks the retakes and silences, cuts them, adds music, captions and graphics, and posts it again.';
+---
+
+<div class={`ae ae--${variant}`} data-ae={variant} role="img" aria-label={label}>
+  <div class="ae-top" aria-hidden="true">
+    <span class="ae-dots"><i></i><i></i><i></i></span>
+    <span class="ae-file"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v4h4" /></svg>take_02.mov</span>
+    <span class="ae-status"><svg class="ae-spark" viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z" /></svg><span data-ae-st>{full ? 'your edit is ready' : 'posted to your accounts'}</span></span>
+    {/* the clock: a hidden copy sizes it, the number shown is laid over it (atlas-editor.css), so counting down a new
+        number nearly every frame of the cut lays out only that number, not the page (the editor's bars are flex and
+        grid items, which can never be layout boundaries) */}
+    <span class="ae-dur"><b><span class="ae-dur__ph">{clock(take.to)}</span><span class="ae-dur__n" data-ae-dur data-from={take.from} data-to={take.to}>{clock(take.to)}</span></b><small>from {clock(take.from)}</small></span>
+    {full && <span class="ae-export">export</span>}
+  </div>
+
+  <div class="ae-side" aria-hidden="true">
+    <div class="ae-msg ae-msg--me" data-ae-me>{full ? 'cut this into a short. punchy captions, upbeat music' : 'make this a short. punchy captions, upbeat music, then post it'}</div>
+    {full && (
+      <>
+        <div class="ae-msg ae-msg--ai" data-ae-say><i></i><p>Cut 4 retakes and 3 silences.</p></div>
+        <div class="ae-msg ae-msg--ai" data-ae-say><i></i><p>Picked an upbeat track that fits the pace.</p></div>
+        <div class="ae-msg ae-msg--ai" data-ae-say><i></i><p>Built the title card and the captions.</p></div>
+      </>
+    )}
+    <div class="ae-steps">
+      <b class="ae-steps__h"><svg class="ae-spark" viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z" /></svg>{full ? 'what atlas did' : 'what atlas does'}</b>
+      <ol>
+        {shownSteps.map(([s, done]) => (
+          <li data-ae-step={done ? 'done' : ''}><i><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" /></svg></i>{s}</li>
+        ))}
+      </ol>
+    </div>
+    {full && <div class="ae-msg ae-msg--ai ae-msg--ok" data-ae-say><i></i><p>Your video is ready. Want a version with another hook?</p></div>}
+  </div>
+
+  <div class="ae-mid" aria-hidden="true">
+    <div class="ae-mon" data-ae-mon>
+      {full ? (
+        <div class="ae-3d">
+          <div class="ae-ly ae-ly--foot" style="--i:0"><img src={img('raw.webp')} alt="" width="540" height="960" loading="lazy" decoding="async" draggable="false" /><span class="ae-lab">your take, cut and graded</span></div>
+          <div class="ae-ly ae-ly--gfx" style="--i:1"><img class="ae-gfx-title" src={img('gfx-title.png')} alt="" width="520" height="145" loading="lazy" draggable="false" /><span class="ae-lab">graphics</span></div>
+          <div class="ae-ly ae-ly--cap" style="--i:2"><span class="ae-capt">an ai story machine</span><span class="ae-lab">captions</span></div>
+          <div class="ae-ly ae-ly--aud" style="--i:3"><svg viewBox="0 0 320 20" preserveAspectRatio="none"><path d={wave(64, 11)} /></svg><span class="ae-lab">music and sound</span></div>
+          <div class="ae-ly ae-ly--fin"><video src={img('reel-loop.mp4')} poster={img('reel-poster.webp')} muted loop playsinline preload="none" data-ae-video></video></div>
+        </div>
+      ) : (
+        <>
+          {/* the real finished video, in front only while an edit is posted (atlas-final.ts). It comes first so the
+              reel covers it the rest of the time: rendered under the reel rather than hidden, because iOS will not
+              start a muted video that is hidden. One element, and no src or poster in the markup: they are set once
+              the editor is near the screen, so nothing is fetched before then, and nothing at all without JS, with
+              reduced motion or with ?still (the reel is the finished frame there).
+              data-dur is the file's length in seconds (ffprobe: 9.6): the editor's posted stage lasts exactly that, so
+              the whole video plays once a lap. No loop attribute: it plays once from frame one, and if the editor's
+              clock ever falls behind it, it holds its last frame rather than starting over under the cut */}
+          <div class="ae-fin">
+            <video data-ae-final data-src={img('take-02-final.mp4')} data-poster={img('take-02-final.webp')} data-dur="9.6" width="540" height="960" muted playsinline preload="none" disablepictureinpicture disableremoteplayback></video>
+          </div>
+          <AtlasReel variant="mon" />
+        </>
+      )}
+    </div>
+  </div>
+
+  <div class="ae-tl" aria-hidden="true">
+    <div class="ae-ruler"></div>
+    {full && (
+      <div class="ae-row ae-row--gfx"><u>graphics</u><div class="ae-trk">
+        {gfx.map(([l, w, t, src]) => <span class="ae-gb" style={`--l:${l};--w:${w}`}><img src={src} alt="" loading="lazy" draggable="false" />{t}</span>)}
+      </div></div>
+    )}
+    <div class="ae-row ae-row--cap"><u>captions</u><div class="ae-trk">
+      {caps.map(([l, w, t]) => <span class="ae-cw" style={`--l:${l};--w:${w}`}>{t}</span>)}
+    </div></div>
+    <div class="ae-row ae-row--vid"><u>video</u><div class="ae-trk ae-trk--vid">
+      {full
+        ? pieces.map((p) => p.t === 'k'
+          ? <span class="ae-k" style={`--w:${p.w};--o:${p.o}`}></span>
+          : <span class="ae-c" style={`--w:${p.w};--o:${p.o}`}><b>{p.label}</b></span>)
+        : track.map((p) => p.t === 'k'
+          /* the piece is the window, its <i> the footage: the window scales with the zoom and the <i> scales back,
+             so the thumbnails never squash (atlas-editor.css) */
+          ? <span class="ae-k" style={`--w:${p.w};--o:${p.o};--k:${p.k}`}><i></i></span>
+          : <span class="ae-c" style={`--w:${p.w};--o:${p.o};--k:${p.k}`}><i><b>{p.label}</b></i></span>)}
+    </div></div>
+    <div class="ae-row ae-row--mus"><u>music</u><div class="ae-trk"><span class="ae-mus"><svg viewBox="0 0 320 20" preserveAspectRatio="none"><path d={wave(128, 7)} /></svg></span><span class="ae-mchip">upbeat, picked by atlas</span></div></div>
+    {full && (
+      <div class="ae-row ae-row--sfx"><u>sound</u><div class="ae-trk">{sfx.map((l) => <span class="ae-sx" style={`--l:${l}`}></span>)}</div></div>
+    )}
+    <span class="ae-ph" data-ae-ph></span>
+  </div>
+
+  {!full && (
+    /* the playback bar under the window: one segment per stage of the loop, the current one filling as it plays,
+       and the stage's name under it. atlas-editor.ts builds the segments from the timeline's own phases and only
+       then unhides it, so without JS, with reduced motion and with ?still there is no bar (there is no loop) */
+    <div class="ae-play" aria-hidden="true" hidden data-ae-play>
+      <span class="ae-play__bar"></span>
+      <span class="ae-play__cap"><b></b></span>
+    </div>
+  )}
+</div>

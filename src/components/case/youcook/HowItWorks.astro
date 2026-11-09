@@ -40,7 +40,7 @@ const nutrition = [
 ];
 ---
 
-<section class="how" id="yc-how">
+<section class="how" id="yc-how" data-offscreen-pause>
   <div class="how__pin">
     <div class="how__grid">
       <div class="how__head">
@@ -553,7 +553,16 @@ const nutrition = [
       setStep(0);
 
       const counter = { p: 0 };
-      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power2.out' }, onUpdate: () => setStep(tl.time()) });
+      // The nav counts the camera view as a dark band while it shows (youcook.astro navBands, hides). Its fade moves
+      // nothing an observer sees in time, so the nav is told on each frame its opacity changes (Base.astro 'nav:moved');
+      // without it the dark pools stayed under the links as dark columns on the pink page after the view had gone.
+      const nav = document.getElementById('site-nav');
+      let phoneO = -1;
+      const phoneMoved = () => {
+        const o = +gsap.getProperty(phone, 'opacity');
+        if (o !== phoneO) { phoneO = o; nav?.dispatchEvent(new CustomEvent('nav:moved', { detail: phone })); }
+      };
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power2.out' }, onUpdate: () => { setStep(tl.time()); phoneMoved(); } });
       tl.to(picks, { scale: 1.12, duration: 0.35, stagger: 0.06, ease: 'back.out(3)' }, 0)
         .to(others, { autoAlpha: 0, scale: 0.6, duration: 0.5, stagger: 0.02 }, 0.45)
         .to(phone, { xPercent: -40, yPercent: 6, rotate: -16, autoAlpha: 0, scale: 0.85, duration: 0.8, ease: 'power2.in' }, 0.5);

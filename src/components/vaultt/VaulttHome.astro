@@ -1,0 +1,100 @@
+---
+/**
+ * VaulttHome: the homepage's Vaultt case study (#mq-vaultt). Its world is a fixed layer (VaulttWorld, in .themes)
+ * that fades in over Atlas's as the intro arrives (src/scripts/backdrops.ts) and never moves. In front of it, a stage
+ * that holds still for the whole act while the scroll moves four panels through it, one at a time (vaultt-home.ts):
+ *   the intro: the name, one line, both stores and the case study link beside the phones (an iPhone with the live
+ *   Network map and the Liquid Glass bar, an Android behind it with the pill);
+ *   then three numbers from VAULTT_NUMBERS, each beside drawn pieces of the app (VaulttCards, no phone around them):
+ *   builders with a fanned stack of profile cards, projects with a spread of project cards by kind, job applications
+ *   with job cards turning to Applied.
+ * The section itself is only the act's length of scroll, and everything on the stage follows it: across each switch
+ * the panel showing slides up and scatters while the next rises from the bottom and gathers (a page stopped part-way
+ * stays part-way, scrolling back runs it backwards), and after the jobs' hold their panel scrolls away with the page.
+ * Without JS (no html.vx-stage, see the script below) the panels simply sit one after another in the page, every item
+ * in place. No props. (The feedback and connection numbers stay in VAULTT_NUMBERS for the case study.)
+ */
+import { VAULTT_NUMBERS as N } from '../../data/work';
+import PhoneFrame from './PhoneFrame.astro';
+import NetworkScreen from './NetworkScreen.astro';
+import StoreButtons from './StoreButtons.astro';
+import VaulttNumber from './VaulttNumber.astro';
+import VaulttCards from './VaulttCards.astro';
+import VaulttMark from './VaulttMark.astro';
+import './vaultt-home.css';
+
+const beats = [
+  { n: N.builders, beat: 'builders', label: 'builders on Vaultt', cards: 'builders' },
+  { n: N.projects, beat: 'projects', label: N.projects.label, cards: 'projects' },
+  { n: N.applications, beat: 'jobs', label: N.applications.label, cards: 'jobs' },
+] as const;
+---
+
+{/* Two gates, set here, before the section is parsed, so its first paint already has the layout and the state the
+    page script starts from (the module script that drives them runs only after GSAP has loaded):
+    - html.vx-stage: the panels sit on the held-still stage (vaultt-home.css). Set whenever JS runs, reduced motion
+      included (its switches are simply instant). If no script has taken the stage over after 8 s (the page's JS
+      failed), it is dropped and the panels go back into the page, one after another.
+    - html.vx-live: the live job card starts on Apply (vaultt-cards.css, vaultt-cards.ts). A class set by the module
+      came after the first paint, and a reload part-way down showed Applied, then Apply, then Applied. Reduced motion
+      and ?still keep the finished state. Dropped after 8 s too if no script took the card over.
+    (This comment is an Astro one, so it stays out of the page; the script itself ships as written.) */}
+<script is:inline>
+  // Vaultt's gates: html.vx-stage (the held-still stage) and html.vx-live (the live job card), before first paint
+  (function () {
+    var h = document.documentElement;
+    h.classList.add('vx-stage');
+    var calm = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
+    if (!calm) h.classList.add('vx-live');
+    setTimeout(function () {
+      if (!h.classList.contains('vx-stage-on')) h.classList.remove('vx-stage');
+      if (!h.classList.contains('vx-live-on')) h.classList.remove('vx-live');
+    }, 8000);
+  })();
+</script>
+
+<section id="mq-vaultt" class="act vx" aria-labelledby="vx-h">
+  <div class="vx__stage" data-vx-stage>
+    <div class="vx__panel vx__panel--intro" data-vx-panel="intro">
+      <div class="container vx__grid">
+        <header class="vx__intro">
+          <div class="vx__intro-in" data-vx-intro>
+            {/* no eyebrow: the name, the line, the stores and the phones say it (Atlas and Endless Pursuit carry no case-study label either) */}
+            <h2 class="vx__name" id="vx-h"><VaulttMark class="vx__mark" /><span class="vx__word">Vaultt</span></h2>
+            <p class="vx__tag">The network for <em>builders.</em></p>
+            <p class="vx__line">Post what you're making, from games and films to code and art. Get real feedback and find people to build with.</p>
+            <div class="vx__ctas"><StoreButtons /></div>
+            <div class="vx__foot">
+              <a class="vx__case" href="/work/vaultt">Open the case study <i aria-hidden="true">→</i></a>
+              <span class="vx__credit">Built from zero with founder Liam Jeffery</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="vx__device" aria-hidden="true" data-vx-device>
+          <div class="vx__stick">
+            <div class="vx__tilt">
+              <div class="vx__phones" data-vx-phones>
+                <PhoneFrame platform="android" class="vx__android"><NetworkScreen platform="android" live={false} seed={11} connections={64} following={7} /></PhoneFrame>
+                <PhoneFrame platform="ios" class="vx__iphone"><NetworkScreen platform="ios" seed={7} managed /></PhoneFrame>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {beats.map((b) => (
+      <div class="vx__panel vx__panel--beat" data-vx-panel={b.beat}>
+        <div class="container">
+          <div class="vx__beat" data-vx-beat={b.beat}>
+            <div class="vx__blk">
+              <VaulttNumber n={b.n} beat={b.beat} label={b.label} mode="chaos" />
+              <div class="vx__vis"><VaulttCards kind={b.cards} /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

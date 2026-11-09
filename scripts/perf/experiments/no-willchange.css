@@ -1,0 +1,2 @@
+/* layer count: every will-change dropped (3D transforms still promote), to see what the ~300 layers cost */
+*, *::before, *::after { will-change: auto !important; }

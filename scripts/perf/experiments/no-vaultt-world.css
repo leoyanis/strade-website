@@ -1,0 +1,2 @@
+/* the Vaultt world canvas off (its loop still runs in JS): its GPU and raster share */
+.theme--vaultt canvas { display: none !important; }

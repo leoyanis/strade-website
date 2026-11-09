@@ -1,0 +1,11 @@
+---
+/**
+ * VaulttWorld: Vaultt's world on the homepage, a fixed theme layer (it goes inside `.themes`, after Atlas's layer and
+ * before `.theme--ep`): vaultt.io navy with the living network on a canvas, the whole screen. It does not move: it
+ * fades in over Atlas's world as Vaultt's intro arrives, and Endless Pursuit's fades in over it once the jobs have
+ * unfolded (src/scripts/backdrops.ts). vaultt-home.ts drives the canvas. No props.
+ */
+---
+<div class="theme theme--vaultt" aria-hidden="true">
+  <canvas class="vx-world" data-vx-net data-look="world" data-managed="1"></canvas>
+</div>

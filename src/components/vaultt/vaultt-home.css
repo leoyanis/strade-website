@@ -1,0 +1,213 @@
+/* ================================================================
+   VAULTT on the homepage (#mq-vaultt): vaultt.io's world.
+   Navy #0C2748, light #E8F1FF, blue #6FA8FF, Bricolage Grotesque for
+   display, Hanken Grotesk for text (vaultt.io's own tokens, read
+   2026-11-07). The phones and the drawn cards are the app: charcoal and Inter.
+   ================================================================ */
+
+/* ---------- the two fonts, self-hosted subsets (scripts/fonts/subset-vaultt.sh makes them) ----------
+   Only this section uses them, and only the homepage loads this file (the case study loads Google's full faces
+   through its own link). Bricolage holds just the glyphs the section sets in it plus every digit and ". , k +";
+   Hanken holds Basic Latin and the typographic apostrophe. scripts/fonts/check-vaultt.mjs fails if the page sets
+   a character either one lacks. Both are variable: Bricolage keeps opsz (the numerals) and wght, Hanken wght. */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('./fonts/bricolage-vaultt.woff2') format('woff2');
+  font-weight: 200 800;
+  font-stretch: 100%;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('./fonts/hanken-vaultt.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- the world: a fixed full-screen layer that fades (src/scripts/backdrops.ts) ----------
+   It never moves: it starts invisible and fades in over Atlas's world as Vaultt's intro arrives, and Endless
+   Pursuit's world fades in over it once the jobs have unfolded. Opaque, so the sky never shows through a fade.
+   `.themes .theme--vaultt`, not `.theme--vaultt`: home.css loads after this file and its `.theme` rule (clip-path:
+   inset(100% 0 0 0)) would otherwise hide the layer. 100lvh, not 100% of .themes: .themes is fixed to the screen,
+   so a phone's URL bar showing or hiding resized it, and with it the world's canvas (a fresh backing store of up to
+   25 MB, mid-scroll); 100lvh is the large screen, which never changes. */
+.themes .theme--vaultt {
+  clip-path: none; inset: auto; left: 0; right: 0; top: 0; height: 100lvh; opacity: 0;
+  background:
+    radial-gradient(80% 46% at 66% 0%, rgba(111, 168, 255, 0.12), rgba(111, 168, 255, 0.03) 55%, transparent 80%),
+    linear-gradient(180deg, #0C2748 0, #0C2748 62%, #0B2443 100%);
+}
+.themes .theme--vaultt .vx-world { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+html:not(.has-themes) #mq-vaultt { background: #0C2748; }
+
+/* ---------- the section ---------- */
+.vx {
+  --vx-blue: #6FA8FF; --vx-light: #E8F1FF; --vx-soft: rgba(232, 241, 255, 0.66); --vx-faint: rgba(232, 241, 255, 0.42);
+  --vx-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
+  --vx-sans: 'Hanken Grotesk', 'Inter', system-ui, sans-serif;
+  --vx-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* the iPhone's width: as tall as the screen allows, never huge */
+  --vx-pw: clamp(232px, min(23vw, calc((100svh - 190px) * 0.478)), 318px);
+  --vx-ph: calc(var(--vx-pw) * 2.0927);
+  /* --vx-k is one point of the drawn cards (VaulttCards.astro): the right column's width over the cards' 470. Each
+     number block is as tall as its cards (vaultt-home.ts reads every size from the layout, never from here) */
+  --vx-k: min(1px, calc((min(100vw, 1120px) - 184px) * 0.53 / 470));
+  --vx-vis-h: calc(var(--vx-k) * 400);
+  --vx-blk: var(--vx-vis-h);
+  /* The stage (html.vx-stage, below): the band at the top left to the site nav and the margin at the bottom; how much
+     scroll each panel's switch takes (scrubbed: the panels move with the scroll) and how much it then holds still
+     (short: Vaultt must never look like a long scroll), vaultt-home.ts SWITCH and HOLD; and Atlas's bottom padding
+     (home.css .h-mq--atlas: 210px, 84px on phones), which the act's length takes off so that Endless Pursuit's first
+     lines come up just after the jobs start to leave. vaultt-home.ts measures the real points from the layout; these
+     only size the scroll. */
+  --vx-top: 84px; --vx-bottom: 16px;
+  --vx-switch: 30lvh;
+  --vx-hold: 36lvh;
+  --vx-atlas-pad: 210px;
+  /* how much earlier than Atlas's last line reaching the top the intro starts to come in: a whole switch
+     (vaultt-home.ts `lead`); the act's length takes it off too */
+  --vx-lead: var(--vx-switch);
+  /* The stars-only beat (Yanis, 2026-11-08: "after the job applications and it switches to the stars, it's just the
+     stars for a moment, just slowly drifting without anything on the screen, and then the endless pursuit thing
+     appears"): the scroll between the jobs leaving the top of the screen and Endless Pursuit's first thing coming up
+     at its bottom. */
+  --vx-beat: 50lvh;
+  /* What follows the jobs' hold before Endless Pursuit's section begins: the jobs' way off the screen (from the
+     intro's line, where the act's points are measured from, to the bottom of the jobs' block: half the cards' and the
+     phones' heights, both centred in the same panel), the beat, and a screen, less 240px: about how far into its
+     section Endless Pursuit first shows (its words and its phone's top layer) and the belt's ease into the page's
+     speed, tuned so the beat as seen measures about half a screen (beat.mjs, "seen beat"). vaultt-home.ts and
+     ep-section.ts read the real points from the layout; this only places the section. (It used to be 66lvh,
+     Endless Pursuit coming up under the leaving jobs.) */
+  --vx-tail: calc((var(--vx-blk) + var(--vx-ph)) / 2 + var(--vx-beat) + 100lvh - 240px);
+  /* z-index 3, over Endless Pursuit's section (2): its star sky reaches up over the jobs while they leave
+     (ep-section.css .ep3-sky), and the stars must pass behind the cards, never over them */
+  position: relative; z-index: 3; color: var(--vx-light); font-family: var(--vx-sans);
+}
+
+/* ---------- without the stage (no JS, or its script never ran): the panels one after another in the page ---------- */
+html:not(.vx-stage) .vx { padding: 100px 0 15svh; }
+html:not(.vx-stage) .vx__panel--beat { margin-top: 25svh; }
+
+/* ---------- the stage ----------
+   Yanis, 2026-11-08: "the bg should stay sticky and the sections that i scroll through, in vaultt specifically, should
+   be sticky things with the animation not literal objects i scroll through". The section is only the act's length of
+   scroll: a switch and a hold per panel, then the jobs leaving with the page as Endless Pursuit comes up
+   (vaultt-home.ts). The stage is fixed to the screen and holds still; it shows only while a panel does (.is-on, set by
+   the script). Each panel fills the space under the nav with its content in the middle, and is moved and formed by the
+   script, for the scroll (a transform on the panel, its items' own styles); hidden panels are not painted. Fixed
+   rather than sticky: nothing of it scrolls in with the section's top edge (the intro rises in its own switch), and
+   the jobs leave by the script moving their panel up 1:1 with the scroll.
+   100lvh: a phone's URL bar showing or hiding never resizes it; the panels sit in the small screen (100svh), so
+   nothing ever hides under the bar. */
+.vx-stage .vx { height: calc(4 * (var(--vx-switch) + var(--vx-hold)) + var(--vx-tail) - var(--vx-atlas-pad) - var(--vx-lead)); padding: 0; }
+.vx-stage .vx__stage { position: fixed; left: 0; right: 0; top: 0; height: 100lvh; pointer-events: none; visibility: hidden; }
+.vx-stage .vx__stage.is-on { visibility: visible; }
+.vx-stage .vx__panel {
+  position: absolute; left: 0; right: 0; top: var(--vx-top); height: calc(100svh - var(--vx-top) - var(--vx-bottom));
+  display: flex; flex-direction: column; justify-content: center; visibility: hidden; will-change: transform;
+}
+.vx-stage .vx__panel.is-shown { visibility: visible; }
+/* The intro's links stay in the tab order while its panel is away (vaultt-home.ts brings the panel back when one of
+   them takes the focus), so its copy is only see-through then, and nothing in a panel is clickable unless it shows. */
+.vx-stage .vx__panel--intro { visibility: visible; }
+.vx-stage .vx__panel--intro:not(.is-shown) .vx__device { visibility: hidden; }
+.vx-stage .vx__panel--intro:not(.is-shown) .vx__intro-in { opacity: 0; }
+.vx-stage .vx__panel.is-shown .vx__intro-in :is(a, button) { pointer-events: auto; }
+
+/* intro */
+.vx__grid {
+  display: grid; grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+  grid-template-areas: "intro device"; column-gap: 40px; align-items: center;
+}
+.vx__intro { grid-area: intro; display: flex; align-items: center; }
+.vx__intro-in { max-width: 470px; }
+.vx__name {
+  display: flex; align-items: center; gap: 0.17em;
+  font-family: var(--vx-display); font-weight: 700; font-size: clamp(64px, 8.4vw, 128px); letter-spacing: -0.045em; line-height: 0.9;
+  font-optical-sizing: auto;
+}
+.vx__mark { width: 0.6em; height: 0.6em; flex: none; margin-top: 0.02em; }
+.vx__word { display: inline-block; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.vx__tag { margin-top: 22px; font-family: var(--vx-display); font-weight: 600; font-size: clamp(26px, 2.5vw, 38px); letter-spacing: -0.03em; line-height: 1.06; }
+.vx__tag em { font-style: normal; color: var(--vx-blue); }
+.vx__line { margin-top: 16px; max-width: 430px; font-size: clamp(16px, 1.2vw, 18px); line-height: 1.55; color: var(--vx-soft); text-wrap: pretty; }
+.vx__ctas { margin-top: 30px; }
+.vx__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin-top: 26px; }
+.vx__case { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: var(--vx-blue); }
+/* the arrow is Inter's (neither Google's latin Hanken nor the subset has U+2192), named here so the font check
+   sees it set in the family that has it */
+.vx__case i { font-style: normal; font-family: 'Inter', system-ui, sans-serif; transition: transform 0.4s var(--ease-out-expo); }
+.vx__case:hover i { transform: translateX(6px); }
+.vx__case:focus-visible { outline: 2px solid var(--vx-blue); outline-offset: 4px; border-radius: 4px; }
+.vx__credit { font-size: 13.5px; color: var(--vx-faint); }
+
+/* the phones: beside the copy in the intro, the network's hub behind them (vaultt-home.ts keeps the hub in one place
+   for the whole act) */
+.vx__device { grid-area: device; position: relative; z-index: 2; align-self: center; }
+/* the iPhone sits toward the right of its column, so the Android peeking out on its left never reaches the copy */
+.vx__stick { position: relative; height: var(--vx-ph); display: flex; justify-content: flex-end; padding-right: 2%; perspective: 1600px; }
+.vx__tilt { position: relative; transform-style: preserve-3d; will-change: transform; }
+.vx__phones { --vx-fan: 1; position: relative; width: var(--vx-pw); height: var(--vx-ph); transform-style: preserve-3d; }
+.vx__phones .vx__iphone { --phone-w: var(--vx-pw); position: relative; z-index: 2; transform: translate3d(0, calc((1 - var(--vx-fan)) * 70px), 0); }
+/* `.vx .vx__phones`: PhoneFrame's scoped `.vp { position: relative }` weighs the same as two classes, and since
+   /work/vaultt also uses the phones their CSS sits in a shared chunk that loads after this file, so the Android
+   fell back into the flow above the iPhone */
+.vx .vx__phones .vx__android {
+  --phone-w: calc(var(--vx-pw) * 0.86);
+  position: absolute; z-index: 1; left: 7%; top: 9%;
+  transform: translate3d(calc(var(--vx-fan) * -50%), calc(var(--vx-fan) * 6%), 0) rotate(calc(var(--vx-fan) * -8deg));
+  transform-origin: 50% 80%;
+}
+/* the Android sits further back: a shade of the night over it */
+.vx__phones .vx__android::after { content: ''; position: absolute; inset: 0; z-index: 60; border-radius: inherit; background: rgba(5, 16, 32, 0.34); pointer-events: none; }
+
+/* ---------- the numbers: each beside its cards, a panel of its own ---------- */
+.vx__beat { position: relative; z-index: 1; }
+.vx__blk { height: var(--vx-blk); display: grid; grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr); column-gap: 40px; align-items: center; }
+/* the number above the cards' column edge: its scattered letters may cross into it, never under it */
+.vx__beat .vn { position: relative; z-index: 2; width: fit-content; }
+.vx__beat .vn__num { white-space: nowrap; }
+.vx__vis { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; height: 100%; }
+
+/* ---------- phones and tablets: intro, then the phones, then the numbers (each above its cards) ---------- */
+@media (max-width: 1023px) {
+  .vx { --vx-k: min(1px, calc((100vw - 136px) * 0.53 / 470)); }
+}
+@media (max-width: 900px) {
+  .vx {
+    --vx-pw: min(62vw, 268px);
+    /* the cards take the whole column (20px gutters), a little smaller than on desktop */
+    --vx-k: min(0.8px, calc((100vw - 40px) / 470));
+    --vx-num-h: 132px;
+    --vx-blk: calc(var(--vx-num-h) + 18px + var(--vx-vis-h));
+    --vx-top: 76px;
+    --vx-switch: 28lvh;
+    --vx-hold: 30lvh;
+    --vx-atlas-pad: 84px;
+    /* one column: the intro rests at the top of its panel, so the jobs' way off is from there to their block's bottom
+       (the panel's middle plus half the block), and Endless Pursuit first shows with its headline, 72px into its
+       section (with the belt's ease and the words' first fade, 139px in all) */
+    --vx-tail: calc((100svh - var(--vx-top) - var(--vx-bottom) + var(--vx-blk)) / 2 + var(--vx-beat) + 100lvh - 139px);
+  }
+  html:not(.vx-stage) .vx { padding: 40px 0 12svh; }
+  html:not(.vx-stage) .vx__panel--beat { margin-top: 22svh; }
+  .vx__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "device"; }
+  .vx__device { margin: 48px 0 0; }
+  /* On the stage the intro starts at the top of its panel and the phones come up under it, cut by the bottom of a
+     short screen: the copy and the phones together are taller than a phone's screen, and shrunk to fit, the phones
+     would be about 170px wide, too small to read their map. */
+  .vx-stage .vx__panel--intro { justify-content: flex-start; }
+  .vx-stage .vx__device { margin-top: 26px; }
+  .vx__stick { justify-content: center; padding-right: 0; }
+  .vx .vx__phones .vx__android { left: 4%; transform: translate3d(calc(var(--vx-fan) * -40%), calc(var(--vx-fan) * 7%), 0) rotate(calc(var(--vx-fan) * -8deg)); }
+  .vx__blk { grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--vx-num-h) var(--vx-vis-h); row-gap: 18px; align-items: start; }
+  .vx__beat .vn { align-self: end; }
+  .vx__vis { height: var(--vx-vis-h); }
+}
+@media (max-width: 420px) {
+  .vx__name { font-size: 64px; }
+  .vx__tag { font-size: 27px; }
+}

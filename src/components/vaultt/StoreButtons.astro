@@ -1,0 +1,66 @@
+---
+/**
+ * StoreButtons: "Download on the App Store" and "Get it on Google Play", in vaultt.io's own badge
+ * style (white, 12px radius, dark ink). No Beta anywhere: the iPhone app is out of beta.
+ *
+ * Props
+ * - appStore?:  App Store URL (default VAULTT_LINKS.appStore)
+ * - playStore?: Google Play URL (default VAULTT_LINKS.playStore)
+ * - size?:      'md' (default, 50px tall) or 'sm' (42px)
+ * - tone?:      'light' (default, white badges for dark pages) or 'dark' (near-black badges for light pages)
+ * - class?:     extra classes on the row
+ *
+ * Both links open in a new tab. Hover lifts a badge 2px.
+ */
+import { VAULTT_LINKS } from '../../data/work';
+
+interface Props {
+  appStore?: string;
+  playStore?: string;
+  size?: 'md' | 'sm';
+  tone?: 'light' | 'dark';
+  class?: string;
+}
+const { appStore = VAULTT_LINKS.appStore, playStore = VAULTT_LINKS.playStore, size = 'md', tone = 'light', class: cls = '' } = Astro.props;
+---
+
+<div class:list={['vs-stores', `vs-stores--${size}`, `vs-stores--${tone}`, cls]}>
+  <a class="vs-store" href={appStore} target="_blank" rel="noopener" aria-label="Download Vaultt on the App Store">
+    <svg class="vs-store__logo" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M16.365 1.43c0 1.14-.42 2.2-1.12 2.98-.76.86-2 1.52-3.02 1.44-.13-1.1.44-2.27 1.1-3 .74-.83 2.03-1.45 3.04-1.42zM20.5 17.2c-.55 1.27-.82 1.84-1.53 2.97-.99 1.57-2.39 3.53-4.11 3.54-1.53.01-1.92-.99-4-1-2.08-.01-2.51.98-4.04.99-1.72.02-3.03-1.79-4.02-3.36C-.02 16.9-.3 11.7 1.9 8.98 2.92 7.7 4.52 6.9 6.24 6.9c1.75 0 2.85 1 4.29 1 1.4 0 2.25-1 4.28-1 1.53 0 3.16.83 4.32 2.27-3.8 2.08-3.18 7.5.37 8.05z" />
+    </svg>
+    <span class="vs-store__text"><small>Download on the</small><b>App Store</b></span>
+  </a>
+  <a class="vs-store" href={playStore} target="_blank" rel="noopener" aria-label="Get Vaultt on Google Play">
+    <svg class="vs-store__logo" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#00D2FF" d="M3.6 2.1C3.4 2.3 3.3 2.6 3.3 3v18c0 .4.1.7.3.9l10.1-9.9L3.6 2.1z" />
+      <path fill="#00E676" d="M3.6 2.1 14.8 8.6l2.8-2.8L5.9 1.3C5 .8 4.2 1 3.6 2.1z" />
+      <path fill="#FFC400" d="m17.6 5.8-2.8 2.8 2.9 2.9 3.6-2c1-.6 1-2.1 0-2.7l-3.7-1z" />
+      <path fill="#FF3D00" d="m3.6 21.9 11.2-6.5-2.9-2.9L3.6 21.9z" />
+    </svg>
+    <span class="vs-store__text"><small>Get it on</small><b>Google Play</b></span>
+  </a>
+</div>
+
+<style>
+  .vs-stores { display: flex; flex-wrap: wrap; gap: 10px; }
+  .vs-store {
+    --h: 50px;
+    display: inline-flex; align-items: center; gap: 10px; height: var(--h); padding: 0 18px 0 15px; border-radius: 12px;
+    background: #fff; color: #0b1220; text-decoration: none;
+    box-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .vs-store:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(111, 168, 255, 0.28); }
+  .vs-store:focus-visible { outline: 2px solid #6FA8FF; outline-offset: 3px; }
+  .vs-store__logo { width: 24px; height: 24px; flex: none; }
+  .vs-store__text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; font-family: 'Hanken Grotesk', 'Inter', system-ui, sans-serif; }
+  .vs-store__text small { font-size: 10.5px; font-weight: 500; opacity: 0.72; letter-spacing: 0.01em; }
+  .vs-store__text b { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; }
+  .vs-stores--sm .vs-store { --h: 42px; padding: 0 14px 0 12px; gap: 8px; border-radius: 10px; }
+  .vs-stores--sm .vs-store__logo { width: 20px; height: 20px; }
+  .vs-stores--sm .vs-store__text small { font-size: 9.5px; }
+  .vs-stores--sm .vs-store__text b { font-size: 15px; }
+  .vs-stores--dark .vs-store { background: #0b1220; color: #fff; box-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+  @media (prefers-reduced-motion: reduce) { .vs-store { transition: none; } }
+</style>

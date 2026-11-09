@@ -4,47 +4,7 @@
    Builds on the tokens in global.css.
    ================================================================ */
 
-/* ---------- NAV ---------- */
-#site-nav {
-  transition: background 0.3s, backdrop-filter 0.3s, border-color 0.3s;
-  border-bottom: 1px solid transparent;
-}
-#site-nav.is-scrolled {
-  background: rgba(10, 10, 10, 0.72);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom-color: var(--border);
-  pointer-events: auto;
-}
-.nav-brand {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
-  color: var(--text-primary);
-}
-.nav-brand img {
-  width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
-  border: 1px solid var(--border-hover);
-}
-.nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a {
-  font-size: 13px; font-weight: 500; color: var(--text-secondary);
-  transition: color 0.2s; padding: 12px 0;
-}
-.nav-links a:hover, .nav-links a[aria-current='page'] { color: var(--text-primary); }
-.nav-links .nav-free { color: var(--cyan); }
-.nav-links .nav-icon { display: inline-flex; padding: 10px 0; }
-.nav-links .nav-book {
-  color: var(--bg-base); background: var(--cyan);
-  padding: 8px 16px; border-radius: 999px; font-weight: 600;
-}
-.nav-links .nav-book:hover { color: var(--bg-base); box-shadow: 0 0 24px var(--cyan-glow); }
-@media (max-width: 767px) {
-  #site-nav { padding: 0 16px; }
-  .nav-brand span { display: none; }
-  .nav-links { gap: 18px; }
-  .nav-links .nav-icon { display: none; }
-  .nav-links .nav-book { padding: 7px 12px; }
-}
+/* ---------- NAV: src/styles/nav.css (the corner pools, the ink and its light/dark tones) ---------- */
 
 /* ---------- SOCIAL BUTTONS ---------- */
 .social-row { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -53,9 +13,11 @@
   font-size: 13px; font-weight: 500; color: var(--text-primary);
   padding: 9px 14px; border-radius: 999px;
   border: 1px solid var(--border-hover); background: rgba(255,255,255,0.02);
-  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  transition: border-color 0.2s, background 0.2s, translate 0.2s;
 }
-.social-btn:hover { border-color: #555; background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+/* the lift is the translate property, not transform: GSAP reveals these buttons with transform, and a CSS transition on
+   it left them 16px down (see .btn-primary in global.css) */
+.social-btn:hover { border-color: #555; background: rgba(255,255,255,0.05); translate: 0 -1px; }
 .social-btn.is-ig:hover { border-color: #e1306c; }
 .btn-ghost {
   display: inline-flex; align-items: center; gap: 10px;
@@ -81,14 +43,74 @@
 .sf-col h4 { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
 .sf-col a { display: block; font-size: 14px; color: var(--text-secondary); padding: 4px 0; transition: color 0.2s; }
 .sf-col a:hover { color: var(--text-primary); }
+/* the copyright and credit line: #808080, about 4.9:1 on the footer's foot (rgb 6 to 10 under the scrim, measured),
+   where --text-muted (#555) was 2.6:1; still quieter than the links (#888, 14px) */
 .sf-bottom {
   margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
   display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  font-size: 12px; color: var(--text-muted);
+  font-size: 12px; color: #808080;
 }
 @media (max-width: 767px) {
   .sf-top { grid-template-columns: 1fr 1fr; gap: 36px; }
   .sf-about { grid-column: 1 / -1; }
+}
+
+/* ---------- NIGHT SKY (src/components/space/page-sky.ts) ----------
+   The homepage's sky as one still frame. Regular pages: fixed behind the whole page (#page-sky, under main and the
+   footer). Case studies: the same fixed sky inside the footer (.sf-sky), which clips it, so it shows through the
+   footer alone and the page above keeps its own look. lvh, so a phone's toolbar sliding in and out never resizes it
+   (every resize draws the frame again). Black until the frame fades in: the sky's own black. */
+.page-sky, .sf-sky {
+  position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh;
+  pointer-events: none; background: #000;
+}
+.page-sky { z-index: 0; }
+/* the page's own background matches the sky's black, wherever the fixed sky does not reach (an overscroll bounce) */
+body:has(> .page-sky) { background: #000; }
+.page-sky > canvas, .sf-sky > canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity 1.2s ease-out; }
+/* the faint nebula over the homepage's finale and footer (home.css, html.has-sky .theme--finale), so this is the same
+   sky: cyan low on the left, violet high on the right */
+.page-sky::after, .sf-sky::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 18% 74%, rgba(0, 229, 255, 0.07), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 86% 26%, rgba(123, 47, 255, 0.1), transparent 70%);
+}
+.page-sky.is-lit > canvas, .sf-sky.is-lit > canvas { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .page-sky > canvas, .sf-sky > canvas { transition: none; }
+}
+/* the footer's sky stays hidden until the footer clips it: unclipped, a fixed layer inside the footer would cover the
+   whole page */
+.sf-sky { display: none; z-index: -1; }
+html.has-footer-sky .sf-sky { display: block; }
+/* The clip-path is what keeps the fixed sky inside the footer in WebKit; the mask is for Chromium, which clipped the
+   sky's canvas and the footer's scrim each on its own at the footer's top edge, so the row the edge runs through let
+   the stars through the scrim: a dotted hairline of stars along the seam under the booking strip on most case studies
+   at 1440 and 390 (rows measured 2026-11-09). With the mask the footer is clipped as one layer. Both are needed:
+   tried the mask alone, and in WebKit the fixed sky then covered the whole page as soon as it was made (2026-11-09). */
+html.has-footer-sky #site-footer { clip-path: inset(0); -webkit-mask-image: linear-gradient(#000, #000); mask-image: linear-gradient(#000, #000); }
+/* The footer on the sky, as on the homepage (home.css, html.has-sky #site-footer): no fill and no top line, and a dark
+   scrim that deepens downwards keeps its words readable over the Milky Way. ::after, so it paints over a case study's
+   .sf-sky (both sit at z-index -1, and the later one in the tree paints on top). page-sky.ts sets the classes once
+   the sky exists; without one the opaque footer stays. */
+html.has-page-sky #site-footer, html.has-footer-sky #site-footer { background: none; border-top-color: transparent; }
+/* top: -1px covers the footer's 1px top border too (transparent now): from the padding box, the sky showed through that
+   one line at full strength, a dotted hairline of stars along the footer's top edge (WebKit, case studies) */
+html.has-page-sky #site-footer::after, html.has-footer-sky #site-footer::after {
+  content: ''; position: absolute; top: -1px; right: 0; bottom: 0; left: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgb(5 5 5 / 0) 0, rgb(5 5 5 / 0.5) 72px, rgb(5 5 5 / 0.74) 168px, rgb(5 5 5 / 0.84) 100%);
+}
+/* A case study's footer has no sky above it: the near-black of the section before it (the shared booking strip is
+   #050505) runs on into the footer and eases out on a smoothstep over 96px, with no slope at the top, until it meets
+   the homepage's scrim at 55px (alpha 0.39); from there down the scrim is exactly the one /work and /free have, so
+   the stars come up out of the strip with no line where they start, and are as bright and as many under the footer's
+   words as there. The stops follow the curve to 0.009. (Tried a 28px linear run-in with the scrim moved 28px lower:
+   the stars started on a hard line under the strip, 2026-11-09 re-check; an ease-out, (1 - y/96px)^2, still showed
+   where they began. Tried a 96px linear one with the scrim moved down with it: on a phone, whose footer is mostly
+   under the deepest part of the scrim, the sky all but vanished.) */
+html.has-footer-sky #site-footer::after {
+  background: linear-gradient(180deg, rgb(5 5 5) 0, rgb(5 5 5 / 0.98) 8px, rgb(5 5 5 / 0.93) 16px, rgb(5 5 5 / 0.84) 24px, rgb(5 5 5 / 0.74) 32px, rgb(5 5 5 / 0.62) 40px, rgb(5 5 5 / 0.5) 48px, rgb(5 5 5 / 0.39) 55px, rgb(5 5 5 / 0.5) 72px, rgb(5 5 5 / 0.74) 168px, rgb(5 5 5 / 0.84) 100%);
 }
 
 /* Mock covers */
@@ -229,8 +251,11 @@
 .free-wrap { max-width: 680px; margin: 0 auto; padding: 0 20px; }
 .free-from { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
 .free-from img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cyan); }
-.free-from strong { display: block; font-size: 15px; }
-.free-from span { font-size: 13px; color: var(--text-muted); }
+/* the byline over the hero's stars: the name in the page's ink, the handle in a grey that keeps 4.5:1 over the sky
+   (the muted grey read 2.5:1 there). `.free-from span` is also the wrapper of the name and the handle, so the name
+   took its grey from it until it had a colour of its own (2026-11-09 re-check) */
+.free-from strong { display: block; font-size: 15px; color: var(--text-primary); }
+.free-from span { font-size: 13px; color: #9a9a9a; }
 .free-keyword {
   display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
   color: var(--cyan); background: var(--cyan-dim); border: 1px solid rgba(0,229,255,0.25);
@@ -301,15 +326,17 @@
   clip-path: polygon(0 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, var(--c) 100%, 0 calc(100% - var(--c)));
 }
 .res-card:hover::after { transform: translateY(380%); }
+/* The ghost numeral sits in the corner across from "Get it free", on about the same baseline, and the link's row is
+   kept as tall as the numeral (its padding-top, below), so the card's words can never run behind it: at the top
+   right, 72px, it sat under the title's or the summary's first line (2026-11-09 re-check). */
 .res-card__num {
-  position: absolute; right: 18px; top: 10px; z-index: -1;
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 72px; font-weight: 600; letter-spacing: -0.05em;
+  position: absolute; right: 20px; bottom: 21px; z-index: -1; line-height: 1;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 56px; font-weight: 600; letter-spacing: -0.05em;
   color: rgba(255, 255, 255, 0.05);
 }
-.res-card .res-kind { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); }
 .res-card h3 { font-size: 22px; letter-spacing: -0.02em; line-height: 1.2; }
 .res-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.55; }
-.res-card .res-go { margin-top: auto; font-size: 13px; font-weight: 600; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; padding-top: 10px; }
+.res-card .res-go { margin-top: auto; font-size: 13px; font-weight: 600; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; padding-top: 25px; }
 .res-draft { font-size: 10px; color: #ffb648; border: 1px solid #ffb64855; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
 .res-empty {
   padding: 56px 32px; border-radius: 20px; text-align: center;
@@ -330,20 +357,13 @@
 .hero-proof { margin-top: 28px; font-size: 13px; color: var(--text-muted); }
 .hero-proof b { color: var(--text-secondary); font-weight: 500; }
 #work { padding: 120px 0 80px; position: relative; z-index: 2; }
-#free-teaser { padding: 40px 0 0; position: relative; z-index: 2; }
 @media (max-width: 767px) {
   .hero-h1 .hero-line { white-space: normal; }
   #work { padding: 72px 0 40px; }
   .hero-actions .btn-primary, .hero-actions .btn-ghost { width: 100%; justify-content: center; }
 }
 
-/* ---------- LIGHT NAV (paper / white branded pages) ---------- */
-body[data-nav='light'] .nav-brand,
-body[data-nav='light'] .nav-links a { color: #1b1a18; }
-body[data-nav='light'] .nav-links a { opacity: 0.7; }
-body[data-nav='light'] .nav-links a:hover { opacity: 1; }
-body[data-nav='light'] .nav-links .nav-book { color: #fff; background: #1b1a18; opacity: 1; }
-body[data-nav='light'] #site-nav.is-scrolled { background: rgba(255,255,255,0.75); border-bottom-color: rgba(0,0,0,0.08); }
+/* ---------- LIGHT PAGES: the progress line (the nav's own light tone is in nav.css) ---------- */
 body[data-nav='light'] #scroll-progress { background: #1b1a18; }
 .free-block ul, .free-block ol { list-style: none; padding-left: 0; }
 .free-block li { position: relative; padding-left: 22px; }

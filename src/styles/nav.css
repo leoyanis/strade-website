@@ -1,0 +1,443 @@
+/* ================================================================
+   SITE NAV (#site-nav in src/layouts/Base.astro)
+
+   No bar. The logo and the links each sit on their own soft pool: a tint plus a light backdrop blur, both shaped
+   by one eased mask, so a pool has no edge anywhere. The pools appear once the page is scrolled
+   (#site-nav.is-scrolled) and are absent at the very top of every hero.
+
+   Each side (.nav-side--l, .nav-side--r) carries data-tone="dark|light": the lightness of the section under that
+   corner's text, and Book a call carries its own (the section under the pill). Base.astro's band observer writes
+   them from [data-nav-theme] sections, body[data-nav-force] (and the per-corner body[data-nav-force-l|r])
+   override them. Dark sections get light ink on a dark pool; light sections get dark ink on a light pool. The
+   same observer pulls a pool's edges in to its text where the pool would lie on the other tone (data-cut, see
+   "cuts"). The server renders the page's navTheme everywhere, so without JavaScript the ink still matches the
+   page.
+
+   Pages retint the nav by setting the custom properties below on #site-nav (see vaultt.astro).
+   ================================================================ */
+#site-nav {
+  --nav-pad: 40px;            /* side gutter of the content */
+  --nav-row: 64px;            /* the content row; the links sit centred in it */
+  --pool-h: 96px;             /* a pool's height: the row plus a 32px fade below it */
+  --pool-reach: 170px;        /* how far a pool runs past its content, on each side */
+  --cut-fade: 32px;           /* the fade of a pool edge pulled in beside its text (see "cuts") */
+  --pool-blur: 8px;
+  /* the pool under light ink (dark sections) and under dark ink (light sections), as RGB triplets */
+  --pool-dark: 10 10 10;
+  --pool-light: 255 255 255;
+  /* strengths: quiet when the corner sits on one tone (the ink already contrasts), stronger when a tagged band
+     covers only one end of the corner's content (data-mixed): there part of the content sits on the other tone
+     and the pool is what keeps it readable (a white card passing under light links, say) */
+  --pool-dark-a: 0.5;
+  --pool-light-a: 0.74;     /* light on light is invisible, so it can run strong for busy light backdrops */
+  --pool-dark-mixed-a: 0.64;
+  --pool-light-mixed-a: 0.84;
+  --ink-on-dark: #f0f0f0;
+  --ink-on-dark-soft: rgb(240 240 240 / 0.74);
+  --ink-on-light: #1b1a18;
+  --ink-on-light-soft: rgb(27 26 24 / 0.76);
+  --nav-accent: var(--cyan);          /* Free stuff, and Book a call's fill, on dark sections */
+  --nav-accent-ink: var(--bg-base);   /* Book a call's label on that fill */
+  --nav-accent-glow: var(--cyan-glow);
+  --nav-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* No timers on anything the scroll drives: tone, ink, pools, tints, cuts, knockouts all change in the frame the
+     scroll does (Yanis's rule: nothing runs on a timer that should follow the scroll). Tried easing them (0.45s on
+     the tone, 0.32s on the cuts): in real-time scroll at 700 px/s the nav lagged a handoff by 4 to 6 frames, a grey
+     logo, grey on grey links, Book a call a murky teal (2026-11-09 re-check). Only hover keeps a transition. */
+
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  /* as tall as the pools, so they are clipped at the screen edge by this box (overflow) instead of widening the
+     page; it never takes a click: only the links do */
+  height: var(--pool-h);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 0 var(--nav-pad);
+  overflow: hidden;
+  pointer-events: none;
+}
+#site-nav a { pointer-events: auto; }
+
+/* a side is its content plus its pool; the pool is sized from the side's box, so it holds exactly its content
+   whatever the font or the screen does to the width */
+.nav-side { position: relative; height: var(--nav-row); display: flex; align-items: center; }
+
+/* ---------- cuts ----------
+   A pool should only lie on its own tone. Base.astro's band observer measures, for the tone a corner shows, how
+   much of its pool beyond each edge of the text (above it, below it, left, right) lies on the other tone, and
+   lists the edges to pull in as data-cut="t b l r". Each factor eases from 0 (the pool's own shape) to 1 (the
+   edge pulled in to the text: the 24px row the logo mark spans, and the span from Work to the last text link,
+   --text-l and --text-r in the pool box's coordinates, written by the same script). That keeps a section edge
+   from dragging a grey or pale smear across its neighbour while it crosses the pool, and stops a pool spilling
+   the tone of a phone or a card over the page around it. The text keeps its pool whatever happens: that is
+   what keeps the ink readable while an edge passes behind the letters.
+   They switch in the frame the observer reports, with the scroll (see "No timers" above). */
+@property --cut-t { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --cut-b { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --cut-l { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --cut-r { syntax: '<number>'; inherits: true; initial-value: 0; }
+.nav-side {
+  --cut-t: 0; --cut-b: 0; --cut-l: 0; --cut-r: 0;
+}
+.nav-side[data-cut~='t'] { --cut-t: 1; }
+.nav-side[data-cut~='b'] { --cut-b: 1; }
+.nav-side[data-cut~='l'] { --cut-l: 1; }
+.nav-side[data-cut~='r'] { --cut-r: 1; }
+
+/* ---------- the pools ----------
+   The shape is a soft "stadium": full strength across exactly the span of the content (the pool box is the
+   content plus --pool-reach on each side) and down to just below the row, then a Gaussian falloff (sigma 0.46,
+   its tail eased to exactly zero, 11 stops) sideways over the reach and downwards to the pool's foot. Two
+   linear masks multiplied (mask-composite: intersect), which also rounds the corners softly.
+   Tried a radial ellipse centred on the content: with a plateau (full to 34%) it read as a dark blob with a rim
+   on flat colour (the homepage's Vaultt navy); with a pure Gaussian it was quiet there but too weak at the ends
+   of the wide links row, so Work went unreadable over a white card. A plain two-stop fade shows its knee as a
+   faint ring. The mask sits on the element that owns the backdrop-filter (WebKit and Chromium both honour it
+   there), and nothing above it has an opacity, filter, mask or clip-path: any of those would make that ancestor
+   the blur's backdrop root and the blur would see nothing. */
+.nav-pool {
+  --pool-core: 40px;          /* full strength down to here: just below the links (their text ends near 44px) */
+  --pool-mask-x: linear-gradient(90deg,
+    transparent 0,
+    rgb(0 0 0 / 0.07) calc(var(--pool-reach) * 0.1), rgb(0 0 0 / 0.16) calc(var(--pool-reach) * 0.2),
+    rgb(0 0 0 / 0.27) calc(var(--pool-reach) * 0.3), rgb(0 0 0 / 0.39) calc(var(--pool-reach) * 0.4),
+    rgb(0 0 0 / 0.53) calc(var(--pool-reach) * 0.5), rgb(0 0 0 / 0.67) calc(var(--pool-reach) * 0.6),
+    rgb(0 0 0 / 0.8) calc(var(--pool-reach) * 0.7), rgb(0 0 0 / 0.91) calc(var(--pool-reach) * 0.8),
+    rgb(0 0 0 / 0.98) calc(var(--pool-reach) * 0.9),
+    #000 var(--pool-reach), #000 calc(100% - var(--pool-reach)),
+    rgb(0 0 0 / 0.98) calc(100% - var(--pool-reach) * 0.9), rgb(0 0 0 / 0.91) calc(100% - var(--pool-reach) * 0.8),
+    rgb(0 0 0 / 0.8) calc(100% - var(--pool-reach) * 0.7), rgb(0 0 0 / 0.67) calc(100% - var(--pool-reach) * 0.6),
+    rgb(0 0 0 / 0.53) calc(100% - var(--pool-reach) * 0.5), rgb(0 0 0 / 0.39) calc(100% - var(--pool-reach) * 0.4),
+    rgb(0 0 0 / 0.27) calc(100% - var(--pool-reach) * 0.3), rgb(0 0 0 / 0.16) calc(100% - var(--pool-reach) * 0.2),
+    rgb(0 0 0 / 0.07) calc(100% - var(--pool-reach) * 0.1),
+    transparent 100%);
+  --pool-mask-y: linear-gradient(180deg,
+    #000 0, #000 var(--pool-core),
+    rgb(0 0 0 / 0.98) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.1),
+    rgb(0 0 0 / 0.91) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.2),
+    rgb(0 0 0 / 0.8) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.3),
+    rgb(0 0 0 / 0.67) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.4),
+    rgb(0 0 0 / 0.53) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.5),
+    rgb(0 0 0 / 0.39) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.6),
+    rgb(0 0 0 / 0.27) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.7),
+    rgb(0 0 0 / 0.16) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.8),
+    rgb(0 0 0 / 0.07) calc(var(--pool-core) + (var(--pool-h) - var(--pool-core)) * 0.9),
+    transparent 100%);
+  /* the cuts (above): a --cut-fade fade beside the text, from 2px past its end; 16px above it (full again at the
+     20px where the logo mark starts) and 14px below it (gone by 58px; the mark ends at 44px). Shorter fades read
+     as a box around the text while an edge crossed it (kleus, desktop). At factor 0 every fade sits outside the
+     box. The top fade moves down by --cut-t-at (0 to 16px, Base.astro topShift) to where the content the pool backs
+     begins, so it lies over that content and not over the colour above it. The hole (--hole-a to --hole-e, --hole-c
+     transparent, Base.astro wordTones): no pool over a stretch of the other tone between the glyphs it backs (the teal
+     between two store screens), fading back in over 6px each side; unset, its stops fall onto the stop before and stay
+     opaque. */
+  --pool-cut-x: linear-gradient(90deg,
+    transparent calc(-12px - var(--cut-fade-l, var(--cut-fade)) + var(--cut-l) * (var(--text-l, 0px) + 10px + var(--cut-shift-l, 0px))),
+    #000 calc(-12px + var(--cut-l) * (var(--text-l, 0px) + 10px + var(--cut-shift-l, 0px))),
+    #000 var(--hole-a, 0px), var(--hole-c, #000) var(--hole-b, 0px), var(--hole-c, #000) var(--hole-d, 0px), #000 var(--hole-e, 0px),
+    #000 calc(var(--pool-w, 200vw) + 12px - var(--cut-r) * (var(--pool-w, 200vw) - var(--text-r, 0px) + 10px)),
+    transparent calc(var(--pool-w, 200vw) + 12px + var(--cut-fade) - var(--cut-r) * (var(--pool-w, 200vw) - var(--text-r, 0px) + 10px)));
+  --pool-cut-y: linear-gradient(180deg,
+    transparent calc(-28px + var(--cut-t) * (32px + var(--cut-t-at, 0px))), #000 calc(-12px + var(--cut-t) * (32px + var(--cut-t-at, 0px))),
+    #000 calc(140px - var(--cut-b) * 96px), transparent calc(154px - var(--cut-b) * 96px));
+  position: absolute; z-index: -1; top: 0;
+  left: calc(-1 * var(--pool-reach)); right: calc(-1 * var(--pool-reach));
+  height: var(--pool-h);
+  pointer-events: none;
+  -webkit-mask-image: var(--pool-mask-x), var(--pool-mask-y), var(--pool-cut-x), var(--pool-cut-y);
+  -webkit-mask-composite: source-in;
+  mask-image: var(--pool-mask-x), var(--pool-mask-y), var(--pool-cut-x), var(--pool-cut-y);
+  mask-composite: intersect;
+  -webkit-backdrop-filter: blur(var(--pool-blur));
+  backdrop-filter: blur(var(--pool-blur));
+  /* hidden, not just transparent, at the top of the page: a backdrop-filter is redrawn whenever what is behind
+     it changes (the homepage sky moves every frame), so it should not exist while it shows nothing */
+  opacity: 0; visibility: hidden;
+}
+#site-nav.is-scrolled .nav-pool { opacity: 1; visibility: visible; }
+/* without JavaScript nothing marks the page as scrolled: keep the pools on, so the ink always has a backing */
+@media (scripting: none) {
+  .nav-pool { opacity: 1; visibility: visible; }
+}
+
+/* Two flat tints inside the mask, one shown at a time: a change of tone swaps them in the same frame (it used to
+   cross-fade over 0.45s, which in real-time scroll read as a grey pool lagging behind the handoff).
+   The tints also stop sooner below the text than the frost does (80px against 96px). When a section edge
+   passes, the pool hangs over the next section until the edge reaches the nav line, and its tint there reads
+   as a pale glow (light over dark) or a grey cloud (dark over light, as under youcook's purple band); the
+   shorter tint cuts that by a quarter and keeps it faint. The frost alone is invisible on flat colour. */
+.nav-pool__tint {
+  position: absolute; inset: 0;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 44px, rgb(0 0 0 / 0.5) 58px, rgb(0 0 0 / 0.15) 70px, transparent 80px);
+  mask-image: linear-gradient(180deg, #000 0, #000 44px, rgb(0 0 0 / 0.5) 58px, rgb(0 0 0 / 0.15) 70px, transparent 80px);
+}
+.nav-pool__tint--dark { background-color: rgb(var(--pool-dark) / var(--pool-dark-a)); }
+.nav-pool__tint--light { background-color: rgb(var(--pool-light) / var(--pool-light-a)); }
+.nav-side[data-mixed] .nav-pool__tint--dark { background-color: rgb(var(--pool-dark) / var(--pool-dark-mixed-a)); }
+.nav-side[data-mixed] .nav-pool__tint--light { background-color: rgb(var(--pool-light) / var(--pool-light-mixed-a)); }
+/* over a flat coloured band ('auto', Base.astro) the pool takes the band's own colour: there it can run dense, which
+   hides what passes behind the links (a card's big title) without showing as a patch on the card */
+.nav-side[data-coloured] .nav-pool__tint--dark { background-color: rgb(var(--pool-dark) / 0.9); }
+.nav-side[data-coloured] .nav-pool__tint--light { background-color: rgb(var(--pool-light) / 0.9); }
+.nav-pool__tint--dark,
+.nav-side[data-tone='light'] .nav-pool__tint--light { opacity: 1; }
+.nav-pool__tint--light,
+.nav-side[data-tone='light'] .nav-pool__tint--dark { opacity: 0; }
+
+/* ---------- ink ---------- */
+.nav-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--ink-on-dark);
+}
+/* a faint halo of the pool's colour under the logo word and the text links: it keeps letters crisp where the
+   backdrop is busy (stars, network lines, screenshots) and disappears on the flat colour it matches. Not on
+   Book a call, which carries its own fill. */
+.nav-brand, .nav-links a:not(.nav-book) { text-shadow: 0 0 12px rgb(var(--pool-dark) / 0.5); }
+.nav-links .nav-icon svg { filter: drop-shadow(0 0 5px rgb(var(--pool-dark) / 0.5)); }
+.nav-side[data-tone='light'] .nav-brand,
+.nav-links a:not(.nav-book)[data-tone='light'] { text-shadow: 0 0 12px rgb(var(--pool-light) / 0.6); }
+.nav-links .nav-icon[data-tone='light'] svg { filter: drop-shadow(0 0 5px rgb(var(--pool-light) / 0.6)); }
+/* the mark's glow is for dark skies; on light sections it would leave a pale halo, so it fades with the ink */
+.nav-brand-mark {
+  height: 24px; width: auto; flex: none; color: currentColor;
+  filter: drop-shadow(0 0 8px rgb(215 240 255 / 0.35));
+}
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: var(--ink-on-dark-soft);
+  padding: 12px 0;
+  transition: box-shadow 0.3s;
+}
+/* hover eases in (the only nav transition: it is a pointer's, not the scroll's) and snaps back, so a tone change
+   under a link the pointer is not on is never timed */
+.nav-links a:hover, .nav-links a:focus-visible { transition: color 0.2s var(--nav-ease), box-shadow 0.3s; }
+.nav-links a:hover, .nav-links a[aria-current='page'] { color: var(--ink-on-dark); }
+.nav-links .nav-free { color: var(--nav-accent); }
+.nav-links .nav-icon { display: inline-flex; padding: 10px 0; }
+.nav-links .nav-book {
+  color: var(--nav-accent-ink); background: var(--nav-accent);
+  padding: 8px 16px; border-radius: 999px; font-weight: 600;
+}
+.nav-links .nav-book:hover { color: var(--nav-accent-ink); box-shadow: 0 0 24px var(--nav-accent-glow); }
+
+/* over light sections. The logo follows its side; every link has a tone of its own (data-tone on the link):
+   its corner's, unless a card's edge runs between the links, and Book a call the band under the pill, since it
+   carries its own fill (a phone screen under Work, the coloured section beside it under the pill) */
+.nav-side[data-tone='light'] .nav-brand { color: var(--ink-on-light); }
+.nav-side[data-tone='light'] .nav-brand-mark { filter: drop-shadow(0 0 8px rgb(215 240 255 / 0)); }
+.nav-links a:not(.nav-book)[data-tone='light'] { color: var(--ink-on-light-soft); }
+.nav-links a:not(.nav-book)[data-tone='light']:hover,
+.nav-links a:not(.nav-book)[data-tone='light'][aria-current='page'] { color: var(--ink-on-light); }
+.nav-links .nav-book[data-tone='light'] { color: #fff; background: var(--ink-on-light); }
+.nav-links .nav-book[data-tone='light']:hover { color: #fff; box-shadow: 0 6px 18px rgb(0 0 0 / 0.16); }
+/* A link an edge runs through (Base.astro, wordTones: data-split="light-dark" or "dark-light", and --split-at from the
+   link's left): each glyph takes the ink of the tone behind it, a two-colour fill clipped to the text, so neither
+   side needs a pool reaching across the edge (on the west ledger at 1440 the paper's edge runs through "Free
+   stuff"). The fill colour beats every colour rule above through -webkit-text-fill-color; the glow goes, since it
+   would ring the glyphs in the wrong colour on one side. Free stuff keeps its accent on the dark side. */
+.nav-links a[data-split] {
+  -webkit-text-fill-color: transparent; text-shadow: none;
+  /* --split-m from --split-at to --split-at2: a middle stretch (below); without one, both fall back to the single
+     edge and the stops draw exactly the two-colour fill. --split-ang: a slanted edge under a script's paint (the free
+     act's dome), the gradient then runs along the edge's normal and --split-at is the stop's place along it */
+  background: linear-gradient(var(--cover-c, transparent), var(--cover-c, transparent)) 0 var(--cover-y, 0px) / 100% var(--cover-h, 0px) no-repeat,
+    linear-gradient(var(--split-ang, 90deg), var(--split-a) var(--split-at, 50%), var(--split-m, var(--split-b)) var(--split-at, 50%), var(--split-m, var(--split-b)) var(--split-at2, var(--split-at, 50%)), var(--split-b) var(--split-at2, var(--split-at, 50%))) 0 0 / 100% 100% no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+}
+/* a corner under the link (Base.astro, linkSplit cover: a card's side and its top meeting under Free stuff): the rows
+   past the level edge, --cover-y down for --cover-h, wear the ink of the side named, over the upright split */
+.nav-links a[data-split-cover='a'] { --cover-c: var(--split-a); }
+.nav-links a[data-split-cover='b'] { --cover-c: var(--split-b); }
+/* A phone's solid bezel ring between two stretches of one tone under a link (Base.astro ringAt, wordTones:
+   data-split-mid, --split-at2): the glyphs on the ring take the ring's ink in full, with no accent, and the ends keep
+   their own. Youcook's cook-mode phone at 1440 left the F of Free stuff dark on its black bezel (2026-11-09). */
+.nav-links a[data-split-mid='dark'] { --split-m: var(--ink-on-dark); }
+.nav-links a[data-split-mid='light'] { --split-m: var(--ink-on-light); }
+.nav-links a[data-split^='light'] { --split-a: var(--ink-on-light-soft); }
+.nav-links a[data-split^='dark'] { --split-a: var(--ink-on-dark-soft); }
+.nav-links a[data-split$='light'] { --split-b: var(--ink-on-light-soft); }
+.nav-links a[data-split$='dark'] { --split-b: var(--ink-on-dark-soft); }
+.nav-links .nav-free[data-split^='dark'] { --split-a: var(--nav-accent); }
+.nav-links .nav-free[data-split$='dark'] { --split-b: var(--nav-accent); }
+/* The logo split the same way (Base.astro brandSplit: the dome's left flank crossing it): "Strade" clipped like a
+   link's split, in the logo's full inks; the mark masked to the first side and drawn again past the edge by the logo's
+   ::after, the mark's own file as its mask. The mark's box has its own centre (--split-at-m). With one ink, "de" sat
+   dark on the dome's black, then the mark white on the cream (1440 at 8280 and 8300, 2026-11-09 re-check). */
+.nav-side--l[data-split^='light'] { --split-a: var(--ink-on-light); }
+.nav-side--l[data-split^='dark'] { --split-a: var(--ink-on-dark); }
+.nav-side--l[data-split$='light'] { --split-b: var(--ink-on-light); }
+.nav-side--l[data-split$='dark'] { --split-b: var(--ink-on-dark); }
+.nav-side--l[data-split] .nav-brand {
+  position: relative; text-shadow: none; -webkit-text-fill-color: transparent;
+  background: linear-gradient(var(--split-ang, 90deg), var(--split-a) var(--split-at, 50%), var(--split-b) var(--split-at, 50%)) 0 0 / 100% 100% no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+}
+/* (the word's knockout outline cannot be cut at the edge: it goes, as on any cut knockout) */
+.nav-side--l[data-split] .nav-brand span,
+.nav-side--l[data-split][data-flat][data-ko]:not([data-ko-cut]) .nav-brand span { -webkit-text-stroke: 0; text-shadow: none; }
+.nav-side--l[data-split] .nav-brand-mark {
+  color: var(--split-a); filter: none;
+  -webkit-mask-image: linear-gradient(var(--split-ang, 90deg), #000 var(--split-at-m, 50%), transparent var(--split-at-m, 50%)); mask-image: linear-gradient(var(--split-ang, 90deg), #000 var(--split-at-m, 50%), transparent var(--split-at-m, 50%));
+}
+.nav-side--l[data-split]:not([data-ko2]) .nav-brand::after {
+  content: ''; position: absolute; left: 0; top: calc(50% - 12px); height: 24px; aspect-ratio: 380 / 484; pointer-events: none;
+  background: linear-gradient(var(--split-ang, 90deg), transparent var(--split-at-m, 50%), var(--split-b) var(--split-at-m, 50%));
+  -webkit-mask: url(/images/ssi/emblem-star.svg) center / contain no-repeat;
+  mask: url(/images/ssi/emblem-star.svg) center / contain no-repeat;
+}
+/* The Instagram icon split by a slanted edge under a script's paint (Base.astro slantOf: the free act's dome): its SVG
+   keeps the first ink up to the edge (a mask), and the link's ::after draws the icon again, masked to the icon's shape
+   (the same drawing as the SVG in Base.astro), filled with the second ink past the edge and nothing before it. One
+   mask layer: with the side as a second layer and mask-composite, WebKit drew the side as a dark box. --split-at is
+   calc(50% + off) from the centre the link's box and its SVG share, so one value places the edge in both. With one ink,
+   its corner went black on the dome's black, or its far side grey on the cream (1440 at 8230 and 8240, 2026-11-09). */
+.nav-links .nav-icon[data-split] { position: relative; }
+.nav-links .nav-icon[data-split] svg {
+  color: var(--split-a); filter: none;
+  -webkit-mask-image: linear-gradient(var(--split-ang, 90deg), #000 var(--split-at, 50%), transparent var(--split-at, 50%)); mask-image: linear-gradient(var(--split-ang, 90deg), #000 var(--split-at, 50%), transparent var(--split-at, 50%));
+}
+.nav-links .nav-icon[data-split]:not([data-ko2])::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(var(--split-ang, 90deg), transparent var(--split-at, 50%), var(--split-b) var(--split-at, 50%));
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Ccircle cx='17.5' cy='6.5' r='1' fill='%23000' stroke='none'/%3E%3C/svg%3E") center / 17px 17px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Ccircle cx='17.5' cy='6.5' r='1' fill='%23000' stroke='none'/%3E%3C/svg%3E") center / 17px 17px no-repeat;
+}
+
+/* ---------- flat colour ----------
+   Over a flat, saturated colour (a coloured section or card: youcook's orange and purple, the homepage's side-quest
+   tiles; flatTone in Base.astro) a corner shows no pool. Base.astro marks the side data-flat when every glyph its pool
+   would cover lies on such a colour, and each text link data-flat when most of it does. Their tone there is the one
+   whose ink reads on that colour (dark on orange and green, light on blue and purple), in full strength, with no pale
+   or dark glow and no accent: cyan on orange or green does not read, and on a split link the dark side drops it where
+   it lies on a flat colour (data-split-flat). Book a call takes its tone from the colour under it, so it turns dark on
+   orange and green. Dark sections, photos, busy content and the night sky keep their pools as before.
+   A band the page declares a surface (data-nav-surface, measured from its painted pixels: the homepage's cream and
+   blueprint paper, fixed layers the nav cannot read) counts as a flat colour too, saturated or not.
+   The knockout (data-ko, --ko "r g b", both from Base.astro): what the colour carries past the links (a side quest
+   tile's title and text, youcook's white headlines) is cut away round each glyph, by an outline of the colour itself,
+   so it cannot be seen on the colour. A 7px stroke under the ink (3.5px of it outside each glyph, the counters
+   filled), then the same colour as a short soft shadow, which widens the cut to about 8px and fades it, so a gradient
+   read one or two levels off at the outline's edge leaves no rim. On a gradient (youcook) Base.astro reads the colour
+   at the nav line as the section scrolls; on a solid colour it is the colour. A link reaching off the colour is cut
+   only over it (Free stuff over a tile's edge), and two colours under one link get none. The logo's word takes the
+   stroke under its own fill (paint-order), only when the whole logo lies on the colour; the logo's mark and the
+   Instagram icon are SVG and get a small rounded patch of the colour behind them instead, which can be cut at the
+   colour's edge like a link's copy (2026-11-08 fix round: Results ran into the side quest tiles' text at 1440 and 390,
+   and into "We've got you." and "Out of eggs?" on youcook; on a phone the mark starts 4px left of a tile). */
+#site-nav .nav-side[data-flat] .nav-pool { opacity: 0; visibility: hidden; }
+.nav-side[data-flat] .nav-brand { text-shadow: none; }
+.nav-side[data-flat] .nav-brand-mark { filter: none; }
+.nav-links a[data-flat]:not(.nav-book) { text-shadow: none; color: var(--ink-on-dark); }
+/* a side with no pool (on a colour, or squeezed between two, Base.astro) drops every link's glow too: off its pool a
+   white glow showed as a pale haze round Results and Free stuff on the cream between two tiles */
+.nav-side[data-flat] .nav-links a:not(.nav-book) { text-shadow: none; }
+.nav-side[data-flat] .nav-links .nav-icon svg { filter: none; }
+.nav-links a[data-flat]:not(.nav-book)[data-tone='light'] { color: var(--ink-on-light); }
+.nav-links .nav-icon[data-flat] svg { filter: none; }
+.nav-links .nav-free[data-split-flat][data-split^='dark'] { --split-a: var(--ink-on-dark-soft); }
+.nav-links .nav-free[data-split-flat][data-split$='dark'] { --split-b: var(--ink-on-dark-soft); }
+/* a split link wholly on flat colours or declared surfaces (a west card's parchment and the dusk sky beside it): full
+   ink both sides, as any flat link has, and no accent; "Free s" read grey and "uff" cyan across the card's edge. Free
+   stuff too, over the rule above (the class makes that one win): "Free s" on the homepage's blue Noteless tile took the
+   soft ink, a lavender at 2.9:1 beside the white Results (390 at 7692 to 7920, 2026-11-09 re-check) */
+.nav-links a[data-split-full][data-split^='light'] { --split-a: var(--ink-on-light); }
+.nav-links a[data-split-full][data-split$='light'] { --split-b: var(--ink-on-light); }
+.nav-links a[data-split-full][data-split^='dark'],
+.nav-links .nav-free[data-split-full][data-split^='dark'] { --split-a: var(--ink-on-dark); }
+.nav-links a[data-split-full][data-split$='dark'],
+.nav-links .nav-free[data-split-full][data-split$='dark'] { --split-b: var(--ink-on-dark); }
+.nav-side[data-flat][data-ko]:not([data-ko-cut]) .nav-brand span {
+  -webkit-text-stroke: 7px rgb(var(--ko)); paint-order: stroke fill;
+  text-shadow: 0 0 2px rgb(var(--ko)), 0 0 5px rgb(var(--ko)), 0 0 9px rgb(var(--ko) / 0.55);
+}
+/* a text link's knockout is a copy of its words behind them (content: data-label, from Base.astro), so the link keeps
+   its own ink, a split ink included, and the copy can be cut at the colour's edge where only part of the link lies on
+   it (--ko-l, --ko-r: how far in from the link's left and right edges; --ko-t, --ko-b the same at a band's top or
+   bottom edge crossing the text, or 12px short of an object's shadow on the colour; unset, the copy runs 16px past
+   the link's box). The link
+   is positioned but makes no stacking context, so the copy's z-index sends it under the whole link, its background
+   too: a split link's ink is that background (background-clip: text), and with z-index 0 on the link the copy
+   painted over it, and "Free" vanished on the blue tile (2026-11-08). It still paints over the pools, which come
+   first in the nav. */
+.nav-links a:is([data-ko], [data-ko2]):not(.nav-book):not(.nav-icon) { position: relative; }
+/* a link over two colours (a side quest tile's edge and the cream beside it) gets a second copy from ::after in the
+   second colour (--ko2, --ko2-l/r/t/b, data-ko2), each copy cut at the edge between them */
+.nav-links a[data-ko]:not(.nav-book):not(.nav-icon)::before,
+.nav-links a[data-ko2]:not(.nav-book):not(.nav-icon)::after {
+  /* the copy's words are paint only: the empty alternative text keeps screen readers from reading each link twice
+     (where that syntax is unknown, the first content stands) */
+  content: attr(data-label); content: attr(data-label) / '';
+  position: absolute; inset: 0; z-index: -1; padding: inherit;
+  white-space: nowrap; pointer-events: none; background: none;
+}
+.nav-links a[data-ko]:not(.nav-book):not(.nav-icon)::before {
+  color: rgb(var(--ko)); -webkit-text-fill-color: rgb(var(--ko));
+  -webkit-text-stroke: 7px rgb(var(--ko));
+  text-shadow: 0 0 2px rgb(var(--ko)), 0 0 5px rgb(var(--ko)), 0 0 9px rgb(var(--ko) / 0.55);
+  clip-path: inset(var(--ko-t, -16px) var(--ko-r, -16px) var(--ko-b, -16px) var(--ko-l, -16px));
+}
+.nav-links a[data-ko2]:not(.nav-book):not(.nav-icon)::after {
+  color: rgb(var(--ko2)); -webkit-text-fill-color: rgb(var(--ko2));
+  -webkit-text-stroke: 7px rgb(var(--ko2));
+  text-shadow: 0 0 2px rgb(var(--ko2)), 0 0 5px rgb(var(--ko2)), 0 0 9px rgb(var(--ko2) / 0.55);
+  clip-path: inset(var(--ko2-t, -16px) var(--ko2-r, -16px) var(--ko2-b, -16px) var(--ko2-l, -16px));
+}
+/* the SVGs' patch: behind the mark (24px tall, about 19px wide, first in the logo) and behind the 16px icon, 4px past
+   them all round, feathered; cut like the copy above. Base.astro counts the logo's cuts from the logo's box, which the
+   patch overhangs by 4px all round on a phone, where the logo is the mark alone (hence + 4px; on a laptop the word
+   follows the mark, and the logo is never cut there), and the icon's from its link's box, 36px tall with the padding,
+   whose top and bottom the patch sits 6px inside (hence - 6px) */
+.nav-side[data-flat]:is([data-ko], [data-ko2]) .nav-brand,
+.nav-links .nav-icon:is([data-ko], [data-ko2]) { position: relative; }
+.nav-side[data-flat][data-ko] .nav-brand::before,
+.nav-side[data-flat][data-ko2] .nav-brand::after,
+.nav-links .nav-icon[data-ko]::before,
+.nav-links .nav-icon[data-ko2]::after {
+  content: ''; position: absolute; z-index: -1; pointer-events: none; border-radius: 9px;
+}
+.nav-side[data-flat][data-ko] .nav-brand::before,
+.nav-links .nav-icon[data-ko]::before { background: rgb(var(--ko)); box-shadow: 0 0 5px 1px rgb(var(--ko)); }
+.nav-side[data-flat][data-ko2] .nav-brand::after,
+.nav-links .nav-icon[data-ko2]::after { background: rgb(var(--ko2)); box-shadow: 0 0 5px 1px rgb(var(--ko2)); }
+.nav-side[data-flat][data-ko] .nav-brand::before,
+.nav-side[data-flat][data-ko2] .nav-brand::after { left: -4px; top: calc(50% - 16px); width: 27px; height: 32px; }
+.nav-links .nav-icon[data-ko]::before,
+.nav-links .nav-icon[data-ko2]::after { left: -4px; right: -4px; top: calc(50% - 12px); height: 24px; }
+.nav-side[data-flat][data-ko] .nav-brand::before {
+  clip-path: inset(calc(var(--ko-t, -14px) + 4px) calc(var(--ko-r, -14px) + 4px) calc(var(--ko-b, -14px) + 4px) calc(var(--ko-l, -14px) + 4px));
+}
+.nav-side[data-flat][data-ko2] .nav-brand::after {
+  clip-path: inset(calc(var(--ko2-t, -14px) + 4px) calc(var(--ko2-r, -14px) + 4px) calc(var(--ko2-b, -14px) + 4px) calc(var(--ko2-l, -14px) + 4px));
+}
+.nav-links .nav-icon[data-ko]::before {
+  clip-path: inset(calc(var(--ko-t, -4px) - 6px) calc(var(--ko-r, -14px) + 4px) calc(var(--ko-b, -4px) - 6px) calc(var(--ko-l, -14px) + 4px));
+}
+.nav-links .nav-icon[data-ko2]::after {
+  clip-path: inset(calc(var(--ko2-t, -4px) - 6px) calc(var(--ko2-r, -14px) + 4px) calc(var(--ko2-b, -4px) - 6px) calc(var(--ko2-l, -14px) + 4px));
+}
+
+/* ---------- phones ----------
+   Gradient only: no backdrop blur (the two pools span most of a 390px screen, and a blur that wide costs real
+   frames on a phone). The link sizing is the one the phone nav already had.
+   A shorter reach keeps the two pools apart: the links take most of the width, and with a longer one the tails
+   met in the middle and read as a bar again. Denser tints stand in for the frost: through a 0.54 pool, body
+   text scrolling behind the links showed and cluttered them (kleus, the homepage's Atlas editor). On a phone's
+   dark and light sections the dense tint still disappears into the backdrop it matches. */
+@media (max-width: 767px) {
+  #site-nav {
+    /* a long cut fade: at 16px, with the denser phone tints, a pool cut on both sides read as a box with hard sides
+       behind the links and round the logo's mark over youcook's store pictures (2026-11-09 re-check; 32px still
+       showed its sides, 48px reads as a soft pool); the logo's left edge keeps its own 8px (--cut-fade-l, below),
+       the margin beside a full-width card */
+    --nav-pad: 16px; --pool-reach: 56px; --cut-fade: 48px;
+    --pool-dark-a: 0.7; --pool-light-a: 0.86; --pool-dark-mixed-a: 0.8; --pool-light-mixed-a: 0.92;
+  }
+  .nav-pool { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  /* The logo sits 16px from the screen's edge and full-width cards start 20px in, so their edge passes right
+     under the mark: the logo's pool never reaches left of the mark here (it ends 4px inside it), or it glowed
+     (or greyed) in the margin beside every such card. Left of the mark there is nothing to read. */
+  .nav-side--l { --cut-l: 1; --cut-l-fixed: 1; --cut-shift-l: 6px; --cut-fade-l: 8px; }
+  .nav-brand span { display: none; }
+  .nav-links { gap: 18px; }
+  .nav-links .nav-icon { display: none; }
+  .nav-links .nav-book { padding: 7px 12px; }
+}

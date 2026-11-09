@@ -1,0 +1,106 @@
+---
+/**
+ * VtKinds: every project on Vaultt as one square, sorted by kind into columns (a unit chart of the real
+ * counts in VAULTT_NUMBERS.categories, read 2026-11-07). As the section comes up the squares fall and
+ * stack, bottom row first; then the pointer can push them around and they spring back, and hovering a
+ * column names it with its count. Engine: kinds.ts (one 2D canvas, pre-drawn tile sprites).
+ *
+ * The groups are VAULTT_KINDS (src/data/work.ts, shared with the homepage stacks): the twelve biggest
+ * categories folded into five kinds plus every other kind, so the six add up to the whole (1,270): Art and
+ * film, Code, Games, Science and data, Business, Other kinds. Colours are the app's own kind colours
+ * (mapGlow: Creative Arts pink, Software blue, Research violet, Analytics green, Marketing orange,
+ * Entrepreneurship yellow); games take the app's teal.
+ * No JS, reduced motion or ?still: the finished chart (and the table for screen readers either way).
+ */
+import { VAULTT_KINDS, VAULTT_NUMBERS as N } from '../../../data/work';
+import VaulttNumber from '../../vaultt/VaulttNumber.astro';
+
+const COLOURS: Record<string, string[]> = {
+  art: ['#FF5FA2', '#FF8FB8', '#E0457F', '#FFB37A'],
+  code: ['#4C8DFF', '#2F81FF', '#8CC6FF', '#56A6FF'],
+  games: ['#2FD4C1', '#1FB5A3', '#6BE6D6', '#23C2AF'],
+  sci: ['#A27BFF', '#8BE04E', '#C3A6FF', '#6FC93A'],
+  biz: ['#FF9A3D', '#FFCF4A', '#FFB45E', '#F5A623'],
+  other: ['#CDD1D5', '#959EA7', '#B7BEC5', '#8CC6FF'],
+};
+const groups = VAULTT_KINDS.map((k) => ({ ...k, c: COLOURS[k.id] }));
+const data = JSON.stringify(groups.map((g) => ({ id: g.id, label: g.label, n: g.n, c: g.c })));
+---
+
+<section class="vt-kinds vt-section" id="vt-kinds" aria-labelledby="vt-kinds-h">
+  <div class="vt-wrap">
+    <header class="vt-kinds__head">
+      <div class="vt-kinds__title">
+        <p class="vt-tag">Every kind of builder</p>
+        <h2 class="vt-h2" id="vt-kinds-h">Games, films, code, art. <span class="ac">Anything.</span></h2>
+      </div>
+      <VaulttNumber n={N.projects} animate class="vt-kinds__num" />
+    </header>
+
+    <div class="vt-kinds__chart" data-kinds={data}>
+      <canvas class="vt-kinds__canvas" aria-hidden="true"></canvas>
+      <ul class="vt-kinds__labels" aria-hidden="true">
+        {groups.map((g, i) => (
+          <li class="vt-kinds__lab" data-g={i} style={`--c:${g.c[0]}`}>
+            <i></i><span class="vt-kinds__long">{g.label}</span><span class="vt-kinds__short">{g.short}</span>
+            <b class="vt-kinds__n">{g.n.toLocaleString('en-GB')}</b>
+          </li>
+        ))}
+      </ul>
+      <p class="vt-kinds__tip" aria-hidden="true"></p>
+      <table class="vt-sr">
+        <caption>Projects shared on Vaultt by kind, {N.asOf}</caption>
+        <tbody>
+          {groups.map((g) => <tr><th scope="row">{g.label}</th><td>{g.n}</td></tr>)}
+        </tbody>
+      </table>
+    </div>
+    <p class="vt-kinds__note vt-note">One square, one project<span class="vt-kinds__push"> <b>·</b> push them around</span></p>
+  </div>
+</section>
+
+<style is:global>
+  .vt-kinds { background: var(--vt-navy); padding-top: clamp(110px, 12vw, 170px); padding-bottom: clamp(56px, 7vw, 110px); }
+  .vt-kinds__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px 48px; flex-wrap: wrap; }
+  .vt-kinds__title { display: flex; flex-direction: column; gap: 20px; max-width: 760px; }
+  .vt .vt-kinds__num { text-align: right; }
+  .vt .vt-kinds__num .vn__num { font-size: clamp(56px, 6vw, 92px); }
+  .vt .vt-kinds__num .vn__label { margin-top: 4px; }
+
+  /* the chart: a canvas for the squares, DOM labels under the columns (placed by kinds.ts) */
+  .vt-kinds__chart { position: relative; margin-top: clamp(40px, 5vw, 64px); }
+  .vt-kinds__canvas { display: block; width: 100%; height: 540px; touch-action: pan-y; }
+  .vt-kinds__labels { position: relative; height: 46px; margin-top: 14px; }
+  .vt-kinds__lab {
+    position: absolute; top: 0; left: calc(var(--x, 0) * 1px); translate: -50% 0; width: max-content;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    font-size: 14px; font-weight: 500; color: var(--vt-soft); white-space: nowrap;
+    transition: color 0.3s var(--vt-ease), opacity 0.3s var(--vt-ease);
+  }
+  .vt-kinds__lab i { width: 18px; height: 3px; border-radius: 3px; background: var(--c); box-shadow: 0 0 10px var(--c); margin-bottom: 3px; }
+  .vt-kinds__short { display: none; }
+  .vt-kinds__n { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--vt-faint); }
+  .vt-kinds__chart.has-js .vt-kinds__n { opacity: 0; transition: opacity 0.25s var(--vt-ease); }
+  .vt-kinds__chart.has-js .vt-kinds__lab.is-on { color: var(--vt-light); }
+  .vt-kinds__chart.has-js .vt-kinds__lab.is-on .vt-kinds__n { opacity: 1; color: var(--vt-light); }
+  .vt-kinds__chart.has-js.is-hover .vt-kinds__lab:not(.is-on) { opacity: 0.45; }
+  /* before the script places them: an even row */
+  .vt-kinds__chart:not(.has-js) .vt-kinds__labels { display: flex; justify-content: space-around; height: auto; }
+  .vt-kinds__chart:not(.has-js) .vt-kinds__lab { position: static; translate: none; }
+  .vt-kinds__tip { display: none; }
+  .vt-kinds__note { margin-top: 26px; text-align: right; }
+  .vt-kinds__note b { font-weight: 500; color: var(--vt-blue); margin: 0 5px; }
+  @media (hover: none), (pointer: coarse) { .vt-kinds__push { display: none; } }
+
+  @media (max-width: 767px) {
+    .vt-kinds__head { flex-direction: column; align-items: flex-start; }
+    .vt .vt-kinds__num { text-align: left; }
+    .vt .vt-kinds__num .vn__num { font-size: clamp(52px, 14vw, 64px); }
+    .vt-kinds__canvas { height: 437px; }
+    .vt-kinds__lab { font-size: 12px; gap: 4px; }
+    .vt-kinds__long { display: none; }
+    .vt-kinds__short { display: inline; }
+    .vt-kinds__n { font-size: 10px; }
+    .vt-kinds__note { text-align: left; }
+  }
+</style>

@@ -1,0 +1,2 @@
+/* the CSS animations that never pause off screen (from the idle pass), stopped */
+.h-a-live i, .bp-cross, .theme--finale .stars, .theme--finale .stars--2, .ae svg, [class*="spin"] { animation: none !important; }

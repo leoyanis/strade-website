@@ -23,7 +23,7 @@
     "card2_body": "Full-stack apps, semantic search, LLM features. Production-ready, scoped, delivered in weeks.",
     "card2_tags": ["Mobile", "Web", "AI Features"],
     "card3_title": "Knowledge Transfer",
-    "card3_body": "Workshops, pair programming, documentation. Your team inherits the capability, not just the code.",
+    "card3_body": "Workshops, pair programming, documentation. Your team inherits the capability as well as the code.",
     "card3_tags": ["Workshops", "Training", "Documentation"]
   },
   "social_proof": {
@@ -38,7 +38,7 @@
     "solution_h": "The Solution",
     "result_h": "The Result",
     "problem": "10,000 students. No way to match them to employers at scale. Traditional keyword matching missed 80% of fits.",
-    "solution": "Embeddings plus pgvector plus LLM grading. Semantic search that understands skills, not keywords.",
+    "solution": "Embeddings plus pgvector plus LLM grading. Semantic search that understands skills instead of matching keywords.",
     "result": "Live. Funded. Sub-second matching. Founders described it as 'feels like magic.'",
     "stack_label": "Tech Stack",
     "stack_cta": "Book a call"

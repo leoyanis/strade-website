@@ -1,0 +1,47 @@
+---
+/**
+ * FreeAct: the homepage's free stuff act, between Side quests (#act-stripes) and Kleus (#act-blueprint).
+ * Its world is the black hole (HoleWorld.astro, a fixed theme layer); this is the section on top of it: the
+ * heading, the line about the videos with a follow link, and the published free skills riding a tilted band.
+ * free-act.ts (mounted from index.astro) drives the hand-over, the band's tilt and the black hole. No props.
+ *
+ * No data-nav-theme on purpose: the act is dark, so the nav keeps its light ink.
+ * The band is .fa-band (tilts) > .fa-track (drifts sideways) > .fa-slot (turns back half the tilt, so the
+ * cards stay readable) > .fa-card (fades in). Each level has one job, so no two motions fight over a transform.
+ */
+import { SITE } from '../../data/site';
+import { RESOURCES } from '../../data/resources';
+import '../../styles/free-act.css';
+
+// published only (visibleResources() also returns drafts in dev), newest first like /free
+const items = RESOURCES.filter((r) => r.published).sort((a, b) => b.date.localeCompare(a.date));
+---
+<section id="act-free" class="act act--free" aria-labelledby="fa-h">
+  <div class="container fa-intro">
+    <h2 class="fa-h" id="fa-h">Free <span class="fa-h__o">stuff.</span></h2>
+    <p class="fa-line">This is what I show off in my videos on my personal socials.</p>
+    <a class="fa-follow" href={SITE.instagram} target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      Follow {SITE.instagramHandle}
+    </a>
+  </div>
+
+  <div class="fa-band">
+    <div class="fa-band__strip" aria-hidden="true"></div>
+    <ul class="fa-track" role="list">
+      {items.map((r) => (
+        <li class="fa-slot">
+          <a class="fa-card" href={`/free/${r.slug}`} style={`--acc:${r.accent ?? '#00e5ff'}`}>
+            <h3 class="fa-card__title">{r.title}</h3>
+            <p class="fa-card__line">{r.ogLine ?? r.summary}</p>
+            <span class="fa-card__go">Get it free <i aria-hidden="true">→</i></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="container fa-all">
+    <a class="fa-all__link" href="/free">All free stuff <i aria-hidden="true">→</i></a>
+  </div>
+</section>

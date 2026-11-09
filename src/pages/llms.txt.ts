@@ -16,7 +16,7 @@ export const GET: APIRoute = () => {
 
   const body = `# ${SITE.name}
 
-> ${SITE.name} builds apps, automations and AI tools for founders and businesses, at a fixed price, and the client owns the code. ${SITE.tagline}
+> ${SITE.name} builds apps, automations and AI tools for founders and businesses, at a fixed price. ${SITE.tagline}
 
 He works through ${SITE.company}. Languages: English, German, Spanish, Romanian.
 
@@ -36,7 +36,7 @@ ${free.join('\n')}
 ## Pages
 
 - [Home](${abs('/')}): who Yanis is, how he works, featured case studies
-- [All work](${abs('/work')}): every project, shipped and in progress
+- [Results](${abs('/work')}): every project, shipped and in progress
 - [Free stuff](${abs('/free')}): Claude skills, prompts and templates he gives away
 - [Contact](${abs('/contact')}): book a call or send an email
 `;

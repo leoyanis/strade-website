@@ -1,17 +1,24 @@
 ---
-// Under the hood: v1 → v2 stack shift, and an animated architecture diagram.
-const v1 = ['FlutterFlow', 'Firebase', 'Cloud Functions'];
-const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edge functions', 'Next.js', 'OpenAI'];
+// Under the hood: the v1 to now stack shift, and an animated architecture diagram (three apps, one Supabase, the AI search).
+// Only FlutterFlow is struck through: Firebase still signs people in and some data still lives in Firestore,
+// and its Cloud Functions are still deployed (the Vaultt repo's CLAUDE.md, 2026-11). Nothing here claims
+// row-level security on "every table": the 2026-11-04 audit only verified the tables a to m.
+const v1 = [
+  { c: 'FlutterFlow', gone: true },
+  { c: 'Firebase', gone: false },
+  { c: 'Cloud Functions', gone: false },
+];
+const now = ['Flutter', 'Supabase', 'Firebase', 'Cloud + edge functions', 'Next.js', 'OpenAI'];
 ---
 
 <section class="vt-stack vt-section" id="vt-stack">
   <div class="vt-wrap">
     <header class="vt-head">
-      <p class="vt-tag"><span class="no">08</span> Under the hood</p>
-      <h2 class="vt-h2">Built for speed first. <span class="lt">Then rebuilt to last.</span></h2>
+      <p class="vt-tag">Under the hood</p>
+      <h2 class="vt-h2">Built fast first. <span class="lt">Then made solid.</span></h2>
       <p class="vt-lede">
-        v1 went live in three months on FlutterFlow and Firebase. As it grew, I moved it to a hand-maintained Flutter codebase
-        on Supabase: <strong>65 tables, 23 server functions and row-level security on every table.</strong>
+        v1 went live in three months on FlutterFlow and Firebase. Then I took it off FlutterFlow: <strong>one Flutter codebase for
+        iPhone, Android and the web, with Supabase as the main database.</strong>
       </p>
     </header>
 
@@ -19,7 +26,9 @@ const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edg
       <div class="vt-shift__row is-v1">
         <span class="vt-shift__k">v1 · 2025</span>
         <div class="vt-shift__chips">
-          {v1.map((c) => <span class="vt-shift__chip"><span>{c}</span><i class="vt-shift__strike" aria-hidden="true"></i></span>)}
+          {v1.map((x) => (
+            <span class:list={['vt-shift__chip', x.gone && 'is-gone']}><span>{x.c}</span>{x.gone && <i class="vt-shift__strike" aria-hidden="true"></i>}</span>
+          ))}
         </div>
       </div>
       <div class="vt-shift__arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7" /></svg></div>
@@ -31,12 +40,12 @@ const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edg
       </div>
     </div>
 
-    <div class="vt-arch" id="vt-arch" role="img" aria-label="Architecture: the Flutter app for iOS and web, the Next.js admin console and the Next.js accelerator intake all talk to Supabase (Postgres with 65 tables, row-level security on every table, 23 server functions), which calls the AI for the hiring brief and ranked search.">
+    <div class="vt-arch" id="vt-arch" role="img" aria-label="Architecture: the Flutter app for iPhone, Android and the web, the Next.js admin console and the Next.js accelerator form all use Supabase (the main database, access rules on the data, edge functions for emails and server tasks), with Firebase for sign-in, and OpenAI powers the search that finds people by what they have made.">
       <div class="vt-arch__row is-clients" aria-hidden="true">
         <div class="vt-node" data-a="1">
           <span class="vt-node__k">App</span>
           <strong>Vaultt</strong>
-          <span class="vt-node__s">Flutter · iOS + web</span>
+          <span class="vt-node__s">Flutter · iOS, Android, web</span>
         </div>
         <div class="vt-node" data-a="1">
           <span class="vt-node__k">Team</span>
@@ -57,9 +66,9 @@ const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edg
       <div class="vt-arch__core" aria-hidden="true" data-a="2">
         <div class="vt-arch__core-head"><span class="vt-node__k">Data + logic</span><strong>Supabase</strong></div>
         <div class="vt-arch__cells">
-          <div class="vt-cell"><b><span data-count="65">65</span></b><span>Postgres tables</span></div>
-          <div class="vt-cell"><b><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></b><span>Row-level security on every table</span></div>
-          <div class="vt-cell"><b><span data-count="23">23</span></b><span>Server functions</span></div>
+          <div class="vt-cell"><b><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" /></svg></b><span>The main database: projects, people, chats</span></div>
+          <div class="vt-cell"><b><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></b><span>Access rules on the data, sign-in with Firebase</span></div>
+          <div class="vt-cell"><b><svg viewBox="0 0 24 24"><path d="M13 3 5 13.5h6L10.5 21 19 10.5h-6L13 3Z" /></svg></b><span>Small server tasks, like the emails</span></div>
         </div>
       </div>
 
@@ -70,8 +79,8 @@ const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edg
       <div class="vt-arch__row is-ai" aria-hidden="true">
         <div class="vt-node is-ai" data-a="3">
           <span class="vt-node__k">AI</span>
-          <strong>Hiring brief <span class="vt-node__arrow">→</span> ranked search</strong>
-          <span class="vt-node__s">OpenAI · called from server functions</span>
+          <strong>Find people by what they make</strong>
+          <span class="vt-node__s">OpenAI reads each builder's projects and CV</span>
         </div>
       </div>
     </div>
@@ -123,6 +132,8 @@ const now = ['Flutter, by hand', 'Supabase Postgres', 'Row-level security', 'Edg
     .vt-wire.is-ai i { animation-duration: 1.6s; }
   }
   @keyframes vt-pulse-down { to { top: 100%; } }
+  /* off screen the pulses hold still (motion.ts sets .is-run while the diagram is near) */
+  .vt .vt-stack:not(.is-run) .vt-wire i { animation-play-state: paused; }
 
   .vt-arch__core {
     position: relative; padding: 22px; border-radius: 22px;

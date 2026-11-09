@@ -1,7 +1,8 @@
-// Hero: the title rises letter by letter, the eyebrow types itself, the rest follows.
+// Hero: the title rises letter by letter, the rest follows.
 // Scrolling away drifts the copy up and the background bloom down. The download button
-// leans towards the pointer.
-import { splitChars, splitWords, typer, type Motion } from './core';
+// leans towards the pointer. (Until 2026-11-08 a "Free Claude skill" eyebrow typed itself above the title; it went
+// with the free cards' clean-up, see free-act.css.)
+import { splitChars, splitWords, type Motion } from './core';
 
 export function hero(el: HTMLElement, m: Motion) {
   const { gsap } = m;
@@ -11,7 +12,6 @@ export function hero(el: HTMLElement, m: Motion) {
 
   const title = q('.sk-title');
   const sub = q('.sk-sub');
-  const eyebrow = q('.sk-eyebrow__t');
   const preview = q('.sk-hero__preview');
   const chars = title ? splitChars(title) : [];
   const words = sub ? splitWords(sub) : [];
@@ -20,13 +20,8 @@ export function hero(el: HTMLElement, m: Motion) {
 
   let ready = !intro;
   if (intro) {
-    const type = eyebrow ? typer(eyebrow) : null;
-    type?.(0);
-    const p = { v: 0 };
     const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, delay: 0.05, onComplete: () => { ready = true; } });
     tl.from(q('.free-from'), { y: 22, opacity: 0, duration: 0.9 }, 0)
-      .from(q('.sk-eyebrow'), { opacity: 0, duration: 0.3 }, 0.12)
-      .to(p, { v: 1, duration: 0.75, ease: 'none', onUpdate: () => type?.(p.v) }, 0.15)
       .from(chars, { yPercent: 118, rotate: 7, duration: 1.25, stagger: 0.028 }, 0.18)
       .from(words, { yPercent: 70, opacity: 0, duration: 0.9, stagger: 0.012 }, 0.5)
       .from(el.querySelectorAll('.sk-get > *'), { y: 24, opacity: 0, duration: 0.9, stagger: 0.08 }, 0.7);

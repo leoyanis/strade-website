@@ -25,7 +25,7 @@ const words = (s: string) => s.split(' ');
 const WHY = [
   {
     n: 'I',
-    h: 'WhatsApp, not another app.',
+    h: 'In WhatsApp, instead of yet another app.',
     p: 'An app you have to remember to open is one more thing to quit. Nobody abandons WhatsApp. So the lesson, the reminders and the feedback all arrive in a chat you already live in, on WhatsApp or Telegram.',
     r: 'chat',
   },
@@ -88,6 +88,21 @@ const RAILS = [
   crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
+  navBands={{
+    // the check-in turns dark edge to edge from the phone's middle down: KlChat.astro paints it with
+    // .ch__anchor::before, so the nav gets a marker box with the same inset; the phone's chat screen on it
+    // stays light
+    '#kl-checkin .ch__anchor': { tone: 'dark', inset: '50% -200vw -6000px -200vw' },
+    '#kl-checkin .phone': 'light',
+    '#kl-check .sheet': 'light',
+    // the path's documentary card is dark on the cream page. (Not the hero ring's cards: the ring turns on its
+    // own, and tagged, every dark card orbiting past flipped the links.)
+    '#kl-how .m--video': 'dark',
+    // so the ring's cards are pictures to the nav, whatever they paint: a pool backs the links as one passes, the ink
+    // stays the paper's, as for any picture. Left to the auto bands (a moving 3D ring, cards of every size), the book's
+    // cover took the paper's knockout, cream boxes round Results and Free stuff on its dark brown (390 at 800, 2026-11-09)
+    '#kl-top .kr__item': 'busy',
+  }}
   ogImage="/og/work-kleus.png"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -96,7 +111,7 @@ const RAILS = [
 
   <div class="kl">
     <!-- ============================== HERO ============================== -->
-    <section class="hero" id="kl-top">
+    <section class="hero" id="kl-top" data-offscreen-pause>
       <div class="hero__glow" aria-hidden="true"><i></i><i></i></div>
       <div class="kl-wrap hero__inner">
         <p class="hero__meta" data-hero-in>
@@ -214,7 +229,7 @@ const RAILS = [
     <KlChat />
 
     <!-- ============================== IV. THE CHECK ============================== -->
-    <section class="chk" id="kl-check">
+    <section class="chk" id="kl-check" data-nav-theme="dark">
       <div class="kl-wrap">
         <KlMark n="IV" label="The check" dark />
         <div class="chk__head">
@@ -253,7 +268,7 @@ const RAILS = [
           <div class="why__sticky">
             <KlMark n="V" label="Decisions" />
             <h2 class="h2 h2--nobal" data-kl-reveal>Why I built it<br /> <span>this way.</span></h2>
-            <p class="lead" data-kl-reveal>Five calls that shaped Kleus. None of them were the AI's to make.</p>
+            <p class="lead" data-kl-reveal>Five things I'd build the same way again.</p>
           </div>
         </div>
         <ol class="why__list">
@@ -327,14 +342,14 @@ const RAILS = [
     </section>
 
     <!-- ============================== VI. UNDER THE HOOD ============================== -->
-    <section class="hood" id="kl-hood">
+    <section class="hood" id="kl-hood" data-nav-theme="dark">
       <div class="kl-wrap">
         <KlMark n="VI" label="Under the hood" dark />
         <div class="hood__head">
-          <h2 class="h2 h2--dark" data-kl-reveal>Built human&#8209;steered.</h2>
+          <h2 class="h2 h2--dark" data-kl-reveal>How it was built.</h2>
           <p class="lead lead--dark" data-kl-reveal>
-            I made the product calls: what the coach says, when it speaks, what counts as learned. AI did most
-            of the typing, inside rules I wrote down and enforced with tests.
+            What the coach says, when it speaks and what counts as learned all live in written rules. Nothing deploys
+            until the tests that check them pass.
           </p>
         </div>
         <div class="pulse">
@@ -378,14 +393,13 @@ const RAILS = [
           </div>
         </div>
         <p class="quote" data-kl-reveal>
-          AI can write a lesson in seconds. Deciding when to speak, when to stay quiet and how to grade someone
-          honestly is the real work. <span>That part was mine.</span>
+          Any app can write a lesson. <span>Kleus knows when not to send one.</span>
         </p>
       </div>
     </section>
 
     <!-- ============================== BRING YOUR OWN THING ============================== -->
-    <section class="cta" id="kl-try">
+    <section class="cta" id="kl-try" data-offscreen-pause>
       <div class="cta__glow" aria-hidden="true"></div>
       <div class="kl-wrap cta__inner">
         <span class="cta__phi" aria-hidden="true"><KlLogo variant="phi" /></span>

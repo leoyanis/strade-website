@@ -328,7 +328,7 @@ export const RESOURCES: Resource[] = [
               rows: [
                 { text: 'Hero builds itself like a film intro', fix: 'Approved' },
                 { text: 'Diagonal wipe into the menu', fix: 'Approved' },
-                { text: 'Two typos in your copy', warn: true, fix: 'Flagged, not changed' },
+                { text: 'Two typos in your copy', warn: true, fix: 'Flagged for you to fix' },
               ],
               reply: 'go',
             },

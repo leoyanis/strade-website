@@ -1,0 +1,2 @@
+/* WebKit filter isolation: the nav mark drop-shadow (fixed, every page) */
+.nav-brand-mark { filter: none !important; }

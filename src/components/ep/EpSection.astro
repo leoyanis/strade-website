@@ -1,0 +1,298 @@
+---
+// Endless Pursuit on the homepage: a developer demo, not an ad. Headline, tagline, two links,
+// and one phone running a working slice of the app's Today screen, built for the web from the
+// app's own design system (lib/ui/tokens.dart, typography.dart, docs/DESIGN.md in the app repo).
+// Behind it, the app's own opening: stars flowing round an ∞ (StarInfinity), gathering as the
+// section scrolls in. The script (ep-section.ts) wires the motion, the sounds and the pointer.
+import './ep-section.css';
+
+interface Props {
+  /** The case study's slug, for the gold link. */
+  slug: string;
+}
+const { slug } = Astro.props;
+
+// Lucide glyphs the app uses (ISC licence), as path data on a 24 grid.
+const I = {
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  share: '<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/>',
+  pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  timer: '<path d="M10 2h4"/><path d="M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+  play: '<path d="M6 3l14 9-14 9z"/>',
+  footprints: '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  user: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>',
+  sunrise: '<path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+  zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  inf: '<path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"/>',
+  speaker: '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/>',
+};
+const svg = (paths: string, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
+
+// The app's avatar: the initial on a two-colour gradient picked from the name
+// (Avatar.colorsFor: the sum of the name's code units, mod the eight pairs).
+const GOLD = '#E3C588', WORK = '#948AEA', BODY = '#DE7546', MIND = '#84BE71';
+const PAIRS: [string, string][] = [[GOLD, WORK], [WORK, BODY], [BODY, GOLD], [MIND, WORK], [GOLD, BODY], [MIND, GOLD], [WORK, MIND], [BODY, MIND]];
+const avatar = (name: string) => {
+  const [a, b] = PAIRS[[...name].reduce((s, c) => s + c.charCodeAt(0), 0) % PAIRS.length];
+  return `background:linear-gradient(135deg,${a},${b})`;
+};
+
+// The circle: the app's own test accounts (all fictional). You first, then who showed up.
+const circle = [
+  { id: 'you', name: 'Theo Quinn', label: 'You', state: 'active' },
+  { id: 'mia', name: 'Mia Sol', label: 'Mia', state: 'showed' },
+  { id: 'kai', name: 'Kai Moss', label: 'Kai', state: 'active' },
+  { id: 'dee', name: 'Dee Lete', label: 'Dee', state: 'quiet' },
+];
+
+// Today's sky (StarBackdrop): a few bright stars, many faint ones, thickest at the top.
+// Seeded, so every build draws the same sky.
+let s = 11;
+const rnd = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+const sky = Array.from({ length: 70 }, () => {
+  const y = Math.pow(rnd(), 1.8) * 874;
+  const bright = rnd() < 0.12;
+  return { x: rnd() * 402, y, r: bright ? 0.7 + rnd() * 0.5 : 0.3 + rnd() * 0.35, a: bright ? 0.5 + rnd() * 0.3 : 0.18 + rnd() * 0.25 };
+});
+const hours = ['06', '09', '12', '15', '18', '21', '24'];
+---
+
+<section id="mq-endless-pursuit" class="act ep3" aria-labelledby="ep3-h" data-ep>
+  <!-- the app's opening, stars flowing round an ∞; drawn by ep-stars.ts. The frame is sticky: the stars hold still
+       like a background while they gather, then scroll away with the words (ep-section.ts place()) -->
+  <div class="ep3-sky" aria-hidden="true">
+    <div class="ep3-sky__pin"><canvas class="ep3-sky__stars"></canvas></div>
+  </div>
+
+  <div class="container ep3__grid">
+    <div class="ep3__text">
+      <h2 class="ep3__h" id="ep3-h">
+        <span class="ep3__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="ep3__mark-path" pathLength="100" d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"/><path class="ep3__mark-spark" pathLength="100" d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"/></svg></span>
+        <span class="ep3__l1" data-ep-word>Endless</span>
+        <span class="ep3__l2" data-ep-word>Pursuit</span>
+      </h2>
+      <p class="ep3__tag" data-ep-in>The Strava for self-improvement</p>
+      <div class="ep3__ctas" data-ep-in>
+        <a class="ep3__btn ep3__btn--gold" href={`/work/${slug}`}>Open the case study <span aria-hidden="true">→</span></a>
+        <a class="ep3__btn ep3__btn--glass" href="https://www.endlesspursuit.app" target="_blank" rel="noopener">endlesspursuit.app <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+
+    <div class="ep3__stage" data-ep-stage role="group" aria-label="Endless Pursuit's Today screen, working: stop the focus session, start a new one, or nudge Dee">
+      <div class="ep3-phone" data-ep-phone>
+        <!-- 0 · the device -->
+        <div class="ep3-ly ep3-ly--body" data-ly="0"></div>
+
+        <!-- 1 · the sky -->
+        <div class="ep3-ly ep3-ly--sky" data-ly="1">
+          <div class="ep3-scr ep3-scr--sky">
+            <svg class="ept-sky" viewBox="0 0 402 874" preserveAspectRatio="none" aria-hidden="true">
+              {sky.map((p) => <circle cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={p.r.toFixed(2)} fill="#E9ECF2" opacity={p.a.toFixed(2)} />)}
+            </svg>
+          </div>
+          <i class="ep3-edge"></i>
+          <span class="ep3-tag" aria-hidden="true"><i></i>star sky</span>
+        </div>
+
+        <!-- 2 · the cards: Today's column -->
+        <div class="ep3-ly ep3-ly--cards" data-ly="2">
+          <div class="ep3-scr ep3-scr--cards">
+            <div class="ept-col" data-ep-col>
+              <header class="ept-dayhead">
+                <p class="ept-over">Tuesday · 27 October</p>
+                <div class="ept-dayrow">
+                  <h3 class="ept-title">Today</h3>
+                  <span class="ept-streak" data-ep-streak aria-label="Streak: 3 days">
+                    <span class="ept-flame" data-ep-flame>
+                      <i class="ept-flame__glow"></i>
+                      <span class="ept-flame__embers"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                      <Fragment set:html={svg(I.flame, 'ept-flame__icon')} />
+                    </span>
+                    <b class="ept-num ept-streak__n" data-ep-roll="streak">3</b>
+                  </span>
+                </div>
+              </header>
+
+              <section class="ept-card ept-myday" data-ep-myday>
+                <i class="ept-sweep" aria-hidden="true"></i>
+                <div class="ept-myday__row">
+                  <i class="ept-live" data-ep-ambient="pulse"></i>
+                  <span class="ept-label">Live to <b>Kiln Club</b></span>
+                  <span class="ept-share"><Fragment set:html={svg(I.share)} />Share</span>
+                </div>
+                <div class="ept-bar" data-ep-bar style="--now:0.5833">
+                  <div class="ept-bar__track">
+                    <i class="ept-bar__hatch"></i>
+                    <i class="ept-bar__run" data-ep-ambient="run"></i>
+                    <div class="ept-bar__blocks" data-ep-blocks></div>
+                  </div>
+                  <i class="ept-bar__now" data-ep-ambient="breath"></i>
+                </div>
+                <div class="ept-hours">{hours.map((h) => <span>{h}</span>)}</div>
+                <div class="ept-nums">
+                  <p class="ept-empty" data-ep-empty>Log anything and your day goes live to your circle. It fills itself in as you go.</p>
+                  <div class="ept-stats" data-ep-stats hidden>
+                    <span class="ept-stat ept-stat--hero"><b class="ept-num" data-ep-roll="focus">0</b><small>min</small><em><i style="background:#948AEA"></i>Focus</em></span>
+                    <span class="ept-stat"><b class="ept-num">0</b><small>km</small><em><i style="background:#DE7546"></i>Run</em></span>
+                    <span class="ept-stat"><b class="ept-num">0</b><small>pages</small><em><i style="background:#84BE71"></i>Read</em></span>
+                  </div>
+                  <span class="ept-chip" data-ep-chip aria-hidden="true"><span class="ept-chip__sparks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>+18 min</b></span>
+                </div>
+              </section>
+
+              <!-- Focus: the ring counting a session, or the gold Start focus -->
+              <div class="ept-focus" data-ep-focus data-state="running">
+                <div class="ept-focus__run" data-ep-run>
+                  <section class="ept-card ept-ringcard">
+                    <div class="ept-ringcard__row"><i class="ept-live" data-ep-ambient="pulse"></i><span class="ept-label">Focusing</span></div>
+                    <div class="ept-ring" data-ep-ring style="--sweep:264deg;--draw:1;--glow:1;--flash:0;--rs:1">
+                      <i class="ept-ring__halo" data-ep-halo></i>
+                      <span class="ept-ring__paint">
+                        <i class="ept-ring__track"></i>
+                        <i class="ept-ring__flash"></i>
+                        <span class="ept-ring__arcglow"><i></i></span>
+                        <i class="ept-ring__arc"></i>
+                        <i class="ept-ring__cap"></i>
+                        <span class="ept-ring__headpos"><i class="ept-ring__cap ept-ring__cap--head"></i><i class="ept-ring__head"></i></span>
+                        <span class="ept-ring__laps" data-ep-laps></span>
+                        <i class="ept-ring__ripple" data-ep-ripple></i>
+                      </span>
+                      <span class="ept-ring__time" data-ep-time>
+                        <b class="ept-num ept-ring__digits" data-ep-clock>18:20</b>
+                        <small data-ep-caption>round 1</small>
+                      </span>
+                    </div>
+                    <button class="ept-pill ept-press" type="button" data-ep-stop aria-label="Stop focus"><i class="ept-pill__stop"></i>Stop</button>
+                  </section>
+                  <div class="ept-plan">
+                    <span class="ept-planchip ept-planchip--mute"><Fragment set:html={svg(I.pencil)} />What for?</span>
+                    <button class="ept-planchip ept-press" type="button" data-ep-style aria-label="Timer style: Pomodoro, 25 minutes. Switch"><Fragment set:html={svg(I.timer)} /><span data-ep-style-label>Pomodoro · 25 min</span></button>
+                  </div>
+                </div>
+                <button class="ept-start ept-press" type="button" data-ep-start hidden><Fragment set:html={svg(I.play)} />Start focus</button>
+              </div>
+
+              <div class="ept-tiles">
+                <span class="ept-card ept-tile"><i class="ept-tile__icon" style="--mode:#DE7546"><Fragment set:html={svg(I.footprints)} /></i><span class="ept-tile__label">Log a run</span></span>
+                <span class="ept-card ept-tile"><i class="ept-tile__icon" style="--mode:#84BE71"><Fragment set:html={svg(I.book)} /></i><span class="ept-tile__label">Log pages</span></span>
+              </div>
+
+              <section class="ept-circle" data-ep-circle>
+                <div class="ept-circle__head">
+                  <span class="ept-headline">Kiln Club</span>
+                  <span class="ept-circle__count"><b class="ept-num" data-ep-roll="shown">3</b> of 4 · run <Fragment set:html={svg(I.flame, 'ept-circle__flame')} /><b class="ept-num">12</b></span>
+                </div>
+                <div class="ept-strip">
+                  {circle.map((m) => (
+                    m.id === 'dee' ? (
+                      <button class={`ept-member ept-member--${m.state}`} type="button" data-ep-member={m.id} aria-label={`${m.label}, quiet today, nudge`}>
+                        <span class="ept-member__ring"><span class="ept-member__face" style={avatar(m.name)}>{m.name[0]}</span><i class="ept-member__dot"></i></span>
+                        <span class="ept-member__name">{m.label}</span>
+                      </button>
+                    ) : (
+                      <span class={`ept-member ept-member--${m.state}`} data-ep-member={m.id}>
+                        <span class="ept-member__ring"><span class="ept-member__face" style={avatar(m.name)}>{m.name[0]}</span><i class="ept-member__dot"></i></span>
+                        <span class="ept-member__name">{m.label}</span>
+                      </span>
+                    )
+                  ))}
+                  <span class="ept-realtime" data-ep-realtime aria-hidden="true">realtime</span>
+                </div>
+              </section>
+
+              <section class="ept-card ept-feedcard" aria-hidden="true">
+                <span class="ept-feedcard__who"><span class="ept-member__face ept-feedcard__face" style={avatar('Mia Sol')}>M</span><span><b>Mia Sol</b><small>6.8 km · 50 min</small></span></span>
+                <div class="ept-bar ept-bar--feed"><div class="ept-bar__track"><div class="ept-bar__blocks"><i style="left:5.6%;width:3.4%;background:#DE7546"></i><i style="left:16.7%;width:4.6%;background:#948AEA"></i></div></div></div>
+              </section>
+            </div>
+          </div>
+          <i class="ep3-edge"></i>
+          <span class="ep3-tag" aria-hidden="true"><i></i>see-through cards</span>
+        </div>
+
+        <!-- 3 · the chrome -->
+        <div class="ep3-ly ep3-ly--chrome" data-ly="3">
+          <div class="ep3-scr ep3-scr--chrome">
+            <i class="ept-island"></i>
+            <div class="ept-status">
+              <span class="ept-status__time">09:41</span>
+              <span class="ept-status__icons">
+                <svg viewBox="0 0 18 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                <svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11.6 5.4 8.9a3.7 3.7 0 0 1 5.2 0zM2.7 6.2a7.5 7.5 0 0 1 10.6 0l-1.4 1.4a5.5 5.5 0 0 0-7.8 0zM0 3.5a11.3 11.3 0 0 1 16 0l-1.4 1.4a9.3 9.3 0 0 0-13.2 0z"/></svg>
+                <span class="ept-status__battery"><i></i></span>
+              </span>
+            </div>
+            <div class="ept-top">
+              <span class="ept-word"><Fragment set:html={svg(I.inf, 'ept-word__mark')} />Endless Pursuit</span>
+              <span class="ept-glassbtn"><Fragment set:html={svg(I.bell)} /></span>
+            </div>
+            <div class="ept-dock">
+              <div class="ept-tabbar">
+                <i class="ept-tabbar__lens"></i>
+                <span class="ept-tab is-on"><Fragment set:html={svg(I.sunrise)} />Today</span>
+                <span class="ept-tab"><Fragment set:html={svg(I.users)} />Tribe</span>
+                <span class="ept-tab"><Fragment set:html={svg(I.user)} />Profile</span>
+              </div>
+              <span class="ept-infbtn"><Fragment set:html={svg(I.inf)} /></span>
+            </div>
+            <i class="ept-home"></i>
+          </div>
+          <i class="ep3-edge"></i>
+          <span class="ep3-tag" aria-hidden="true"><i></i>Liquid Glass</span>
+        </div>
+
+        <!-- 4 · what drops in over everything: toasts -->
+        <div class="ep3-ly ep3-ly--over" data-ly="4">
+          <div class="ep3-scr ep3-scr--over">
+            <!-- "Focus for": the sheet Start focus opens; it folds up from its bottom edge -->
+            <div class="ept-scrim" data-ep-scrim></div>
+            <div class="ept-sheet" data-ep-sheet role="dialog" aria-modal="false" aria-label="Focus for" hidden>
+              <i class="ept-sheet__handle"></i>
+              <div class="ept-sheet__head">
+                <span class="ept-sheet__title">Focus for</span>
+                <button class="ept-sheet__close ept-press" type="button" data-ep-close aria-label="Close"><Fragment set:html={svg(I.x)} /></button>
+              </div>
+              <p class="ept-sheet__label">Style</p>
+              <div class="ept-styles" role="radiogroup" aria-label="Style">
+                <button class="ept-option ept-press is-on" type="button" role="radio" aria-checked="true" data-ep-opt="pomodoro"><Fragment set:html={svg(I.timer)} /><b>Pomodoro</b><small>rounds and breaks</small></button>
+                <button class="ept-option ept-press" type="button" role="radio" aria-checked="false" data-ep-opt="free"><Fragment set:html={svg(I.inf)} /><b>Free timer</b><small>until you stop</small></button>
+              </div>
+              <div class="ept-round" data-ep-round>
+                <p class="ept-sheet__label">A round</p>
+                <div class="ept-drum" data-ep-drum role="slider" tabindex="0" aria-label="A round, in minutes" aria-valuemin="5" aria-valuemax="60" aria-valuenow="25" aria-valuetext="25 minutes">
+                  <span class="ept-drum__cells" data-ep-cells><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  <i class="ept-drum__shade"></i>
+                  <span class="ept-drum__brackets"><i></i><i></i><i></i><i></i></span>
+                  <i class="ept-drum__caret" data-ep-caret></i>
+                  <small class="ept-drum__unit">min</small>
+                </div>
+                <p class="ept-sheet__note">Then a 5 min break. The rest of the rhythm is in Focus <span style="white-space:nowrap">set-up.</span></p>
+              </div>
+              <button class="ept-start ept-press ept-sheet__go" type="button" data-ep-go><Fragment set:html={svg(I.play)} />Start focus</button>
+            </div>
+            <div class="ept-toast" data-ep-toast role="status" aria-live="polite">
+              <i class="ept-brass" data-ep-brass><Fragment set:html={svg(I.zap)} /></i><span data-ep-toast-text>Nudged Dee</span>
+            </div>
+          </div>
+          <i class="ep3-edge"></i>
+          <span class="ep3-tag" aria-hidden="true"><i></i>sheets, toasts</span>
+        </div>
+
+        <!-- 5 · the cover glass: a glare that follows the turn -->
+        <div class="ep3-ly ep3-ly--glass" data-ly="5"><i></i></div>
+      </div>
+
+      <button class="ep3-sound" type="button" data-ep-sound aria-pressed="false" aria-label="Sound">
+        <Fragment set:html={svg(I.speaker, 'ep3-sound__icon')} />
+        <span class="ep3-sound__waves" aria-hidden="true"><i></i><i></i></span>
+        <canvas class="ep3-sound__scope" width="88" height="32" aria-hidden="true"></canvas>
+        <span class="ep3-sound__label" data-ep-sound-label>Sound off</span>
+      </button>
+    </div>
+  </div>
+</section>

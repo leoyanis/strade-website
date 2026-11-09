@@ -1,0 +1,71 @@
+---
+// One card in the hero's wheel: a small poster for a project, in that project's own colours.
+// The art is either the real thing (a reel, a phone with a real screen) or a drawn mockup where there
+// is nothing public to show (the CRM board, the story sequences). Atlas's reel is built in code
+// (AtlasReel), so it can come apart into its layers when the card is picked.
+import type { WheelItem } from './wheel-types';
+import AtlasReel from '../atlas/AtlasReel.astro';
+
+interface Props {
+  item: WheelItem;
+  index: number;
+  total: number;
+}
+const { item: c, index, total } = Astro.props;
+const a = c.art;
+const label = `${c.name}, case study ${index + 1} of ${total}`;
+---
+
+<a
+  href={`/work/${c.slug}`}
+  class:list={['wc', c.light && 'is-light', `wc--${a.t}`]}
+  data-slug={c.slug}
+  data-i={index}
+  style={`--bg:${c.bg};--ink:${c.ink};--accent:${c.accent};${c.glow ? `--glow:${c.glow};` : ''}`}
+  aria-label={label}
+  draggable="false"
+>
+  <span class="wc__in">
+    <span class="wc__face">
+      <span class="wc__art" aria-hidden="true">
+        {a.t === 'video' && <video src={a.src} poster={a.poster} muted loop playsinline preload="none"></video>}
+        {a.t === 'video-contain' && <video class="is-contain" src={a.src} poster={a.poster} muted loop playsinline preload="none"></video>}
+        {a.t === 'reel' && <AtlasReel variant="card" />}
+        {a.t === 'phone' && (
+          <>
+            <span class="wc-phone"><img src={a.src} alt="" loading="lazy" decoding="async" draggable="false" /></span>
+            {a.pal && <img class="wc-pal" src={a.pal} alt="" loading="lazy" decoding="async" draggable="false" />}
+          </>
+        )}
+        {a.t === 'contain' && <img class="wc-contain" src={a.src} alt="" loading="lazy" decoding="async" draggable="false" />}
+        {a.t === 'window' && (
+          <span class="wc-window"><span class="wc-window__bar"><i></i><i></i><i></i></span><img src={a.src} alt="" loading="lazy" decoding="async" draggable="false" /></span>
+        )}
+        {a.t === 'crm' && (
+          <span class="wc-crm">
+            {[['Replied', 3], ['Call booked', 2], ['Won', 1]].map(([col, n]) => (
+              <span class="wc-crm__col">
+                <em>{col}<i>{n}</i></em>
+                {Array.from({ length: Number(n) }).map((_, i) => (
+                  <b><s style={`width:${58 + ((i * 19) % 30)}%`}></s><s style={`width:${34 + ((i * 23) % 36)}%`}></s></b>
+                ))}
+              </span>
+            ))}
+            <span class="wc-crm__pill">130 tests on the sender</span>
+          </span>
+        )}
+        {a.t === 'stories' && (
+          <span class="wc-stories">
+            <span class="wc-story is-l"><em>PLAN</em><b>Your week, sorted.</b></span>
+            <span class="wc-story is-r"><em>DROP</em><b>Out now.</b></span>
+            <span class="wc-story is-m"><em>NEW</em><b>Three things we changed</b></span>
+          </span>
+        )}
+      </span>
+      <span class="wc__head">
+        <strong>{c.name}</strong>
+        <small>{c.kind}</small>
+      </span>
+    </span>
+  </span>
+</a>

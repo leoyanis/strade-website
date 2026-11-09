@@ -47,6 +47,8 @@ export function loadMotion(): Promise<Motion | null> {
 /**
  * Split text into clipped words of single characters, for rise-in titles. Nested inline
  * elements (e.g. an outlined <span>) are kept and split inside. Keeps an accessible label.
+ * "ff" stays in one span (as in free-act.ts): each span is its own layer and paints its outline on its own, so a split
+ * pair drew a seam across the joined crossbar of /free's outlined "stuff." (quests.css, .ql-hero h1 span).
  */
 export function splitChars(el: HTMLElement): HTMLElement[] {
   if (el.dataset.split) return Array.from(el.querySelectorAll<HTMLElement>('.fx-ch'));
@@ -64,13 +66,16 @@ export function splitChars(el: HTMLElement): HTMLElement[] {
         const word = document.createElement('span');
         word.className = 'fx-w';
         word.setAttribute('aria-hidden', 'true');
-        [...part].forEach((c) => {
+        const letters = [...part];
+        for (let i = 0; i < letters.length; i++) {
+          let c = letters[i];
+          while (c.endsWith('f') && letters[i + 1] === 'f') c += letters[++i];
           const ch = document.createElement('span');
           ch.className = 'fx-ch';
           ch.textContent = c;
           word.appendChild(ch);
           chars.push(ch);
-        });
+        }
         frag.appendChild(word);
       });
       node.replaceChild(frag, n);

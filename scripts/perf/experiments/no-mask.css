@@ -1,0 +1,2 @@
+/* masks off (the EP star canvas mask, the hero worlds mask, the Atlas grid mask, ...) */
+*, *::before, *::after { -webkit-mask-image: none !important; mask-image: none !important; }

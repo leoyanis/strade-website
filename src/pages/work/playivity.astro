@@ -50,6 +50,16 @@ const decisions = [
   crumbs={projectCrumbs(p)}
   bare
   navTheme="light"
+  navBands={{
+    // the dark-theme phone beside the class screenshot sits right under the links on desktop. (Tagged before the
+    // nav pulled its pools in to the text, it threw a long grey shadow across the white page; now the pool keeps
+    // to the phone.) Its screen holds light cards, so the screenshot is busy too. The theme screenshot above it
+    // carries its own data-nav-theme, switched with its theme below. The phone's body, not its figure: the figure
+    // also holds the caption under it, on the white page, and its dark pool lay there as a dark box and then a grey
+    // slab under the links once the phone had passed (1440 at 8711 to 8762, 2026-11-09 re-check). The body's drop
+    // shadow on the page below it keeps the page's knockout away (a shadow caster, Base.astro trim).
+    '.pv-phone__body': 'dark', '.pv-phone__body img': 'busy',
+  }}
   ogImage="/og/work-playivity.png"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -383,7 +393,7 @@ const decisions = [
           <p class="pv-sechead__p">School view, class view, Let’s Play, the 3.5-inch Playpost screen and the “How did we do?” summary, each with its default, hover, active, disabled and empty states, in one clickable Figma prototype.</p>
         </div>
 
-        <div class="pv-shot" id="pv-theme" data-mode="light">
+        <div class="pv-shot" id="pv-theme" data-mode="light" data-nav-theme="light">
           <div class="pv-shot__bar">
             <span class="pv-shot__dots" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pv-shot__url">School Overview</span>
@@ -484,7 +494,6 @@ const decisions = [
     overflow-x: clip;
   }
   :global(body) { background: #ffffff; }
-  :global(body[data-nav='light'] #site-nav.is-scrolled) { background: rgba(255, 255, 255, 0.82); }
 
   .pv-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; position: relative; }
   .pv-problem__grid > *, .pv-how__grid > *, .pv-sys > *, .pv-type > *, .pv-shots2 > * { min-width: 0; }
@@ -988,9 +997,18 @@ const decisions = [
     const theme = document.getElementById('pv-theme');
     let themeTimer: number | undefined;
     let themeTouched = false;
+    let navFlip: number | undefined;
     const setMode = (m: string) => {
       if (!theme) return;
       theme.dataset.mode = m;
+      // the nav's corners over the screenshot follow its theme (Base.astro watches data-nav-theme): untagged, the
+      // cream page's light pool lay over the dark theme as a white fog every other 3.2s. They turn when the
+      // screenshots' cross-fade (.pv-shot__frame img: 0.7s, ease) is half done, 210ms in (measured: the dark shot at 0.45
+      // at 194ms, 0.53 at 217ms; ease front-loads, so not at 350ms), when the new theme is the one showing. The nav has
+      // no easing of its own any more, and turned at the start it sat grey on the grey of the blend (Free stuff and the
+      // icon, 1440, 2026-11-09 re-check)
+      window.clearTimeout(navFlip);
+      navFlip = window.setTimeout(() => { theme.dataset.navTheme = m === 'dark' ? 'dark' : 'light'; }, 210);
       theme.querySelectorAll<HTMLButtonElement>('.pv-seg button').forEach((b) => {
         const on = b.dataset.mode === m;
         b.classList.toggle('is-on', on);

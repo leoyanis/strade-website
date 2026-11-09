@@ -66,6 +66,13 @@ const decisions = [
   crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
+  navBands={{
+    // the gold Start focus button in the Today screen passes right under the links on a phone: a flat colour to the
+    // nav (its own gradient, read by Base.astro: surface 'auto'), so it takes dark ink and a knockout in its gold, no
+    // pool. Untagged, Results sat white on the pale gold and Free stuff cyan, the label clashing behind (390,
+    // 2026-11-09 re-check)
+    '.ep-goldbtn': { tone: 'light', surface: 'auto' },
+  }}
   ogImage="/og/work-endless-pursuit.png"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -94,13 +101,17 @@ const decisions = [
     <!-- ============================== HERO ============================== -->
     <section class="ep-hero" aria-labelledby="ep-title">
       <div class="ep-hero__wash" aria-hidden="true"></div>
-      <svg class="ep-loop" viewBox="-560 -290 1120 580" aria-hidden="true">
+      <svg class="ep-loop" data-offscreen-pause viewBox="-560 -290 1120 580" aria-hidden="true">
         <defs>
           <linearGradient id="ep-loop-grad" x1="0" x2="1" y1="0" y2="0">
             <stop offset="0" stop-color="#F0DCAF"></stop>
             <stop offset="1" stop-color="#D9B678"></stop>
           </linearGradient>
-          <filter id="ep-loop-glow" x="-20%" y="-50%" width="140%" height="200%">
+          <!-- The blur's region, as tight as the glow needs: the loop's box (1000 x 417 units) plus 40 units each
+               side, past the furthest the blur reaches (stroke half-width 7 + about 3 sigma, 27). It was -20% / 140% by
+               -50% / 200%, 2.2 times the area, and WebKit blurs that whole region on the CPU on every frame of the
+               orbit: about 15 fps on an iPhone. Nothing visible lies outside the new region. -->
+          <filter id="ep-loop-glow" x="-4%" y="-10%" width="108%" height="120%">
             <feGaussianBlur stdDeviation="9"></feGaussianBlur>
           </filter>
         </defs>
@@ -109,7 +120,7 @@ const decisions = [
         <path class="ep-loop__comet" d={loop} pathLength="1000"></path>
       </svg>
 
-      <div class="ep-wrap ep-hero__grid">
+      <div class="ep-wrap ep-hero__grid" data-offscreen-pause>
         <div class="ep-hero__copy">
           <p class="ep-wordmark" data-hero-in>
             <svg aria-hidden="true"><use href="#ep-i-inf"></use></svg>
@@ -207,7 +218,7 @@ const decisions = [
     </section>
 
     <!-- ============================== WHAT I BUILT ============================== -->
-    <section class="ep-built" aria-labelledby="ep-built-h">
+    <section class="ep-built" data-offscreen-pause aria-labelledby="ep-built-h">
       <div class="ep-wrap">
         <header class="ep-sechead">
           <p class="ep-over" data-reveal>What I built</p>
@@ -400,7 +411,7 @@ const decisions = [
     </section>
 
     <!-- ============================== DESIGN SYSTEM ============================== -->
-    <section class="ep-glasssec" aria-labelledby="ep-glass-h">
+    <section class="ep-glasssec" data-offscreen-pause aria-labelledby="ep-glass-h">
       <div class="ep-wrap ep-glasssec__grid">
         <div class="ep-glasssec__text">
           <p class="ep-over" data-reveal>Design system</p>
@@ -442,7 +453,7 @@ const decisions = [
     </section>
 
     <!-- ============================== HOW ============================== -->
-    <section class="ep-how" aria-labelledby="ep-how-h">
+    <section class="ep-how" data-offscreen-pause aria-labelledby="ep-how-h">
       <div class="ep-wrap">
         <header class="ep-sechead ep-sechead--split">
           <div>
@@ -451,8 +462,8 @@ const decisions = [
           </div>
           <p class="ep-sechead__aside" data-reveal>
             Before writing app code I built a clickable prototype of the whole app, so every screen was agreed up front.
-            Then I designed the product topic by topic and wrote each decision down. I make the calls, and the AI that
-            does the typing works from those decisions, not from guesses.
+            Then I designed the product topic by topic and wrote each decision down. That written record is what the app is built
+            from, so nothing gets guessed along the way.
           </p>
         </header>
       </div>
@@ -511,7 +522,7 @@ const decisions = [
     </section>
 
     <!-- ============================== CLOSE ============================== -->
-    <section class="ep-close">
+    <section class="ep-close" data-offscreen-pause>
       <div class="ep-wrap ep-close__inner">
         <svg class="ep-close__inf" aria-hidden="true"><use href="#ep-i-inf"></use></svg>
         <p class="ep-close__line ep-moment" data-reveal>Day one is already on the board.</p>

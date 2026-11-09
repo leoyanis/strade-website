@@ -1,0 +1,166 @@
+---
+/**
+ * VtHero: the case study's first screen. Vaultt's network, alive, radiating from the app's own icon,
+ * with the name, the line, the headline number and both stores. Everything else waits further down.
+ *
+ * The network is builder 1's engine (src/components/vaultt/network.ts, the 'world' look on vaultt.io navy),
+ * driven by case-hero.ts: on arrival the ties draw out of the icon, the crowd of builders joins in waves
+ * while 23.7k lands on its reels, then it stays alive (a few pulses, a slow drift). The pointer plays with
+ * it: hover names a builder, drag throws one, a click ties a new connection in.
+ * No JS, reduced motion or ?still: the finished frame, every word visible.
+ */
+import { VAULTT_NUMBERS as N } from '../../../data/work';
+import VaulttMark from '../../vaultt/VaulttMark.astro';
+import StoreButtons from '../../vaultt/StoreButtons.astro';
+import VaulttNumber from '../../vaultt/VaulttNumber.astro';
+---
+
+<section class="vt-hero" id="vt-hero" aria-labelledby="vt-hero-h">
+  <script is:inline>
+    // Hold the intro elements back until case-hero.ts takes over (never longer than 3.5 s).
+    (function () {
+      try {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]still\b/.test(location.search)) return;
+        var h = document.getElementById('vt-hero');
+        h.classList.add('is-intro');
+        setTimeout(function () { h.classList.remove('is-intro'); }, 3500);
+      } catch (e) {}
+    })();
+  </script>
+  <canvas class="vt-hero__net" aria-hidden="true"></canvas>
+  <span class="vt-grain" aria-hidden="true"></span>
+
+  <div class="vt-wrap vt-hero__grid">
+    <div class="vt-hero__copy">
+      <p class="vt-tag vt-hero__eyebrow" data-vt-in><span class="vt-hero__pulse" aria-hidden="true"></span>Case study <span class="no">·</span> Live</p>
+      <h1 class="vt-hero__word" id="vt-hero-h">
+        <span class="vt-sr">Vaultt</span>
+        <span class="vt-hero__letters" aria-hidden="true">{'Vaultt'.split('').map((c) => <span class="vt-hero__ch">{c}</span>)}</span>
+      </h1>
+      <p class="vt-hero__tag" data-vt-in>The network for <em>builders.</em></p>
+      <VaulttNumber n={N.builders} label="builders on Vaultt" class="vt-hero__num" />
+      <div class="vt-hero__stores" data-vt-in><StoreButtons /></div>
+      <p class="vt-hero__credit" data-vt-in>Built from zero with founder Liam Jeffery</p>
+    </div>
+  </div>
+
+  <div class="vt-hero__stage" aria-hidden="true">
+    <div class="vt-hub">
+      <span class="vt-hub__ring"></span>
+      <span class="vt-hub__ring vt-hub__ring--2"></span>
+      <span class="vt-hub__tile"><VaulttMark class="vt-hub__mark" /></span>
+    </div>
+    <div class="vt-hero__hint-at"><p class="vt-hero__hint vt-note">Drag a builder <span>·</span> Click to connect</p></div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-hero {
+    --hx: 50%;
+    --hy: 52%;
+    position: relative; overflow: hidden; isolation: isolate;
+    min-height: max(100svh, 700px); padding-top: 64px;
+    display: flex; align-items: center;
+    background:
+      radial-gradient(60% 70% at 74% 50%, rgba(47, 128, 238, 0.13), transparent 70%),
+      var(--vt-navy);
+  }
+  /* the network fades into the page at the bottom, so nothing is cut by a line, and away under the nav at
+     the top (a point beside "Free stuff" read as a notification dot) */
+  .vt-hero__net {
+    position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 120px, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 120px, #000 70%, transparent 100%);
+    touch-action: pan-y;
+  }
+  .vt-hero__grid { position: relative; z-index: 2; width: 100%; pointer-events: none; }
+  .vt-hero__copy { position: relative; max-width: 560px; padding: 48px 0 64px; pointer-events: auto; }
+  .vt-hero__eyebrow { gap: 10px; }
+  .vt-hero__pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--vt-blue);
+    box-shadow: 0 0 0 0 rgba(111, 168, 255, 0.6); animation: vt-pulse 2.2s ease-out infinite;
+  }
+  @keyframes vt-pulse { 0% { box-shadow: 0 0 0 0 rgba(111, 168, 255, 0.55); } 80%, 100% { box-shadow: 0 0 0 12px rgba(111, 168, 255, 0); } }
+
+  .vt-hero__word {
+    margin: 20px 0 0;
+    font-family: var(--vt-display); font-weight: 800;
+    font-size: clamp(88px, 11.6vw, 172px); line-height: 0.86; letter-spacing: -0.055em;
+    color: var(--vt-light);
+  }
+  /* the letters rise out of a clipped line on arrival */
+  .vt-hero__letters { display: inline-flex; overflow: hidden; padding: 0.02em 0.04em 0.1em 0; margin-bottom: -0.1em; }
+  .vt-hero__ch { display: inline-block; will-change: transform; }
+
+  .vt-hero__tag {
+    margin-top: 18px;
+    font-family: var(--vt-display); font-weight: 700;
+    font-size: clamp(28px, 2.9vw, 42px); line-height: 1.04; letter-spacing: -0.032em;
+    color: var(--vt-light); text-wrap: balance;
+  }
+  .vt-hero__tag em { font-style: normal; color: var(--vt-blue); }
+
+  .vt .vt-hero__num { margin-top: 34px; }
+  .vt .vt-hero__num .vn__num { font-size: clamp(64px, 6.6vw, 96px); }
+  .vt .vt-hero__num .vn__label { margin-top: 6px; font-size: clamp(16px, 1.3vw, 19px); }
+
+  .vt-hero__stores { margin-top: 30px; }
+  .vt-hero__credit { margin-top: 22px; font-size: 14px; line-height: 1.5; color: var(--vt-faint); }
+
+  /* the right side: the app's icon at the hub of the network */
+  .vt-hero__stage { position: absolute; z-index: 1; top: 64px; right: 0; bottom: 0; width: 54%; pointer-events: none; }
+  .vt-hub { position: absolute; left: var(--hx); top: var(--hy); width: 84px; height: 84px; translate: -50% -50%; }
+  .vt-hub__tile {
+    position: absolute; inset: 0; display: grid; place-items: center; border-radius: 24px;
+    background: linear-gradient(160deg, #16386A 0%, #0E2C52 46%, #0A2140 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(232, 241, 255, 0.22), inset 0 0 0 1px rgba(232, 241, 255, 0.1),
+      0 0 0 1px rgba(5, 16, 32, 0.6), 0 18px 50px -10px rgba(47, 128, 238, 0.55), 0 0 90px rgba(111, 168, 255, 0.28);
+  }
+  .vt-hub__mark { width: 50px; height: 50px; display: block; filter: drop-shadow(0 4px 14px rgba(47, 128, 238, 0.5)); }
+  .vt-hub__ring { position: absolute; inset: -1px; border-radius: 26px; border: 1px solid rgba(111, 168, 255, 0.5); opacity: 0; pointer-events: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-hub__ring { animation: vt-hub-ring 3.6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite; }
+    .vt-hub__ring--2 { animation-delay: -1.8s; }
+  }
+  @keyframes vt-hub-ring { 0% { transform: scale(1); opacity: 0.55; } 70%, 100% { transform: scale(2.1); opacity: 0; } }
+  /* off screen the rings and the live dot hold still (case-hero.ts sets .is-run while the hero is on screen) */
+  .vt .vt-hero:not(.is-run) :is(.vt-hero__pulse, .vt-hub__ring) { animation-play-state: paused; }
+
+  /* the hint's place, and its fade as the hero scrolls away (case-hero.ts sets .is-away). On this wrapper, not the
+     hint: the hint's own opacity belongs to its entrance (GSAP) and its exit once someone has played */
+  .vt-hero__hint-at { position: absolute; left: 50%; bottom: 38px; translate: -50% 0; transition: opacity 0.45s var(--vt-ease); }
+  .vt-hero.is-away .vt-hero__hint-at { opacity: 0; }
+  .vt-hero__hint { white-space: nowrap; }
+  .vt-hero__hint span { color: var(--vt-blue); margin: 0 6px; }
+  .vt-hero__hint.is-gone { opacity: 0; transition: opacity 0.6s var(--vt-ease); }
+  @media (hover: none), (pointer: coarse) { .vt-hero__hint { display: none; } }
+
+  /* the intro: held back until the script lands (the inline script above adds .is-intro) */
+  .vt-hero.is-intro :is([data-vt-in], .vt-hero__ch, .vt-hub, .vt-hero__num, .vt-hero__hint) { opacity: 0; }
+
+  @media (max-width: 1023px) {
+    .vt-hero__stage { width: 50%; }
+    .vt-hero__copy { max-width: 470px; }
+  }
+  /* phones: the copy first, then the network below it, its hub in the middle of the space */
+  @media (max-width: 767px) {
+    .vt-hero { display: block; min-height: 0; padding-top: 84px; }
+    .vt-hero__copy { max-width: none; padding: 26px 0 0; }
+    .vt-hero__word { font-size: min(24.5vw, 112px); margin-top: 16px; }
+    .vt-hero__tag { font-size: 29px; margin-top: 16px; }
+    .vt .vt-hero__num { margin-top: 26px; }
+    .vt .vt-hero__num .vn__num { font-size: 66px; }
+    .vt-hero__stores { margin-top: 24px; }
+    .vt .vt-hero__stores .vs-stores { flex-wrap: nowrap; }
+    .vt-hero__credit { margin-top: 18px; font-size: 13.5px; }
+    .vt-hero__stage { position: relative; top: auto; right: auto; bottom: auto; width: 100%; height: 380px; }
+    .vt-hub { --hx: 50%; --hy: 52%; width: 70px; height: 70px; }
+    .vt-hub__tile { border-radius: 20px; }
+    .vt-hub__ring { border-radius: 22px; }
+    .vt-hub__mark { width: 42px; height: 42px; }
+  }
+  @media (max-width: 380px) {
+    .vt .vt-hero__stores .vs-stores { flex-wrap: wrap; }
+  }
+</style>

@@ -1,0 +1,202 @@
+---
+// The Atlas reel: a 9:16 short-form video built in code (no video file), in Atlas's own look: near-black,
+// Geist, and Atlas purple only where the AI acts (and on the hook card's second line, Atlas's title style).
+// It is the raw take from getatlas.site's own editor demo (take-02-raw.webp, that site's base.jpg), cut
+// with punch-ins, with the hook, the captions, a screen card, the music and the post on top. The words
+// on it are that video's own burned-in captions, in order, so the code-built reel and the real finished
+// video (take-02-final.mp4, which the homepage editor plays once its edit is posted) say the same thing.
+//
+// It is made of real, separate layers, because the homepage takes it apart in 3D while the card flies
+// (variant "flyer"): an idea and a script underneath the take, then the take, the edit (cuts and music),
+// the words and graphics, and the post. Each layer carries a label in plain words.
+//
+// variant "card":  the Atlas card in the hero's wheel (flat, cropped below the card's name like a reel).
+// variant "flyer": the copy that flies from the wheel into the editor; adds the two hidden layers, the sheets,
+//                  the cut film strip and the labels that show while it is apart.
+// variant "mon":   the finished preview inside the homepage editor. It also carries the raw, ungraded take
+//                  under the graded one, so the editor fades between them (opacity) instead of animating a filter.
+//                  The flyer carries it too: when the card leaves the editor mid-edit, the flyer takes the editor's
+//                  look as it is (raw, no words) and finishes itself on the way up.
+// All three use the same markup for what shows when flat, so the hand-overs between them cannot be seen.
+// The motion lives in src/scripts/atlas-reel.ts; without it (or with reduced motion, or ?still) this is a finished
+// frame: the markup ships with is-paused, so the CSS loops stand still until the script plays the reel.
+// Sizes are in em, and 1em is 1% of the reel's width (--rw), so one number scales the whole thing.
+import '../../styles/atlas-reel.css';
+
+interface Props {
+  variant: 'card' | 'flyer' | 'mon';
+}
+const { variant } = Astro.props;
+const flyer = variant === 'flyer';
+const img = (f: string) => `/images/work/atlas/${f}`;
+
+// The words, exactly as take-02-final.mp4 burns them in (read off its frames with ffmpeg), in the same order:
+// "how i" / "make 6 figures" / "a month" / "with media" / "trafficking" / "explained in" / "29 seconds", the
+// video's first sentence (0.07 to 3.83 s). The first two chunks are the hook card (the `hook` lines), the next
+// five the captions, one group per chunk. Nothing here goes beyond what the speaker says.
+// `lit` would be the one word in purple, the AI's colour, where Atlas acts; these are the speaker's own words,
+// plain white as in the real video, so none is lit.
+const hook = ['how i', 'make 6 figures'];
+const groups: { w: string[]; lit: number }[] = [
+  { w: ['a', 'month'], lit: -1 },
+  { w: ['with', 'media'], lit: -1 },
+  { w: ['trafficking'], lit: -1 },
+  { w: ['explained', 'in'], lit: -1 },
+  { w: ['29', 'seconds'], lit: -1 },
+];
+// The labels on the layers while the reel is apart, bottom to top (the order things happen).
+const labels = {
+  idea: 'Finds an idea that worked',
+  script: 'Writes it in your voice',
+  take: 'You film it once',
+  edit: 'Cuts the mistakes, adds music',
+  words: 'Adds captions and graphics',
+  post: 'Posts it, shows what worked',
+};
+// a four point spark (reads as a spark at label size, where the editor's eight point one is a blob)
+const spark = 'M12 1.5c.7 5.6 3.4 8.3 9 9-5.6.7-8.3 3.4-9 9-.7-5.6-3.4-8.3-9-9 5.6-.7 8.3-3.4 9-9z';
+
+// The edit layer's film strip: a small timeline of the take, kept (k) and cut (c) clips, in seconds of footage. While
+// the reel stands apart the cut clips close up and the kept ones slide together (--cut, set by the flight), with the
+// same red hatch as the editor's timeline below. It sits near the top of its layer, so in the 3D view it shows above
+// the take, never across the face (it used to sit across the forehead, where it read as a glitch).
+// Everything is precomputed here in em, so the collapse is transforms only: no layout while it moves.
+const stripRaw: [string, number][] = [['k', 4.6], ['c', 3.2], ['k', 4], ['c', 5.4], ['k', 4.8], ['c', 2.6], ['k', 4.2], ['c', 3.6], ['k', 3.8]];
+const SW = 84; // the strip's width in em
+const SG = 0.7; // the gap between clips
+const SU = (SW - SG * (stripRaw.length - 1)) / stripRaw.reduce((a, [, w]) => a + w, 0); // em per second of footage
+let sLeft = 0;
+let sFoot = 1.15; // footage offset in seconds: skips the strip image's first frame
+let sGone = 0;
+const strip = stripRaw.map(([t, w]) => {
+  const piece = { cut: t === 'c', l: sLeft, w: w * SU, s: -sGone, o: sFoot };
+  sLeft += w * SU + SG;
+  sFoot += w;
+  if (t === 'c') sGone += w * SU + SG;
+  return piece;
+});
+const f2 = (n: number) => n.toFixed(2);
+const barsN = 18;
+---
+
+<div class={`ar ar--${variant} is-paused`} data-reel={variant} aria-hidden="true">
+  {flyer && (
+    <div class="ar-ly ar-ly--idea" style="--i:0">
+      <div class="ar-clip"><div class="ar-fr ar-sheet ar-sheet--solid">
+        <span class="ar-sh"><svg viewBox="0 0 24 24"><path d={spark} /></svg>ideas</span>
+        <span class="ar-chart">
+          {[0.34, 0.5, 0.42, 1, 0.58, 0.46].map((h, i) => <i class={i === 3 ? 'is-top' : ''} style={`--h:${h}`}></i>)}
+        </span>
+        <span class="ar-note">your best posts</span>
+        <span class="ar-pick"><b>new idea</b>{hook.join(' ')} a month</span>
+      </div></div>
+      <span class="ar-lab" style="--n:0;--ly:30%"><i class="ar-lead"></i><span class="ar-pill"><svg viewBox="0 0 24 24"><path d={spark} /></svg>{labels.idea}</span></span>
+    </div>
+  )}
+  {flyer && (
+    <div class="ar-ly ar-ly--script" style="--i:1">
+      <div class="ar-clip"><div class="ar-fr ar-sheet ar-sheet--solid">
+        <span class="ar-sh"><svg viewBox="0 0 24 24"><path d={spark} /></svg>script</span>
+        <!-- the script is the video's first sentence, split where it reads -->
+        <span class="ar-script">
+          <span>how i make 6 figures a month</span>
+          <span>with media trafficking,</span>
+          <span>explained in 29 seconds<i class="ar-caret"></i></span>
+        </span>
+        <span class="ar-skel"><i style="--w:.86"></i><i style="--w:.62"></i><i style="--w:.74"></i></span>
+      </div></div>
+      <span class="ar-lab" style="--n:1;--ly:30%"><i class="ar-lead"></i><span class="ar-pill"><svg viewBox="0 0 24 24"><path d={spark} /></svg>{labels.script}</span></span>
+    </div>
+  )}
+
+  <!-- the take: the person on camera, cut into shots with punch-ins, and graded -->
+  <div class="ar-ly ar-ly--take" style="--i:2">
+    <div class="ar-clip"><div class="ar-fr ar-take">
+      <!-- the framing: in the wheel card the picture sits higher in its frame, so the face shows above the fold -->
+      <div class="ar-crop"><div class="ar-cam">
+        {variant !== 'card' && <img class="ar-raw" src={img('take-02-raw.webp')} alt="" width="432" height="768" decoding="async" draggable="false" />}
+        <img class="ar-pic" src={img('take-02-raw.webp')} alt="" width="432" height="768" decoding="async" draggable="false" />
+      </div></div>
+      <i class="ar-shade"></i>
+    </div></div>
+    {flyer && <span class="ar-lab ar-lab--you" style="--n:2;--ly:30%"><i class="ar-lead"></i><span class="ar-pill"><i class="ar-rec"></i>{labels.take}</span></span>}
+  </div>
+
+  <!-- the edit: the music Atlas picked, hitting on the cuts (and, while apart, the film strip being cut) -->
+  <div class="ar-ly ar-ly--edit" style="--i:3">
+    <div class="ar-clip"><div class="ar-fr">
+      {flyer && <i class="ar-glass ar-glass--p"></i>}
+      {flyer && (
+        <span class="ar-strip">
+          {strip.map((s) => (
+            <i class={s.cut ? 'is-cut' : ''} style={`--l:${f2(s.l)}em;--w:${f2(s.w)}em;--s:${f2(s.s)}em;--o:${f2(s.o * SU)}em`}></i>
+          ))}
+        </span>
+      )}
+      <span class="ar-music">
+        <svg class="ar-note-ic" viewBox="0 0 24 24"><path d="M9 17.5V6.2l10-2.2v11.3 M9 17.5a2.6 2.6 0 1 1-2.6-2.6A2.6 2.6 0 0 1 9 17.5z M19 15.3a2.6 2.6 0 1 1-2.6-2.6 2.6 2.6 0 0 1 2.6 2.6z" /></svg>
+        <span class="ar-wave">{Array.from({ length: barsN }).map((_, i) => <i style={`--d:${((i * 37) % 23) / 23}`}></i>)}</span>
+      </span>
+    </div></div>
+    {flyer && <span class="ar-lab" style="--n:3;--ly:30%"><i class="ar-lead"></i><span class="ar-pill"><svg viewBox="0 0 24 24"><path d={spark} /></svg>{labels.edit}</span></span>}
+  </div>
+
+  <!-- the words and graphics: the hook on top, the captions word by word, a screen card that slides in -->
+  <div class="ar-ly ar-ly--words" style="--i:4">
+    <div class="ar-clip"><div class="ar-fr">
+      {flyer && <i class="ar-glass"></i>}
+      <span class="ar-words">
+      <span class="ar-title"><span>{hook[0]}</span><span><em>{hook[1]}</em></span></span>
+      <!-- the screen card: Atlas's three steps, idea, film, post; the one you do is the white one -->
+      <span class="ar-broll">
+        <span class="ar-broll__bar"><i></i><i></i><i></i></span>
+        <span class="ar-broll__row">
+          <span class="ar-sf"><b>IDEA</b><s></s><s></s></span>
+          <span class="ar-sf is-lit"><b>FILM</b><s></s><s></s></span>
+          <span class="ar-sf"><b>POST</b><s></s><s></s></span>
+        </span>
+      </span>
+      <span class="ar-caps">
+        {groups.map((g) => (
+          <span class="ar-cg">
+            {g.w.map((w, j) => <b class={j === g.lit ? 'is-lit' : ''}>{w}</b>)}
+          </span>
+        ))}
+      </span>
+      </span>
+    </div></div>
+    {flyer && <span class="ar-lab" style="--n:4;--ly:30%"><i class="ar-lead"></i><span class="ar-pill"><svg viewBox="0 0 24 24"><path d={spark} /></svg>{labels.words}</span></span>}
+  </div>
+
+  <!-- the post: it is up on your accounts, and the views come back -->
+  <div class="ar-ly ar-ly--post" style="--i:5">
+    <div class="ar-clip"><div class="ar-fr">
+      {flyer && <i class="ar-glass"></i>}
+      <span class="ar-rail">
+        <span class="ar-heart">
+          <svg viewBox="0 0 24 24"><path d="M12 20.4s-7.6-4.6-7.6-10.2A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 7.6 2.7c0 5.6-7.6 10.2-7.6 10.2z" /></svg>
+          <i></i><i></i><i></i>
+        </span>
+        <svg viewBox="0 0 24 24"><path d="M12 4.2c4.6 0 8.2 3.1 8.2 7s-3.6 7-8.2 7c-1 0-2-.1-2.9-.4L4.6 19.6l1.3-3.7C4.6 14.6 3.8 13 3.8 11.2c0-3.9 3.6-7 8.2-7z" /></svg>
+        <svg viewBox="0 0 24 24"><path d="M13.4 5.2l7 6.3-7 6.3v-3.9c-4.8 0-7.8 1.4-9.8 4.6.8-4.9 3.8-8.6 9.8-9.4z" /></svg>
+      </span>
+      {flyer && (
+        <span class="ar-posted">
+          <span class="ar-posted__row"><i></i><i></i><i></i><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" /></svg>posted</b></span>
+          <svg class="ar-posted__chart" viewBox="0 0 120 44">
+            <defs><linearGradient id="ar-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8858F8" stop-opacity="0.34" /><stop offset="1" stop-color="#8858F8" stop-opacity="0" /></linearGradient></defs>
+            <path class="ar-area" d="M2 40 L20 36 L38 37 L56 27 L74 29 L92 16 L116 6 L116 44 L2 44 Z" />
+            <path d="M2 40 L20 36 L38 37 L56 27 L74 29 L92 16 L116 6" />
+            <circle cx="116" cy="6" r="2.6" />
+          </svg>
+        </span>
+      )}
+      <span class="ar-views">
+        <span class="ar-views__k">views</span>
+        <svg viewBox="0 0 60 22" preserveAspectRatio="none"><path d="M2 19 L12 16 L21 17 L30 11 L39 12 L48 6 L58 3" pathLength="100" /></svg>
+        <svg class="ar-views__up" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5" /></svg>
+      </span>
+    </div></div>
+    {flyer && <span class="ar-lab" style="--n:5;--ly:30%"><i class="ar-lead"></i><span class="ar-pill"><svg viewBox="0 0 24 24"><path d={spark} /></svg>{labels.post}</span></span>}
+  </div>
+</div>

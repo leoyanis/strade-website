@@ -1,0 +1,119 @@
+---
+/*
+  The portrait as a WANTED poster pinned up in the west act (#about in index.astro). Parchment with torn edges,
+  hung from one nail it sways on, the photo printed in sepia with two bullet holes, and the existing subject tag
+  as its name plate. Styles: west.css (.w-poster*).
+
+  The torn outline is a clip-path polygon generated here from a seeded random, so it is the same on every build.
+  Why the shadow is its own element: a clip-path also clips the element's box-shadow, so the paper cannot cast its
+  own; the shadow box sits behind it, a little inset, and only its blur shows round the torn edge.
+  The sway is a CSS animation on .w-poster, inside the element the page's reveal moves (.bp-photo, data-reveal):
+  on one element the running animation would override GSAP's inline transform and the reveal would not show.
+*/
+interface Props {
+  src: string;
+  alt: string;
+  /** The subject tag, "SUBJECT 01 · Y. SCHWEIZER": shown as two lines, its text unchanged. */
+  tag: string;
+}
+const { src, alt, tag } = Astro.props;
+// "SUBJECT 01" over "Y. SCHWEIZER"; the dot stays in the text for screen readers and copy-paste, visually hidden
+const cut = tag.indexOf(' · ');
+const sub = cut < 0 ? tag : tag.slice(0, cut);
+const name = cut < 0 ? '' : tag.slice(cut + 3);
+
+/** A torn outline: points along each edge, each nudged inwards by a seeded amount, now and then a deeper bite. */
+function tornPolygon(seed: number) {
+  let s = seed;
+  const r = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+  const pts: string[] = [];
+  const edge = (n: number, at: (t: number, inward: number) => [number, number], depth: number) => {
+    for (let i = 0; i < n; i++) {
+      const t = i / n;
+      let d = r() * depth;
+      if (r() < 0.08) d += depth * 1.4;
+      const [x, y] = at(t, d);
+      pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+    }
+  };
+  // clockwise from the top-left corner; x depth in % of the width, y depth in % of the height
+  edge(28, (t, d) => [t * 100, d], 1.1);
+  edge(40, (t, d) => [100 - d * 1.5, t * 100], 1.1);
+  edge(28, (t, d) => [100 - t * 100, 100 - d], 1.1);
+  edge(40, (t, d) => [d * 1.5, 100 - t * 100], 1.1);
+  return `polygon(${pts.join(', ')})`;
+}
+const torn = tornPolygon(1907);
+
+/**
+ * A bullet hole, as SVG paths in a -20..20 box: an irregular black hole, a ring of torn paper pushed out round it
+ * (lighter, with a dark lip so it reads raised), and a few cracks running out into the scorch. Seeded, so it is
+ * the same on every build.
+ */
+function bulletHole(seed: number) {
+  let s = seed;
+  const r = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+  const ring = (n: number, r0: number, r1: number) => {
+    const pts: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + (r() - 0.5) * 0.3;
+      const rr = r0 + r() * (r1 - r0);
+      pts.push(`${(Math.cos(a) * rr).toFixed(2)} ${(Math.sin(a) * rr).toFixed(2)}`);
+    }
+    return `M${pts.join(' L')} Z`;
+  };
+  const cracks: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const a = r() * Math.PI * 2;
+    const r0 = 7.5;
+    const r1 = 11 + r() * 6;
+    const bend = (r() - 0.5) * 0.35;
+    cracks.push(`M${(Math.cos(a) * r0).toFixed(2)} ${(Math.sin(a) * r0).toFixed(2)} L${(Math.cos(a + bend) * r1).toFixed(2)} ${(Math.sin(a + bend) * r1).toFixed(2)}`);
+  }
+  return { torn: ring(16, 5.6, 8.8), hole: ring(11, 3.4, 4.8), cracks: cracks.join(' ') };
+}
+const holeA = bulletHole(31);
+const holeB = bulletHole(77);
+---
+
+<div class="w-poster">
+  <span class="w-poster__shadow" aria-hidden="true"></span>
+  <div class="w-poster__paper" style={`clip-path:${torn}`}>
+    <span class="w-poster__wanted" aria-hidden="true">WANTED</span>
+    <span class="w-poster__rule" aria-hidden="true"></span>
+    <div class="w-poster__photo">
+      <img src={src} alt={alt} width="1100" height="1467" loading="lazy" decoding="async" />
+      <svg class="w-poster__hole w-poster__hole--a" viewBox="-20 -20 40 40" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="w-scorch">
+            <stop offset="0.2" stop-color="#1E1007" stop-opacity="0.85" />
+            <stop offset="0.5" stop-color="#3A2010" stop-opacity="0.42" />
+            <stop offset="1" stop-color="#3A2010" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <circle r="18" fill="url(#w-scorch)" />
+        <path d={holeA.cracks} stroke="#1E1007" stroke-width="0.7" opacity="0.75" fill="none" stroke-linecap="round" />
+        <path d={holeA.torn} fill="#E8D7AE" stroke="#4A2C14" stroke-width="0.9" stroke-linejoin="round" />
+        <path d={holeA.hole} fill="#0A0503" stroke="#6A4626" stroke-width="0.5" stroke-linejoin="round" />
+      </svg>
+    </div>
+    <svg class="w-poster__hole w-poster__hole--b" viewBox="-20 -20 40 40" aria-hidden="true" focusable="false">
+      <circle r="17" fill="url(#w-scorch)" />
+      <path d={holeB.cracks} stroke="#1E1007" stroke-width="0.7" opacity="0.75" fill="none" stroke-linecap="round" />
+      <path d={holeB.torn} fill="#EBDBB4" stroke="#4A2C14" stroke-width="0.9" stroke-linejoin="round" />
+      <path d={holeB.hole} fill="#0A0503" stroke="#6A4626" stroke-width="0.5" stroke-linejoin="round" />
+    </svg>
+    <span class="w-poster__tag">
+      <span class="w-poster__sub">{sub}</span>{name && <span class="sr-only"> · </span>}{name && <span class="w-poster__name">{name}</span>}
+    </span>
+  </div>
+  <span class="w-poster__nail" aria-hidden="true"></span>
+  <!-- the nav's light bands over the paper (west.css .w-navband): one over WANTED and its rule, one over the name
+       plate. None over the photo: a picture, it is tagged 'busy' (index.astro navBands), so a corner over it keeps a
+       pool. Siblings of the paper, not children: the paper's torn clip-path would clip them, and the nav's observer
+       with them. data-nav-surface: the paper as painted under the corners (on phones, and under the logo on screens
+       up to about 1180px wide), measured from the pixels at 390 in Chromium and WebKit, within 2 levels at the top and 6 at the foot, where
+       the bottom right stain is: a corner there takes dark ink with no pool and a knockout in that colour. -->
+  <i class="w-navband w-navband--top" data-nav-theme="light" data-nav-surface="#D9C295" aria-hidden="true"></i>
+  <i class="w-navband w-navband--foot" data-nav-theme="light" data-nav-surface="#D8C193" aria-hidden="true"></i>
+</div>

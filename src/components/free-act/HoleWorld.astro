@@ -1,0 +1,27 @@
+---
+/**
+ * HoleWorld: the free stuff act's world, a fixed theme layer. It goes inside `.themes` between the stripes
+ * and the blueprint, so the blueprint's sheet paints over it with its own edge and scan line.
+ *
+ * The world arrives as a dome: `.hole-dome` is a huge circle whose top point free-act.ts glues to the act's
+ * top edge, so a curved horizon rises over the stripes (their straight diagonal and the blueprint's flat edge
+ * are its neighbours). `.hole-dome__in` undoes the dome's move, so what is inside stays still on the screen:
+ * the black hole, a pre-rendered loop (hole-video.ts): `.hole-stage` is the video's frame, scaled and placed so the
+ * hole lands where the act's words expect it, with the video in it and its poster over the video. Neither carries a
+ * source in the markup: hole-video.ts sets them as the act comes near (it also makes the poster's <picture>). Under
+ * the stage, a CSS drawing of the hole (.hole-art) shows until the poster is decoded, and alone without JS. The edge
+ * stays bare: tried a thin light rim along it (an SVG arc with a glow), and on the cream it only read as a muddy
+ * bronze outline, so the dark meets the cream directly. No props.
+ */
+---
+<div class="theme theme--hole" aria-hidden="true">
+  <div class="hole-dome">
+    <div class="hole-dome__in">
+      <div class="hole-art"></div>
+      <div class="hole-stage">
+        <video class="hole-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback tabindex="-1"></video>
+        <div class="hole-poster"></div>
+      </div>
+    </div>
+  </div>
+</div>

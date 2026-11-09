@@ -11,8 +11,8 @@ export async function initFreeIndex() {
   const title = hero?.querySelector<HTMLElement>('h1');
   if (hero && title) {
     const intro = gsap.timeline({ defaults: { ease: 'expo.out' }, delay: 0.05 });
+    // (no label above the title since 2026-11-08: the blinking-dot eyebrow went with the free cards' clean-up)
     intro
-      .from(hero.querySelector('.ql-hero__label'), { y: 16, opacity: 0, duration: 0.8 }, 0)
       .from(splitChars(title), { yPercent: 118, rotate: 6, duration: 1.3, stagger: 0.04 }, 0.1)
       .from(splitWords(hero.querySelector<HTMLElement>('p')!), { yPercent: 70, opacity: 0, duration: 0.9, stagger: 0.012 }, 0.45)
       .from(hero.querySelectorAll('.social-row > *'), { y: 18, opacity: 0, duration: 0.8 }, 0.7);

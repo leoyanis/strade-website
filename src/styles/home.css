@@ -6,14 +6,28 @@
    as each act arrives. Without JS, each act paints its own bg.
    ================================================================ */
 
-/* ---------- theme layers ---------- */
-.themes { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+/* ---------- theme layers ----------
+   The stack is the large screen (100lvh), anchored to the top, not the visible area: with inset: 0 it shrank and
+   grew with a phone's toolbar, and every layer parked "just below the screen" showed as a band along the bottom
+   when the toolbar collapsed (the west act's torn edge, cream and brown, in the dark between Atlas and Vaultt; Mobile
+   Safari, iOS 26.3, 2026-11-08). The scripts that park a layer below the screen park it below this box's height. */
+.themes { position: fixed; left: 0; right: 0; top: 0; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none; }
 html:not(.has-themes) .themes { display: none; }
 .theme { position: absolute; inset: 0; overflow: hidden; clip-path: inset(100% 0 0 0); will-change: clip-path; }
 
 .theme--stripes { clip-path: none; background: none; }
-.wipe { position: absolute; top: 0; left: 0; overflow: hidden; transform-origin: 0 0; transform: translate3d(0, 200vh, 0); will-change: transform; }
-.wipe__inner { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; transform-origin: 0 0; background: #F5F1E8; will-change: transform; }
+/* .wipe is cream too. In Chromium, .wipe__inner's left and right edges (turned back by -theta inside the rotated
+   .wipe) come out only partly covered, so the dark world under the stripes showed through as a dashed grey seam down
+   both screen edges (a solid one at 3x; WebKit never showed it). .wipe's own cream fills those pixels. It is a single
+   solid colour, so there are no tiles to paint, and its diagonal edge lies on .wipe__inner's (that edge's antialiased
+   pixels come out about a quarter of a pixel fuller, which does not show). */
+/* The stripes act's paper: what .wipe paints, the act's own background without JS, and (as it renders) the knockout
+   round its heading (.knock, below). It renders 1 to 2 levels darker than the page paints the same colour (Chromium's
+   stripe field over it, WebKit's composited layer: rgb 244/243, 240/239, 231/230 against 245, 241, 232, sampled
+   2026-11-09), so the knockout uses --stripes-paper-seen, the middle of those. */
+:root { --stripes-paper: #F5F1E8; --stripes-paper-seen: #F4F0E7; }
+.wipe { position: absolute; top: 0; left: 0; overflow: hidden; transform-origin: 0 0; transform: translate3d(0, 200vh, 0); will-change: transform; background: var(--stripes-paper); }
+.wipe__inner { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; transform-origin: 0 0; background: var(--stripes-paper); will-change: transform; }
 .stripe-field { position: absolute; inset: -60% -40%; will-change: transform; }
 .stripe-rot { position: absolute; inset: 0; transform: rotate(-32deg); }
 .stripe { position: absolute; left: -10%; right: -10%; }
@@ -56,27 +70,25 @@ html:not(.has-themes) .themes { display: none; }
 .bp-mark--bl { bottom: 24px; left: 24px; } .bp-mark--br { bottom: 24px; right: 24px; }
 .bp-scan { position: absolute; left: 0; right: 0; height: 2px; background: #111; top: 100%; box-shadow: 0 0 0 6px rgba(17,17,17,0.06); }
 
+/* The finale is back under the hero's own sky: index.astro lifts the sky canvas (.ssi-canvas.is-lifted, z-index 1)
+   above the other worlds during the finale's circle wipe, and this layer is a faint nebula tint above it (z-index
+   2), clipped to the same circle. Without the sky (no WebGL and no 2D canvas) it keeps its old opaque night, so it
+   still hides the worlds under it. (Its CSS star dots and their twinkle went with the real sky.) */
 .theme--finale {
+  z-index: 2;
   background:
     radial-gradient(ellipse 60% 50% at 20% 70%, rgba(0, 229, 255, 0.16), transparent 70%),
     radial-gradient(ellipse 50% 60% at 85% 30%, rgba(123, 47, 255, 0.2), transparent 70%),
     #050505;
 }
-.theme--finale .stars, .theme--finale .stars--2 {
-  position: absolute; inset: 0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 20px 30px, rgba(255,255,255,0.7), transparent),
-    radial-gradient(1px 1px at 90px 120px, rgba(255,255,255,0.5), transparent),
-    radial-gradient(1.5px 1.5px at 160px 60px, rgba(0,229,255,0.8), transparent),
-    radial-gradient(1px 1px at 230px 200px, rgba(255,255,255,0.6), transparent);
-  background-size: 260px 240px;
-  animation: twinkle 4s ease-in-out infinite alternate;
+html.has-sky .theme--finale {
+  background:
+    radial-gradient(ellipse 60% 50% at 18% 74%, rgba(0, 229, 255, 0.07), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 86% 26%, rgba(123, 47, 255, 0.1), transparent 70%);
 }
-.theme--finale .stars--2 { background-size: 380px 330px; animation-delay: -2s; opacity: 0.6; }
-@keyframes twinkle { from { opacity: 0.35; } to { opacity: 1; } }
 
 /* no-JS fallback: acts paint their own backgrounds */
-html:not(.has-themes) .act--stripes { background: #F5F1E8; }
+html:not(.has-themes) .act--stripes { background: var(--stripes-paper); }
 html:not(.has-themes) .act--blueprint { background: #F2F0EB; }
 html:not(.has-themes) .act--finale { background: #050505; }
 
@@ -279,26 +291,33 @@ html:not(.has-themes) .act--finale { background: #050505; }
 .h-mq__stat { display: flex; align-items: baseline; gap: 14px; margin-top: 30px; }
 .h-mq__stat strong { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: clamp(40px, 4.4vw, 60px); font-weight: 600; letter-spacing: -0.04em; color: var(--accent); text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 40%, transparent); }
 .h-mq__stat span { color: var(--text-secondary); max-width: 220px; line-height: 1.4; }
-.h-mq--vaultt .h-link { color: var(--accent); }
-.h-v-visual { position: relative; height: 600px; }
-.h-planet {
-  position: absolute; width: 520px; height: 520px; border-radius: 50%; right: -60px; top: 40px;
-  background: radial-gradient(circle at 35% 30%, #9cc4ff 0%, #3d6fd1 30%, #0c2748 62%, transparent 72%);
-  filter: blur(2px); opacity: 0.55;
-  box-shadow: 0 0 120px 30px rgba(111, 168, 255, 0.18);
-}
-.h-planet::after { /* ring */
-  content: ''; position: absolute; inset: 42% -24%; border-radius: 50%;
-  border: 2px solid rgba(160, 200, 255, 0.35); transform: rotate(-18deg);
-}
-.h-v-cards { position: absolute; width: 74%; left: 0; top: 30px; border-radius: 18px; transform: rotate(-5deg); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(111, 168, 255, 0.15); }
-.h-v-phone { position: absolute; width: 36%; right: 4%; bottom: 0; filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.7)); }
+/* Vaultt's section lives in src/components/vaultt (VaulttHome, vaultt-home.css) */
 
 /* ================================================================
    ACT II — STRIPES (colourful minimal)
    ================================================================ */
 .act--stripes { padding: 140px 0 120px; }
-.knock { background: #F5F1E8; box-shadow: 0 0 0 18px #F5F1E8; }
+/* The stripes pass behind the act's heading and its line: a knockout in the paper's colour shaped like the letters
+   (a stroke painted under each glyph, so it adds a halo round it and never thins it), so a stripe breaks off only
+   round the letters and reads as passing behind them. It used to be a box (the paper as a background plus an 18px
+   box-shadow): a stripe crossing it broke off along the box's straight edges, so the box showed even where the colour
+   matched, and it was lighter anyway (see --stripes-paper-seen). Part of the text, it rises and fades with the letters,
+   so it is never a plate on its own. The line (one run of text): half its 10px stroke shows, a 5px halo. */
+.knock { -webkit-text-stroke: 10px var(--stripes-paper-seen); paint-order: stroke fill; }
+/* The heading: its letters are one span each (.h-split's rise), and a stroke is painted span by span, so each letter's
+   halo cut a sliver of paper through the letter before it (the tracking is tight). The halo is a dilation of the whole
+   heading instead: six drop-shadows in the paper, each shifting the last result, cover every offset from -0.1em to
+   0.1em in 0.05em steps both ways, under all the letters at once. A filter is drawn after the letters' clip and is not
+   cut by it, and it follows each letter as it rises and fades. */
+.knock.h-split {
+  -webkit-text-stroke: 0;
+  filter:
+    drop-shadow(0.05em 0 0 var(--stripes-paper-seen)) drop-shadow(0.05em 0 0 var(--stripes-paper-seen))
+    drop-shadow(-0.1em 0 0 var(--stripes-paper-seen)) drop-shadow(0 0.05em 0 var(--stripes-paper-seen))
+    drop-shadow(0 0.05em 0 var(--stripes-paper-seen)) drop-shadow(0 -0.1em 0 var(--stripes-paper-seen));
+}
+/* reduced motion, before the cream has come in at once (index.astro paintWipe): no knockout over the dark world */
+.act--stripes.is-bare .knock { -webkit-text-stroke: 0; filter: none; }
 /* main quest 02: Endless Pursuit, its own dark world dropped onto the stripes */
 .h-ep__grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
 .h-ep__text { padding: 8px 0; }
@@ -386,25 +405,7 @@ html:not(.has-themes) .act--finale { background: #050505; }
 .h-tile:hover .h-tile__arrow { transform: translate(3px, -3px) rotate(-8deg); }
 .h-tiles__all { display: flex; justify-content: flex-end; margin-top: 22px; }
 .h-tiles__all a { font-weight: 700; color: #111; border-bottom: 2px solid #111; padding-bottom: 2px; }
-
-.h-free { margin-top: 200px; }
-.h-free__box {
-  position: relative; overflow: hidden; border-radius: 28px; background: #111; color: #f5f1e8;
-  padding: clamp(32px, 5vw, 64px); display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;
-}
-.h-free__box::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 10px;
-  background: #FF4F1F;
-}
-.h-free__box .h-label { color: #FFB648; }
-.h-free__box h2 { font-size: clamp(34px, 4.6vw, 60px); font-weight: 900; letter-spacing: -0.05em; line-height: 0.98; margin-top: 16px; }
-.h-free__box p { color: rgba(245, 241, 232, 0.7); margin-top: 14px; font-size: 17px; max-width: 460px; }
-.h-free__res { background: #F5F1E8; color: #111; border-radius: 20px; padding: 26px; transform: rotate(2deg); transition: transform 0.5s var(--ease-out-expo); }
-.h-free__res:hover { transform: rotate(0deg) scale(1.02); }
-.h-free__res small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #E5484D; }
-.h-free__res h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; margin-top: 8px; line-height: 1.1; }
-.h-free__res p { color: #444; font-size: 15px; margin-top: 8px; }
-.h-free__res span { display: inline-flex; margin-top: 18px; font-weight: 700; }
+/* the free stuff act that follows has its own file: src/styles/free-act.css */
 
 /* ================================================================
    ACT III — BLUEPRINT (black & white paper)
@@ -435,9 +436,138 @@ html:not(.has-themes) .act--finale { background: #050505; }
 .bp-callout--a { left: -6px; bottom: 26%; } .bp-callout--a::before { left: 100%; }
 .bp-callout--b { right: 40px; top: 58px; } .bp-callout--b::before { right: 100%; }
 
+/* Kleus's figures (index.astro .bp-kx; Yanis, 2026-11-08: "get some more elements over" from the case study): the path,
+   the check and the commit grid, drawn on the sheet in ink. Each follows the scroll through one variable the script
+   sets (--kp, --kc, --kg: 0 to 1); without the script (reduced motion, ?still, no JS) they stay at 1, the finished
+   drawing */
+.bp-kx { --kp: 1; --kc: 1; --kg: 1; display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 64px 56px; margin-top: 104px; }
+.bp-kx__fig--path { grid-column: 1 / -1; }
+.bp-kx__fig > .bp-fig { display: block; margin-bottom: 24px; }
+/* 03a: one saved source splits into a path of short lessons (KlPath, smaller) */
+.kxp__src { display: flex; align-items: center; gap: 14px; width: 280px; margin: 0 auto; padding: 14px 16px; background: #111; color: #F2F0EB; opacity: clamp(0, calc(var(--kp) * 8), 1); }
+.kxp__play { position: relative; flex: none; width: 30px; height: 30px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #F2F0EB; }
+.kxp__play::after { content: ''; position: absolute; left: 12px; top: 9px; border-style: solid; border-width: 6px 0 6px 9px; border-color: transparent transparent transparent #F2F0EB; }
+.kxp__srcl { display: flex; flex-direction: column; font-size: 19px; font-weight: 750; letter-spacing: -0.025em; line-height: 1.05; }
+.kxp__srcl small { margin-bottom: 5px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #BDBAB3; }
+.kxp__dur { margin-left: auto; padding: 3px 6px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; box-shadow: inset 0 0 0 1px rgba(242, 240, 235, 0.45); }
+.kxp__split { display: flex; flex-direction: column; align-items: center; }
+.kxp__stem { width: 1.5px; height: 30px; background: #111; transform-origin: top; transform: scaleY(clamp(0, calc((var(--kp) - 0.08) * 9), 1)); }
+.kxp__label { margin-top: 8px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #333; opacity: clamp(0, calc((var(--kp) - 0.14) * 9), 1); }
+.kxp__stage { position: relative; max-width: 1100px; margin: 12px auto 0; aspect-ratio: 1100 / 250; container-type: inline-size; --u: calc(100cqw / 1100); }
+.kxp__arrows { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.kxp__arrows g { --a: calc(0.2 + var(--i) * 0.07); }
+.kxp__curve, .kxp__head { fill: none; stroke: #111; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.kxp__curve { stroke-dasharray: 1; stroke-dashoffset: calc(1 - clamp(0, (var(--kp) - var(--a)) * 5, 1)); }
+.kxp__head { opacity: clamp(0, calc((var(--kp) - var(--a) - 0.18) * 12), 1); }
+.kxp__cards { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+.kxp__card {
+  --a: calc(0.32 + var(--i) * 0.07);
+  --in: clamp(0, calc((var(--kp) - var(--a)) * 5), 1);
+  position: absolute; left: calc(var(--x) * var(--u)); top: calc(var(--y) * var(--u)); width: calc(150 * var(--u));
+  display: flex; flex-direction: column; gap: 8px; padding: 12px 13px 14px;
+  background: #FBFAF7; box-shadow: 0 0 0 1.5px #111, 4px 4px 0 rgba(17, 17, 17, 0.12);
+  opacity: var(--in); translate: -50% calc((1 - var(--in)) * 18px); rotate: var(--r);
+}
+.kxp__n, .kxp__m { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #555; }
+.kxp__t { font-size: 14px; font-weight: 650; letter-spacing: -0.015em; line-height: 1.25; color: #111; text-wrap: balance; }
+.kxp__m { margin-top: auto; padding-top: 7px; border-top: 1px dashed rgba(17, 17, 17, 0.25); }
+/* 03b: every lesson ends in something you write, scored out of 100 (KlCheck's result sheet) */
+.kxc { position: relative; max-width: 540px; padding: 24px 24px 22px; background: #FBFAF7; box-shadow: 0 0 0 1.5px #111, 6px 6px 0 rgba(17, 17, 17, 0.12); rotate: 1.2deg; }
+.kxc__head { position: relative; display: flex; align-items: center; gap: 16px; padding-bottom: 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(17, 17, 17, 0.2); }
+.kxc__ring { position: relative; flex: none; width: 76px; height: 76px; }
+.kxc__ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.kxc__track { fill: none; stroke: rgba(17, 17, 17, 0.12); stroke-width: 8; }
+.kxc__prog { fill: none; stroke: #111; stroke-width: 8; stroke-dashoffset: calc(var(--circ) * (1 - 0.93 * clamp(0, var(--kc) * 1.6, 1))); }
+.kxc__ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.kxc__headtext { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
+.kxc__band { padding: 4px 9px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; box-shadow: inset 0 0 0 1.5px #111; }
+.kxc__title { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; }
+.kxc__out { position: absolute; right: 0; top: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #777; }
+.kxc__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #333; opacity: clamp(0, calc((var(--kc) - 0.42) * 7), 1); }
+.kxc__concept { display: flex; align-items: center; gap: 8px; }
+.kxc__score { font-size: 13px; font-weight: 700; color: #111; }
+.kxc__concept svg, .kxc__mark svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #111; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.kxc__mark { display: flex; gap: 10px; margin-top: 12px; font-size: 14.5px; line-height: 1.5; color: #333; }
+.kxc__mark svg { margin-top: 4px; }
+.kxc__mark b { color: #111; font-weight: 650; }
+.kxc__mark--good { opacity: clamp(0, calc((var(--kc) - 0.58) * 7), 1); }
+.kxc__mark--gap { opacity: clamp(0, calc((var(--kc) - 0.74) * 7), 1); }
+/* 03c: KlCommits itself, inked on the sheet; its columns ink in week by week with the scroll (overrides its scoped,
+   dark theme from here, hence the id) */
+#mq-kleus .cg { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+#mq-kleus .cg .cg__months { color: #555; font-size: 11px; letter-spacing: 0.06em; }
+#mq-kleus .cg .cg__grid { clip-path: inset(0 calc((1 - var(--kg)) * 100%) 0 0); }
+#mq-kleus .cg .cg__c { background: rgba(17, 17, 17, 0.05); box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.14); border-radius: 2px; }
+#mq-kleus .cg .cg__c--1 { background: rgba(17, 17, 17, 0.2); box-shadow: none; }
+#mq-kleus .cg .cg__c--2 { background: rgba(17, 17, 17, 0.42); box-shadow: none; }
+#mq-kleus .cg .cg__c--3 { background: rgba(17, 17, 17, 0.68); box-shadow: none; }
+#mq-kleus .cg .cg__c--4 { background: #111; box-shadow: none; }
+#mq-kleus .cg .cg__c--out { background: transparent; box-shadow: none; }
+#mq-kleus .cg .cg__grid .cg__c.is-hot { box-shadow: 0 0 0 2px #F2F0EB, 0 0 0 3.5px #111; }
+#mq-kleus .cg .cg__key { color: #555; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+#mq-kleus .cg .cg__tip { background: #111; color: #F2F0EB; border-radius: 0; box-shadow: none; }
+#mq-kleus .cg .cg__tip span { color: #BDBAB3; }
+/* phones: about one screen more, not two (measured 1410px with everything): four of the six lessons, no minutes line,
+   and the check keeps what landed */
+@media (max-width: 767px) {
+  .bp-kx { grid-template-columns: 1fr; gap: 44px; margin-top: 64px; }
+  .bp-kx__fig > .bp-fig { margin-bottom: 18px; }
+  .kxp__src { width: auto; max-width: 300px; }
+  .kxp__stem { height: 20px; }
+  .kxp__stage { aspect-ratio: auto; container-type: normal; margin-top: 14px; }
+  .kxp__arrows { display: none; }
+  .kxp__cards { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kxp__card { position: relative; left: auto; top: auto; width: auto; translate: 0 calc((1 - var(--in)) * 14px); rotate: none; padding: 10px 11px 12px; }
+  .kxp__card:nth-child(n + 5), .kxp__m { display: none; }
+  .kxp__t { font-size: 13px; }
+  .kxc { padding: 20px 18px 18px; rotate: 0.6deg; }
+  .kxc__mark { font-size: 13.5px; }
+  .kxc__mark--gap { display: none; }
+}
+
+/* The cut between Kleus and the method (index.astro .bp-cut; Yanis, 2026-11-08: they read as one section): a section
+   line ruled like a scale (a tick every 24px, a long one every 120px, the sheet's own grid), a registration mark at
+   each end and a section bubble, 03 over 04, its arrow pointing down into the next part. It draws out from the bubble
+   with the scroll (--cut, 0 to 1, set by the script; 1 without it) */
+.bp-cut { --cut: 1; display: flex; align-items: center; margin: 150px 0 130px; }
+.bp-cut__rule {
+  flex: 1 1 0; min-width: 0; height: 16px;
+  background:
+    linear-gradient(#111, #111) 0 50% / 100% 1.5px no-repeat,
+    repeating-linear-gradient(90deg, #111 0 1.5px, transparent 1.5px 120px) 0 50% / 100% 15px no-repeat,
+    repeating-linear-gradient(90deg, rgba(17, 17, 17, 0.75) 0 1px, transparent 1px 24px) 0 50% / 100% 7px no-repeat;
+  clip-path: inset(0 calc((1 - var(--cut)) * 100%) 0 0);
+}
+/* mirrored, so both scales count out from the bubble and both draw away from it */
+.bp-cut__rule--l { transform: scaleX(-1); }
+.bp-cut__reg {
+  position: relative; flex: none; width: 22px; height: 22px; margin: 0 12px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #111;
+  opacity: clamp(0, calc((var(--cut) - 0.82) * 6), 1); transform: scale(calc(0.6 + 0.4 * clamp(0, (var(--cut) - 0.82) * 6, 1)));
+}
+.bp-cut__reg::before, .bp-cut__reg::after { content: ''; position: absolute; background: #111; }
+.bp-cut__reg::before { left: 50%; top: -7px; bottom: -7px; width: 1.5px; margin-left: -0.75px; }
+.bp-cut__reg::after { top: 50%; left: -7px; right: -7px; height: 1.5px; margin-top: -0.75px; }
+.bp-cut__bubble {
+  position: relative; flex: none; display: grid; grid-template-rows: 1fr 1fr; width: 60px; height: 60px; margin: 0 14px;
+  border-radius: 50%; background: #F2F0EB; box-shadow: inset 0 0 0 1.5px #111;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: #111;
+  opacity: clamp(0, calc(var(--cut) * 5), 1); transform: scale(calc(0.85 + 0.15 * clamp(0, var(--cut) * 5, 1)));
+}
+.bp-cut__bubble b { display: grid; place-items: center; font-weight: 600; }
+.bp-cut__bubble b:first-child { padding-top: 5px; }
+.bp-cut__bubble b:last-child { padding-bottom: 5px; }
+.bp-cut__bubble::before { content: ''; position: absolute; left: 6px; right: 6px; top: 50%; height: 1.5px; margin-top: -0.75px; background: #111; }
+.bp-cut__bubble::after { content: ''; position: absolute; left: 50%; top: calc(100% - 1px); border-style: solid; border-width: 9px 7px 0; border-color: #111 transparent transparent; translate: -50% 0; }
+@media (max-width: 640px) {
+  .bp-cut { margin: 104px 0 96px; }
+  .bp-cut__bubble { width: 52px; height: 52px; margin: 0 10px; font-size: 11px; }
+  .bp-cut__reg { width: 18px; height: 18px; margin: 0 8px; }
+}
+
 /* method diagram */
 .bp-method h2, .bp-stats h2, .bp-about h2 { font-size: clamp(40px, 6vw, 80px); font-weight: 800; letter-spacing: -0.055em; line-height: 0.95; margin-top: 16px; max-width: 900px; }
-.bp-method h2 em, .bp-about h2 em { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.02em; }
+/* only #method's "Product out." (the #about headline lost its serif word, Yanis 2026-11-07) */
+.bp-method h2 em { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.02em; }
 .bp-flow { position: relative; margin-top: 64px; }
 .bp-flow svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .bp-flow__steps { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
@@ -459,44 +589,107 @@ html:not(.has-themes) .act--finale { background: #050505; }
 .bp-measure::after { content: ''; position: absolute; top: 4px; left: 0; height: 17px; width: 1px; background: #111; }
 .bp-measure:last-child { box-shadow: inset -1px 0 0 transparent; }
 .bp-measure:last-child .bp-measure__end { position: absolute; top: 4px; right: 0; height: 17px; width: 1px; background: #111; }
-.bp-measure strong { display: block; font-size: clamp(40px, 5vw, 72px); font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
-.bp-measure span { display: block; margin-top: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+.bp-measure strong { display: block; font-size: clamp(40px, 5vw, 66px); font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* a word unit after a number ("6+ figs", data/work.ts STATS): small, so it fits its column like "112.5B" */
+.bp-measure strong small { font-size: 0.42em; font-weight: 700; letter-spacing: -0.01em; }
+.bp-measure span { display: block; margin-top: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #444; text-wrap: balance; }
+/* four columns: every label on one line ("BUILT" was left alone on a second line once, F7 2026-11-09) */
+@media (min-width: 1024px) { .bp-measure span { white-space: nowrap; } }
 
 /* spec sheet */
 .bp-about__grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 56px; align-items: start; margin-top: 48px; }
-.bp-photo { position: relative; background: #fff; padding: 10px; box-shadow: 0 0 0 1.5px #111; }
-.bp-photo img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 35%; filter: grayscale(1) contrast(1.25) brightness(1.05); }
-.bp-photo__tag { position: absolute; left: 10px; bottom: 10px; background: #111; color: #F2F0EB; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; padding: 6px 10px; }
-.bp-cross { position: absolute; width: 90px; height: 90px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.9), 0 0 0 1px rgba(0,0,0,0.25); top: 22%; left: 44%; animation: cross-scan 7s ease-in-out infinite; }
-.bp-cross::before, .bp-cross::after { content: ''; position: absolute; background: rgba(255,255,255,0.9); }
-.bp-cross::before { left: 50%; top: -14px; bottom: -14px; width: 1px; }
-.bp-cross::after { top: 50%; left: -14px; right: -14px; height: 1px; }
-@keyframes cross-scan { 0%, 100% { transform: translate(0, 0); } 30% { transform: translate(-60px, 40px); } 60% { transform: translate(40px, 90px); } }
-.bp-spec { width: 100%; border-collapse: collapse; font-size: 16px; }
-.bp-spec th, .bp-spec td { text-align: left; padding: 15px 0; border-bottom: 1px solid rgba(17, 17, 17, 0.25); vertical-align: top; }
-.bp-spec th { width: 34%; font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 500; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #555; padding-top: 18px; }
-.bp-spec td { font-weight: 500; color: #111; }
-.bp-spec a { border-bottom: 1.5px solid #111; }
-.bp-quote { margin-top: 36px; padding: 26px 28px; background: #fff; box-shadow: 0 0 0 1.5px #111, 8px 8px 0 #111; }
-.bp-quote small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #555; }
-.bp-quote blockquote { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.3; margin-top: 10px; color: #111; }
-.bp-quote cite { display: flex; align-items: center; gap: 12px; margin-top: 16px; font-style: normal; font-size: 14px; color: #333; }
-.bp-quote cite img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; filter: grayscale(1); }
+/* #about now lives in the west act: its poster (which replaced the crosshair), ledger and telegram are in west.css */
 
 /* ================================================================
-   FINALE — same CTA as the top
+   FINALE: same CTA as the top, back under the hero's sky
    ================================================================ */
 .act--finale { min-height: 100svh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 160px 0 140px; color: #f0f0f0; }
 .act--finale .hero-h1 { font-size: clamp(42px, 7.4vw, 96px); letter-spacing: -0.045em; line-height: 1.02; margin-bottom: 26px; }
 .act--finale .hero-line { white-space: normal; }
 .act--finale .hero-line--accent { color: var(--cyan); }
-.act--finale .hero-body { font-size: clamp(16px, 1.6vw, 19px); max-width: 600px; margin: 0 auto; }
 .act--finale .social-row { justify-content: center; margin-top: 26px; }
+/* the hero's pill buttons (.sx-btn, below) */
+.act--finale .fin-ctas { margin-top: 32px; }
+/* a soft dark pool behind the words, as in the hero, so they read over the Milky Way */
+/* (isolated, so the pool and the emblem behind the words stay above the section's own no-JS background) */
+.fin-inner { position: relative; isolation: isolate; }
+/* under reduced motion and ?still index.astro keeps the words hidden until the sky has faded in; a link that keyboard
+   focus lands on shows them at once */
+.fin-inner:focus-within { opacity: 1 !important; }
+.fin-inner::before {
+  content: ''; position: absolute; z-index: -1; left: 50%; top: 48%; width: min(130%, 1100px); height: 118%; translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.28) 55%, transparent); pointer-events: none;
+}
+/* the Strade star made of stardust, faint behind the headline (index.astro creates its canvas; the still image
+   shows until then, and without JavaScript) */
+.fin-head { position: relative; }
+.fin-emblem {
+  position: absolute; z-index: -1; left: 50%; top: 50%; width: clamp(200px, 25vw, 330px); aspect-ratio: 380 / 484;
+  translate: -50% -50%; opacity: 0.3; pointer-events: none;
+}
+.fin-emblem__dust { position: absolute; left: -30%; top: -15%; width: 160%; height: 130%; display: block; }
+.fin-emblem__still { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.85; transition: opacity 0.6s; }
+.fin-emblem.has-dust .fin-emblem__still { opacity: 0; }
+/* The finale's stage: everything the finale shows. With motion index.astro gives the section .is-pinned and
+   finale-flight.ts writes three lengths on it (px, on every ScrollTrigger refresh): the stage sticks --fin-x below
+   the screen's top while the emblem gathers and finale-flight.ts moves it the rest of the way, slowing it to a stop;
+   the section is a screen plus --fin-pin tall, so the stage holds still for --fin-pin of scroll while the headline
+   builds, then the page takes it on; and the section gives back --fin-tail at its bottom, so the footer comes up
+   under the stage as it would under a screen-high section. Without .is-pinned (reduced motion, ?still, no
+   JavaScript) the section keeps its plain layout and the stage is just its row. */
+.fin-stage { display: flex; align-items: center; justify-content: center; width: 100%; }
+.act--finale.is-pinned {
+  display: block; min-height: 0; padding: 0;
+  height: calc(100vh + var(--fin-pin, 150vh)); height: calc(100svh + var(--fin-pin, 150svh));
+  margin-bottom: calc(-1 * var(--fin-tail, 0px));
+}
+.act--finale.is-pinned .fin-stage { position: sticky; top: var(--fin-x, 20vh); height: 100vh; height: 100svh; }
+/* The stage's brake (it slows from the page's speed to a stop over twice --fin-x: speed 1 - smoothstep) and the
+   words' letting go (from a stop to the page's speed over --fin-lr: speed smoothstep), as animations on the scroll
+   itself where the browser has them (.is-timeline, finale-flight.ts): they then move on the compositor in the same
+   frame as the scroll, where the script's moves land a frame late. finale-flight.ts writes the ranges in px of the
+   page's scroll (--fin-a to --fin-b, --fin-g to --fin-e) and the headline's shift (--fin-d); the curves are sampled
+   at 33 points (error under 0.04% of the travel). Without them the script moves the same two properties. */
+@keyframes fin-brake { from { translate: 0 var(--fin-d, 0px); } to { translate: 0 calc(var(--fin-d, 0px) - var(--fin-x, 0px)); } }
+@keyframes fin-letgo { from { translate: 0 0; } to { translate: 0 calc(-0.5 * var(--fin-lr, 0px)); } }
+@supports (animation-timeline: scroll()) {
+  .act--finale.is-pinned.is-timeline .fin-stage {
+    animation-name: fin-brake; animation-duration: auto; animation-fill-mode: both;
+    animation-timing-function: linear(0, 0.06244, 0.12453, 0.18593, 0.24634, 0.30547, 0.36305, 0.41885, 0.47266, 0.52426, 0.5735, 0.62022, 0.66431, 0.70564, 0.74416, 0.77979, 0.8125, 0.84229, 0.86916, 0.89314, 0.91431, 0.93272, 0.9485, 0.96176, 0.97266, 0.98135, 0.98805, 0.99297, 0.99634, 0.99843, 0.99953, 0.99994, 1);
+    animation-timeline: scroll(root); animation-range: var(--fin-a) var(--fin-b);
+  }
+  .act--finale.is-pinned.is-timeline .fin-inner {
+    animation-name: fin-letgo; animation-duration: auto; animation-fill-mode: both;
+    animation-timing-function: linear(0, 0.00006, 0.00047, 0.00157, 0.00366, 0.00703, 0.01195, 0.01865, 0.02734, 0.03824, 0.0515, 0.06728, 0.08569, 0.10686, 0.13084, 0.15771, 0.1875, 0.22021, 0.25584, 0.29436, 0.33569, 0.37978, 0.4265, 0.47574, 0.52734, 0.58115, 0.63695, 0.69453, 0.75366, 0.81407, 0.87547, 0.93756, 1);
+    animation-timeline: scroll(root); animation-range: var(--fin-g) var(--fin-e);
+  }
+}
+/* the finale's shooting star, its spray and the gathering emblem (finale-flight.ts, stardust.ts flight mode) draw on
+   this canvas until the emblem has closed and its own canvas takes over. Fixed to the screen like the night it is in
+   (the theme stack's top and height, 100lvh, so the circle's centre is its bottom middle): the star and the hanging
+   spray hold still against the sky however fast the scroll, and by the hand-over the stage holds still too.
+   finale-flight.ts sets its column (left, width) on refresh. It comes after the stage, so it paints over the stage's
+   dark pool like the emblem it hands over to; the words are not up while it shows. Shown only while it flies */
+.fin-flight {
+  position: fixed; left: 0; top: 0; width: 0; height: 100vh; height: 100lvh;
+  visibility: hidden; pointer-events: none; display: block;
+}
+
+/* The homepage's footer: the finale's night sky runs on behind it. The site's footer is opaque with a top border,
+   which cut the sky with a hard line; here it has no fill of its own and no line, so the fixed sky layer shows
+   through, and a dark scrim that deepens downwards keeps its words readable over the Milky Way (its muted grey sits
+   on at least 0.74 of near-black, about what it had on the opaque footer). Only with the sky (html.has-sky, set by
+   index.astro): without WebGL and a 2D canvas, or without JavaScript, the opaque footer stays. */
+html.has-sky #site-footer {
+  /* border-box: from the padding box (the default) the gradient tiled its dark end into the 1px top border, a hair
+     line of its own */
+  background: linear-gradient(180deg, rgb(5 5 5 / 0) 0, rgb(5 5 5 / 0.5) 72px, rgb(5 5 5 / 0.74) 168px, rgb(5 5 5 / 0.84) 100%) no-repeat border-box;
+  border-top-color: transparent;
+}
 
 /* ---------- responsive ---------- */
 @media (max-width: 1023px) {
-  .h-mq__grid, .h-ep__grid, .bp-k__grid, .bp-about__grid, .h-free__box { grid-template-columns: 1fr; }
-  .h-v-visual { height: 480px; }
+  .h-mq__grid, .h-ep__grid, .bp-k__grid, .bp-about__grid { grid-template-columns: 1fr; }
   .h-tiles { grid-template-columns: repeat(2, 1fr); }
   .bp-flow__steps { grid-template-columns: repeat(2, 1fr); row-gap: 48px; }
   .bp-measures { grid-template-columns: repeat(2, 1fr); row-gap: 30px; }
@@ -531,15 +724,11 @@ html:not(.has-themes) .act--finale { background: #050505; }
 @media (max-width: 640px) {
   .h-now { padding-bottom: 90px; }
   .h-mq { padding-bottom: 160px; }
-  .h-v-visual { height: 360px; }
-  .h-planet { width: 320px; height: 320px; right: -80px; }
   .act--stripes { padding: 110px 0 90px; }
   .h-ep__visual { min-height: 440px; }
   .h-side { padding-top: 130px; }
   .h-tiles { grid-template-columns: 1fr; }
   .h-tile { min-height: 190px; }
-  .h-free { margin-top: 130px; }
-  .h-free__res { transform: none; }
   .act--blueprint { padding: 120px 0 90px; }
   .bp-sec + .bp-sec { margin-top: 140px; }
   .bp-drawing { padding: 40px 40px 30px 0; }
@@ -550,11 +739,10 @@ html:not(.has-themes) .act--finale { background: #050505; }
   .bp-flow svg { display: none; }
   .bp-measures { grid-template-columns: 1fr 1fr; }
   .bp-measure { padding: 30px 12px 6px; }
-  .bp-spec th { width: 38%; }
-  .knock { box-shadow: 0 0 0 12px #F5F1E8; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .h-marquee__track, .hero-me__orbit::before, .h-chip, .bp-cross, .theme--finale .stars, .theme--finale .stars--2,
+  /* (the west act's loops stop in west.css) */
+  .h-marquee__track, .hero-me__orbit::before, .h-chip,
   .h-ep__glow, .h-ep__comet, .h-ep__stamp-ring, .h-ep__wip i { animation: none; }
 }
 
@@ -562,3 +750,293 @@ html:not(.has-themes) .act--finale { background: #050505; }
 .h-split { overflow: hidden; padding-bottom: 0.08em; }
 .act--finale .hero-inner { max-width: 1140px; padding: 0 24px; }
 @media (max-width: 640px) { .bp-mark--tl, .bp-mark--tr { display: none; } }
+
+/* ================================================================
+   EXP · HERO — Strade under the SSI sky: the emblem made of stars,
+   the name, and a hand of project cards dealt up from the bottom
+   ================================================================ */
+/* the WebGL sky (starfield.ts) lives in the fixed theme stack, under every act's own layer */
+.themes .ssi-canvas { position: absolute; left: 0; top: 0; z-index: 0; display: block; width: 100%; height: 100%; }
+/* during the finale's wipe the sky is lifted over every other world, under the finale's tint (z-index 2) */
+.themes .ssi-canvas.is-lifted { z-index: 1; }
+/* the sky replaces the old dot grid, particles and cursor glow */
+html.has-sky #atmosphere, html.has-sky #particle-canvas, html.has-sky #cursor-glow { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.sx-hero {
+  --cw: clamp(168px, 16vw, 248px);             /* the front card's width (the wheel reads it too) */
+  --ch: calc(var(--cw) * 16 / 9);
+  --peek: clamp(150px, 33vh, 340px);           /* how much of the centre card shows above the fold (at most: on shorter
+                                                  screens the words above set it, the card sits ~76px under the buttons) */
+  --fly-x: 0px;                                /* the extra sky the Atlas card flies through (below) */
+  position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center;
+  min-height: calc(100svh + var(--ch) + 210px - var(--peek) + var(--fly-x));
+  padding: clamp(74px, 9vh, 104px) 20px 0; text-align: center; overflow-x: clip;
+}
+/* The Atlas card's way out of the hand and its way into the editor take 1.5 times their old scroll, the held state in
+   between its old scroll (Yanis, 2026-11-08: the card's animations "50% longer"; index.astro airU). The flight runs
+   from the hero's top to the editor's preview, so the hero carries the extra sky under the wheel (0.31 of the old air
+   time: about 230px at 1440x900, 183px at 390x844), and everything after it moves down by as much. The min-height grows
+   by the same amount, so the wheel (pushed to the bottom by its margin-top: auto) stays where it was. Fitted to the old
+   flight at 1280x720 to 1920x1080 and 375x667 to 430x932 (the hold within about 3% of its old length; about 6% longer at
+   2560x1440); svh, so a phone's address bar never moves it. Only when the flight runs (html.hero-flight, the inline
+   script in index.astro): reduced motion, ?still and no JS get no extra sky */
+.hero-flight .sx-hero { --fly-x: calc(26.5svh - 8px); }
+.sx-hero__flight { flex: none; width: 100%; height: var(--fly-x); pointer-events: none; }
+/* beats the old shared #hero rule in global.css (fixed height, centred content) */
+#hero.sx-hero { height: auto; justify-content: flex-start; padding: clamp(74px, 9vh, 104px) 20px 0; z-index: 3; }
+.sx-hero__head { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; margin-bottom: 22px; will-change: transform, opacity; }
+/* a soft dark pool behind the name, so it reads over the Milky Way */
+.sx-hero__head::before {
+  content: ''; position: absolute; z-index: -1; left: 50%; top: 64%; width: min(140%, 920px); height: 74%; translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.3) 55%, transparent); pointer-events: none;
+}
+.sx-emblem { position: relative; width: clamp(160px, 25vh, 262px); aspect-ratio: 380 / 484; }
+.sx-emblem__dust { position: absolute; left: -30%; top: -15%; width: 160%; height: 130%; display: block; }
+.sx-emblem__still { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.92; filter: drop-shadow(0 0 22px rgba(215, 240, 255, 0.34)); transition: opacity 0.6s; }
+.has-stardust .sx-emblem__still { opacity: 0; }
+.sx-word { margin: clamp(16px, 2.6vh, 28px) 0 0; line-height: 1; }
+.sx-word img { display: block; width: clamp(240px, 30vw, 450px); height: auto; filter: drop-shadow(0 0 26px rgba(200, 225, 255, 0.2)); }
+.sx-kicker {
+  margin-top: clamp(12px, 1.8vh, 18px); padding-left: 0.62em;
+  font-size: clamp(11px, 0.95vw, 13px); font-weight: 500; letter-spacing: 0.62em; text-transform: uppercase; color: rgba(236, 242, 255, 0.7);
+}
+.sx-line { margin-top: clamp(14px, 2.2vh, 22px); max-width: 660px; font-size: clamp(15px, 1.2vw, 18px); line-height: 1.5; color: rgba(232, 238, 248, 0.8); text-wrap: balance; }
+.sx-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: clamp(16px, 2.6vh, 26px); }
+.sx-btn {
+  display: inline-flex; align-items: center; gap: 14px; height: 52px; padding: 0 24px; border-radius: 999px;
+  font-size: 16px; font-weight: 600; transition: transform 0.4s var(--ease-out-expo), background 0.3s, box-shadow 0.4s;
+}
+.sx-btn--primary { padding-right: 7px; background: #F4F6FB; color: #07080C; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 12px 44px rgba(170, 210, 255, 0.2); }
+.sx-btn__go { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #07080C; color: #fff; transition: transform 0.4s var(--ease-out-expo); }
+.sx-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45), 0 18px 60px rgba(170, 210, 255, 0.34); }
+.sx-btn--primary:hover .sx-btn__go { transform: rotate(-45deg); }
+.sx-btn--ghost { color: #EEF2FA; background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.sx-btn--ghost:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+/* laptop screens up to 1000px tall: the words above the wheel set how high the front card can sit, and the face in
+   the Atlas card (about 55% down the card) was below the fold at 1280x720, 1366x768, 1440x900 and 1536x864. So: a
+   smaller emblem, a tighter gap under the buttons (the wheel's --top shrinks with it, home-wheel.css), a card no
+   taller than about half the screen, and a --peek big enough that the words, not --peek, decide where the card sits */
+@media (min-width: 768px) and (max-height: 1000px) {
+  .sx-hero { --cw: clamp(160px, min(16vw, 27vh), 248px); --peek: clamp(150px, 50vh, 500px); }
+  .sx-hero__head { margin-bottom: 12px; }
+  .sx-emblem { width: clamp(124px, 20vh, 262px); }
+}
+@media (min-width: 768px) and (max-height: 800px) {
+  .sx-emblem { width: clamp(112px, 17vh, 262px); }
+  .sx-word { margin-top: clamp(12px, 1.9vh, 28px); }
+  .sx-line { margin-top: clamp(10px, 1.6vh, 22px); }
+  .sx-ctas { margin-top: clamp(12px, 2vh, 26px); }
+}
+
+/* the hand of cards: every card hangs from one pivot far below it, so turning a card puts it on the arc */
+.sx-fan {
+  --R: 1500px; --step: 8.2deg;
+  --top: 44px; /* room for the labels above the cards, inside the mask */
+  position: relative; width: 100%; height: calc(var(--top) + var(--ch) + 150px); margin-top: auto; flex: none;
+  pointer-events: none; will-change: transform;
+  -webkit-mask-image: linear-gradient(#000 64%, transparent 98%); mask-image: linear-gradient(#000 64%, transparent 98%);
+}
+.sx-card {
+  --w: calc(var(--cw) * 0.86);
+  position: absolute; left: 50%; top: calc(var(--top) + var(--ch) - var(--w) * 16 / 9);
+  width: var(--w); aspect-ratio: 9 / 16; margin-left: calc(var(--w) / -2);
+  border-radius: calc(var(--w) * 0.09); z-index: calc(10 - var(--d)); pointer-events: auto;
+  transform-origin: 50% calc(100% + var(--R)); transform: rotate(calc(var(--k) * var(--step)));
+}
+.sx-card.is-hero { --w: var(--cw); }
+.sx-card__in { position: absolute; inset: 0; display: block; border-radius: inherit; transition: transform 0.6s var(--ease-out-expo), filter 0.5s; will-change: transform; }
+.sx-card__media {
+  position: absolute; inset: 0; display: block; overflow: hidden; border-radius: inherit; background: var(--card-bg, #0b0b0f);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 255, 255, 0.1); transition: box-shadow 0.6s var(--ease-out-expo);
+}
+.sx-card img, .sx-card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* the label rides above the card's top edge, on the side no neighbour covers */
+.sx-card__meta {
+  position: absolute; z-index: 2; bottom: calc(100% + 10px); left: 4px; right: 4px; display: flex; align-items: baseline; justify-content: center; gap: 8px;
+  color: #fff; white-space: nowrap; pointer-events: none;
+}
+.sx-card.is-left .sx-card__meta { justify-content: flex-start; }
+.sx-card.is-right .sx-card__meta { justify-content: flex-end; }
+.sx-card__meta strong { font-size: clamp(13px, 1.02vw, 15px); font-weight: 700; letter-spacing: -0.01em; }
+.sx-card__meta small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(225, 233, 250, 0.6); }
+.sx-card:hover .sx-card__in, .sx-card:focus-visible .sx-card__in { transform: translateY(-20px); }
+.sx-card:hover .sx-card__media, .sx-card:focus-visible .sx-card__media { box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.28), 0 0 50px rgba(190, 215, 255, 0.18); }
+.sx-fan:has(.sx-card:hover) .sx-card:not(:hover) .sx-card__in { filter: brightness(0.6) saturate(0.8); }
+.sx-card.is-hero .sx-card__media { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(167, 149, 255, 0.55), 0 0 70px rgba(167, 149, 255, 0.28); }
+.sx-card.is-hero .sx-card__meta small { color: #B9ABFF; }
+.sx-card.is-hero .sx-card__meta strong { font-size: clamp(15px, 1.25vw, 18px); }
+.sx-fan__tag {
+  position: absolute; z-index: 20; left: calc(50% - var(--cw) * 0.5 - 168px); top: 34px;
+  padding: 7px 12px; border-radius: 8px; background: #B4A6FF; color: #15102E; font-size: 12px; font-weight: 600; white-space: nowrap;
+  box-shadow: 0 10px 30px rgba(167, 149, 255, 0.35); transform: rotate(-3deg); pointer-events: none;
+}
+.sx-fan__tag::after { /* a little leader line to the reel */
+  content: ''; position: absolute; left: 100%; top: 50%; width: 22px; height: 1px; background: #B4A6FF; opacity: 0.8;
+}
+/* intro gate (see the inline script in index.astro): nothing jumps before the motion takes over */
+.hero-intro .sx-word, .hero-intro [data-hero-in], .hero-intro .sx-card__meta { opacity: 0; }
+/* the emblem's still too: the stars form it (stardust.ts), and the still showed at full strength on the first paint,
+   then faded out before the stars gathered from nothing, a flash of the whole emblem (Yanis, 2026-11-08: "dont flash
+   the emblem"). .has-stardust keeps it hidden once the gate lifts; without the stars it fades in then (0.6 s) */
+.hero-intro .sx-emblem__still { opacity: 0; }
+.hero-intro .sx-card__in { transform: translateY(115%); }
+
+@media (max-width: 767px) {
+  .sx-hero { --cw: clamp(138px, 40vw, 178px); --peek: clamp(120px, 22vh, 200px); }
+  .hero-flight .sx-hero { --fly-x: calc(115px + 8svh); }
+  #hero.sx-hero { padding-top: 92px; }
+  .sx-emblem { width: clamp(120px, 19vh, 170px); }
+  .sx-line { font-size: 15px; max-width: 340px; }
+  .sx-fan { --R: 760px; --step: 11deg; }
+  .sx-card[style*="--d:3"] { display: none; }
+  .sx-card__meta small { display: none; }
+  .sx-fan__tag { left: 12px; top: -6px; transform: rotate(-3deg); }
+  .sx-fan__tag::after { display: none; }
+}
+/* small phones (an iPhone SE is 375x667): a smaller emblem, so the front card's face clears the fold there too */
+@media (max-width: 767px) and (max-height: 700px) {
+  .sx-emblem { width: clamp(96px, 15vh, 170px); }
+}
+/* the band after the hero starts straight under the cards now */
+.h-now { padding-top: 10px; }
+
+/* ================================================================
+   EXP · MAIN QUEST 01 — ATLAS (under the sky)
+   ================================================================ */
+.h-mq--atlas { padding-top: 120px; }
+.h-mq--atlas .h-link { color: var(--accent); }
+.h-mq--atlas .h-mq__stat strong { font-size: clamp(34px, 3.6vw, 52px); white-space: nowrap; }
+.h-a-visual { position: relative; height: 620px; }
+.h-a-glow {
+  position: absolute; width: 560px; height: 560px; right: -40px; top: 10px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(140, 112, 255, 0.34), rgba(118, 88, 255, 0.12) 45%, transparent 70%); filter: blur(10px);
+}
+.h-a-site {
+  position: absolute; left: 0; top: 70px; width: 82%; margin: 0; border-radius: 14px; overflow: hidden; background: #0B0B0D;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1); transform: rotate(-3deg);
+}
+.h-a-site__bar { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; background: #141418; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.h-a-site__bar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+.h-a-site__bar b { margin-left: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; color: rgba(255, 255, 255, 0.5); }
+.h-a-site img { display: block; width: 100%; height: auto; }
+.h-a-phone {
+  position: absolute; right: 2%; top: 0; width: 38%; aspect-ratio: 9 / 16; margin: 0; overflow: hidden; border-radius: 30px; background: #000;
+  box-shadow: 0 50px 110px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(167, 149, 255, 0.5), 0 0 80px rgba(167, 149, 255, 0.25);
+}
+.h-a-phone video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.h-a-chip {
+  position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px;
+  background: rgba(20, 18, 32, 0.78); color: #EDEBFF; font-size: 13px; font-weight: 600; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(167, 149, 255, 0.35), 0 12px 30px rgba(0, 0, 0, 0.4); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.h-a-chip i { width: 7px; height: 7px; border-radius: 50%; background: #A795FF; box-shadow: 0 0 10px #A795FF; }
+.h-a-chip--1 { left: 6%; bottom: 150px; }
+.h-a-chip--2 { left: 22%; bottom: 96px; }
+.h-a-chip--3 { left: 12%; bottom: 42px; }
+@media (max-width: 900px) {
+  .h-a-visual { height: 520px; margin-top: 30px; }
+  .h-a-site { width: 92%; top: 40px; }
+  .h-a-phone { width: 44%; }
+}
+
+/* ENDLESS PURSUIT (#mq-endless-pursuit) and its .theme--ep world live in src/components/ep/ep-section.css */
+
+
+/* ================================================================
+   EXP · THE WORK — header, case-study meta, the Atlas editor
+   ================================================================ */
+
+.h-meta { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 8px 28px; margin: 28px 0 0; }
+.h-meta dt { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(225, 233, 250, 0.5); }
+.h-meta dd { margin: 5px 0 0; font-size: 15px; font-weight: 600; color: #f0f2f8; }
+
+/* ================================================================
+   EXP · ATLAS (#mq-atlas), in Atlas's own world (getatlas.site's dark
+   rooms): near-black #0B0B0D, a 64px grid, a purple glow where the AI
+   works, Geist, one Instrument Serif word. The world rises out of the
+   space sky at the section's top (the card is still flying there) and
+   is plain near-black at its bottom edge, where Vaultt takes over.
+   ================================================================ */
+.h-mq--atlas { padding: 120px 0 210px; font-family: 'Geist', 'Inter', system-ui, sans-serif; }
+.h-mq--atlas .container { position: relative; z-index: 1; }
+.h-aw { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.h-aw::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 360px; background: linear-gradient(180deg, rgba(11, 11, 13, 0), rgba(11, 11, 13, 0.6) 50%, #0B0B0D); }
+.h-aw__base { position: absolute; left: 0; right: 0; top: 359px; bottom: 0; background: #0B0B0D; }
+.h-aw__grid {
+  position: absolute; inset: 0; opacity: 0.9;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px; background-position: calc(50% + 32px) 0;
+  -webkit-mask-image: radial-gradient(ellipse 58% 46% at 60% 52%, #000 20%, transparent 74%); mask-image: radial-gradient(ellipse 58% 46% at 60% 52%, #000 20%, transparent 74%);
+}
+.h-aw__glow { position: absolute; left: 60%; top: 52%; width: 1000px; height: 760px; margin: -380px 0 0 -500px; border-radius: 50%; background: radial-gradient(closest-side, rgba(136, 88, 248, 0.26), rgba(136, 88, 248, 0.08) 55%, transparent); will-change: transform, opacity; }
+
+/* the words: a live pill, the name, one line of what it is, one of how, two buttons */
+.h-mq__grid--atlas { grid-template-columns: minmax(0, 0.74fr) minmax(0, 1.26fr); gap: 36px; }
+.h-a-live { display: inline-flex; align-items: center; gap: 9px; padding: 8px 14px 8px 11px; border-radius: 99px; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; color: #CFCFD6; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.h-a-live i { width: 7px; height: 7px; border-radius: 50%; background: #8858F8; box-shadow: 0 0 0 4px rgba(136, 88, 248, 0.18); animation: h-a-pulse 2.4s ease-in-out infinite; }
+/* box-shadow is repainted on every frame of the pulse, so it runs only while the pill is on screen (index.astro);
+   running for the whole page it kept every section painting 120 times a second at rest */
+.h-a-live:not(.is-onscreen) i { animation-play-state: paused; }
+@keyframes h-a-pulse { 50% { box-shadow: 0 0 0 7px rgba(136, 88, 248, 0.05); } }
+.h-mq--atlas .h-mq__name { margin-top: 20px; font-size: clamp(68px, 8.4vw, 122px); font-weight: 600; letter-spacing: -0.065em; line-height: 0.9; color: #F4F3F7; }
+.h-a-tag { margin-top: 18px; font-size: clamp(23px, 2.15vw, 31px); font-weight: 500; letter-spacing: -0.035em; line-height: 1.12; color: #F4F3F7; text-wrap: balance; }
+.h-a-tag em { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.14em; letter-spacing: -0.01em; color: #B49BFF; }
+.h-mq--atlas .h-mq__line { margin-top: 14px; max-width: 360px; font-size: clamp(15.5px, 1.2vw, 17.5px); line-height: 1.55; color: #A3A2AD; }
+.h-a-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 30px; }
+.h-a-btn {
+  display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 22px; border-radius: 99px; white-space: nowrap;
+  font-size: 15px; font-weight: 500; color: #F4F3F7; background: rgba(255, 255, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  transition: transform 0.35s var(--ease-out-expo), background 0.3s, box-shadow 0.35s;
+}
+.h-a-btn:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.11); }
+/* the second way in is a quiet link, so both sit on one row next to the editor */
+.h-a-link { display: inline-flex; align-items: center; gap: 7px; padding: 6px 0; font-size: 15px; font-weight: 500; color: #CFCFD6; border-bottom: 1px solid rgba(207, 207, 214, 0.28); transition: color 0.25s, border-color 0.25s; }
+.h-a-link:hover { color: #fff; border-color: rgba(255, 255, 255, 0.7); }
+.h-a-link span { transition: transform 0.35s var(--ease-out-expo); }
+.h-a-link:hover span { transform: translate(2px, -2px); }
+.h-a-btn--main { padding: 0 7px 0 22px; color: #0E0E0E; background: #F4F3F7; box-shadow: none; }
+.h-a-btn--main:hover { background: #fff; box-shadow: 0 14px 34px -12px rgba(136, 88, 248, 0.7); }
+.h-a-btn__go { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: #fff; background: #8858F8; transition: transform 0.4s var(--ease-out-expo); }
+.h-a-btn--main:hover .h-a-btn__go { transform: rotate(-45deg); }
+
+/* the editor: as big as its column allows (it may use part of the page's right margin), its glow under it */
+.h-a-editor { position: relative; display: flex; justify-content: flex-end; container-type: inline-size; margin-right: clamp(-100px, calc((1120px - 100vw) / 2 - 24px), 0px); }
+/* its own compositing layer (will-change): without one, every repaint of the editor beside it (the loop paints
+   all the time) re-ran the 30px blur, and Safari dropped 31% of frames on the Atlas section (iPhone profile 31% to
+   1.6%, Safari 31% to 3.1%, perf pass). Its cost: WebKit resamples the editor's timeline thumbnails slightly
+   differently with the extra layer next to them (README, rule 9). Checked 2026-11-08 with and without the layer:
+   Chromium unchanged, WebKit identical on desktop and sharper on a phone (variance of the Laplacian over the strip,
+   1240 without to 1744 with: without it the phone thumbnails were the soft ones) */
+.h-a-editor::before { content: ''; position: absolute; right: 12%; top: 8%; width: 66%; height: 84%; border-radius: 50%; background: radial-gradient(closest-side, rgba(118, 88, 255, 0.3), transparent); filter: blur(30px); pointer-events: none; will-change: transform; }
+@media (min-width: 761px) { .h-a-editor .ae--compact { font-size: min(13px, calc(100cqw / 54)); } }
+/* while the card flies in, the preview is an empty slot (its frame and ring stay) */
+.ae-mon.is-waiting > * { visibility: hidden; }
+@media (max-width: 900px) {
+  .h-mq--atlas { padding: 90px 0 84px; } /* 150px left a ~250px empty band before Vaultt on phones */
+  .h-mq__grid--atlas { grid-template-columns: 1fr; gap: 0; }
+  /* stacked: the editor comes first, so the picked card lands in it before any text passes under the card */
+  /* 44px under it, and 72px when the editor's playback bar will show (index.astro sets .has-bar before the first
+     paint: JS on, motion allowed, no ?still): the bar and its stage name hang below the window (atlas-editor.css
+     .ae-play), with about 30px of air before the text (at 64px a tablet had 18px). Without the loop there is no bar,
+     and 72px left an empty band under the editor */
+  .h-a-editor { justify-content: center; order: -1; margin: 0 0 44px; }
+  .h-a-editor.has-bar { margin-bottom: 72px; }
+  .h-aw__grid { -webkit-mask-image: radial-gradient(ellipse 90% 40% at 50% 40%, #000 20%, transparent 74%); mask-image: radial-gradient(ellipse 90% 40% at 50% 40%, #000 20%, transparent 74%); }
+  .h-aw__glow { left: 50%; top: 38%; width: 700px; height: 640px; margin: -320px 0 0 -350px; }
+  .h-mq--atlas .h-mq__line { max-width: 420px; }
+}
+@media (prefers-reduced-motion: reduce) { .h-a-live i { animation: none; } }
+
+/* ================================================================
+   THE WORK'S BACKDROPS (src/scripts/backdrops.ts). The acts' worlds are
+   fixed full-screen layers that cross-fade in place when the scroll
+   passes a switch point (Atlas to Vaultt as Vaultt's intro arrives,
+   Vaultt to Endless Pursuit as the jobs have unfolded); the content
+   scrolls over them as usual.
+   ================================================================ */
+/* Atlas's near-black, continued under the act: its own world (.h-aw) rises out of the sky with the section, and this
+   layer sits right under that world's opaque part and runs to the bottom of the screen (backdrops.ts moves it), so
+   below the act's last line the screen stays Atlas's until Vaultt's world fades in over it: never the sky, never an
+   edge. The first of the work's layers in .themes, so Vaultt's and Endless Pursuit's paint over it. */
+.themes .theme--atlas { clip-path: none; inset: auto; left: 0; right: 0; top: 0; height: 100lvh; background: #0B0B0D; transform: translate3d(0, 110vh, 0); will-change: transform; }

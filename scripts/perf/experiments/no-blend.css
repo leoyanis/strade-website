@@ -1,0 +1,2 @@
+/* every mix-blend-mode off (the EP grain overlay, the stripes paper multiply, ...) */
+*, *::before, *::after { mix-blend-mode: normal !important; }
