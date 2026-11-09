@@ -18,6 +18,12 @@ export type Wheel = {
   setSelection: (s: number, keep: string) => void;
   card: (slug: string) => HTMLElement | null;
   angleOf: (slug: string) => number;
+  /** Where a card's face is on the screen for the wheel as it is now: its centre and scale, from the layout read on
+   *  resize and remeasure() and the scroll the caller already has, so no layout is read (index.astro's Atlas flight
+   *  reads it every frame of the lift; it read the face's getBoundingClientRect there, a forced layout per frame). */
+  faceOf: (slug: string, scrollX: number, scrollY: number) => { x: number; y: number; s: number; w: number; h: number };
+  /** Reads the layout faceOf() works from again (index.astro, on every ScrollTrigger refresh). */
+  remeasure: () => void;
   destroy: () => void;
 };
 
@@ -37,6 +43,11 @@ export function createWheel(
   let step = 8.4;
   let pxPerCard = 220;
   let pivotD = 1700; // from a card's centre down to the shared pivot
+  // for faceOf(): the ring's top left on the page, the pivot's distance below a card's bottom, each card's layout box
+  let rootX = 0;
+  let rootY = 0;
+  let pivotR = 1500;
+  let boxes = cards.map(() => ({ l: 0, t: 0, w: 1, h: 1, fw: 1, fh: 1 }));
   const measure = () => {
     const cs = getComputedStyle(root);
     step = parseFloat(cs.getPropertyValue('--step')) || 8.4;
@@ -44,6 +55,15 @@ export function createWheel(
     const h = cards[0]?.offsetHeight || 400;
     pivotD = R + h / 2;
     pxPerCard = (pivotD * step * Math.PI) / 180;
+    pivotR = R;
+    const rr = root.getBoundingClientRect();
+    rootX = rr.left + window.scrollX;
+    rootY = rr.top + window.scrollY;
+    // (fw, fh: the layout size unrounded, as a getBoundingClientRect would see it; offsets round it to whole pixels)
+    boxes = cards.map((c) => {
+      const cs = getComputedStyle(c);
+      return { l: c.offsetLeft, t: c.offsetTop, w: c.offsetWidth || 1, h: c.offsetHeight || 1, fw: parseFloat(cs.width) || c.offsetWidth || 1, fh: parseFloat(cs.height) || c.offsetHeight || 1 };
+    });
   };
   measure();
 
@@ -298,6 +318,25 @@ export function createWheel(
     angleOf(slug) {
       const i = cards.findIndex((c) => c.dataset.slug === slug);
       return i < 0 ? 0 : wrap(i - pos, N) * step;
+    },
+    faceOf(slug, sx, sy) {
+      const i = cards.findIndex((c) => c.dataset.slug === slug);
+      if (i < 0) return { x: 0, y: 0, s: 1, w: 1, h: 1 };
+      // render()'s transform for the card, rotate(a) translate(0, lift - back) scale(s) about its pivot (the
+      // transform origin, R below its bottom centre), applied to its centre: the centre ends up at the pivot plus
+      // (pivotD - lift) along the turned card's axis (the sel lift and fade are not the kept card's)
+      const off = wrap(i - pos, N);
+      const ad = Math.abs(off);
+      const s = 1 - 0.12 * Math.min(1, ad);
+      let lift = -16 * Math.max(0, 1 - ad);
+      if (sel > 0 && cards[i].dataset.slug !== keep) lift += sel * (64 + ad * 26);
+      const a = (off * step * Math.PI) / 180;
+      const b = boxes[i];
+      const d = pivotD - lift;
+      return { x: rootX - sx + b.l + b.w / 2 + d * Math.sin(a), y: rootY - sy + b.t + b.h + pivotR - d * Math.cos(a), s, w: b.fw * s, h: b.fh * s };
+    },
+    remeasure() {
+      measure();
     },
     destroy() {
       cancelAnimationFrame(raf);

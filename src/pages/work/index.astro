@@ -20,7 +20,13 @@ const fills = ['92%', '78%', '34%', '64%'];
     // there (whole cover, then only the part clear of .qp__shade): a cover is dimmed to a mid tone (quests.css),
     // so a white pool read as a white box on it as much as the dark one reads as grey, and per part the links
     // flipped tone twice per cover.
-    '.qp__media': 'busy',
+    // Bare (2026-11-09 final check): no pool over them either, which lay as a white bar cut at a cover's right edge under
+    // Results (1440 at 800 to 1230 and 1650 to 1890); the links keep full-strength ink with a tight glow.
+    '.qp__media': 'bare',
+    // a contained picture's words sit on a dark ground of their own (quests.css .qp--contain .qp__frame::after, laptops
+    // only), which no band describes: under the links the knockout took the frame's white shaded grey, grey boxes on
+    // the near-black (Playivity, 1440 at 1890 to 2000). Its colour as measured under the links (18 19 22 at 1440)
+    '.qp--contain .qp__content': { tone: 'dark', inset: '0 0 0 0', surface: '#121316', media: '(min-width: 1024px)' },
   }}
   ogImage="/og/work.png"
 >

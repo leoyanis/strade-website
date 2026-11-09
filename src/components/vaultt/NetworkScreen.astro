@@ -143,6 +143,9 @@ const ios = platform === 'ios';
   .vs__pill--blue { background: #70A9FF; color: #171A1C; box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 18) rgba(112, 169, 255, 0.28); }
   .vs__pill--dark { background: rgba(33, 38, 44, 0.86); color: #EEF0F1; box-shadow: inset 0 0 0 calc(var(--u) * 0.8) rgba(255, 255, 255, 0.08); -webkit-backdrop-filter: blur(calc(var(--u) * 10)); backdrop-filter: blur(calc(var(--u) * 10)); }
   .vs__pill--dark svg { color: #8CC6FF; }
+  /* touch screens: the map's canvas draws the frost under these itself (network.ts drawGlass sets .vs--glass): a
+     backdrop-filter over a canvas that redraws every frame was a blur pass per control per frame */
+  .vs--glass .vs__glass, .vs--glass .vs__pill--dark { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
   .vs__tabbar { position: absolute; left: calc(var(--u) * 21); right: calc(var(--u) * 21); top: calc(var(--u) * 764); }
   .vs__home { position: absolute; left: 50%; bottom: calc(var(--u) * 8); width: calc(var(--u) * 136); height: calc(var(--u) * 5); translate: -50% 0; border-radius: 999px; background: #EEF0F1; pointer-events: none; }

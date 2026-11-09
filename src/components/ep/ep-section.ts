@@ -259,6 +259,37 @@ export function mountEp(root: HTMLElement, { gsap, ScrollTrigger }: Opts): EpWor
     window.clearTimeout(sleepTimer);
     for (const el of root.querySelectorAll('.is-amb')) el.classList.remove('is-amb');
   }
+  // Touch screens: what moves by itself waits for the scroll to rest. A phone visitor scrolls the whole time this
+  // section is in view, and the ambient loops (infinite CSS animations inside the phone's 3D layers) and the clock's
+  // once-a-second repaint of the ring ran under the finger, from the moment it came into view (2026-11-09 audit,
+  // VE-07). So on touch, coming into view no longer wakes them: the loops wake 150 ms after the scroll last moved (for
+  // the same 12 s), hold while it moves (.is-scrolling, ep-section.css), and the clock keeps its second until the
+  // scroll rests, then catches up. A tap wakes them as before. At rest it all looks as it did.
+  const touch = !fine && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  let scrolling = false;
+  let restT = 0;
+  let scrollRaf = 0;
+  function onRest() {
+    scrolling = false;
+    if (scrollRaf) cancelAnimationFrame(scrollRaf);
+    scrollRaf = 0;
+    root.classList.remove('is-scrolling');
+    if (visible) wake();
+  }
+  if (touch && !calm) {
+    addEventListener('scroll', () => {
+      if (!visible) return;
+      window.clearTimeout(restT);
+      restT = window.setTimeout(onRest, 150);
+      if (scrolling) return;
+      scrolling = true;
+      // the class in the next frame, never from inside the scroll listener (README rule 3)
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0;
+        if (scrolling) root.classList.add('is-scrolling');
+      });
+    }, { passive: true });
+  }
 
   // ================================================================ rolling numbers and morphs
   /**
@@ -433,6 +464,11 @@ export function mountEp(root: HTMLElement, { gsap, ScrollTrigger }: Opts): EpWor
   }
   function onTick() {
     if (!running) return;
+    // (touch: held while the scroll moves, see onRest)
+    if (scrolling) {
+      tick = window.setTimeout(onTick, 160);
+      return;
+    }
     // the clock rolls while someone's there, and simply changes once a second after
     setNum(clock, fmt(elapsed()), awake);
     if (ignited) paintRing({ sweep: sweepNow(), head: sweepNow() });
@@ -1366,9 +1402,10 @@ export function mountEp(root: HTMLElement, { gsap, ScrollTrigger }: Opts): EpWor
   // The stars only drift for a breath, this share of a screen, between Vaultt's jobs clearing the screen and their
   // gather into the ∞ (Yanis, 2026-11-09: "the stars before EP are roaming free for just a sec too long. Have them go
   // into the infinity icon basically after passing the job applications"; they used to wait for this section's words,
-  // about 500px on a desktop, and then barely moved for a while). The stars' ease out (ep-stars.ts FIELD_EASE) makes
-  // the pull show within about another tenth of a screen.
-  const BREATH = 0.1;
+  // about 500px on a desktop, and then barely moved for a while). A tenth of a screen here, with the pull taking
+  // another fifth to show, still read as roaming (2026-11-09 check); the stars' ease out (ep-stars.ts FIELD_EASE) now
+  // shows the pull within a tenth of a screen of the jobs.
+  const BREATH = 0.03;
   let vh = window.innerHeight;
   window.addEventListener('resize', () => { vh = window.innerHeight; }, { passive: true });
   /** The frame's top on screen at scroll y: coming up until it sticks, then 0, then scrolling away. */
@@ -1688,7 +1725,12 @@ export function mountEp(root: HTMLElement, { gsap, ScrollTrigger }: Opts): EpWor
   // ================================================================ visibility, layout, start
   function setVisible(on: boolean) {
     if (on) {
-      wake();
+      // (touch: once the scroll rests, onRest)
+      if (!touch) wake();
+      else if (!scrolling) {
+        window.clearTimeout(restT);
+        restT = window.setTimeout(onRest, 150);
+      }
       schedule();
       kick();
       if (soundOn) audio.resume();

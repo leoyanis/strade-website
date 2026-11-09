@@ -83,6 +83,8 @@ const sel = Math.max(0, items.findIndex((i) => i.id === selected));
     -webkit-backdrop-filter: url(#vx-lg-lens) blur(calc(var(--u, 1px) * 4)) saturate(1.9) brightness(1.1);
     backdrop-filter: url(#vx-lg-lens) blur(calc(var(--u, 1px) * 4)) saturate(1.9) brightness(1.1);
   }
+  /* touch screens: the map's canvas under the bar draws its frost (network.ts drawGlass, .vs--glass on the screen) */
+  :global(.vs--glass) .lg__glass { -webkit-backdrop-filter: none; backdrop-filter: none; }
   /* the specular highlight: a soft hot spot that slides with the pointer */
   .lg__glass::before {
     content: ''; position: absolute; inset: 0; border-radius: inherit; mix-blend-mode: screen;

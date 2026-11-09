@@ -759,6 +759,20 @@ a { color: inherit; text-decoration: none; }
 .footer-links a { font-size: 13px; color: var(--text-muted); transition: color 0.2s; }
 .footer-links a:hover { color: var(--text-secondary); }
 
+/* The site footer (Base.astro's #site-footer, styled in portfolio.css) in the safe areas (2026-11-09): with
+   viewport-fit=cover (Base.astro's viewport meta) the page runs under a phone's home indicator, and in landscape
+   under its rounded corners and camera housing. Every inset is 0 on a screen without them, so nothing moves there.
+   Bottom: the inset is added under the last row, below the footer's own 28px (portfolio.css), so the two add up.
+   Sides: the gutter widens to the inset only where the inset is wider (max(): an inset already clear of the text
+   adds nothing). The floors are .container's gutters (LAYOUT above, 20px in the phone block below); keep them in step. */
+#site-footer .sf-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+@media (min-width: 768px) {
+  #site-footer > .container { padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); }
+}
+@media (min-width: 1024px) {
+  #site-footer > .container { padding-left: max(72px, env(safe-area-inset-left, 0px)); padding-right: max(72px, env(safe-area-inset-right, 0px)); }
+}
+
 /* ================================================================
    SCROLL REVEALS
    ================================================================ */
@@ -863,6 +877,27 @@ img { max-width: 100%; height: auto; }
   }
   .footer-links { gap: 20px; }
   .footer-links a { padding: 4px 0; }
+  /* Footer tap areas (2026-11-09): at least 44px tall and wide wherever the space round a link is free, with nothing
+     moved: an invisible ::after grows each link's hit area, never into a neighbour's. 45px, not 44: layout rounds to
+     1/64px, and 44 came out at 43.99.
+     - Legal pages' footer (#footer): the links (28.8px) grow 8.1px up and down into .footer-row's 12px gaps; the
+       logo above them grows upwards only, into the footer's 36px top padding, so the two never meet.
+     - Site footer (#site-footer, portfolio.css): the Instagram and LinkedIn buttons (40.8px) grow 2.1px up and down;
+       in each column the first link grows up into the 16px under its heading and the last one down into the free
+       space below it. The middle link stays 30.4px: the links follow each other every 30.4px, so a taller area could
+       only take part of a neighbour's (the boundary would leave the midway line between two labels). 44px there
+       needs a taller pitch, which moves the columns. */
+  .footer-logo, .footer-links a, #site-footer .social-btn, #site-footer .sf-col a { position: relative; }
+  .footer-logo::after, .footer-links a::after, #site-footer .social-btn::after,
+  #site-footer .sf-col a:first-of-type::after, #site-footer .sf-col a:last-of-type::after {
+    content: ''; position: absolute; inset: 0;
+  }
+  .footer-links a::after, #site-footer .social-btn::after { top: min(0px, 50% - 22.5px); bottom: min(0px, 50% - 22.5px); }
+  .footer-links a::after { left: min(0px, 50% - 22.5px); right: min(0px, 50% - 22.5px); }
+  .footer-logo::after, #site-footer .sf-col a:first-of-type::after { top: min(0px, 100% - 45px); }
+  #site-footer .sf-col a:last-of-type::after { bottom: min(0px, 100% - 45px); }
+  /* the footer's safe-area gutter on phones (the FOOTER section above has the rest and the why) */
+  #site-footer > .container { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 
   /* ---- Reveal animations: reduce movement on mobile ---- */
   .reveal-section { transform: translateY(16px); }

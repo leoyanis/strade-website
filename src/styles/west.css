@@ -57,20 +57,44 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
-/* parallax layers: full-screen wrappers (west.ts moves them by yPercent of the screen), each holding one art box.
-   The art box spans the rows its viewBox crops (--k of the scene, --b up from its bottom) at the scene's aspect */
-.w-l { position: absolute; inset: 0; will-change: transform; pointer-events: none; }
+/* parallax layers: wrappers anchored to the screen's bottom and only as tall as their art (west.ts moves them by a
+   share of the screen's height, in px), each holding one art box. They were full-screen boxes: five composited layers
+   a screen tall for art a third to three quarters of one (audit B02). The art box spans the rows its viewBox crops
+   (--k of the scene, --b up from its bottom) at the scene's aspect */
+.w-l {
+  position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--sb) + var(--sh) * (var(--b, 0) + var(--k)));
+  /* (a whole px: the layer's top on a pixel, as the full-screen box's was, so its art rasters exactly as before; a
+     fractional top moved the anti-aliasing of the road's ruts and the tumbleweed on a phone) */
+  height: round(up, calc(var(--sb) + var(--sh) * (var(--b, 0) + var(--k))), 1px);
+  will-change: transform; pointer-events: none;
+}
 .w-art {
   position: absolute; left: 50%; bottom: calc(var(--sb) + var(--sh) * var(--b, 0));
   height: calc(var(--sh) * var(--k)); aspect-ratio: var(--ar);
   translate: calc(-50% + var(--dx, 0%)) 0;
 }
 .w-art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.w-art--sun { --k: 1; --ar: 1600 / 1000; }
-.w-art--far { --k: 0.7; --ar: 1600 / 700; }
-.w-art--mid { --k: 0.38; --b: 0.2; --ar: 1600 / 380; }
-.w-art--town { --k: 0.72; --ar: 1600 / 720; }
-.w-art--near { --k: 0.42; --ar: 1600 / 420; }
+/* phones running WebKit (Safari, every iOS browser; west.ts initFlat): the five static layers as images (the sun, far,
+   mid, town and near art boxes; scripts/west-flat.mjs bakes them at DPR 3), each in place of its SVG once west.ts has
+   fetched and decoded it, two screens before the act. A
+   phone painted ~900 SVG nodes cold on the frame the west was revealed (audit B02); an image is drawn, already
+   decoded. Each sits in its art box where its pixels were (a box in % of it, from flat.json) and under the art box's
+   overlays (shimmer, hawk, tumbleweed, window glows, smoke, sign), which stay live. So does the lettering of the town's
+   two painted signs (not in the image: each engine sets it a little differently), the one part of its SVG still drawn,
+   over the image. Wider than a phone, or before the images are ready, the SVG shows */
+.w-flat { display: none; }
+@media (max-width: 767px) {
+  .w-art.is-flat > .w-flat { display: block; position: absolute; }
+  .w-art.is-flat > .w-flat > img { display: block; width: 100%; height: 100%; }
+  .w-art.is-flat > svg, .w-art.is-flat > .w-sun__glow, .w-art.is-flat > .w-sun__disc { display: none; }
+  .w-art--town.is-flat > svg { display: block; }
+  .w-art--town.is-flat > svg > :not(text) { display: none; }
+}
+.w-l--sun { --k: 1; --ar: 1600 / 1000; }
+.w-l--far { --k: 0.7; --ar: 1600 / 700; }
+.w-l--mid { --k: 0.38; --b: 0.2; --ar: 1600 / 380; }
+.w-l--town { --k: 0.72; --ar: 1600 / 720; }
+.w-l--near { --k: 0.42; --ar: 1600 / 420; }
 /* the painted signs (SALOON, GENERAL STORE): weathered paint on a facade in its own shadow (the sun is behind the
    town), about 2:1 on the boards. At #8E675A (3:1) "SALOON" competed with the headline rising over it (W2) */
 .w-paint { font-family: 'Geist', 'Inter', system-ui, sans-serif; font-weight: 800; fill: #694C45; }
@@ -182,21 +206,24 @@
 @keyframes w-swing { from { transform: rotate(-4.5deg); } to { transform: rotate(4.5deg); } }
 
 /* dust in the low sun: each depth is a strip two screens wide that drifts right by one screen width a cycle, its
-   motes drawn twice a screen apart (WestWorld.astro), so the loop has no seam; the strip's inner box bobs it on its
-   own clock. Two animations per depth where each mote had its own drift (W6). The far motes are slowest, as each
-   depth's motes were on average (46 to 62 s, 30 to 40 s, 19 to 27 s across the screen) */
+   motes drawn twice a screen apart (WestWorld.astro), so the loop has no seam, and bobs on its own clock: the drift
+   on its `translate`, the bob on its `transform`, two animations on one element (a nested box used to bob it: a second
+   layer two screens wide per depth), and only as tall as its depth's band (WestWorld.astro sets the band and gives
+   each mote its height in it, so the motes sit where they did; audit B02). Two animations per depth where each mote
+   had its own drift (W6). The far motes are slowest, as each depth's motes were on average (46 to 62 s, 30 to 40 s,
+   19 to 27 s across the screen) */
 .w-dust { position: absolute; inset: 0; overflow: hidden; }
-.w-dust__g { position: absolute; top: 0; bottom: 0; left: 0; width: 200vw; will-change: transform; animation: w-drift 54s linear -19s infinite; }
-.w-dust__g--mid { animation-duration: 35s; animation-delay: -7s; }
-.w-dust__g--near { animation-duration: 23s; animation-delay: -15s; }
-.w-dust__b { position: absolute; inset: 0; will-change: transform; animation: w-bob 5.4s ease-in-out infinite alternate; }
-.w-dust__g--mid .w-dust__b { animation-duration: 4.3s; animation-delay: -1.7s; }
-.w-dust__g--near .w-dust__b { animation-duration: 6.8s; animation-delay: -3.1s; }
+.w-dust__g {
+  position: absolute; left: 0; width: 200vw; will-change: transform, translate;
+  animation: w-drift 54s linear -19s infinite, w-bob 5.4s ease-in-out 0s infinite alternate;
+}
+.w-dust__g--mid { animation-duration: 35s, 4.3s; animation-delay: -7s, -1.7s; }
+.w-dust__g--near { animation-duration: 23s, 6.8s; animation-delay: -15s, -3.1s; }
 .w-dust i {
   position: absolute; border-radius: 50%;
   background: radial-gradient(circle, #FFF2D4 0, rgba(255, 216, 150, 0.7) 36%, rgba(255, 200, 130, 0) 70%);
 }
-@keyframes w-drift { from { transform: translateX(-100vw); } to { transform: translateX(0); } }
+@keyframes w-drift { from { translate: -100vw 0; } to { translate: 0 0; } }
 @keyframes w-bob { from { transform: translateY(-12px); } to { transform: translateY(12px); } }
 
 /* phones and other tall screens: the saloon is brought into the crop (the store and tower leave it), fewer motes,
@@ -269,13 +296,22 @@ html:not(.has-themes) .act--west {
   content: ''; position: absolute; z-index: -1; left: -32%; top: -150px; width: min(1180px, 121%); height: 520px; pointer-events: none;
   background: radial-gradient(closest-side, rgba(12, 7, 22, 0.66), rgba(12, 7, 22, 0.52) 40%, rgba(12, 7, 22, 0.22) 72%, transparent);
 }
+/* phones: the headline crosses the saloon's sign and its lit windows right where a phone sets it, and the pool above,
+   centred left of a narrow column, left most of the line on the bright facade (audit V-09). Here it is a soft band
+   across the column, as tall as the label and the headline with a fade either side, its dark core under the words
+   (static: drawn once, nothing moves with it) */
+@media (max-width: 600px) {
+  .act--west .bp-about::before {
+    left: -24px; width: calc(100% + 48px); top: -64px; height: 330px;
+    background: radial-gradient(ellipse 72% 50% at 46% 46%, rgba(12, 7, 22, 0.72), rgba(12, 7, 22, 0.58) 42%, rgba(12, 7, 22, 0.26) 72%, transparent);
+  }
+}
 .act--west .bp-about__grid { margin-top: var(--w-gap); }
 /* fading out under the finale's cross-fade (reduced motion; index.astro sets its opacity): a layer of its own only
    while see-through */
 .act--west .bp-about__grid.is-fading { will-change: opacity; }
-/* clipped to outside the finale's opening circle (index.astro): a layer of its own while the clip moves, so each new
-   clip redraws only the mask, not the paper and the photo under it */
-.act--west .bp-about.is-clipped { will-change: transform; }
+/* (the finale's opening circle covers #about by its place in the stacking order now, finale-disc.ts: no clip, so no
+   layer of its own while the circle opens) */
 
 /* the WANTED poster (WantedPoster.astro). It hangs from one nail and sways on it */
 .w-poster-host { position: relative; padding-top: 6px; }

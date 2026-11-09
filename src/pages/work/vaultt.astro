@@ -35,6 +35,12 @@ const p = getProject('vaultt')!;
     // the white store buttons span a phone's width under the links, and the giant white words (the hero's name, its
     // big number, the morphing "Vaultt") pass behind them: under the navy pool they left the blue Free stuff at 2.4:1
     '.vs-store': 'auto', '#vt-hero-h': 'busy', '.vt-hero__num': 'busy', '#vt-morph': 'busy',
+    // the hero's network is thin lines on the navy, no picture: as one (busy) it kept a navy pool behind the links over
+    // the whole hero, which smeared the white store buttons rising under them (390 at 400 to 460, 2026-11-09)
+    '.vt-hero__net': 'none',
+    // the rebrand's pinned stage is flat charcoal: as a toned band it took the page's navy pool, a navy haze with stepped
+    // edges on the charcoal (1440 at 7600 to 8100, 2026-11-09 final check)
+    '#vt-rebrand': { tone: 'dark', surface: '#131a21' },
   }}
   ogImage="/og/work-vaultt.png"
 >
@@ -77,6 +83,9 @@ const p = getProject('vaultt')!;
     --nav-accent: #6FA8FF; --nav-accent-ink: #0C2748; --nav-accent-glow: rgba(111, 168, 255, 0.5);
     --ink-on-light: #0C2748; --ink-on-light-soft: rgb(12 39 72 / 0.76);
   }
+  /* the page's own navy is a flat colour to the nav (no pool, a navy knockout) since its hero network is no band
+     (navBands above): Free stuff keeps its blue there, which reads on the navy, as it did over the pool */
+  body.is-bare .nav-links .nav-free[data-flat][data-tone='dark'] { color: var(--nav-accent); }
 
   /* ---------- tokens ---------- */
   .vt {

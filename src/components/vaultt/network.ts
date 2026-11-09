@@ -801,6 +801,7 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
   const onDown = (e: PointerEvent) => {
     if (reduced || opts.ignore?.(e.target)) return;
     if (!toCanvas(e)) return;
+    pressing = true;
     downX = ptrX;
     downY = ptrY;
     downT = performance.now();
@@ -825,6 +826,7 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
   };
   const onUp = (e: PointerEvent) => {
     if (reduced) return;
+    pressing = false;
     const wasDrag = drag;
     if (drag >= 0) {
       // thrown: it keeps its release velocity and the spring wobbles it home
@@ -847,6 +849,8 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
         flash[h] = 1;
         tapLit = h;
         tapLitT = simT;
+        // lit for 2.2 s, then it eases back (full rate on a touch screen until then)
+        busyUntil = simT + 2.8;
       } else if (look === 'world') {
         ripple(ptrX, ptrY);
         tieNearest(ptrX, ptrY);
@@ -873,6 +877,8 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
     rX[k] = x;
     rY[k] = y;
     rT[k] = simT;
+    // the ring runs 1.4 s and the person it ties in lights up: full rate on a touch screen until both are done
+    busyUntil = Math.max(busyUntil, simT + 2);
   }
   /** A click on empty space ties the nearest suggestion to the hub: a new connection lights up. */
   function tieNearest(x: number, y: number) {
@@ -903,6 +909,19 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
   let running = false;
   let drawing = true;
   let lastT = 0;
+  // On a touch screen the canvas is drawn about 30 times a second while nobody touches it: what moves on its own is
+  // slow ambient life (the sea and the crowd drift about half a pixel a second, the people breathe, the feedback
+  // pulses glide along their ties with a tail) and the beats are eased from the scroll, so it looks the same at 30,
+  // while every drawn frame is the whole screen of dots, ties and glows (about 1100 canvas calls a frame in the intro,
+  // its raster and upload; 2026-11-09 audit, VE-02). The simulation still advances every frame with the frame's own
+  // dt, so the physics are exact. Full rate while a finger or button is down, and while a tap's ripple or lit person
+  // plays (busyUntil). (The pulses are not counted as interaction: the feedback beat sends about two a second for the
+  // whole act, so "full rate while a pulse runs" meant full rate nine frames in ten.)
+  const coarse = typeof matchMedia === 'function' && matchMedia('(hover: none) and (pointer: coarse)').matches;
+  const LITE_MS = 1000 / 30 - 4;
+  let lastDraw = -1e9;
+  let pressing = false;
+  let busyUntil = -1;
   let idleSince = 0;
   let appReveal = reduced ? 1 : 0;
   let appRevealStart = -1;
@@ -932,7 +951,10 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
     lastT = now;
     try {
       tick(dt);
-      if (drawing) draw();
+      if (drawing && (!coarse || pressing || drag >= 0 || simT < busyUntil || now - lastDraw >= LITE_MS)) {
+        lastDraw = now;
+        draw();
+      }
       failed = 0;
     } catch (err) {
       report(err);
@@ -1392,6 +1414,91 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
+    if (glass.length) drawGlass();
+  }
+
+  /* ------------------------------------------------------------------ glass (the app's look, touch screens)
+     The app screen's frosted controls (NetworkScreen.astro's .vs__glass buttons and .vs__pill--dark, the iOS tab bar's
+     .lg__glass, the Android pill .ap) sit over this canvas with a CSS backdrop-filter, and the canvas redraws every
+     frame, so each of them was its own blur pass over a fresh backdrop on every frame: 16 across the homepage's two
+     phones (2026-11-09 audit, sys-05). On a touch screen the canvas draws the frost itself under each one: a mip chain
+     of the frame (halved four or five times, each a single drawImage of a small canvas), and from it each control's box
+     scaled back up, clipped to its rounded shape (bilinear upscaling from 1/16 is the blur). Their tint, rims and icons
+     stay in the page; .vs--glass on the screen takes their backdrop-filter off. Their sizes and corners are read on
+     resize, in the screen's own layout pixels (offsets, so the phones' turns and tilts do not enter). */
+  type GlassBox = { x: number; y: number; w: number; h: number; r: number; k: number };
+  let glass: GlassBox[] = [];
+  const mips: HTMLCanvasElement[] = [];
+  const screen = look === 'app' && coarse ? canvas.closest<HTMLElement>('.vs') : null;
+  // each control's backdrop blur in the screen's points (--u), as NetworkScreen, LiquidGlassBar and AndroidPillBar set it
+  const GLASS: [string, number][] = [['.vs__glass', 8], ['.vs__pill--dark', 10], ['.lg__glass', 5], ['.ap', 24]];
+  function measureGlass() {
+    if (!screen) return;
+    const u = parseFloat(getComputedStyle(screen).getPropertyValue('--u')) || 1;
+    const out: GlassBox[] = [];
+    for (const [sel, blurU] of GLASS) {
+      screen.querySelectorAll<HTMLElement>(sel).forEach((el) => {
+        let x = 0;
+        let y = 0;
+        let n: HTMLElement | null = el;
+        while (n && n !== screen) {
+          x += n.offsetLeft;
+          y += n.offsetTop;
+          n = n.offsetParent as HTMLElement | null;
+        }
+        if (n !== screen || !el.offsetWidth) return;
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const r = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, w / 2, h / 2);
+        // the mip level whose upscale blurs about as much as the CSS blur: a level 2^k down spreads about 0.4 * 2^k px
+        const sigma = blurU * u * dpr;
+        const k = Math.max(1, Math.min(6, Math.round(Math.log2(sigma / 0.4))));
+        out.push({ x, y, w, h, r, k });
+      });
+    }
+    glass = out;
+    const levels = out.reduce((m, g) => Math.max(m, g.k), 0);
+    for (let k = 1; k <= levels; k++) {
+      const c = mips[k - 1] ?? (mips[k - 1] = document.createElement('canvas'));
+      const w = Math.max(1, Math.ceil(canvas.width / 2 ** k));
+      const h = Math.max(1, Math.ceil(canvas.height / 2 ** k));
+      if (c.width !== w || c.height !== h) {
+        c.width = w;
+        c.height = h;
+      }
+    }
+    screen.classList.toggle('vs--glass', out.length > 0);
+  }
+  function drawGlass() {
+    const levels = glass.reduce((m, g) => Math.max(m, g.k), 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    // the chain: each level is the one above halved (bilinear at exactly half averages each 2x2 block)
+    let src: HTMLCanvasElement = canvas;
+    for (let k = 1; k <= levels; k++) {
+      const m = mips[k - 1];
+      const g = m.getContext('2d')!;
+      g.imageSmoothingEnabled = true;
+      g.drawImage(src, 0, 0, src.width, src.height, 0, 0, m.width, m.height);
+      src = m;
+    }
+    ctx.imageSmoothingEnabled = true;
+    for (const b of glass) {
+      const s = 2 ** b.k;
+      const x = b.x * dpr;
+      const y = b.y * dpr;
+      const w = b.w * dpr;
+      const h = b.h * dpr;
+      ctx.save();
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, w, h, b.r * dpr);
+      else ctx.rect(x, y, w, h);
+      ctx.clip();
+      ctx.drawImage(mips[b.k - 1], x / s, y / s, w / s, h / s, x, y, w, h);
+      ctx.restore();
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   /** How much of the drawn "You" shows at the hub (world): the host's `viewer`, or the inverse of the clearance. */
@@ -1778,8 +1885,11 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     if (!w || !h) return false;
-    const budget = look === 'world' ? 6.4e6 : 1.8e6;
-    const d = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(budget / (w * h)));
+    // Touch screens: at most 1.5x and a smaller budget (2.2 Mpx for the world, 0.9 for a phone's map). The world is
+    // the whole screen, redrawn and uploaded every drawn frame: at 2x a 393x852 phone held 786x1704 (5.4 MB), at 1.5x
+    // 590x1278 (3 MB, -44%); its content is soft dots, glows and hairlines under the copy's shield (P4, VE-04).
+    const budget = look === 'world' ? (coarse ? 2.2e6 : 6.4e6) : coarse ? 0.9e6 : 1.8e6;
+    const d = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2, Math.sqrt(budget / (w * h)));
     if (w === cssW && h === cssH && d === dpr && canvas.width === Math.round(w * d)) return false;
     cssW = w;
     cssH = h;
@@ -1794,6 +1904,7 @@ export function createNetwork(canvas: HTMLCanvasElement, opts: NetworkOptions): 
     layout();
     buildSprites();
     buildGrid();
+    measureGlass();
     return true;
   }
 

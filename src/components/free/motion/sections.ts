@@ -186,8 +186,20 @@ export function steps(el: HTMLElement, m: Motion) {
     if (cur >= 0 || items[0].getBoundingClientRect().top <= window.innerHeight * 0.75) set(k);
   };
   ScrollTrigger.create({ trigger: el, start: 'top bottom', end: 'bottom top', onUpdate: track, onToggle: track, onRefresh: track });
+  // Each step's badge and text slide in from the right as the step comes up. Phones (2026-11-09) fade them in with a
+  // 12px rise instead, badge and text as one (no stagger), in 0.5s. There the badge has 14px of room before its text
+  // (free.css, 600px), and the slide ran it over the first letters: the badge's CSS transition on transform (free.css,
+  // for the active step's tilt) restarts on every frame GSAP writes, so the badge held 36px right for the whole 0.9s,
+  // its right edge 22px into the text, and only then eased back across it (measured at 390). The rise goes through the
+  // separate translate property, which that transition leaves alone, so the badge keeps to its text frame for frame
+  // (tried y: the badge sat 12px low for the whole tween, then caught up). Wider screens keep the slide.
+  const phone = window.matchMedia('(max-width: 767px)').matches;
   items.forEach((li) => {
-    gsap.from(li.children, { x: 36, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08, clearProps: 'transform', scrollTrigger: once(li, 'top 92%') });
+    if (phone) {
+      gsap.fromTo(li.children, { translate: '0px 12px', opacity: 0 }, { translate: '0px 0px', opacity: 1, duration: 0.5, ease: 'power3.out', clearProps: 'translate', scrollTrigger: once(li, 'top 92%') });
+    } else {
+      gsap.from(li.children, { x: 36, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08, clearProps: 'transform', scrollTrigger: once(li, 'top 92%') });
+    }
   });
   const fill = { trigger: items[0], start: () => `top ${line()}%`, endTrigger: items[items.length - 1], end: () => `top ${line()}%`, scrub: 0.4 };
   gsap.fromTo(list, { '--p': 0 }, { '--p': 1, ease: 'none', scrollTrigger: fill });

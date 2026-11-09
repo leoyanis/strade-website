@@ -34,7 +34,8 @@
    so a phone's URL bar showing or hiding resized it, and with it the world's canvas (a fresh backing store of up to
    25 MB, mid-scroll); 100lvh is the large screen, which never changes. */
 .themes .theme--vaultt {
-  clip-path: none; inset: auto; left: 0; right: 0; top: 0; height: 100lvh; opacity: 0;
+  /* its own layer for its fades (it is only up for its world and its fades: backdrops.ts) */
+  clip-path: none; inset: auto; left: 0; right: 0; top: 0; height: 100lvh; opacity: 0; will-change: opacity;
   background:
     radial-gradient(80% 46% at 66% 0%, rgba(111, 168, 255, 0.12), rgba(111, 168, 255, 0.03) 55%, transparent 80%),
     linear-gradient(180deg, #0C2748 0, #0C2748 62%, #0B2443 100%);
@@ -187,6 +188,11 @@ html:not(.vx-stage) .vx__panel--beat { margin-top: 25svh; }
     --vx-switch: 28lvh;
     --vx-hold: 30lvh;
     --vx-atlas-pad: 84px;
+    /* Phones: Endless Pursuit's headline comes up as the stars start to gather (they gather from the jobs' leaving,
+       ep-section.ts BREATH), not after them (2026-11-09 phone audit, V-06: "two screens of near-empty starfield"; at
+       50lvh the headline came up 0.4 of a screen past the jobs and was whole only 0.65 past them; at 18lvh 0.1 and
+       0.36 on a 393x659 iPhone 15, under 0.6 on every phone size, dead.mjs) */
+    --vx-beat: 18lvh;
     /* one column: the intro rests at the top of its panel, so the jobs' way off is from there to their block's bottom
        (the panel's middle plus half the block), and Endless Pursuit first shows with its headline, 72px into its
        section (with the belt's ease and the words' first fade, 139px in all) */
@@ -210,4 +216,30 @@ html:not(.vx-stage) .vx__panel--beat { margin-top: 25svh; }
 @media (max-width: 420px) {
   .vx__name { font-size: 64px; }
   .vx__tag { font-size: 27px; }
+}
+/* Short phones (an iPhone with Safari's bars shows 659px, an SE 568px): the intro's copy is tightened so the iPhone
+   under it shows its header and its live map from the moment it arrives. Laid out as on a tall phone, the copy and
+   the store badges took about 420px and the phone came up cut off below its tab row (2026-11-09 phone audit,
+   VE-13). The founder credit makes way here (it is on the case study). */
+@media (max-width: 900px) and (max-height: 780px) {
+  .vx__name { font-size: 52px; }
+  .vx__tag { margin-top: 12px; font-size: 23px; }
+  .vx__line { margin-top: 10px; font-size: 15px; line-height: 1.45; }
+  .vx__ctas { margin-top: 16px; }
+  .vx__foot { margin-top: 12px; }
+  .vx__credit { display: none; }
+  .vx-stage .vx__device { margin-top: 16px; }
+  /* the store badges at their small size (StoreButtons' --sm), side by side where the width allows */
+  .vx .vx__ctas .vs-store { --h: 42px; padding: 0 14px 0 12px; gap: 8px; border-radius: 10px; }
+  .vx .vx__ctas .vs-store__logo { width: 20px; height: 20px; }
+  .vx .vx__ctas .vs-store__text small { font-size: 9.5px; }
+  .vx .vx__ctas .vs-store__text b { font-size: 15px; }
+}
+/* Phones: the drawn app's words that say what it is come out at about 9px or more. The screen is drawn at 393pt and
+   shown about 240px wide, so its 10 to 13pt labels were 6 to 8px, unreadable (2026-11-09 phone audit, V-13): the tab
+   bar's names (iOS and Android) and the counts line under the views are drawn larger; the rest already reads (the
+   title, the views, the buttons) or is a badge or a dot. */
+@media (max-width: 900px) {
+  .vx .vx__phones .vs__counts { font-size: calc(var(--u) * 15); }
+  .vx .vx__phones .lg__label, .vx .vx__phones .ap__label { font-size: calc(var(--u, 1px) * 14.5); }
 }

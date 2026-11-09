@@ -112,6 +112,8 @@ export type StardustFlight = {
   clipX: number;
   clipY: number;
   clipR: number;
+  /** false: something else cuts the canvas to the circle (the finale's flight disc), so no clip is drawn here */
+  clip?: boolean;
 };
 
 const COLORS = ['255,255,255', '140,232,255', '255,226,180'];
@@ -166,7 +168,7 @@ export type Stardust = {
  */
 export function createStardust(
   canvas: HTMLCanvasElement,
-  opts: { reduced: boolean; seed?: number; density?: number; intro?: boolean; flight?: HTMLCanvasElement | null },
+  opts: { reduced: boolean; seed?: number; density?: number; intro?: boolean; flight?: HTMLCanvasElement | null; restFps?: number },
 ): Stardust | null {
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
@@ -568,7 +570,7 @@ export function createStardust(
     }
     // the night's circle: clip only while it does not cover the whole canvas yet
     const far = Math.hypot(Math.max(F.clipX, fw - F.clipX), Math.max(F.clipY, fh - F.clipY));
-    const clip = F.clipR < far;
+    const clip = F.clip !== false && F.clipR < far;
     if (clip) {
       g.save();
       g.beginPath();
@@ -628,6 +630,10 @@ export function createStardust(
   let raf = 0;
   let last = 0;
   let onScreen = true;
+  // the twinkle's rate at rest (opts.restFps, 30 by default: the finale's faint copy asks for 15 on a phone, where it
+  // twinkles behind the held headline for as long as the visitor reads), and when the flight last drew for the scroll
+  const restDt = 1 / ((opts.restFps ?? 30) + 1);
+  let flewAt = -1e9;
   let acc = 0; // time since the last drawn frame (30 fps when idle)
   let slow = 0; // frames in a row that ran long
   const frame = (now: number) => {
@@ -638,8 +644,9 @@ export function createStardust(
     clock += step;
     acc += step;
     if (mode === 'flight') {
-      // the scroll's frames are drawn by fly() itself; here only the twinkle, at 30 fps, while the page is still
-      if (acc < 1 / 31) return;
+      // the scroll's frames are drawn by fly() itself; here only the twinkle, at 30 fps while the page is still, and
+      // at the rest rate once nothing has scrolled for two seconds
+      if (acc < (clock - flewAt > 2 ? restDt : 1 / 31)) return;
       if (dt > 0.03) slow++;
       else slow = Math.max(0, slow - 1);
       if (slow > 24 && stride === 1) stride = 2;
@@ -648,7 +655,7 @@ export function createStardust(
       return;
     }
     const idle = clock > STARDUST_INTRO + 0.6 && clock - ptr.last > 1.5;
-    if (idle && acc < 1 / 31) return; // twinkle reads the same at 30 fps
+    if (idle && acc < (clock - ptr.last > 3 ? restDt : 1 / 31)) return; // twinkle reads the same at 30 fps
     // frames running long (a busy phone): draw half the stars, a touch brighter
     if (dt > 0.03 && clock > 1) slow++;
     else slow = Math.max(0, slow - 1);
@@ -752,6 +759,7 @@ export function createStardust(
       // behind the circle wipe drawn from the same scroll; the loop only keeps the twinkle going when it is still
       drawFlight(clock);
       acc = 0;
+      flewAt = clock;
     },
     layout: () => ({ w: cw, h: ch, cx, cy, k }),
   };

@@ -53,12 +53,18 @@ const AV_AT = 0;
 class Fade {
   private anim: Animation | null = null;
   private target: number;
+  /** called whenever a fade ends (the layer manager keeps a fading world up until then) */
+  onEnd: (() => void) | null = null;
   constructor(private el: HTMLElement, initial: number, private ms = FADE_MS) {
     this.target = initial;
     el.style.opacity = String(initial);
   }
   get to() {
     return this.target;
+  }
+  /** whether a fade is under way */
+  get running() {
+    return this.anim !== null;
   }
   /** At once (reduced motion, a jump). */
   set(o: number) {
@@ -88,10 +94,32 @@ class Fade {
         if (this.anim !== a) return;
         this.anim = null;
         done?.();
+        this.onEnd?.();
       })
       .catch(() => {});
   }
 }
+
+/*
+ * Which worlds are drawn at all: one state machine for every .themes child.
+ * WebKit composites every visible layer whether or not an opaque one covers it (no occlusion culling), and keeps
+ * its backing store: with nothing hiding them, every world from Endless Pursuit's to the west's stayed composited
+ * under the act on screen, about 25 full-screen layers at the finale for the 2 that show. Hiding the covered ones
+ * cut the time spent in long frames by 43% in the finale and the west and 24% in the blueprint (WebKit, iPhone 15,
+ * 2026-11-09 audit, B01). So a world is visibility:hidden unless the scroll is within SHOW screens of the stretch
+ * where some of it can be seen ([a, b]: from its act's edge coming up to the next world covering it, in document px
+ * from the acts' tops, measured on refresh), and it stays up until the scroll is HIDE screens past that stretch:
+ * every world is up (and rastered) a screen before its edge comes in, whichever way the page scrolls, and a page
+ * resting near a threshold never flickers. visibility, not display: boxes, observers and canvases keep their sizes.
+ * Atlas's near-black and Vaultt's world are shown and hidden by their fades (go(), below) as before; Endless
+ * Pursuit's world also stays up while its fade runs. No root keeps a will-change of its own any more (home.css .theme):
+ * what moves inside a world (a wipe, a dome) holds its own, set by that world's script. Any world's owner can hold it
+ * up with data-layer-keep on its root, or keep it down with data-layer-off (a world its owner no longer draws in: with
+ * motion the finale's night is the disc in #finale, and index.astro puts data-layer-off on the finale's tint layer);
+ * both are read through a MutationObserver, never per frame.
+ */
+const SHOW = 1;
+const HIDE = 1.5;
 
 /** Sets up the backdrops. */
 export function createBackdrops(o: { ScrollTrigger: ST; sky: Sky | null; reduced: boolean; vaultt: VaulttWorld | null; ep: EpWorld | null }) {
@@ -119,6 +147,112 @@ export function createBackdrops(o: { ScrollTrigger: ST; sky: Sky | null; reduced
     park = Math.max(vh, atlasBase!.offsetHeight);
   }, { passive: true });
   const M = { aTop: 0, av: Infinity, ve: Infinity, stripes: Infinity };
+
+  /* ---------- the layer manager (the note above SHOW) ---------- */
+  const themesBox = document.querySelector<HTMLElement>('.themes');
+  // each entry: a world shown and hidden by the scroll (bit i)
+  type Entry = { el: HTMLElement; a: number; b: number; s: number; h: number };
+  const E: Entry[] = [];
+  const entry = (sel: string | HTMLElement) => {
+    const el = typeof sel === 'string' ? document.querySelector<HTMLElement>(sel) : sel;
+    if (!el) return -1;
+    E.push({ el, a: Infinity, b: -Infinity, s: SHOW, h: HIDE });
+    return E.length - 1;
+  };
+  const iEp = entry(eLayer);
+  const iStripes = entry('.theme--stripes');
+  const iHole = entry('.theme--hole');
+  const iBp = entry('.theme--blueprint');
+  const iWest = entry('.theme--west');
+  // (with motion the finale's night is #finale's disc: index.astro keeps this layer down with data-layer-off)
+  const iFin = entry('.theme--finale');
+  const win = (i: number, a: number, b: number) => {
+    if (i < 0) return;
+    E[i].a = Number.isFinite(a) ? a : Infinity;
+    E[i].b = Number.isNaN(b) ? Infinity : b;
+  };
+  // the segments between every threshold (sorted), and per segment the worlds within SHOW of their stretch (shown on
+  // entering it) and within HIDE (kept if up)
+  let bounds: number[] = [];
+  let showAt: number[] = [0];
+  let keepAt: number[] = [0];
+  let seg = -1;
+  let mask = 0;
+  // what is written: a world's bit set while it is visible (all are, before the first update)
+  let applied = E.reduce((m, _e, i) => m | (1 << i), 0);
+  let keepBits = 0;
+  let offBits = 0;
+  /** From the measured windows: the sorted thresholds and what each segment shows and keeps. */
+  function plan() {
+    const xs = new Set<number>();
+    for (const e of E) for (const k of [e.s, e.h]) {
+      xs.add(e.a - k * vh);
+      xs.add(e.b + k * vh);
+    }
+    bounds = [...xs].filter(Number.isFinite).sort((p, q) => p - q);
+    showAt = [];
+    keepAt = [];
+    for (let k = 0; k <= bounds.length; k++) {
+      // a scroll inside segment k, [bounds[k - 1], bounds[k])
+      const y = !bounds.length ? 0 : k === 0 ? bounds[0] - 1 : k === bounds.length ? bounds[k - 1] + 1 : (bounds[k - 1] + bounds[k]) / 2;
+      let s = 0;
+      let kp = 0;
+      E.forEach((e, i) => {
+        if (y >= e.a - e.s * vh && y < e.b + e.s * vh) s |= 1 << i;
+        if (y >= e.a - e.h * vh && y < e.b + e.h * vh) kp |= 1 << i;
+      });
+      showAt.push(s);
+      keepAt.push(kp);
+    }
+    seg = -1;
+  }
+  /** Writes what changed: visibility on a world's root. */
+  function applyLayers() {
+    let want = (mask | keepBits) & ~offBits;
+    // a world fading in or out stays up until its fade is done
+    if (iEp >= 0 && fadeE.running) want |= 1 << iEp;
+    const d = want ^ applied;
+    if (!d) return;
+    applied = want;
+    for (let i = 0; i < E.length; i++) {
+      if (!(d & (1 << i))) continue;
+      E[i].el.style.visibility = want & (1 << i) ? '' : 'hidden';
+    }
+  }
+  /** The scroll's say: one search of the sorted thresholds, the state only touched when the segment changes. */
+  function layersAt(y: number) {
+    let lo = 0;
+    let hi = bounds.length;
+    while (lo < hi) {
+      const m = (lo + hi) >> 1;
+      if (bounds[m] <= y) lo = m + 1;
+      else hi = m;
+    }
+    if (lo !== seg) {
+      seg = lo;
+      mask = (mask & keepAt[lo]) | showAt[lo];
+    }
+    applyLayers();
+  }
+  // data-layer-keep on a world's root holds it up (an owner whose world must show past its default stretch);
+  // data-layer-off keeps it down (an owner that no longer draws in it)
+  const readKeep = () => {
+    keepBits = 0;
+    offBits = 0;
+    E.forEach((e, i) => {
+      if (e.el.hasAttribute('data-layer-keep')) keepBits |= 1 << i;
+      if (e.el.hasAttribute('data-layer-off')) offBits |= 1 << i;
+    });
+  };
+  readKeep();
+  if (typeof MutationObserver !== 'undefined') {
+    const mo = new MutationObserver(() => {
+      readKeep();
+      applyLayers();
+    });
+    for (const e of E) mo.observe(e.el, { attributes: true, attributeFilter: ['data-layer-keep', 'data-layer-off'] });
+  }
+
   /** Layout reads: on start, refreshes and the acts' size changes. */
   function measure() {
     const y0 = window.scrollY;
@@ -132,6 +266,30 @@ export function createBackdrops(o: { ScrollTrigger: ST; sky: Sky | null; reduced
     // Endless Pursuit's stars hold still from a little above this switch and gather from it
     // (and where Vaultt's jobs have left the screen: with reduced motion its finished ∞ waits for that)
     if (Number.isFinite(M.ve)) ep?.from(M.ve, mk?.clear);
+    // Each world's stretch, from its act's edge coming up to the next world covering it, in the large screens (H, the
+    // stack's 100lvh) that the acts' wipes park below. Conservative ends, from the acts' own tops only: Endless
+    // Pursuit's black fades in at its switch and is covered once the stripes wipe is done (with the act's top 12%
+    // down); the stripes world, until the black hole's dome has cleared the screen's top corners (its sag, well under
+    // a screen, past the free act's top); the hole, from its dome leaving its park below the screen until the
+    // blueprint's sheet has the screen (its act's top at the screen's top); the blueprint, until the west's wipe has
+    // it (the same, for the west act); the west (its torn edge rides 22px above its wipe's), until the finale's circle
+    // has the whole screen (12% of a screen before the finale's top reaches the top); the finale, to the end.
+    const top = (id: string) => {
+      const el = document.getElementById(id);
+      return el ? el.getBoundingClientRect().top + y0 : NaN;
+    };
+    const H = Math.max(vh, themesBox?.offsetHeight ?? 0);
+    const free = top('act-free');
+    const bp = top('act-blueprint');
+    const west = top('act-west');
+    const fin = top('finale');
+    win(iEp, M.ve, M.stripes);
+    win(iStripes, M.stripes - H, free + H);
+    win(iHole, free - H - 16, bp);
+    win(iBp, bp - H, west);
+    win(iWest, west - H - 48, fin);
+    win(iFin, fin - H, Infinity);
+    plan();
   }
 
   /* ---------- the layers ---------- */
@@ -144,9 +302,13 @@ export function createBackdrops(o: { ScrollTrigger: ST; sky: Sky | null; reduced
   let baseY = '';
   let world = -1; // 0 Atlas, 1 Vaultt, 2 Endless Pursuit
   let skyHidden = false;
+  // Atlas's near-black and Vaultt's world: up for their world and its fades (written only when it changes)
   const show = (el: HTMLElement, on: boolean) => {
-    el.style.visibility = on ? '' : 'hidden';
+    const v = on ? '' : 'hidden';
+    if (el.style.visibility !== v) el.style.visibility = v;
   };
+  // Endless Pursuit's world stays up while its fade runs (applyLayers), and is let go when the fade is done
+  fadeE.onEnd = () => applyLayers();
 
   /** Shows world `to`: a fade from its neighbour, at once after a jump or under reduced motion. */
   function go(to: number) {
@@ -221,6 +383,7 @@ export function createBackdrops(o: { ScrollTrigger: ST; sky: Sky | null; reduced
       skyHidden = hide;
       o.sky?.hide(hide);
     }
+    layersAt(y);
   }
 
   measure();
@@ -258,6 +421,10 @@ export function createBackdrops(o: { ScrollTrigger: ST; sky: Sky | null; reduced
       ST: ScrollTrigger,
       get world() {
         return world;
+      },
+      // the layer manager's windows (document px) and what it has written
+      get layers() {
+        return { E: E.map((e) => ({ el: e.el.className, a: e.a, b: e.b })), applied, bounds };
       },
     };
   }

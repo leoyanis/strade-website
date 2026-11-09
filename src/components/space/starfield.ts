@@ -19,9 +19,9 @@
 //   Touch: tap or drag. With nobody on the sky, a weaker lens wanders slowly through it.
 // - Meteors every few seconds (all from one radiant, like a shower) and a satellite now and then. The meteors
 //   burn up in our own atmosphere, so the lens doesn't bend them.
-// - Cost: DPR ≤ 2, nothing is drawn in hidden tabs or while an opaque element covers the screen, and
-//   quality steps down if frames run long. Reduced motion gets one static frame. No WebGL: a static
-//   2D canvas of the same stars.
+// - Cost: DPR ≤ 2, nothing is drawn in hidden tabs or while an opaque element covers the screen, touch
+//   screens draw 30 frames a second while nothing but the twinkle moves, and quality steps down if frames
+//   run long. Reduced motion gets one static frame. No WebGL: a static 2D canvas of the same stars.
 
 export type SkyState = {
   /** Brightness outside the iris, 0..1. Acts dim or lift the sky. */
@@ -665,14 +665,39 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
   let drawCount = 0;
   let glowReady = false;
   let quality = 1;
+  // Attribute locations, looked up once per program (they were looked up on every frame), and the satellite's and the
+  // meteor's vertices written into buffers allocated once (each frame made a new Float32Array and reallocated the GL
+  // buffer with bufferData). The same vertices and draws as before.
+  let locXY = -1;
+  let locStar = -1;
+  let locP = -1;
+  let locI = -1;
+  const satData = new Float32Array(4);
+  const streakData = new Float32Array(30);
+  const putVertex = (i: number, x: number, y: number, along: number, across: number, a: number) => {
+    const o = i * 5;
+    streakData[o] = x;
+    streakData[o + 1] = y;
+    streakData[o + 2] = along;
+    streakData[o + 3] = across;
+    streakData[o + 4] = a;
+  };
 
   const initGL = () => {
     star = compile(g, STAR_VS, STAR_FS);
     glow = compile(g, QUAD_VS, GLOW_FS);
     streak = compile(g, STREAK_VS, STREAK_FS);
+    locXY = g.getAttribLocation(glow.p, 'a_xy');
+    locStar = g.getAttribLocation(star.p, 'a_star');
+    locP = g.getAttribLocation(streak.p, 'a_p');
+    locI = g.getAttribLocation(streak.p, 'a_i');
     starBuf = g.createBuffer();
     satBuf = g.createBuffer();
     streakBuf = g.createBuffer();
+    g.bindBuffer(g.ARRAY_BUFFER, satBuf);
+    g.bufferData(g.ARRAY_BUFFER, satData.byteLength, g.DYNAMIC_DRAW);
+    g.bindBuffer(g.ARRAY_BUFFER, streakBuf);
+    g.bufferData(g.ARRAY_BUFFER, streakData.byteLength, g.DYNAMIC_DRAW);
     quadBuf = g.createBuffer();
     g.bindBuffer(g.ARRAY_BUFFER, quadBuf);
     g.bufferData(g.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), g.STATIC_DRAW);
@@ -920,7 +945,7 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
       g.disable(g.BLEND);
       g.useProgram(glow.p);
       g.bindBuffer(g.ARRAY_BUFFER, quadBuf);
-      const loc = g.getAttribLocation(glow.p, 'a_xy');
+      const loc = locXY;
       g.enableVertexAttribArray(loc);
       g.vertexAttribPointer(loc, 2, g.FLOAT, false, 0, 0);
       g.activeTexture(g.TEXTURE0);
@@ -964,7 +989,7 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
     g.uniform1f(u.u_twinkle, opts.reduced ? 0 : 1);
     g.uniform4fv(u.u_iris, iris);
     g.uniform1f(u.u_sigma, Math.max(0.5 * (bw / W), 0.75));
-    const aStar = g.getAttribLocation(star.p, 'a_star');
+    const aStar = locStar;
     g.enableVertexAttribArray(aStar);
     g.bindBuffer(g.ARRAY_BUFFER, starBuf);
     g.vertexAttribPointer(aStar, 4, g.FLOAT, false, 0, 0);
@@ -979,7 +1004,11 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
         const y = sat.sy + sat.vy * (t - sat.t0) - poleY;
         const fade = smooth(0, 0.06, k) * (1 - smooth(sat.fadeAt, sat.fadeAt + 0.05, k)) * (1 - smooth(0.94, 1, k));
         g.bindBuffer(g.ARRAY_BUFFER, satBuf);
-        g.bufferData(g.ARRAY_BUFFER, new Float32Array([c * x + s * y, -s * x + c * y, sat.amp * fade + 0.0001, 0.5]), g.DYNAMIC_DRAW);
+        satData[0] = c * x + s * y;
+        satData[1] = -s * x + c * y;
+        satData[2] = sat.amp * fade + 0.0001;
+        satData[3] = 0.5;
+        g.bufferSubData(g.ARRAY_BUFFER, 0, satData);
         g.vertexAttribPointer(aStar, 4, g.FLOAT, false, 0, 0);
         g.uniform1f(u.u_twinkle, 0.15);
         g.drawArrays(g.POINTS, 0, 1);
@@ -1002,21 +1031,19 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
         const px = -meteor.dy * 1.7;
         const py = meteor.dx * 1.7;
         const a = meteor.amp * smooth(0, 0.12, k) * (1 - smooth(0.55, 1, k)) * state.gain;
-        // prettier-ignore
-        const v = new Float32Array([
-          tx - px, ty - py, 0, -1, a,
-          tx + px, ty + py, 0, 1, a,
-          hx - px, hy - py, 1, -1, a,
-          hx - px, hy - py, 1, -1, a,
-          tx + px, ty + py, 0, 1, a,
-          hx + px, hy + py, 1, 1, a,
-        ]);
+        // the same six vertices (x, y, along, across, alpha) as before, written in place
+        putVertex(0, tx - px, ty - py, 0, -1, a);
+        putVertex(1, tx + px, ty + py, 0, 1, a);
+        putVertex(2, hx - px, hy - py, 1, -1, a);
+        putVertex(3, hx - px, hy - py, 1, -1, a);
+        putVertex(4, tx + px, ty + py, 0, 1, a);
+        putVertex(5, hx + px, hy + py, 1, 1, a);
         g.useProgram(streak.p);
         g.uniform2f(streak.u.u_view, W, H);
         g.bindBuffer(g.ARRAY_BUFFER, streakBuf);
-        g.bufferData(g.ARRAY_BUFFER, v, g.DYNAMIC_DRAW);
-        const ap = g.getAttribLocation(streak.p, 'a_p');
-        const ai = g.getAttribLocation(streak.p, 'a_i');
+        g.bufferSubData(g.ARRAY_BUFFER, 0, streakData);
+        const ap = locP;
+        const ai = locI;
         g.enableVertexAttribArray(ap);
         g.enableVertexAttribArray(ai);
         g.vertexAttribPointer(ap, 4, g.FLOAT, false, 20, 0);
@@ -1028,19 +1055,42 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
     }
   };
 
+  /* Touch screens at rest: 30 draws a second instead of one per display frame (60 Hz, or 120 on a ProMotion iPhone).
+     At rest nothing in the sky moves faster than the twinkle and the idle lens's slow wander, and on a phone each
+     frame was a full-screen WebGL redraw (audit P5, B10). It draws every display frame again the moment anything it
+     shows changes: the page's parallax and the finale's iris and gain (any change to `state`), a finger on the sky
+     (the lens), a meteor (fast), and the dark adaptation's first seconds. dt stays the real time since the last drawn
+     frame, so the springs, the twinkle and the meteors keep their speed. Desktop draws every frame, as before. */
+  const HOLD_MS = 1000 / 30 - 4;
+  const seen = { shift: NaN, pan: NaN, gain: NaN, ix: NaN, iy: NaN, ir: NaN, ig: NaN };
+  const still = () =>
+    state.shift === seen.shift && state.pan === seen.pan && state.gain === seen.gain && state.irisX === seen.ix &&
+    state.irisY === seen.iy && state.irisR === seen.ir && state.irisGain === seen.ig;
+  // touch screens step down after half as many long frames (long frames on a phone are the page, not the sky alone)
+  const SLOW_FRAMES = coarse ? 45 : 90;
   const frame = (ms: number) => {
     raf = requestAnimationFrame(frame);
+    const t = (ms - t0) / 1000;
+    const held = coarse && still() && !pointer.down && lensP.m < 0.002 && lensP.tm === 0 && !meteor && t > ADAPT + 1;
+    if (held && ms - last < HOLD_MS) return;
     const dt = Math.min((ms - last) / 1000, 1 / 24);
     last = ms;
     now = ms;
-    const t = (ms - t0) / 1000;
     stepLenses(Math.max(dt, 0.001), t);
     events(t);
     draw(t);
-    // long frames for a few seconds: draw fewer stars at a lower resolution
-    if (dt > 0.026 && t > ADAPT + 1) slow++;
+    seen.shift = state.shift;
+    seen.pan = state.pan;
+    seen.gain = state.gain;
+    seen.ix = state.irisX;
+    seen.iy = state.irisY;
+    seen.ir = state.irisR;
+    seen.ig = state.irisGain;
+    // long frames for a few seconds: draw fewer stars at a lower resolution (a frame held to 30 fps on purpose is long
+    // only past 50 ms)
+    if (dt > (held ? 0.05 : 0.026) && t > ADAPT + 1) slow++;
     else slow = Math.max(0, slow - 0.25);
-    if (slow > 90 && quality === 1) {
+    if (slow > SLOW_FRAMES && quality === 1) {
       quality = 0.6;
       drawCount = Math.round(starCount * quality);
       size();
@@ -1055,6 +1105,8 @@ export function createSky(mount: HTMLElement, opts: { reduced: boolean; seed?: n
   function wake() {
     if (raf || !shouldRun()) return;
     last = performance.now();
+    // the first frame after a sleep always draws (a held frame would leave the last one from before the sleep)
+    seen.shift = NaN;
     raf = requestAnimationFrame(frame);
   }
   const sleep = () => {

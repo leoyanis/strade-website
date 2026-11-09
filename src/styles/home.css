@@ -13,7 +13,10 @@
    Safari, iOS 26.3, 2026-11-08). The scripts that park a layer below the screen park it below this box's height. */
 .themes { position: fixed; left: 0; right: 0; top: 0; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none; }
 html:not(.has-themes) .themes { display: none; }
-.theme { position: absolute; inset: 0; overflow: hidden; clip-path: inset(100% 0 0 0); will-change: clip-path; }
+.theme { position: absolute; inset: 0; overflow: hidden; clip-path: inset(100% 0 0 0); }
+/* (no will-change on .theme: for good on every world, will-change: clip-path gave each a mask pass and a layer of its
+   own under the acts it no longer showed in. What moves inside a world holds its own; backdrops.ts shows and hides
+   every world, visibility, by the scroll) */
 
 .theme--stripes { clip-path: none; background: none; }
 /* .wipe is cream too. In Chromium, .wipe__inner's left and right edges (turned back by -theta inside the rotated
@@ -29,6 +32,12 @@ html:not(.has-themes) .themes { display: none; }
 .wipe { position: absolute; top: 0; left: 0; overflow: hidden; transform-origin: 0 0; transform: translate3d(0, 200vh, 0); will-change: transform; background: var(--stripes-paper); }
 .wipe__inner { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; transform-origin: 0 0; background: var(--stripes-paper); will-change: transform; }
 .stripe-field { position: absolute; inset: -60% -40%; will-change: transform; }
+/* Phones and touch screens: the field clipped to its own box, so its layer is that box (702x1857 on a 390x844 phone,
+   11.7 MPx at 3x) and not the rotated stripes' bounds (1610x1947, 28.2 MPx). Nothing on screen changes: the screen
+   always lies inside the box (inset -60% -40% of it, moved at most 5% across and 14% up by the act's scrub, below),
+   and .wipe__inner already clips everything else (stepped shots of every stripes position, 2026-11-09: identical in
+   WebKit, within the run-to-run noise in Chromium). */
+@media (max-width: 767px), (hover: none) and (pointer: coarse) { .stripe-field { overflow: hidden; } }
 .stripe-rot { position: absolute; inset: 0; transform: rotate(-32deg); }
 .stripe { position: absolute; left: -10%; right: -10%; }
 .stripe i { position: absolute; left: 0; right: 0; top: calc(100% + 12px); height: 6px; }
@@ -48,27 +57,72 @@ html:not(.has-themes) .themes { display: none; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.theme--blueprint {
-  background-color: #F2F0EB;
-  background-image:
-    linear-gradient(rgba(17, 17, 17, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 17, 0.08) 1px, transparent 1px),
-    linear-gradient(rgba(17, 17, 17, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 17, 0.035) 1px, transparent 1px);
-  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
-  background-position: -1px -1px;
+/* The blueprint's paper (.bp-sheet): cream, a ruled grid (a faint line every 24px, a stronger one every 120px) and a
+   soft vignette, fixed to the screen. Two copies paint it, and neither repaints while the page scrolls:
+   - .bp-paper, inside #act-blueprint (index.astro): the paper's leading part. A box from the act's top edge down
+     1.5 large screens, clipped to itself (clip-path), holding the paper fixed to the screen. The page's own scrolling
+     moves that edge, on the compositor in Chromium and in the UI process on iOS, so the sheet's edge is always the
+     act's edge: no lagging frame can show the black hole under Kleus's words (sys-01: the edge used to be a
+     clip-path written from a ScrollTrigger update, and on a phone the page scrolled ahead of it by up to 254px;
+     measured with 40ms main-thread stalls, in both engines, before and after). The scan line rides its top.
+     It must stay a fixed element inside the act: no transform, filter, contain or content-visibility on
+     #act-blueprint itself (each would make the act, not the screen, its box, and the grid would scroll).
+   - .theme--blueprint, the world layer in .themes: everything below that box. A transform pair: .bp-wipe (clips, moved
+     down) holding .bp-wipe__in (moved back up by as much), so the paper stays put and only a clip moves; as
+     animations on the page's scroll where the browser has them (index.astro writes --bpw-a and --bpw-b on refresh).
+     Its edge runs 0.75 of a large screen below the act's top, inside the box above, so wherever it is late it is
+     under the box (scrolling down) and never above the act's edge (scrolling up): up to 0.75 of a screen of lag
+     either way shows nothing.
+   The grid is one 120px tile, an SVG with each line's colour composited once, not four gradients: a fifth of the
+   paint and raster time per raster of the sheet (Chromium, 390x844 at 3x, 60 repaints: 19 ms against 4). The
+   gradients themselves came out a few levels apart from row to row in both engines; the tile's lines are their exact
+   mix, within 2 to 5 levels of what each engine drew. */
+.themes .theme--blueprint, .themes .theme--blueprint.is-moving { clip-path: none; will-change: auto; }
+.bp-sheet {
+  background: #F2F0EB url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' shape-rendering='crispEdges'%3E%3Crect width='120' height='120' fill='%23F2F0EB'/%3E%3Cpath fill='%23EAE8E3' d='M0 24h120v1H0zM0 48h120v1H0zM0 72h120v1H0zM0 96h120v1H0z'/%3E%3Cpath fill='%23EAE8E3' d='M24 0h1v120h-1zM48 0h1v120h-1zM72 0h1v120h-1zM96 0h1v120h-1z'/%3E%3Cpath fill='%23E3E1DC' d='M24 24h1v1h-1zM24 48h1v1h-1zM24 72h1v1h-1zM24 96h1v1h-1zM48 24h1v1h-1zM48 48h1v1h-1zM48 72h1v1h-1zM48 96h1v1h-1zM72 24h1v1h-1zM72 48h1v1h-1zM72 72h1v1h-1zM72 96h1v1h-1zM96 24h1v1h-1zM96 48h1v1h-1zM96 72h1v1h-1zM96 96h1v1h-1z'/%3E%3Cpath fill='%23D9D7D3' d='M0 0h120v1H0z'/%3E%3Cpath fill='%23D9D7D3' d='M0 0h1v120H0z'/%3E%3Cpath fill='%23D2D0CC' d='M24 0h1v1h-1zM48 0h1v1h-1zM72 0h1v1h-1zM96 0h1v1h-1z'/%3E%3Cpath fill='%23D2D0CC' d='M0 24h1v1H0zM0 48h1v1H0zM0 72h1v1H0zM0 96h1v1H0z'/%3E%3Cpath fill='%23C2C1BD' d='M0 0h1v1H0z'/%3E%3C/svg%3E") -1px -1px / 120px 120px;
 }
-.theme--blueprint::after {
+.bp-sheet::after {
   content: ''; position: absolute; inset: 0;
   background: radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.08));
 }
+.bp-wipe, .bp-wipe__in { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+/* parked below the stack (its own height, the large screen) until the script or the scroll moves it */
+.bp-wipe { overflow: hidden; transform: translate3d(0, 100%, 0); }
+.bp-wipe__in { transform: translate3d(0, -100%, 0); }
+/* moved by the script (no scroll-driven animations): layers of their own for the stretch it moves them */
+.theme--blueprint:not(.is-timeline) .bp-wipe, .theme--blueprint:not(.is-timeline) .bp-wipe__in { will-change: transform; }
+@keyframes bp-wipe { from { transform: translate3d(0, 100%, 0); } to { transform: translate3d(0, 0, 0); } }
+@keyframes bp-wipe-in { from { transform: translate3d(0, -100%, 0); } to { transform: translate3d(0, 0, 0); } }
+@keyframes bp-scan { from { opacity: 1; } to { opacity: 0; } }
+@supports (animation-timeline: scroll()) {
+  .theme--blueprint.is-timeline .bp-wipe,
+  .theme--blueprint.is-timeline .bp-wipe__in {
+    animation-name: bp-wipe; animation-duration: auto; animation-timing-function: linear; animation-fill-mode: both;
+    animation-timeline: scroll(root); animation-range: var(--bpw-a) var(--bpw-b);
+  }
+  .theme--blueprint.is-timeline .bp-wipe__in { animation-name: bp-wipe-in; }
+  .bp-paper.is-scan.is-timeline .bp-scan {
+    animation-name: bp-scan; animation-duration: auto; animation-timing-function: linear; animation-fill-mode: both;
+    animation-timeline: scroll(root); animation-range: var(--bps-a) var(--bps-b);
+  }
+}
+/* the leading part: index.astro hides its paper while it is more than two screens from the screen (.is-far) */
+.bp-paper { position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: min(100%, 150vh); height: min(100%, 150lvh); clip-path: inset(0); pointer-events: none; }
+html:not(.has-themes) .bp-paper { display: none; }
+.bp-paper__sheet { position: fixed; left: 0; right: 0; top: 0; height: 100vh; height: 100lvh; }
+.bp-paper.is-far .bp-paper__sheet { visibility: hidden; }
 .bp-mark { position: absolute; width: 28px; height: 28px; }
 .bp-mark::before, .bp-mark::after { content: ''; position: absolute; background: #111; }
 .bp-mark::before { left: 13px; top: 0; width: 1.5px; height: 28px; }
 .bp-mark::after { top: 13px; left: 0; height: 1.5px; width: 28px; }
 .bp-mark--tl { top: 84px; left: 24px; } .bp-mark--tr { top: 84px; right: 24px; }
 .bp-mark--bl { bottom: 24px; left: 24px; } .bp-mark--br { bottom: 24px; right: 24px; }
-.bp-scan { position: absolute; left: 0; right: 0; height: 2px; background: #111; top: 100%; box-shadow: 0 0 0 6px rgba(17,17,17,0.06); }
+/* The scan line along the sheet's edge: 2px of ink and a 6px wash under it (it was a box-shadow ring, of which the
+   sheet's clip only ever showed the part below the line). It rides the paper box's top, so it is always on the edge;
+   its fade over the sheet's rise (opacity 1 to 0) is an animation on the scroll where there are those, else the
+   script's tween. Shown only with motion (.is-scan, index.astro), as before. */
+.bp-scan { position: absolute; left: 0; right: 0; top: 0; height: 8px; background: linear-gradient(#111 0 2px, rgba(17, 17, 17, 0.06) 2px 8px); visibility: hidden; }
+.bp-paper.is-scan .bp-scan { visibility: visible; }
 
 /* The finale is back under the hero's own sky: index.astro lifts the sky canvas (.ssi-canvas.is-lifted, z-index 1)
    above the other worlds during the finale's circle wipe, and this layer is a faint nebula tint above it (z-index
@@ -520,6 +574,9 @@ html:not(.has-themes) .act--finale { background: #050505; }
   .kxp__card { position: relative; left: auto; top: auto; width: auto; translate: 0 calc((1 - var(--in)) * 14px); rotate: none; padding: 10px 11px 12px; }
   .kxp__card:nth-child(n + 5), .kxp__m { display: none; }
   .kxp__t { font-size: 13px; }
+  /* the figures' hairline mono labels: 11px at least on a phone, a little less tracking to keep their width (B19) */
+  .kxp__n { font-size: 11px; letter-spacing: 0.06em; }
+  .kxp__srcl small { font-size: 11px; letter-spacing: 0.1em; }
   .kxc { padding: 20px 18px 18px; rotate: 0.6deg; }
   .kxc__mark { font-size: 13.5px; }
   .kxc__mark--gap { display: none; }
@@ -605,8 +662,17 @@ html:not(.has-themes) .act--finale { background: #050505; }
    ================================================================ */
 .act--finale { min-height: 100svh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 160px 0 140px; color: #f0f0f0; }
 .act--finale .hero-h1 { font-size: clamp(42px, 7.4vw, 96px); letter-spacing: -0.045em; line-height: 1.02; margin-bottom: 26px; }
+/* phones: the 42px floor broke the first line after "to", leaving "build?" alone on a line (320 to 430 wide, audit
+   B12): a size from the width, balanced lines ("Got something / to build?"). The emblem is centred on the headline's
+   box, which finale-flight.ts measures on every refresh. Wider screens keep their size and their wrapping */
+@media (max-width: 480px) {
+  .act--finale .hero-h1 { font-size: clamp(30px, 9.6vw, 42px); text-wrap: balance; }
+}
 .act--finale .hero-line { white-space: normal; }
 .act--finale .hero-line--accent { color: var(--cyan); }
+/* the finale's letters get will-change from finale-flight.ts for their own move only (global.css gives every
+   .hero-h1 letter one for good: 30 more layers for the whole visit) */
+.act--finale .hero-h1 .char { will-change: auto; }
 .act--finale .social-row { justify-content: center; margin-top: 26px; }
 /* the hero's pill buttons (.sx-btn, below) */
 .act--finale .fin-ctas { margin-top: 32px; }
@@ -649,29 +715,181 @@ html:not(.has-themes) .act--finale { background: #050505; }
    itself where the browser has them (.is-timeline, finale-flight.ts): they then move on the compositor in the same
    frame as the scroll, where the script's moves land a frame late. finale-flight.ts writes the ranges in px of the
    page's scroll (--fin-a to --fin-b, --fin-g to --fin-e) and the headline's shift (--fin-d); the curves are sampled
-   at 33 points (error under 0.04% of the travel). Without them the script moves the same two properties. */
-@keyframes fin-brake { from { translate: 0 var(--fin-d, 0px); } to { translate: 0 calc(var(--fin-d, 0px) - var(--fin-x, 0px)); } }
-@keyframes fin-letgo { from { translate: 0 0; } to { translate: 0 calc(-0.5 * var(--fin-lr, 0px)); } }
+   at 33 points (error under 0.04% of the travel), as 33 keyframes run straight (linear) between: they were one
+   linear() easing, the same curve, but Safari 26 runs a scroll-driven animation with a linear() easing on the main
+   thread (WebKit bug 312407), where it trails the scroll by a frame; `linear`, cubic-bezier() and steps() stay on the
+   compositor. Without scroll-driven animations the script moves the same two properties. */
+@keyframes fin-brake {
+  0% { translate: 0 var(--fin-d, 0px); }
+  3.125% { translate: 0 calc(var(--fin-d, 0px) - 0.06244 * var(--fin-x, 0px)); }
+  6.25% { translate: 0 calc(var(--fin-d, 0px) - 0.12453 * var(--fin-x, 0px)); }
+  9.375% { translate: 0 calc(var(--fin-d, 0px) - 0.18593 * var(--fin-x, 0px)); }
+  12.5% { translate: 0 calc(var(--fin-d, 0px) - 0.24634 * var(--fin-x, 0px)); }
+  15.625% { translate: 0 calc(var(--fin-d, 0px) - 0.30547 * var(--fin-x, 0px)); }
+  18.75% { translate: 0 calc(var(--fin-d, 0px) - 0.36305 * var(--fin-x, 0px)); }
+  21.875% { translate: 0 calc(var(--fin-d, 0px) - 0.41885 * var(--fin-x, 0px)); }
+  25% { translate: 0 calc(var(--fin-d, 0px) - 0.47266 * var(--fin-x, 0px)); }
+  28.125% { translate: 0 calc(var(--fin-d, 0px) - 0.52426 * var(--fin-x, 0px)); }
+  31.25% { translate: 0 calc(var(--fin-d, 0px) - 0.5735 * var(--fin-x, 0px)); }
+  34.375% { translate: 0 calc(var(--fin-d, 0px) - 0.62022 * var(--fin-x, 0px)); }
+  37.5% { translate: 0 calc(var(--fin-d, 0px) - 0.66431 * var(--fin-x, 0px)); }
+  40.625% { translate: 0 calc(var(--fin-d, 0px) - 0.70564 * var(--fin-x, 0px)); }
+  43.75% { translate: 0 calc(var(--fin-d, 0px) - 0.74416 * var(--fin-x, 0px)); }
+  46.875% { translate: 0 calc(var(--fin-d, 0px) - 0.77979 * var(--fin-x, 0px)); }
+  50% { translate: 0 calc(var(--fin-d, 0px) - 0.8125 * var(--fin-x, 0px)); }
+  53.125% { translate: 0 calc(var(--fin-d, 0px) - 0.84229 * var(--fin-x, 0px)); }
+  56.25% { translate: 0 calc(var(--fin-d, 0px) - 0.86916 * var(--fin-x, 0px)); }
+  59.375% { translate: 0 calc(var(--fin-d, 0px) - 0.89314 * var(--fin-x, 0px)); }
+  62.5% { translate: 0 calc(var(--fin-d, 0px) - 0.91431 * var(--fin-x, 0px)); }
+  65.625% { translate: 0 calc(var(--fin-d, 0px) - 0.93272 * var(--fin-x, 0px)); }
+  68.75% { translate: 0 calc(var(--fin-d, 0px) - 0.9485 * var(--fin-x, 0px)); }
+  71.875% { translate: 0 calc(var(--fin-d, 0px) - 0.96176 * var(--fin-x, 0px)); }
+  75% { translate: 0 calc(var(--fin-d, 0px) - 0.97266 * var(--fin-x, 0px)); }
+  78.125% { translate: 0 calc(var(--fin-d, 0px) - 0.98135 * var(--fin-x, 0px)); }
+  81.25% { translate: 0 calc(var(--fin-d, 0px) - 0.98805 * var(--fin-x, 0px)); }
+  84.375% { translate: 0 calc(var(--fin-d, 0px) - 0.99297 * var(--fin-x, 0px)); }
+  87.5% { translate: 0 calc(var(--fin-d, 0px) - 0.99634 * var(--fin-x, 0px)); }
+  90.625% { translate: 0 calc(var(--fin-d, 0px) - 0.99843 * var(--fin-x, 0px)); }
+  93.75% { translate: 0 calc(var(--fin-d, 0px) - 0.99953 * var(--fin-x, 0px)); }
+  96.875% { translate: 0 calc(var(--fin-d, 0px) - 0.99994 * var(--fin-x, 0px)); }
+  100% { translate: 0 calc(var(--fin-d, 0px) - var(--fin-x, 0px)); }
+}
+@keyframes fin-letgo {
+  0% { translate: 0 0; }
+  3.125% { translate: 0 calc(-0.00003 * var(--fin-lr, 0px)); }
+  6.25% { translate: 0 calc(-0.000235 * var(--fin-lr, 0px)); }
+  9.375% { translate: 0 calc(-0.000785 * var(--fin-lr, 0px)); }
+  12.5% { translate: 0 calc(-0.00183 * var(--fin-lr, 0px)); }
+  15.625% { translate: 0 calc(-0.003515 * var(--fin-lr, 0px)); }
+  18.75% { translate: 0 calc(-0.005975 * var(--fin-lr, 0px)); }
+  21.875% { translate: 0 calc(-0.009325 * var(--fin-lr, 0px)); }
+  25% { translate: 0 calc(-0.01367 * var(--fin-lr, 0px)); }
+  28.125% { translate: 0 calc(-0.01912 * var(--fin-lr, 0px)); }
+  31.25% { translate: 0 calc(-0.02575 * var(--fin-lr, 0px)); }
+  34.375% { translate: 0 calc(-0.03364 * var(--fin-lr, 0px)); }
+  37.5% { translate: 0 calc(-0.042845 * var(--fin-lr, 0px)); }
+  40.625% { translate: 0 calc(-0.05343 * var(--fin-lr, 0px)); }
+  43.75% { translate: 0 calc(-0.06542 * var(--fin-lr, 0px)); }
+  46.875% { translate: 0 calc(-0.078855 * var(--fin-lr, 0px)); }
+  50% { translate: 0 calc(-0.09375 * var(--fin-lr, 0px)); }
+  53.125% { translate: 0 calc(-0.110105 * var(--fin-lr, 0px)); }
+  56.25% { translate: 0 calc(-0.12792 * var(--fin-lr, 0px)); }
+  59.375% { translate: 0 calc(-0.14718 * var(--fin-lr, 0px)); }
+  62.5% { translate: 0 calc(-0.167845 * var(--fin-lr, 0px)); }
+  65.625% { translate: 0 calc(-0.18989 * var(--fin-lr, 0px)); }
+  68.75% { translate: 0 calc(-0.21325 * var(--fin-lr, 0px)); }
+  71.875% { translate: 0 calc(-0.23787 * var(--fin-lr, 0px)); }
+  75% { translate: 0 calc(-0.26367 * var(--fin-lr, 0px)); }
+  78.125% { translate: 0 calc(-0.290575 * var(--fin-lr, 0px)); }
+  81.25% { translate: 0 calc(-0.318475 * var(--fin-lr, 0px)); }
+  84.375% { translate: 0 calc(-0.347265 * var(--fin-lr, 0px)); }
+  87.5% { translate: 0 calc(-0.37683 * var(--fin-lr, 0px)); }
+  90.625% { translate: 0 calc(-0.407035 * var(--fin-lr, 0px)); }
+  93.75% { translate: 0 calc(-0.437735 * var(--fin-lr, 0px)); }
+  96.875% { translate: 0 calc(-0.46878 * var(--fin-lr, 0px)); }
+  100% { translate: 0 calc(-0.5 * var(--fin-lr, 0px)); }
+}
 @supports (animation-timeline: scroll()) {
   .act--finale.is-pinned.is-timeline .fin-stage {
-    animation-name: fin-brake; animation-duration: auto; animation-fill-mode: both;
-    animation-timing-function: linear(0, 0.06244, 0.12453, 0.18593, 0.24634, 0.30547, 0.36305, 0.41885, 0.47266, 0.52426, 0.5735, 0.62022, 0.66431, 0.70564, 0.74416, 0.77979, 0.8125, 0.84229, 0.86916, 0.89314, 0.91431, 0.93272, 0.9485, 0.96176, 0.97266, 0.98135, 0.98805, 0.99297, 0.99634, 0.99843, 0.99953, 0.99994, 1);
+    animation-name: fin-brake; animation-duration: auto; animation-fill-mode: both; animation-timing-function: linear;
     animation-timeline: scroll(root); animation-range: var(--fin-a) var(--fin-b);
   }
   .act--finale.is-pinned.is-timeline .fin-inner {
-    animation-name: fin-letgo; animation-duration: auto; animation-fill-mode: both;
-    animation-timing-function: linear(0, 0.00006, 0.00047, 0.00157, 0.00366, 0.00703, 0.01195, 0.01865, 0.02734, 0.03824, 0.0515, 0.06728, 0.08569, 0.10686, 0.13084, 0.15771, 0.1875, 0.22021, 0.25584, 0.29436, 0.33569, 0.37978, 0.4265, 0.47574, 0.52734, 0.58115, 0.63695, 0.69453, 0.75366, 0.81407, 0.87547, 0.93756, 1);
+    animation-name: fin-letgo; animation-duration: auto; animation-fill-mode: both; animation-timing-function: linear;
     animation-timeline: scroll(root); animation-range: var(--fin-g) var(--fin-e);
+  }
+}
+/* The night's circle (.fin-disc, index.astro): a disc as large as the circle gets, centred on the theme stack's bottom
+   middle, scaled on the compositor from a point (--fd-x0) to whole as the wipe scrolls by, with its inner box scaled
+   back by the inverse so what it holds stays put on the screen at 1:1 and never re-rasters (it holds only canvases:
+   the sky, moved in from .themes while the night shows, and .fin-tint, the faint nebula drawn once). It replaces three
+   per-frame clips: the circle() on the sky and on the tint, and the path() that cut the west's cards out (the disc
+   lies above them in the stacking order, so it covers them). index.astro writes the geometry (--fd-cx, --fd-cy: the
+   centre; --fd-r: the radius, the top corners' distance) and the scroll range (--fd-a to --fd-b, px of the page's
+   scroll, where the radius grows straight with the scroll as before), on every refresh. With scroll-driven animations
+   (.is-timeline) both scales run on the scroll itself, so the circle's edge is exactly where the page is in every
+   frame; without them the script writes the same two scales. The inverse's 36 keyframes are geometric (each scale
+   1.2 times the next) with one fitted curve for all of them, since 1/x has the same shape in every such segment:
+   the product of the two scales stays within 3e-6 of 1 (0.003 px at the circle's edge), generated by
+   .scratch/wf/invkf.py. Only with motion and the sky wired (.has-disc); the flight canvas gets its own disc
+   (.fin-disc--flight) after the stage, so the star and the spray are cut by the same circle on the compositor and
+   still paint over the stage's dark pool. The section stacks above the west act (z-index 2) and the footer above
+   the section (3). */
+.fin-disc { display: none; }
+.act--finale.has-disc { z-index: 2; }
+/* only within a screen of the finale (.is-near, an observer in finale-disc.ts): no layers for the discs elsewhere.
+   will-change on both, so each keeps the raster it got at 1:1 on the screen: without it Chromium dropped the disc's
+   round clip once the disc's box held the whole screen (the night covered the west's corners at 400 px into the wipe,
+   1440, 2026-11-09), and the inner box, scaled up to 700 times, was rastered at that scale */
+.act--finale.has-disc.is-near .fin-disc {
+  display: block; position: fixed; will-change: transform; left: calc(var(--fd-cx, 50vw) - var(--fd-r, 0px)); top: calc(var(--fd-cy, 100vh) - var(--fd-r, 0px));
+  width: calc(2 * var(--fd-r, 0px)); height: calc(2 * var(--fd-r, 0px)); border-radius: 50%; overflow: hidden;
+  scale: 0; pointer-events: none;
+}
+.fin-disc__in {
+  position: absolute; will-change: transform; left: calc(var(--fd-r, 0px) - var(--fd-cx, 50vw)); top: calc(var(--fd-r, 0px) - var(--fd-cy, 100vh));
+  width: calc(2 * var(--fd-cx, 50vw)); height: var(--fd-cy, 100vh); transform-origin: var(--fd-cx, 50vw) var(--fd-cy, 100vh);
+}
+.fin-disc__in > canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+@keyframes fin-disc { from { scale: var(--fd-x0, 0.0014108); } to { scale: 1; } }
+@keyframes fin-disc-in {
+  0.000000% { scale: 708.802; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.028256% { scale: 590.668; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.062164% { scale: 492.224; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.102854% { scale: 410.186; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.151681% { scale: 341.822; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.210274% { scale: 284.852; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.280585% { scale: 237.376; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.364958% { scale: 197.814; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.466206% { scale: 164.845; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.587704% { scale: 137.371; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.733501% { scale: 114.475; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  0.908458% { scale: 95.3962; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  1.118406% { scale: 79.4968; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  1.370344% { scale: 66.2474; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  1.672669% { scale: 55.2061; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  2.035460% { scale: 46.0051; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  2.470808% { scale: 38.3376; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  2.993226% { scale: 31.948; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  3.620128% { scale: 26.6233; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  4.372410% { scale: 22.1861; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  5.275148% { scale: 18.4884; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  6.358435% { scale: 15.407; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  7.658378% { scale: 12.8392; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  9.218310% { scale: 10.6993; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  11.090229% { scale: 8.9161; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  13.336531% { scale: 7.43008; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  16.032094% { scale: 6.19174; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  19.266769% { scale: 5.15978; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  23.148379% { scale: 4.29982; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  27.806312% { scale: 3.58318; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  33.395830% { scale: 2.98598; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  40.103253% { scale: 2.48832; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  48.152160% { scale: 2.0736; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  57.810849% { scale: 1.728; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  69.401275% { scale: 1.44; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  83.309786% { scale: 1.2; animation-timing-function: cubic-bezier(0.31297, 0.37551, 0.64642, 0.70529); }
+  100.000000% { scale: 1; }
+}
+@supports (animation-timeline: scroll()) {
+  .act--finale.has-disc.is-timeline .fin-disc {
+    animation-name: fin-disc; animation-duration: auto; animation-fill-mode: forwards; animation-timing-function: linear;
+    animation-timeline: scroll(root); animation-range: var(--fd-a) var(--fd-b);
+  }
+  .act--finale.has-disc.is-timeline .fin-disc__in {
+    animation-name: fin-disc-in; animation-duration: auto; animation-fill-mode: forwards;
+    animation-timeline: scroll(root); animation-range: var(--fd-a) var(--fd-b);
   }
 }
 /* the finale's shooting star, its spray and the gathering emblem (finale-flight.ts, stardust.ts flight mode) draw on
    this canvas until the emblem has closed and its own canvas takes over. Fixed to the screen like the night it is in
-   (the theme stack's top and height, 100lvh, so the circle's centre is its bottom middle): the star and the hanging
-   spray hold still against the sky however fast the scroll, and by the hand-over the stage holds still too.
-   finale-flight.ts sets its column (left, width) on refresh. It comes after the stage, so it paints over the stage's
-   dark pool like the emblem it hands over to; the words are not up while it shows. Shown only while it flies */
+   (it fills its disc's inner box, which is the theme stack's place, so the circle's centre is its bottom middle): the
+   star and the hanging spray hold still against the sky however fast the scroll, and by the hand-over the stage holds
+   still too. finale-flight.ts sets its column (left, width) on refresh. Its disc comes after the stage, so it paints
+   over the stage's dark pool like the emblem it hands over to; the words are not up while it shows. Shown only while
+   it flies */
 .fin-flight {
-  position: fixed; left: 0; top: 0; width: 0; height: 100vh; height: 100lvh;
+  position: absolute; left: 0; top: 0; width: 0; height: 100%;
   visibility: hidden; pointer-events: none; display: block;
 }
 
@@ -681,6 +899,8 @@ html:not(.has-themes) .act--finale { background: #050505; }
    on at least 0.74 of near-black, about what it had on the opaque footer). Only with the sky (html.has-sky, set by
    index.astro): without WebGL and a 2D canvas, or without JavaScript, the opaque footer stays. */
 html.has-sky #site-footer {
+  /* above the finale's section (z-index 2 with its disc, home.css .has-disc): it comes up over the stage's bottom */
+  position: relative; z-index: 3;
   /* border-box: from the padding box (the default) the gradient tiled its dark end into the 1px top border, a hair
      line of its own */
   background: linear-gradient(180deg, rgb(5 5 5 / 0) 0, rgb(5 5 5 / 0.5) 72px, rgb(5 5 5 / 0.74) 168px, rgb(5 5 5 / 0.84) 100%) no-repeat border-box;
@@ -749,7 +969,12 @@ html.has-sky #site-footer {
 /* letter-rise headlines: clip the rising letters */
 .h-split { overflow: hidden; padding-bottom: 0.08em; }
 .act--finale .hero-inner { max-width: 1140px; padding: 0 24px; }
-@media (max-width: 640px) { .bp-mark--tl, .bp-mark--tr { display: none; } }
+/* phones: no registration marks on the paper. Fixed to the screen 24px in, they crossed the words in every frame of
+   the act, whose gutter there is only 16 to 22px (B11; the top pair already went below 640px) */
+@media (max-width: 767px) { .bp-mark { display: none; } }
+/* the smallest phones (320px): the measures one to a row, or "112.5B" pushed its column 4px past the screen (B19;
+   after the 640px block above, which sets the two columns) */
+@media (max-width: 359px) { .bp-measures { grid-template-columns: 1fr; } }
 
 /* ================================================================
    EXP · HERO — Strade under the SSI sky: the emblem made of stars,

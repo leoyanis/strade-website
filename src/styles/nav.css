@@ -50,7 +50,8 @@
      page; it never takes a click: only the links do */
   height: var(--pool-h);
   display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 0 var(--nav-pad);
+  /* (and inside the safe area: a notched phone in landscape, viewport-fit=cover in Base.astro; 0 everywhere else) */
+  padding: 0 max(var(--nav-pad), env(safe-area-inset-right)) 0 max(var(--nav-pad), env(safe-area-inset-left));
   overflow: hidden;
   pointer-events: none;
 }
@@ -243,6 +244,15 @@
     linear-gradient(var(--split-ang, 90deg), var(--split-a) var(--split-at, 50%), var(--split-m, var(--split-b)) var(--split-at, 50%), var(--split-m, var(--split-b)) var(--split-at2, var(--split-at, 50%)), var(--split-b) var(--split-at2, var(--split-at, 50%))) 0 0 / 100% 100% no-repeat;
   -webkit-background-clip: text; background-clip: text;
 }
+/* Two or more bands' edges under a link at once (Base.astro shapesUnder: vaultt's two store badges and the navy between
+   them rising under Results on a phone): each band's rounded box is a stack of background layers in that band's ink
+   (--shape-bg, written by the script), over the link's own ink (currentColor, its tone's colour rules) for what lies
+   outside them, all clipped to the text. Exact at corners and gaps, where one split edge could only guess. */
+.nav-links a:not(.nav-book)[data-shape] {
+  -webkit-text-fill-color: transparent; text-shadow: none;
+  background: var(--shape-bg);
+  -webkit-background-clip: text; background-clip: text;
+}
 /* a corner under the link (Base.astro, linkSplit cover: a card's side and its top meeting under Free stuff): the rows
    past the level edge, --cover-y down for --cover-h, wear the ink of the side named, over the upright split */
 .nav-links a[data-split-cover='a'] { --cover-c: var(--split-a); }
@@ -281,6 +291,22 @@
 .nav-side--l[data-split]:not([data-ko2]) .nav-brand::after {
   content: ''; position: absolute; left: 0; top: calc(50% - 12px); height: 24px; aspect-ratio: 380 / 484; pointer-events: none;
   background: linear-gradient(var(--split-ang, 90deg), transparent var(--split-at-m, 50%), var(--split-b) var(--split-at-m, 50%));
+  -webkit-mask: url(/images/ssi/emblem-star.svg) center / contain no-repeat;
+  mask: url(/images/ssi/emblem-star.svg) center / contain no-repeat;
+}
+/* The logo over shapes (Base.astro logoShapes: vaultt's App Store badge rising under the mark on a phone, its rounded
+   corner through the mark's foot): each band's rounded box in that band's ink, drawn again by the logo's ::after through
+   the mark's own file as its mask (--shape-bg-m, in the mark's box), and over the word clipped to its text (--shape-bg-w,
+   in the logo's box, the logo's own ink beneath); the mark itself keeps the logo's ink everywhere else */
+.nav-side--l[data-shape] .nav-brand {
+  position: relative; text-shadow: none; -webkit-text-fill-color: transparent;
+  background: var(--shape-bg-w); -webkit-background-clip: text; background-clip: text;
+}
+.nav-side--l[data-shape] .nav-brand span { -webkit-text-stroke: 0; text-shadow: none; }
+.nav-side--l[data-shape] .nav-brand-mark { filter: none; }
+.nav-side--l[data-shape]:not([data-ko2]) .nav-brand::after {
+  content: ''; position: absolute; left: 0; top: calc(50% - 12px); height: 24px; aspect-ratio: 380 / 484; pointer-events: none;
+  background: var(--shape-bg-m);
   -webkit-mask: url(/images/ssi/emblem-star.svg) center / contain no-repeat;
   mask: url(/images/ssi/emblem-star.svg) center / contain no-repeat;
 }
@@ -373,19 +399,19 @@
   color: rgb(var(--ko)); -webkit-text-fill-color: rgb(var(--ko));
   -webkit-text-stroke: 7px rgb(var(--ko));
   text-shadow: 0 0 2px rgb(var(--ko)), 0 0 5px rgb(var(--ko)), 0 0 9px rgb(var(--ko) / 0.55);
-  clip-path: inset(var(--ko-t, -16px) var(--ko-r, -16px) var(--ko-b, -16px) var(--ko-l, -16px));
+  /* (--ko-rad: the band's own rounded corners, where the cut is its box: Base.astro koShape) */
+  clip-path: inset(var(--ko-t, -16px) var(--ko-r, -16px) var(--ko-b, -16px) var(--ko-l, -16px) round var(--ko-rad, 0px));
 }
 .nav-links a[data-ko2]:not(.nav-book):not(.nav-icon)::after {
   color: rgb(var(--ko2)); -webkit-text-fill-color: rgb(var(--ko2));
   -webkit-text-stroke: 7px rgb(var(--ko2));
   text-shadow: 0 0 2px rgb(var(--ko2)), 0 0 5px rgb(var(--ko2)), 0 0 9px rgb(var(--ko2) / 0.55);
-  clip-path: inset(var(--ko2-t, -16px) var(--ko2-r, -16px) var(--ko2-b, -16px) var(--ko2-l, -16px));
+  clip-path: inset(var(--ko2-t, -16px) var(--ko2-r, -16px) var(--ko2-b, -16px) var(--ko2-l, -16px) round var(--ko2-rad, 0px));
 }
-/* the SVGs' patch: behind the mark (24px tall, about 19px wide, first in the logo) and behind the 16px icon, 4px past
-   them all round, feathered; cut like the copy above. Base.astro counts the logo's cuts from the logo's box, which the
-   patch overhangs by 4px all round on a phone, where the logo is the mark alone (hence + 4px; on a laptop the word
-   follows the mark, and the logo is never cut there), and the icon's from its link's box, 36px tall with the padding,
-   whose top and bottom the patch sits 6px inside (hence - 6px) */
+/* the SVGs' patch: behind the mark (24px tall, about 19px wide, first in the logo) and behind the 17px icon, shaped
+   below; cut like the copy above. Base.astro counts the logo's cuts from the logo's box, which the patch overhangs by 5px
+   all round on a phone, where the logo is the mark alone (hence + 5px; on a laptop the word follows the mark, and the
+   logo is never cut there), and the icon's from its link's box, 37px tall with the padding (hence - 9px, below) */
 .nav-side[data-flat]:is([data-ko], [data-ko2]) .nav-brand,
 .nav-links .nav-icon:is([data-ko], [data-ko2]) { position: relative; }
 .nav-side[data-flat][data-ko] .nav-brand::before,
@@ -398,22 +424,64 @@
 .nav-links .nav-icon[data-ko]::before { background: rgb(var(--ko)); box-shadow: 0 0 5px 1px rgb(var(--ko)); }
 .nav-side[data-flat][data-ko2] .nav-brand::after,
 .nav-links .nav-icon[data-ko2]::after { background: rgb(var(--ko2)); box-shadow: 0 0 5px 1px rgb(var(--ko2)); }
+/* Glyph-tight (2026-11-09 final check): the mark's patch is the mark itself grown by 3.5px and softened over about 2px
+   (--mark-halo, the emblem's star and ring stroked 140 units wide in a viewBox 5px larger all round, then blurred), as
+   the links' copies are their words grown; a rounded box 4px past the mark showed as a cream blob cutting the blue
+   stripes and the circle line round the star (1440 at 6650 to 8200). The icon's patch hugs its rounded square (1px past
+   it, 2px of softness): a box 4px wider with a 5px glow laid a cream square on the lime blob (1440 at 6805 to 6985). */
+#site-nav { --mark-halo: url(""); }
 .nav-side[data-flat][data-ko] .nav-brand::before,
-.nav-side[data-flat][data-ko2] .nav-brand::after { left: -4px; top: calc(50% - 16px); width: 27px; height: 32px; }
+.nav-side[data-flat][data-ko2] .nav-brand::after {
+  left: -5px; top: calc(50% - 17px); width: calc(24px * 380 / 484 + 10px); height: 34px;
+  border-radius: 0; box-shadow: none;
+  -webkit-mask: var(--mark-halo) center / 100% 100% no-repeat; mask: var(--mark-halo) center / 100% 100% no-repeat;
+}
 .nav-links .nav-icon[data-ko]::before,
-.nav-links .nav-icon[data-ko2]::after { left: -4px; right: -4px; top: calc(50% - 12px); height: 24px; }
+.nav-links .nav-icon[data-ko2]::after { left: -1px; right: -1px; top: calc(50% - 9.5px); height: 19px; border-radius: 6.5px; }
+.nav-links .nav-icon[data-ko]::before { box-shadow: 0 0 2px 0.5px rgb(var(--ko)); }
+.nav-links .nav-icon[data-ko2]::after { box-shadow: 0 0 2px 0.5px rgb(var(--ko2)); }
+/* the cuts, from the logo's box (the patch overhangs it by 5px: the mark's box on a phone) and the icon's link box (the
+   patch sits 9px inside its top and bottom, 1px outside its sides); round: the band's own corners (koShape) */
 .nav-side[data-flat][data-ko] .nav-brand::before {
-  clip-path: inset(calc(var(--ko-t, -14px) + 4px) calc(var(--ko-r, -14px) + 4px) calc(var(--ko-b, -14px) + 4px) calc(var(--ko-l, -14px) + 4px));
+  clip-path: inset(calc(var(--ko-t, -14px) + 5px) calc(var(--ko-r, -14px) + 5px) calc(var(--ko-b, -14px) + 5px) calc(var(--ko-l, -14px) + 5px) round var(--ko-rad, 0px));
 }
 .nav-side[data-flat][data-ko2] .nav-brand::after {
-  clip-path: inset(calc(var(--ko2-t, -14px) + 4px) calc(var(--ko2-r, -14px) + 4px) calc(var(--ko2-b, -14px) + 4px) calc(var(--ko2-l, -14px) + 4px));
+  clip-path: inset(calc(var(--ko2-t, -14px) + 5px) calc(var(--ko2-r, -14px) + 5px) calc(var(--ko2-b, -14px) + 5px) calc(var(--ko2-l, -14px) + 5px) round var(--ko2-rad, 0px));
 }
 .nav-links .nav-icon[data-ko]::before {
-  clip-path: inset(calc(var(--ko-t, -4px) - 6px) calc(var(--ko-r, -14px) + 4px) calc(var(--ko-b, -4px) - 6px) calc(var(--ko-l, -14px) + 4px));
+  clip-path: inset(calc(var(--ko-t, -4px) - 9px) calc(var(--ko-r, -14px) + 1px) calc(var(--ko-b, -4px) - 9px) calc(var(--ko-l, -14px) + 1px) round var(--ko-rad, 0px));
 }
 .nav-links .nav-icon[data-ko2]::after {
-  clip-path: inset(calc(var(--ko2-t, -4px) - 6px) calc(var(--ko2-r, -14px) + 4px) calc(var(--ko2-b, -4px) - 6px) calc(var(--ko2-l, -14px) + 4px));
+  clip-path: inset(calc(var(--ko2-t, -4px) - 9px) calc(var(--ko2-r, -14px) + 1px) calc(var(--ko2-b, -4px) - 9px) calc(var(--ko2-l, -14px) + 1px) round var(--ko2-rad, 0px));
 }
+
+/* ---------- bare pictures ----------
+   A corner busy only with pictures the page marks bare (Base.astro navBands 'bare': kleus's turning ring of cards and the
+   quest covers on /work) shows no pool: over them it lay as a white haze band, cut at the card's
+   edge into a bar (kleus 1440 at 540 to 750, /work 1440 at 800 to 1230, 2026-11-09 final check). The links keep the
+   ink of their tone at full strength (the soft ink read grey beside the current page's full one) and a glow tight to
+   the glyphs, in the pool's colour, instead of the 12px one (split and shaped links keep their own two inks). */
+#site-nav .nav-side[data-bare] .nav-pool { opacity: 0; visibility: hidden; }
+.nav-side[data-bare] .nav-links a:not(.nav-book):not([data-split]):not([data-shape]) {
+  color: var(--ink-on-dark); text-shadow: 0 0 1px rgb(var(--pool-dark) / 0.9), 0 0 4px rgb(var(--pool-dark) / 0.7);
+}
+.nav-side[data-bare] .nav-links .nav-free:not([data-split]):not([data-shape]):not([data-tone='light']) { color: var(--nav-accent); }
+.nav-side[data-bare] .nav-links a:not(.nav-book):not([data-split]):not([data-shape])[data-tone='light'] {
+  color: var(--ink-on-light); text-shadow: 0 0 1px rgb(var(--pool-light) / 0.9), 0 0 4px rgb(var(--pool-light) / 0.75);
+}
+/* and a split link there takes the full ink on each side too, Free stuff keeping its accent on the dark side: in the soft
+   ink "Free s" read grey on the white frame of a quest cover beside the cyan "tuff" (/work 1440 at 1660 to 1860, and on
+   the cream strip of the MQ-04 cover at 820 to 1140, 2026-11-09 final check) */
+.nav-side[data-bare] .nav-links a[data-split^='light'] { --split-a: var(--ink-on-light); }
+.nav-side[data-bare] .nav-links a[data-split$='light'] { --split-b: var(--ink-on-light); }
+.nav-side[data-bare] .nav-links a:not(.nav-free)[data-split^='dark'] { --split-a: var(--ink-on-dark); }
+.nav-side[data-bare] .nav-links a:not(.nav-free)[data-split$='dark'] { --split-b: var(--ink-on-dark); }
+.nav-side[data-bare] .nav-links .nav-icon svg { filter: drop-shadow(0 0 1px rgb(var(--pool-dark) / 0.9)) drop-shadow(0 0 3px rgb(var(--pool-dark) / 0.7)); }
+.nav-side[data-bare] .nav-links .nav-icon[data-tone='light'] svg { filter: drop-shadow(0 0 1px rgb(var(--pool-light) / 0.9)) drop-shadow(0 0 3px rgb(var(--pool-light) / 0.75)); }
+.nav-side--l[data-bare]:not([data-split]):not([data-shape]) .nav-brand { text-shadow: 0 0 1px rgb(var(--pool-dark) / 0.9), 0 0 4px rgb(var(--pool-dark) / 0.7); }
+.nav-side--l[data-bare][data-tone='light']:not([data-split]):not([data-shape]) .nav-brand { text-shadow: 0 0 1px rgb(var(--pool-light) / 0.9), 0 0 4px rgb(var(--pool-light) / 0.75); }
+.nav-side--l[data-bare]:not([data-split]):not([data-shape]) .nav-brand-mark { filter: drop-shadow(0 0 1px rgb(var(--pool-dark) / 0.9)) drop-shadow(0 0 3px rgb(var(--pool-dark) / 0.7)); }
+.nav-side--l[data-bare][data-tone='light']:not([data-split]):not([data-shape]) .nav-brand-mark { filter: drop-shadow(0 0 1px rgb(var(--pool-light) / 0.9)) drop-shadow(0 0 3px rgb(var(--pool-light) / 0.75)); }
 
 /* ---------- phones ----------
    Gradient only: no backdrop blur (the two pools span most of a 390px screen, and a blur that wide costs real
@@ -440,4 +508,14 @@
   .nav-links { gap: 18px; }
   .nav-links .nav-icon { display: none; }
   .nav-links .nav-book { padding: 7px 12px; }
+  /* Tap targets of 44px with nothing moved (audit V-03, 2026-11-09): the logo is the 19 by 24 mark, Book a call 35px
+     tall. Each gets an invisible box round it, positioned so no box the nav measures changes: the logo's inside the
+     link (.nav-hit; its pseudo-elements carry the knockout and the split ink), the pill's its ::after. */
+  .nav-brand { position: relative; }
+  .nav-hit { position: absolute; left: -12.5px; right: -12.5px; top: calc(50% - 22px); height: 44px; pointer-events: auto; }
+  .nav-links .nav-book { position: relative; }
+  .nav-links .nav-book::after { content: ''; position: absolute; inset: -5px -2px; }
 }
+/* (no tap box on wider screens: the logo there is the mark and the word) */
+.nav-hit { display: block; }
+@media (min-width: 768px) { .nav-hit { display: none; } }

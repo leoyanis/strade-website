@@ -43,12 +43,16 @@ const MASK_VARS = ['--tx', '--ty', '--tw', '--th'];
 // A star field's pull into the ∞, an ease out: 1 - (1 - gather)^FIELD_EASE of the way. The scattered swarm's
 // gather^3.2 left the first third of the gather all but still (0.3^3.2 = 2% of the way), which was fine while that
 // third was the stars fading in; a field that is already on screen has to answer the scroll at once. Since the gather
-// begins right after Vaultt's jobs (2026-11-09), the stars visibly head for the ∞ from the first scroll, the loose ∞
-// is there about when this section's words come up into it, and the rest of the way it settles (and HUG tightens it)
-// while the words and phone come into place. Tried gather^1.7, ^1.15 and ^0.85 first: each still read as the field
-// roaming for a third to half a screen past the jobs (^0.85: a third of the way only 300px in on a desktop). The curve
-// runs a screen wide, close to most of the field, so a field part of the way there still looks like a field.
-const FIELD_EASE = 3;
+// begins as Vaultt's jobs leave (2026-11-09), the stars visibly head for the ∞ within a tenth of a screen of them, the
+// loose ∞ is there before this section's words come up into it, and the rest of the way it settles (and HUG tightens
+// it) while the words and phone come into place. Tried gather^1.7, ^1.15, ^0.85, then an ease out of 3 with the
+// app's 0.12 stagger: each still read as the field roaming for a fifth to half a screen past the jobs (the ease out
+// of 3: a band only 200px past them on a desktop, density round the curve 1.35 times the field's). The curve runs a
+// screen wide, close to most of the field, so a field part of the way there still looks like a field.
+const FIELD_EASE = 6;
+// A star field's start stagger, a share of the gather (the app's swarm spreads its starts over 0.12 of it, which
+// held half the stars still for the gather's first 60px on a desktop): just enough that they don't set off as one.
+const FIELD_STAGGER = 0.03;
 // How much closer to the curve the swarm runs once it has gathered (over the last quarter of the gather, so with the
 // scroll): half the app's spread, so the finished ∞ reads as a line of stars, denser and brighter along its path. At
 // the app's spread, on a curve a screen wide, it read as a sparse ring of dust (2026-11-08 site check).
@@ -482,9 +486,12 @@ export function createStars(canvas: HTMLCanvasElement, opts: { count: number; st
     // the swarm closes in on the curve over the last quarter of the gather (HUG), the scroll's doing, not a clock's
     const hugT = clamp((gather - 0.75) / 0.25, 0, 1);
     const spreadK = 2 * (1 - HUG * hugT * hugT * (3 - 2 * hugT));
+    // each star's start: its draw (0 to the app's stagger) rescaled to a field's shorter one, so the draws stay as made
+    const stagger = field ? FIELD_STAGGER : A.gatherStagger;
+    const delayK = stagger / A.gatherStagger;
     for (let i = 0; i < n; i++) {
       const j = i * 3;
-      const arrive = clamp((gather - delay[i]) / (1 - A.gatherStagger), 0, 1);
+      const arrive = clamp((gather - delay[i] * delayK) / (1 - stagger), 0, 1);
       if (arrive <= 0 && !field) {
         dyn[j + 2] = 0;
         continue;

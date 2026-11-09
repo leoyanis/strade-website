@@ -640,6 +640,19 @@ button.ept-member.is-down .ept-member__ring { transform: scale(0.96); transition
   .ep3__ctas { gap: 10px; }
 }
 
+/* ---------- touch screens (2026-11-09 audit) ----------
+   - the ambient loops hold while the page scrolls (ep-section.ts onRest sets .is-scrolling; VE-07)
+   - the glass button and the sound switch drop their backdrop blur: it was redone every frame over the star canvas
+     under them, at 84% fill over a near-empty black, and a little more fill keeps the few stars behind as faint
+     (VE-12)
+   - no grain over the world: overlay at 6% on #0A0A0A moves no pixel by a whole level, but it was a blend group over
+     the whole screen for every frame of the act (VE-16) */
+@media (hover: none) and (pointer: coarse) {
+  .ep3.is-scrolling .is-amb, .ep3.is-scrolling .is-amb::before, .ep3.is-scrolling .is-amb::after { animation-play-state: paused; }
+  .ep3__btn--glass, .ep3-sound { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(20, 20, 20, 0.9); }
+  .themes .theme--ep__grain { display: none; }
+}
+
 /* ---------- reduced motion: no ambient loops, nothing that moves by itself ---------- */
 @media (prefers-reduced-motion: reduce) {
   .ept-live.is-amb::after, .ept-bar__run.is-amb, .ept-bar__now.is-amb::after, .ept-ring__halo.is-amb, .ept-member--active .ept-member__ring.is-amb::before, .ept-flame__icon.is-amb { animation: none !important; }

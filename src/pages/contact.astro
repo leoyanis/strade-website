@@ -11,8 +11,9 @@ const EMAIL = SITE.email;
   locale="en"
   path="/contact"
 >
-  <section style="min-height:80vh;display:flex;align-items:center">
-    <div class="container" style="padding-top:96px">
+  <!-- the first screen's sizing is in the style below (it was inline), so phones can centre it under the nav -->
+  <section class="contact-hero">
+    <div class="container contact-body">
       <span class="label">Contact</span>
       <h1 style="margin:12px 0 24px">Let's talk.</h1>
       <p style="color:var(--text-secondary);font-size:18px;max-width:480px;margin-bottom:48px">
@@ -34,3 +35,19 @@ const EMAIL = SITE.email;
     </div>
   </section>
 </Base>
+
+<style>
+  /* Wider screens, as when these were inline styles: at least 80vh, the content centred down it under a 96px top pad */
+  .contact-hero { min-height: 80vh; display: flex; align-items: center; }
+  .contact-body { padding-top: 96px; }
+  /* Phones (2026-11-09): the content sat high, 122px under the nav and 259px over the fold at 390x844, with the
+     footer showing at the bottom of the first screen. Now it is centred in the first screen below the 64px fixed nav:
+     the section is one small viewport tall (svh, the height with Safari's toolbars showing; 100vh where svh is
+     unknown), its top 64px stand under the nav, and the flex centring above does the rest. */
+  @media (max-width: 767px) {
+    .contact-hero { min-height: 100vh; min-height: 100svh; padding-top: 64px; }
+    .contact-body { padding-top: 0; }
+  }
+  /* (the footer keeps its Instagram and LinkedIn buttons here on phones too: hidden, LinkedIn could not be reached from
+     /contact at all, and that outweighs the Instagram link doubling the page's own button; reverted 2026-11-09) */
+</style>

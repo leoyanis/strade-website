@@ -19,6 +19,8 @@ import '../styles/home.css';
 import '../styles/home-wheel.css';
 // after home.css: the west act overrides a few of its shared rules (.theme's clip-path among them)
 import '../styles/west.css';
+// what an act far from the screen gives up (.is-offstage, set in the script below; the global performance pass's)
+import '../styles/offstage.css';
 
 const atlas = getProject('atlas')!;
 const vaultt = getProject('vaultt')!;
@@ -163,6 +165,13 @@ const KL_CIRC = 2 * Math.PI * 60;
     // straight through the white links (2026-11-09 re-check). The section's top reaches the nav line only after the
     // circle has opened, so it never overrides the wipe's paint.
     '#finale': { tone: 'dark', surface: '#050506' },
+    // and its white Book a call pill, light by its own colour: once the corner follows the flat night (no pool), a link
+    // passing over the pill takes dark ink and a white knockout on it, as over any white card (the dark pool had turned
+    // it chrome grey, 390 at 18350 to 18450, 2026-11-09 final check)
+    '#finale .sx-btn--primary': { tone: 'light', surface: 'auto' },
+    // and the black disc of its arrow, inside the pill: as the pill's white, Results' knockout laid a white blob on it
+    // (390 at 18140, WebKit, 2026-11-09 final check)
+    '#finale .sx-btn--primary .sx-btn__go': { tone: 'dark', surface: 'auto' },
   }}
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -211,10 +220,13 @@ const KL_CIRC = 2 * Math.PI * 60;
     <!-- the free stuff act's black hole (src/components/free-act): it rises as a dome over the stripes, and the
          blueprint's sheet paints over it with its own edge and scan line -->
     <HoleWorld />
+    <!-- the blueprint's paper below its leading part (which is in the act itself, .bp-paper): a transform pair, the
+         wipe moving down to its edge and the paper inside moving back up, so the paper never moves (home.css) -->
     <div class="theme theme--blueprint">
-      <span class="bp-mark bp-mark--tl"></span><span class="bp-mark bp-mark--tr"></span>
-      <span class="bp-mark bp-mark--bl"></span><span class="bp-mark bp-mark--br"></span>
-      <span class="bp-scan"></span>
+      <div class="bp-wipe"><div class="bp-wipe__in bp-sheet">
+        <span class="bp-mark bp-mark--tl"></span><span class="bp-mark bp-mark--tr"></span>
+        <span class="bp-mark bp-mark--bl"></span><span class="bp-mark bp-mark--br"></span>
+      </div></div>
     </div>
     <!-- act IV: the Wild West town at sundown behind #about (src/components/west) -->
     <WestWorld />
@@ -347,6 +359,15 @@ const KL_CIRC = 2 * Math.PI * 60;
        ACT III: BLUEPRINT
        ============================================================ -->
   <section id="act-blueprint" class="act act--blueprint" data-nav-theme="light" data-nav-surface="#F2F0EB, vignette 50% 40% 55% 0.1">
+    <!-- the paper's leading part, in the act's own flow, so its top edge is always the act's own (home.css .bp-paper:
+         a box clipped to itself, holding the paper fixed to the screen), with the scan line along that edge -->
+    <div class="bp-paper" aria-hidden="true">
+      <div class="bp-paper__sheet bp-sheet">
+        <span class="bp-mark bp-mark--tl"></span><span class="bp-mark bp-mark--tr"></span>
+        <span class="bp-mark bp-mark--bl"></span><span class="bp-mark bp-mark--br"></span>
+      </div>
+      <span class="bp-scan"></span>
+    </div>
     <div class="container">
       <div class="bp-sec bp-k" id="mq-kleus">
         <div class="bp-k__grid">
@@ -472,8 +493,10 @@ const KL_CIRC = 2 * Math.PI * 60;
        (WestWorld, src/components/west); the blueprint sheet tears away from its top edge.
        ============================================================ -->
   <!-- data-nav-surface="plain": the dusk sky is a field with nothing to cut, so a corner over it shows no pool (Base.astro
-       plainBand); the papers, the photo, the label and the headline over it carry their own bands -->
-  <section id="act-west" class="act act--west" data-nav-theme="dark" data-nav-surface="plain" aria-labelledby="about-h">
+       plainBand); the papers, the photo, the label and the headline over it carry their own bands. #141234: the dusk
+       under the nav line with the papers hidden (20 18 52 at 1440, reduced motion), what shows through them as they
+       fade under the finale's cross-fade (their ink and knockout follow the mix) -->
+  <section id="act-west" class="act act--west" data-nav-theme="dark" data-nav-surface="plain #141234" aria-labelledby="about-h">
     <span class="w-cover" id="west-cover" aria-hidden="true"></span>
     <div class="container">
       <div class="bp-sec bp-about" id="about">
@@ -527,8 +550,13 @@ const KL_CIRC = 2 * Math.PI * 60;
        stars that hangs, then is drawn down into the emblem (on .fin-flight, a canvas fixed to the screen, until the
        emblem's own canvas takes over) as the stage (.fin-stage, sticky) slows to a stop; held still, the letters rise
        in from below and the emblem fades to its faint rest, then the stage lets go; data-fin-in is what rises in
-       after the letters (instead of the generic data-reveal) -->
+       after the letters (instead of the generic data-reveal).
+       The circle is .fin-disc: a disc scaled on the compositor (its contents scaled back, so they never move), in
+       which the sky canvas and the tint sit while the night shows. It lies above the west act and below the stage,
+       so it covers the west's cards by its place in the stacking order, with no clip on them; the flight canvas has a
+       disc of its own above the stage (index.astro's script and home.css) -->
   <section id="finale" class="act act--finale" data-sky-live>
+    <div class="fin-disc" aria-hidden="true"><div class="fin-disc__in"><canvas class="fin-tint"></canvas></div></div>
     <div class="fin-stage">
     <div class="hero-inner fin-inner">
       <div class="fin-head">
@@ -557,7 +585,7 @@ const KL_CIRC = 2 * Math.PI * 60;
       </div>
     </div>
     </div>
-    <canvas class="fin-flight" aria-hidden="true"></canvas>
+    <div class="fin-disc fin-disc--flight" aria-hidden="true"><div class="fin-disc__in"><canvas class="fin-flight"></canvas></div></div>
   </section>
 </Base>
 
@@ -573,6 +601,7 @@ const KL_CIRC = 2 * Math.PI * 60;
   import { mountFreeAct } from '../components/free-act/free-act';
   import { initWest } from '../components/west/west';
   import { mountFinaleFlight, type FinaleFlight } from '../components/space/finale-flight';
+  import { mountFinaleDisc, type FinaleDisc } from '../components/space/finale-disc';
 
   // ?still renders the page in its finished state (reduced motion), handy for screenshots
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
@@ -596,6 +625,26 @@ const KL_CIRC = 2 * Math.PI * 60;
     }
   });
   document.querySelectorAll('.h-a-live, #act-west').forEach((el) => onscreen.observe(el));
+
+  /* ---------- acts far from the screen (.is-offstage, src/styles/offstage.css) ----------
+     An act whose whole box is more than a screen and a half from the view is marked .is-offstage, and loses the mark
+     as soon as any of its box comes within a screen: two observers, so an act between the two edges keeps what it
+     had and a page resting there never flickers, and the act has everything back a screen before it can show. A
+     pinned or sticky stage stays inside its act's box, so a hold never goes offstage. offstage.css takes the layers
+     off such an act (will-change, infinite loops, scroll-driven animations, backdrop filters), which it otherwise
+     kept for the whole visit: from Endless Pursuit down, 72 to 83 of the page's 95 to 135 layers on phone-4x were in
+     acts more than a screen away (2026-11-09). The same with reduced motion and ?still. Owners can key their own
+     rules on the class (free-act.css does). Set only by these callbacks: without JS no act is ever offstage. */
+  const backOn = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) e.target.classList.remove('is-offstage');
+  }, { rootMargin: '100% 0px 100% 0px' });
+  const goneOff = new IntersectionObserver((entries) => {
+    for (const e of entries) if (!e.isIntersecting) e.target.classList.add('is-offstage');
+  }, { rootMargin: '150% 0px 150% 0px' });
+  document.querySelectorAll('section.act').forEach((el) => {
+    backOn.observe(el);
+    goneOff.observe(el);
+  });
 
   /* ---------- the night sky behind act I (the SSI sky) and the emblem made of stars ---------- */
   const themes = document.querySelector<HTMLElement>('.themes');
@@ -642,14 +691,16 @@ const KL_CIRC = 2 * Math.PI * 60;
   if (dust) document.documentElement.classList.add('has-stardust');
   // the same star, faint behind the finale's headline: its own instance, which has no intro of its own. With motion it
   // is made by the finale's shooting star (flight mode, wired to the circle wipe below: finale-flight.ts), on the
-  // .fin-flight canvas, which scrolls with the page. Under reduced motion it draws the finished emblem. Its still
-  // image shows until it exists
+  // .fin-flight canvas, fixed to the screen in its own disc. Under reduced motion it draws the finished emblem. Its
+  // still image shows until it exists. On a phone it twinkles at 15 fps once nothing has moved for a few seconds (it
+  // sits faint behind the held headline for as long as the visitor reads; 30 everywhere else)
   const finDustCanvas = document.querySelector<HTMLCanvasElement>('.fin-emblem__dust');
   const finFlightCanvas = document.querySelector<HTMLCanvasElement>('.fin-flight');
+  const finPhone = Math.min(innerWidth, innerHeight) < 600;
   const finDust = finDustCanvas
     ? createStardust(finDustCanvas, reduce
       ? { reduced: true, seed: 20261107, density: 0.5 }
-      : { reduced: false, seed: 20261107, density: 0.5, intro: false, flight: finFlightCanvas })
+      : { reduced: false, seed: 20261107, density: 0.5, intro: false, flight: finFlightCanvas, restFps: finPhone ? 15 : 30 })
     : null;
   if (finDust) finDustCanvas?.parentElement?.classList.add('has-dust');
 
@@ -677,8 +728,19 @@ const KL_CIRC = 2 * Math.PI * 60;
      It ends on the Atlas card taken apart in mid-air (workY, set with the flight); any wheel, touch or key from the
      visitor takes over. ---------- */
   let workY: (() => number) | null = null;
+  // The page's scroll for the Atlas flight's frames, without a layout read: taken in the scroll event (before anything
+  // in the frame writes a style), and set by smoothTo() below as it scrolls, since its scroll event only comes a
+  // frame later. (The flight read window.scrollY inside GSAP's tick, after other tweens had written: a forced style
+  // and layout pass every frame of the hero, 2026-11-09 audit P3.)
+  let pageY = window.scrollY;
+  addEventListener('scroll', () => { pageY = window.scrollY; }, { passive: true });
   const smoothTo = (y: number, ms: number) => {
-    const to = (top: number) => window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+    // (its targets are well inside the page, so the scroll lands where it is told; the scroll event that follows
+    // a frame later writes the page's own value anyway)
+    const to = (top: number) => {
+      window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+      pageY = Math.max(0, top);
+    };
     if (reduce) return to(y);
     const y0 = window.scrollY;
     const t0 = performance.now();
@@ -922,54 +984,131 @@ const KL_CIRC = 2 * Math.PI * 60;
       paintWipe();
     });
 
-    /* Where the blueprint act and Endless Pursuit's section sit in the document, and the screen's height: the
-       layer painters below ran on every scroll update and each read the section's rect after the frame's
-       writes, a forced style recalc and layout every frame. Measured on ScrollTrigger refreshes and whenever
-       the page's height changes (fonts, images); the scroll position comes from ScrollTrigger's own cached read.
-       innerHeight is kept from resize events: on phones every read of it runs a layout first. */
-    // (here vh is where the blueprint's sheet and scan line park while the act is below the screen: past the large
-    // screen, .themes' own height (100lvh), not innerHeight, or a phone's toolbar collapsing showed them along the
-    // bottom of the screen; Mobile Safari, iOS 26.3)
+    /* The blueprint's sheet (home.css .bp-sheet, .bp-paper, .theme--blueprint). Its leading part is in the act's own
+       flow (.bp-paper: the act's top edge down 1.5 large screens, the paper fixed to the screen inside it), so its
+       edge is moved by the page's scrolling itself and can never trail the act's words. Until 2026-11-09 the whole
+       sheet was the fixed layer, its edge a clip-path inset written here on every ScrollTrigger update: on a phone the
+       page scrolled ahead of that write, and the black hole showed under Kleus in that gap (sys-01, measured up to
+       254px with 40ms main-thread stalls; sys-07: the clip also repainted the 3 Mpx sheet every frame). The layer now
+       covers what is below the leading part: a transform pair whose edge runs BP_LEAD below the act's top, inside the
+       leading part, so wherever it is late it is out of sight (it is never above the act's edge, and never past the
+       part's bottom, for lags up to 0.75 of a screen). Where the browser has scroll-driven animations the pair moves
+       itself (home.css bp-wipe) over the range written here, in px of the page's scroll; without them the same
+       transforms are written from the trigger's updates, in whole px. Layout is read on refreshes, resizes and page
+       height changes (fonts, images), never per frame; vh is the large screen (.themes is 100lvh), where the layer
+       parks: innerHeight parked it just under the visible area, which a phone's collapsing toolbar uncovered
+       (Mobile Safari, iOS 26.3). */
     const themesBox = document.querySelector<HTMLElement>('.themes');
     let vh = Math.max(window.innerHeight, themesBox?.offsetHeight ?? 0);
-    addEventListener('resize', () => {
-      vh = Math.max(window.innerHeight, themesBox?.offsetHeight ?? 0);
-      paintBlueprint();
-    }, { passive: true });
     const docTop = (el: Element) => el.getBoundingClientRect().top + window.scrollY;
-    const tops = new Map<Element, number>();
-    const measureTops = () => { for (const el of tops.keys()) tops.set(el, docTop(el)); };
-    const topOf = (el: Element, scroll: number) => (tops.get(el) ?? docTop(el)) - scroll;
-    ScrollTrigger.addEventListener('refresh', measureTops);
-    new ResizeObserver(measureTops).observe(document.body);
-
-    // Blueprint is glued to the top edge of its act; the scan line rides that edge.
     const bpLayer = document.querySelector<HTMLElement>('.theme--blueprint')!;
+    const bpWipe = bpLayer.querySelector<HTMLElement>('.bp-wipe');
+    const bpWipeIn = bpLayer.querySelector<HTMLElement>('.bp-wipe__in');
     const bpAct = document.getElementById('act-blueprint')!;
-    tops.set(bpAct, docTop(bpAct));
-    const paintBlueprint = (self?: ScrollTrigger) => {
-      const top = Math.min(Math.max(topOf(bpAct, self ? self.scroll() : window.scrollY), 0), vh);
-      bpLayer.style.clipPath = `inset(${top}px 0 0 0)`;
+    const bpPaper = bpAct.querySelector<HTMLElement>('.bp-paper');
+    const bpTimeline = typeof CSS !== 'undefined' && !!CSS.supports?.('animation-timeline: scroll()');
+    if (bpTimeline) {
+      bpLayer.classList.add('is-timeline');
+      bpPaper?.classList.add('is-timeline');
+    }
+    // how far below the act's top the layer's edge runs (share of the large screen): half the leading part's 1.5
+    const BP_LEAD = 0.75;
+    const bp = { top: docTop(bpAct), lead: 0, a: 0, b: 1 };
+    let bpEdge = NaN;
+    const setBpVar = (el: HTMLElement, k: string, v: string) => {
+      if (el.style.getPropertyValue(k) !== v) el.style.setProperty(k, v);
     };
-    ScrollTrigger.create({ trigger: bpAct, start: 'top bottom', end: 'top top', onUpdate: paintBlueprint, onRefresh: (self) => { measureTops(); paintBlueprint(self); }, onLeave: paintBlueprint, onLeaveBack: paintBlueprint });
-    paintBlueprint();
-    /* The finale opens on the hero's own night sky. Its circle wipe (from the bottom centre) lifts the WebGL sky
-       canvas above the other worlds and clips it to the same circle, with the finale's faint tint over it: no second
-       WebGL context, no regenerated stars. Lifted, the sky draws on top of everything else in .themes, so it never
-       draws under an opaque layer; before the wipe it sleeps under the west act's cover (sky.cover, above). Both
-       circles are written here from one value, so the tint and the sky never disagree by a pixel.
-       (Before: the finale's layer was opaque and sky.hide() stopped the sky under it once the wipe was done.)
+    /** Layout reads: the act's place and the large screen; the layer's range (and the scan line's, below) from them. */
+    // Chromium resolves a scroll-driven px range against the page's length when the range is written, and kept that
+    // when the length changed later (a refresh's passing layout, the page growing): the animation then sat tens of px
+    // off for good (found on the free act's dome, free-act.ts writeRanges()). So every write is followed, a frame later
+    // and after every ScrollTrigger refresh, by the same ranges a thousandth of a pixel off (both ends together, so
+    // nothing moves), which the browser resolves against the page as it then is
+    let bpNudge = 0;
+    let bpKick = 0;
+    let bpScanWrite: (() => void) | null = null;
+    const bpPx = (v: number) => `${(v + bpNudge).toFixed(3)}px`;
+    const writeBp = () => {
+      if (!bpTimeline) return;
+      setBpVar(bpLayer, '--bpw-a', bpPx(bp.a));
+      setBpVar(bpLayer, '--bpw-b', bpPx(bp.b));
+      bpScanWrite?.();
+    };
+    const rekickBp = () => {
+      if (!bpTimeline || bpKick) return;
+      bpKick = requestAnimationFrame(() => {
+        bpKick = 0;
+        bpNudge = bpNudge ? 0 : 0.001;
+        writeBp();
+      });
+    };
+    ScrollTrigger.addEventListener('refresh', rekickBp);
+    const measureBp = () => {
+      vh = Math.max(window.innerHeight, themesBox?.offsetHeight ?? 0);
+      bp.top = docTop(bpAct);
+      const T = Math.round(bp.top);
+      const park = Math.round(vh);
+      bp.lead = Math.round(BP_LEAD * park);
+      bp.a = T + bp.lead - park;
+      bp.b = T + bp.lead;
+      writeBp();
+      rekickBp();
+      bpEdge = NaN;
+    };
+    /** Without scroll-driven animations: the pair at its edge for this scroll, whole px, written when it changes. */
+    const paintBlueprint = (scroll: number) => {
+      if (bpTimeline || !bpWipe || !bpWipeIn) return;
+      const e = Math.min(Math.max(Math.round(bp.top) + bp.lead - Math.round(scroll), 0), Math.round(vh));
+      if (e === bpEdge) return;
+      bpEdge = e;
+      bpWipe.style.transform = `translate3d(0, ${e}px, 0)`;
+      bpWipeIn.style.transform = `translate3d(0, ${-e}px, 0)`;
+    };
+    measureBp();
+    const bpFromST = (self: ScrollTrigger) => paintBlueprint(self.scroll());
+    ScrollTrigger.create({
+      start: () => {
+        measureBp();
+        return bp.a;
+      },
+      end: () => bp.b,
+      onUpdate: bpFromST, onLeave: bpFromST, onLeaveBack: bpFromST, onRefresh: bpFromST,
+    });
+    addEventListener('resize', () => {
+      measureBp();
+      paintBlueprint(window.scrollY);
+    }, { passive: true });
+    new ResizeObserver(() => {
+      measureBp();
+      paintBlueprint(window.scrollY);
+    }).observe(document.body);
+    paintBlueprint(window.scrollY);
+    // The leading part's paper is a full-screen layer clipped to the part: hidden while the part is more than two
+    // screens below the screen or one above it (an observer, never the scroll), so it is drawn only round the
+    // hand-over. Two screens ahead, because an observer's answer can come a few frames late in a fling, and the part
+    // must have its paper before it arrives or the hole would show in it
+    if (bpPaper) {
+      new IntersectionObserver((es) => {
+        for (const e of es) bpPaper.classList.toggle('is-far', !e.isIntersecting);
+      }, { rootMargin: '100% 0px 200% 0px' }).observe(bpPaper);
+    }
+    /* The finale opens on the hero's own night sky. With motion the circle wipe (from the bottom centre) is the
+       finale's disc (finale-disc.ts, .fin-disc): the WebGL sky canvas moves into it from .themes while the night
+       shows, with the finale's faint tint drawn under it, and the disc grows on the compositor with the scroll (no
+       clips: before, a circle() was rewritten on the sky and on the tint every frame, audit B04). No second WebGL
+       context, no regenerated stars; before the wipe the sky sleeps under the west act's cover (sky.cover, above).
        body.dataset.navForce = 'dark' from the moment the circle covers the screen's top corners (the nav reads it):
-       they are hypot(w/2, h) from the circle's centre, and a circle() radius in % is of hypot(w, h) / √2.
+       they are hypot(w/2, h) from the circle's centre.
        The west act's foreground (#about: the label, the headline, the poster, the ledger and the telegram slip) sits
-       in main, above every theme layer, so the circle cannot cover it by itself: it is clipped to outside the same
-       circle (a clip-path with the circle cut out, in its own coordinates, written with the circle from one value), so
-       the night opens over it exactly as over the scene, and once the circle holds all of it, it is hidden and gives up
-       its nav bands (.is-gone, west.css). While the circle opens, it also tells the nav that it paints the night inside
-       it (nav.toneAt, Base.astro), so a link over the black takes light ink with no light pool even where a card's band
-       still lies under it. (Before, the foreground faded as the circle's edge swept over it, from its nearest point to
-       60% of the way to its farthest: the telegram slip at the top of the screen stayed opaque over the circle's crown,
-       and a faint ghost of it was left on the black, 2026-11-09.) */
+       in main, above every theme layer; the disc lies in the finale's section, which stacks above it, so the night
+       covers the cards by compositing, exactly where it covers the scene. (Before, #about was clipped to outside the
+       circle by a path() rewritten every frame, a mask over a 1686 px layer on a phone, whose cut edge trailed the
+       sky's on iOS, audit B03.) Once the circle holds all of #about, it is hidden and gives up its nav bands
+       (.is-gone, west.css). While the circle opens, it also tells the nav that it paints the night inside it
+       (nav.toneAt, Base.astro), so a link over the black takes light ink with no light pool even where a card's band
+       still lies under it. (Before that, the foreground faded as the circle's edge swept over it: the telegram slip at
+       the top of the screen stayed opaque over the circle's crown, and a faint ghost of it was left on the black,
+       2026-11-09.) Reduced motion keeps its cross-fade on the theme stack (paintFade, below). */
     const finLayer = document.querySelector<HTMLElement>('.theme--finale');
     const skyCanvas = sky?.canvas ?? null;
     const westFg = document.querySelector<HTMLElement>('#about .bp-about__grid');
@@ -987,65 +1126,39 @@ const KL_CIRC = 2 * Math.PI * 60;
     measureFg();
     ScrollTrigger.addEventListener('refresh', measureFg);
     new ResizeObserver(measureFg).observe(document.body);
-    /* #about clipped to outside the circle of radius R centred on the stack's bottom middle (.themes is 100lvh, its
-       bottom below the visible one while a phone's toolbar shows): no clip until the circle reaches its box (with a
-       margin for the poster's sway and the cards' shadows), hidden once the circle holds all of it, and between, a
-       path that is a large rectangle with the circle cut out (evenodd), in #about's own coordinates from the cached box
-       and the given scroll. Arithmetic only per update; written only when it changes. */
-    let westClip = '';
+    /* #about under the night's disc: covered by compositing while the circle opens over it (no clip), and hidden
+       once the circle holds all of it, its box from the cached measure and the given scroll (with a margin for the
+       poster's sway and the cards' shadows, and 40 px more, so on the way back up it shows again a little before the
+       disc, which runs a frame ahead of the script on the compositor, uncovers it). Arithmetic only per update. */
     let westHidden = false;
-    const clipWest = (R: number, scroll: number) => {
+    const westHandOff = (R: number, scroll: number) => {
       if (!westAbout) return;
       const hc = Math.max(wh, stackH);
       const m = 60;
       const top = fgBox.t - scroll - m;
-      const bot = fgBox.b - scroll + m;
       const l = fgBox.l - m;
       const r = fgBox.r + m;
       const cx = ww / 2;
-      const near = Math.hypot(Math.max(l - cx, 0, cx - r), Math.max(0, hc - bot));
       const far = Math.hypot(Math.max(cx - l, r - cx), hc - top);
-      const hidden = R >= far;
-      let clip = '';
-      if (!hidden && R > near) {
-        const x = cx - fgBox.l;
-        const y = hc - (fgBox.t - scroll);
-        const d = (2 * R).toFixed(1);
-        clip = `path(evenodd, "M-4000 -4000H9000V20000H-4000ZM${(x - R).toFixed(1)} ${y.toFixed(1)}a${R.toFixed(1)} ${R.toFixed(1)} 0 1 0 ${d} 0a${R.toFixed(1)} ${R.toFixed(1)} 0 1 0 -${d} 0Z")`;
-      }
-      if (clip !== westClip) {
-        westClip = clip;
-        westAbout.style.clipPath = clip;
-        westAbout.classList.toggle('is-clipped', !!clip);
-      }
+      const hidden = R >= far + 40;
       if (hidden !== westHidden) {
         westHidden = hidden;
         westAbout.style.visibility = hidden ? 'hidden' : '';
         westFg?.classList.toggle('is-gone', hidden);
       }
     };
-    // While the circle opens, the night it paints, for the nav (Base.astro's nav.toneAt and 'nav:paint'): dark inside
-    // the circle, nothing outside (the bands decide there). Only until the circle has the screen's top corners, when the
-    // whole-nav force takes over; each side only clears the paint it set
-    const finNavEl = document.getElementById('site-nav') as (HTMLElement & { toneAt?: ((x: number, y: number) => string | null) | null }) | null;
-    let finPaintR = 0;
-    const finToneAt = (x: number, y: number) => (Math.hypot(x - ww / 2, Math.max(wh, stackH) - y) <= finPaintR ? 'dark' : null);
-    const paintNav = (R: number, corners: number) => {
-      if (!finNavEl) return;
-      const on = R > 0 && R < corners;
-      if (on) {
-        if (finNavEl.toneAt !== finToneAt || R !== finPaintR) {
-          finPaintR = R;
-          finNavEl.toneAt = finToneAt;
-          finNavEl.dispatchEvent(new Event('nav:paint'));
-        }
-      } else if (finNavEl.toneAt === finToneAt) {
-        finNavEl.toneAt = null;
-        finNavEl.dispatchEvent(new Event('nav:paint'));
-      }
-    };
+    // While the circle opens, the night it paints, for the nav: dark inside the circle, the bands outside, until the
+    // circle has the screen's top corners and the whole-nav force (setNavDark, below) takes over. Given to the nav once
+    // per layout as the circle's geometry (Base.astro nav.paintCircle: its centre on the screen and its radius as a
+    // function of the scroll, then a 'nav:circle' event; layoutDisc, below), which the nav works out on its own scroll
+    // frame from the scroll it already has. It was a toneAt paint this script kept current from every scroll update,
+    // with a 'nav:paint' whenever the circle's edge moved inside the nav's strip (audit B13)
+    const finNavEl = document.getElementById('site-nav') as (HTMLElement & { paintCircle?: { cx: number; cy: number; r: (scrollY: number) => number } | null }) | null;
     // the foreground's opacity (written only when it changed by a hundredth). .is-fading gives it a compositor layer
-    // only while it is see-through, so the fade never repaints it; .is-gone takes its nav bands off below half
+    // only while it is see-through, so the fade never repaints it; .is-gone takes its nav bands off once it has all but
+    // gone: the nav reads each paper as it shows through the fade over the dusk (Base.astro: a faded band's tone and
+    // knockout are the mix with the dusk under it, #act-west's "plain #141234"). Off below half, the papers still showed
+    // at a third as a murky grey under the night's cyan Free stuff (1440 at 13700 to 13830, 2026-11-09 final check)
     let fgO = 1;
     const setFg = (o: number) => {
       if (!westFg) return;
@@ -1054,14 +1167,14 @@ const KL_CIRC = 2 * Math.PI * 60;
       fgO = v;
       westFg.style.opacity = v >= 1 ? '' : String(v);
       westFg.classList.toggle('is-fading', v < 1);
-      westFg.classList.toggle('is-gone', v < 0.5);
+      westFg.classList.toggle('is-gone', v < 0.04);
     };
     const ease3 = (t: number) => t * t * (3 - 2 * t);
     let finST: ScrollTrigger | undefined;
     // the shooting star and the headline (finale-flight.ts), mounted with the wipe's trigger below (motion only)
     let finFlight: FinaleFlight | null = null;
-    let finClip = '';
-    let skyLifted = false;
+    // the night's disc (finale-disc.ts), mounted with the wipe's trigger below (motion only)
+    let finDisc: FinaleDisc | null = null;
     let navForced = false;
     const setNavDark = (force: boolean) => {
       if (force === navForced) return;
@@ -1069,8 +1182,8 @@ const KL_CIRC = 2 * Math.PI * 60;
       if (force) document.body.dataset.navForce = 'dark';
       else delete document.body.dataset.navForce;
     };
-    // A circle() radius in % is of hypot(w, h) / √2 of the box it clips, the theme stack (.themes: 100lvh, so on a
-    // phone with its toolbar showing it reaches below the visible bottom, and the circle's centre with it); the
+    // The circle's unit as a circle() radius in % had it: hypot(w, h) / √2 of the theme stack (.themes: 100lvh, so on
+    // a phone with its toolbar showing it reaches below the visible bottom, and the circle's centre with it); the
     // wipe's circle is 150% of that once it is fully open
     const stackHeight = () => Math.max(wh, stackH);
     const circleUnit = () => Math.hypot(ww, stackHeight()) / Math.SQRT2;
@@ -1080,23 +1193,27 @@ const KL_CIRC = 2 * Math.PI * 60;
       // The circle's radius: straight with the scroll, from finale-flight.ts when it runs (which draws the star, the
       // spray and the stage from the same scroll, in this same task), from the trigger's progress without it
       const R = finFlight && finST ? finFlight.paint(p * (finST.end - finST.start), ww, wh, stackHeight()) : 1.5 * p * circleUnit();
-      const open = R >= 1.5 * circleUnit() - 0.5;
-      const clip = `circle(${((100 * R) / circleUnit()).toFixed(3)}% at 50% 100%)`;
-      if (clip !== finClip) {
-        finClip = clip;
-        if (finLayer) finLayer.style.clipPath = clip;
-        // fully open there is nothing to clip: the sky then costs what it costs in the hero
-        if (skyCanvas) skyCanvas.style.clipPath = open || R <= 0 ? '' : clip;
-      }
-      if (skyCanvas && (R > 0) !== skyLifted) {
-        skyLifted = R > 0;
-        skyCanvas.classList.toggle('is-lifted', skyLifted);
-      }
-      // the screen's top corners are hypot(w/2, stack height) from the circle's centre
-      const corners = Math.hypot(ww / 2, stackHeight());
+      finDisc?.paint(R);
+      // the screen's top corners are hypot(w/2, stack height) from the circle's centre (the disc's centre when it
+      // runs, the one the nav is given, so the force comes on exactly where the nav's circle paint goes off)
+      const corners = finDisc ? Math.hypot(finDisc.geo.cx, finDisc.geo.cy) : Math.hypot(ww / 2, stackHeight());
       setNavDark(R >= corners);
-      clipWest(R, sc);
-      paintNav(R, corners);
+      westHandOff(R, sc);
+    };
+    // the disc's geometry and its stretch of scroll, from the plan's circle (the same formula without the flight), and
+    // the same circle for the nav: radius(s) = rk x clamp(s / sWipe), s px of scroll past the wipe's start, as
+    // finale-flight.ts draws it
+    const layoutDisc = (self: ScrollTrigger) => {
+      const c = finFlight ? finFlight.circle() : { rk: 1.5 * circleUnit(), sWipe: 0.88 * wh };
+      finDisc?.layout({ start: self.start, rk: c.rk, sWipe: c.sWipe });
+      if (!finNavEl) return;
+      const start = self.start;
+      finNavEl.paintCircle = {
+        cx: finDisc ? finDisc.geo.cx : ww / 2,
+        cy: finDisc ? finDisc.geo.cy : stackHeight(),
+        r: (y: number) => c.rk * Math.min(1, Math.max(0, (y - start) / c.sWipe)),
+      };
+      finNavEl.dispatchEvent(new Event('nav:circle'));
     };
     /* Reduced motion and ?still: the same stretch of scroll, as a cross-fade instead of the moving circle. The sky and
        the tint come up with opacity (the lifted sky holds its one still frame) while the west act's foreground fades
@@ -1138,10 +1255,22 @@ const KL_CIRC = 2 * Math.PI * 60;
         onLeaveBack: () => paintFade(0),
       });
     } else {
+      const finSection = document.getElementById('finale');
+      // the night's disc (finale-disc.ts): the sky and the tint move into it, and the tint's layer in the theme stack
+      // (reduced motion's) is kept down by the layer manager (backdrops.ts: data-layer-off, a world its owner no longer
+      // draws in)
+      const finDiscs = finSection ? Array.from(finSection.querySelectorAll<HTMLElement>('.fin-disc')) : [];
+      const finTint = finSection?.querySelector<HTMLCanvasElement>('.fin-tint') ?? null;
+      if (finSection && finDiscs.length === 2 && finTint && themes) {
+        finDisc = mountFinaleDisc({ section: finSection, discs: finDiscs, tint: finTint, sky: skyCanvas, themes });
+        if (finLayer) {
+          finLayer.setAttribute('data-layer-off', '');
+          finLayer.style.visibility = 'hidden';
+        }
+      }
       paintFinale(0);
       // The finale is pinned (home.css .is-pinned: a sticky stage in a section a screen plus the held stretch tall;
       // finale-flight.ts writes the lengths), only with the flight that drives it
-      const finSection = document.getElementById('finale');
       const finStage = finSection?.querySelector<HTMLElement>('.fin-stage') ?? null;
       const finH1 = document.getElementById('final-h1');
       const finBox = finDustCanvas?.parentElement ?? null;
@@ -1155,7 +1284,10 @@ const KL_CIRC = 2 * Math.PI * 60;
       finST = ScrollTrigger.create({
         trigger: '#finale', start: 'top bottom', end: pinned ? 'bottom top' : 'top 12%',
         onUpdate: (self) => paintFinale(self.progress),
-        onRefresh: (self) => paintFinale(self.progress),
+        onRefresh: (self) => {
+          layoutDisc(self);
+          paintFinale(self.progress);
+        },
       });
       /* The finale (finale-flight.ts): a shooting star is in the night from the moment the circle opens (nothing of it
          shows outside the circle), crosses the screen's middle and flies out, dropping a spray of the emblem's stars
@@ -1178,26 +1310,29 @@ const KL_CIRC = 2 * Math.PI * 60;
     // the other layer wipes and before the sections' own mounts, so an error in one of those cannot leave its world
     // hidden behind the blueprint sheet.
     initWest({ gsap, ScrollTrigger, reduced: reduce });
-    const scan = document.querySelector<HTMLElement>('.bp-scan');
+    const scan = bpPaper?.querySelector<HTMLElement>('.bp-scan');
     if (!reduce) {
-      // the scan line rides the edge of the blueprint sheet
-      if (scan) {
-        scan.style.top = '0';
-        scan.style.transform = `translateY(${vh}px)`;
+      // The scan line rides the top of the paper's leading part, which is the act's own edge, so it never needs
+      // moving (it was a transform written every update, rounded to whole px). It fades out over the sheet's rise, as
+      // the act's top goes from the screen's bottom to its top: an animation on the scroll where there are those
+      // (home.css bp-scan; its range, the same two points, written on every measure), else the scrubbed tween
+      if (bpPaper && scan) {
+        bpPaper.classList.add('is-scan');
+        if (bpTimeline) {
+          // written with the layer's range (writeBp(): on every measure and its re-resolve a frame later)
+          const scanRange = () => {
+            setBpVar(bpPaper, '--bps-a', bpPx(Math.round(bp.top - window.innerHeight)));
+            setBpVar(bpPaper, '--bps-b', bpPx(Math.round(bp.top)));
+          };
+          bpScanWrite = scanRange;
+          scanRange();
+        } else {
+          gsap.fromTo(scan, { opacity: 1 }, {
+            opacity: 0, ease: 'none',
+            scrollTrigger: { trigger: bpAct, start: 'top bottom', end: 'top top', scrub: true },
+          });
+        }
       }
-      gsap.fromTo('.bp-scan', { opacity: 1 }, {
-        opacity: 0, ease: 'none',
-        scrollTrigger: {
-          trigger: '#act-blueprint', start: 'top bottom', end: 'top top', scrub: true,
-          // moved by transform (top was a layout per frame and a layout shift). Rounded to whole CSS pixels, as
-          // gsap.set rounded the `top` it replaces (CSSPlugin's autoRound): tried rounding to device pixels and the
-          // line sat one device pixel higher than before on most frames
-          onUpdate: (self) => {
-            const top = Math.max(0, topOf(bpAct, self.scroll()));
-            if (scan) scan.style.transform = `translateY(${Math.round(top)}px)`;
-          },
-        },
-      });
       document.querySelectorAll<HTMLElement>('.shape').forEach((el) => {
         const sp = Number(el.dataset.speed ?? 1);
         gsap.to(el, {
@@ -1250,9 +1385,12 @@ const KL_CIRC = 2 * Math.PI * 60;
     // dropped the transform, at about 4.4 s after load. The transition is off for the deal and comes back with
     // clearProps.
     gsap.set(dealOrder, { transition: 'none' });
+    const heroLite = matchMedia('(max-width: 767px), (hover: none) and (pointer: coarse)').matches;
     gsap.timeline({ delay: 0.15 })
       .from(dealOrder, { yPercent: 120, duration: 1.3, ease: 'expo.out', stagger: 0.07, clearProps: 'transform,transition' }, 0.4)
-      .fromTo('.sx-word', { opacity: 0, y: 18, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power3.out', clearProps: 'filter' }, 0.9)
+      // (phones and touch screens: the name rises and fades in without the blur, which WebKit re-rasterized for every
+      // frame of its 1.4 s, the hero's first and costliest frames on a phone; audit P3)
+      .fromTo('.sx-word', heroLite ? { opacity: 0, y: 18 } : { opacity: 0, y: 18, filter: 'blur(10px)' }, heroLite ? { opacity: 1, y: 0, duration: 1.4, ease: 'power3.out' } : { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power3.out', clearProps: 'filter' }, 0.9)
       .from('[data-hero-in]', { opacity: 0, y: 16, duration: 0.9, ease: 'power2.out', stagger: 0.08 }, 1.25);
     // scrolling away: the name drifts up. Its fade belongs to the Atlas flight below: it clears exactly as the picked
     // card rises towards it, so the card never crosses words or buttons that are still showing. Without the flight
@@ -1332,7 +1470,12 @@ const KL_CIRC = 2 * Math.PI * 60;
         const bar = edStatus?.parentElement?.getBoundingClientRect();
         L.tbB = edStatus && bar ? Math.max(4, r.top - ((bar.top + bar.bottom) / 2 + edStatus.offsetHeight / 2)) : 12;
         L.phone = window.innerWidth < 768;
-        L.hs = Math.min(L.phone ? 0.96 : 1.04, (vh * 0.56) / L.ch);
+        // Phones: held at 55% of the screen's width at least, below 62% of its height (2026-11-09 phone audit, V-07: at
+        // 0.96 of a phone's 156px card it hung at 38% of the width in an empty black screen, its layers' names about
+        // 10px; atlas-reel.css sizes the names for this, about 13px)
+        L.hs = L.phone
+          ? Math.min(Math.max((window.innerWidth * 0.55) / L.cw, Math.min(0.96, (vh * 0.56) / L.ch)), (vh * 0.62) / L.ch)
+          : Math.min(1.04, (vh * 0.56) / L.ch);
         L.fw = Math.ceil(Math.max(L.cw * L.hs, L.mw, L.cw) * 1.02);
         L.fh = (L.fw * 16) / 9;
         // where the card waits for the editor (this far above the middle, its top clear of the nav), and the share of
@@ -1355,6 +1498,8 @@ const KL_CIRC = 2 * Math.PI * 60;
         }
         flyer.style.setProperty('--fw', `${L.fw}px`);
         flyer.style.setProperty('--fk', (L.fw / L.cw).toFixed(4));
+        // where the card sits in the hand, for the lift (wheel.faceOf in place())
+        wheel.remeasure();
       };
       measure();
 
@@ -1391,6 +1536,10 @@ const KL_CIRC = 2 * Math.PI * 60;
         v < V1 ? (v / V1) * OUT_U : v < V2 ? OUT_U + ((v - V1) / (V2 - V1)) * HOLD_W : F0 + ((v - V2) / (1 - V2)) * (1 - F0);
 
       let state: 'rest' | 'flying' | 'landed' = 'rest';
+      // what the wheel's own sum (wheel.faceOf) leaves out of where the face really is (a hover lift still easing on
+      // it, say): read once per flight, as it starts, and added through the lift
+      let faceDX = 0;
+      let faceDY = 0;
       // the playhead of whichever copy of the reel is showing, so the next one picks up on the same frame
       const shownTime = () => (state === 'rest' ? cardReel?.time() : state === 'flying' ? flyReel.time() : edReel?.time()) ?? 0;
       // the scrub calls place() every frame: each style is written only when its value changed
@@ -1500,6 +1649,10 @@ const KL_CIRC = 2 * Math.PI * 60;
           return;
         }
         if (state !== 'flying') {
+          const fr = atlasFace.getBoundingClientRect();
+          const f0 = wheel.faceOf('atlas', L.sx, pageY);
+          faceDX = fr.left + fr.width / 2 - f0.x;
+          faceDY = fr.top + fr.height / 2 - f0.y;
           const t = shownTime();
           const fromEditor = state === 'landed';
           const finWas = fromEditor && (editor?.finShowing() ?? false);
@@ -1517,20 +1670,21 @@ const KL_CIRC = 2 * Math.PI * 60;
         }
         const { cw, ch, fw, fh } = L;
         // the screen's size from resize events (ww/wh above): on phones every read of innerWidth/innerHeight runs
-        // a layout first, and this runs inside GSAP's tick after other tweens have written styles. The scroll is
-        // still read live, once: the card must sit exactly on the preview at the hand-over, and during the scripted
-        // "See our work" scroll ScrollTrigger's cached value is a frame behind the page. The horizontal scroll is
-        // always 0 here; it comes from the last measure()
+        // a layout first, and this runs inside GSAP's tick after other tweens have written styles. The scroll is the
+        // page's own for this frame (pageY: the scroll event's, or the one smoothTo() just set; ScrollTrigger's cached
+        // value is a frame behind the page during the scripted "See our work" scroll, and the card must sit exactly
+        // on the preview at the hand-over). The horizontal scroll is always 0 here; it comes from the last measure()
         const vw = ww;
         const vh = wh;
-        const scrollNow = window.scrollY;
+        const scrollNow = pageY;
         // the card's time in the air (1 from the moment the editor's top edge reaches it)
         const u = airU(Math.min(1, p / L.pm));
         // how far apart the layers are: in on the way up, out on the way down (0 flat, 1 every name showing)
         const xa = easeSine(seg(u, X0, X1)) * (1 - easeSine(seg(u, F0, F1)));
         // held a little above the middle; while it is apart it moves left, so the stack and its names sit centred.
         // It gets there by half way open, before the long names arrive
-        const hx = vw / 2 - (L.phone ? vw * 0.235 : Math.min(96, vw * 0.066)) * easeSine(Math.min(1, xa / 0.55));
+        // (phones: a little further since the card is held larger and the names sized up, V-07)
+        const hx = vw / 2 - (L.phone ? vw * 0.245 : Math.min(96, vw * 0.066)) * easeSine(Math.min(1, xa / 0.55));
         const hy = vh * (L.phone ? 0.45 : 0.47);
         // where it lands: the editor's preview (from the layout read at refresh, moved by the scroll)
         const ex = L.mx - L.sx;
@@ -1542,13 +1696,16 @@ const KL_CIRC = 2 * Math.PI * 60;
         let tb = 0; // the editor's title bar text, 0 until the card has cleared it
         if (u < A) {
           // picked: it pops up out of the hand, the rest of the hand drops back, and it rises to the middle.
-          // Where the card sits in the hand is read here only (it moves with the page, and may still be turning)
+          // Where the card sits in the hand (it moves with the page, and may still be turning): the wheel's own sum
+          // for its transform, from layout read on refresh, no read here (the face's getBoundingClientRect, read
+          // every frame, cost a forced layout per frame; audit P3)
           const ang = wheel.angleOf('atlas');
           const rad = (ang * Math.PI) / 180;
-          const fr = atlasFace.getBoundingClientRect();
-          const sc = fr.width / (Math.abs(Math.cos(rad)) * cw + Math.abs(Math.sin(rad)) * ch) || 1;
-          const sx = fr.left + fr.width / 2;
-          const sy = fr.top + fr.height / 2;
+          const f = wheel.faceOf('atlas', L.sx, scrollNow);
+          // (its scale as the face's box gives it: the turned box's width over the card's, unrounded over rounded)
+          const sc = (Math.abs(Math.cos(rad)) * f.w + Math.abs(Math.sin(rad)) * f.h) / (Math.abs(Math.cos(rad)) * cw + Math.abs(Math.sin(rad)) * ch) || 1;
+          const sx = f.x + faceDX;
+          const sy = f.y + faceDY;
           const k = u / A;
           const e = easeIO(k);
           const base = sy - 34 * easeOut(Math.min(1, k / 0.35));
