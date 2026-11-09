@@ -67,7 +67,6 @@ const DownloadIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none
               <span><strong>From Yanis Schweizer</strong><span>{SITE.instagramHandle}</span></span>
             </a>
             {r.keyword && <span class="free-keyword">You commented “{r.keyword}”. Here it is.</span>}
-            <span class="sk-eyebrow"><span class="sk-eyebrow__t">{r.eyebrow ?? `Free ${r.kind.toLowerCase()}`}</span></span>
             <h1 class="sk-title">{r.title}</h1>
             <p class="sk-sub">{r.summary}</p>
             {primary && (
@@ -274,7 +273,7 @@ const DownloadIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none
         <div class="res-grid">
           {more.map((m) => (
             <a class="res-card" href={`/free/${m.slug}`} style={m.accent ? `--acc:${m.accent}` : undefined}>
-              <span class="res-kind">{m.kind}{!m.published && <span class="res-draft">draft</span>}</span>
+              {!m.published && <span class="res-draft">draft</span>}
               <h3>{m.title}</h3>
               <p>{m.summary}</p>
               <span class="res-go">Get it free <i aria-hidden="true">→</i></span>
@@ -318,3 +317,15 @@ const DownloadIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none
     });
   });
 </script>
+
+<style is:global>
+  /* The nav has no bar any more (src/styles/nav.css), so the 64px band above the "how it works" panel, which
+     sticks just under the nav on phones and tablets (free.css), showed the steps' text scrolling past behind
+     the links. The panel now sticks at the very top and its own opaque padding covers that band; the negative
+     margin cancels the extra padding, so the layout in flow is unchanged and the art sticks where it did
+     (64px plus its 6px). The heading above sits within that reach in flow, so it is lifted over the panel. */
+  @media (max-width: 999px) {
+    body .sk-how.is-live .sk-how__side { top: 0; margin-top: -64px; padding-top: 70px; }
+    body .sk-how.is-live .sk-how__h { position: relative; z-index: 4; }
+  }
+</style>

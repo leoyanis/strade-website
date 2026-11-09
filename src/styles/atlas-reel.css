@@ -1,0 +1,258 @@
+/* ================================================================
+   The Atlas reel (src/components/atlas/AtlasReel.astro): a 9:16 short
+   built in code. 1em = 1% of the reel's width (--rw), so it is the same
+   picture at card size and inside the editor.
+   State lives in CSS variables on .ar (atlas-reel.ts and the flight set them):
+   --m      0 in the card (the reel starts under the card's name), 1 full bleed
+   --x      0 flat, 1 every layer apart (the flyer only)
+   --cut    0 the film strip whole, 1 its cut clips gone (the flyer only)
+   --grade  the take's colour, 0 raw to 1 graded (only the editor's copy has the raw take under it)
+   --ow --om --op  words, music and post shown (the editor clears them for the raw take)
+   Without JS the defaults are a finished frame, and the markup ships with
+   .is-paused, so the CSS loops stand still until atlas-reel.ts plays it.
+   Nothing here is centred with the `translate` property: GSAP folds that into
+   its own transform as pixels (or not, depending on rounding), so a GSAP-driven
+   element centred that way drifts off centre after a resize.
+   ================================================================ */
+.ar {
+  --m: 0; --x: 0; --cut: 0; --grade: 1; --ow: 1; --om: 1; --op: 1;
+  --p: #8858F8; --p2: #A795FF; --p3: #D3C4FF;
+  position: absolute; inset: 0; display: block;
+  font-family: 'Geist', 'Inter', system-ui, sans-serif; font-size: calc(var(--rw, 230px) / 100); font-weight: 500;
+  line-height: 1.1; letter-spacing: -0.01em; color: #fff; text-align: left;
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+}
+/* the wheel card's reel is the card's width (--cw, from .sx-hero), like the flyer's (--fw) and the editor's: without
+   it the card fell back to 230px, so on a phone (a 156px card) every word and pill on it was half again too big, and
+   shrank by a third the moment the card lifted and the flyer took over. That also made the screen card cover the face */
+.ar--card { --rw: var(--cw, 230px); }
+.ar svg { display: block; overflow: visible; }
+.ar b, .ar em, .ar s, .ar i { font-style: normal; text-decoration: none; }
+.ar-ly { position: absolute; inset: 0; display: block; }
+.ar-clip { position: absolute; inset: 0; display: block; overflow: hidden; border-radius: var(--fr, 0); }
+/* the frame: full width, 9:16; in the card it starts 21% down, under the name, and the card's edge crops it */
+.ar-fr { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; transform: translate3d(0, calc((1 - var(--m)) * 21%), 0); }
+
+/* ---------- the take ---------- */
+.ar-take { overflow: hidden; border-radius: 6em 6em 0 0; background: #0d0d10; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08); }
+/* the framing. In the wheel card (--m 0) the picture sits 8% of the frame higher, so under the hook the face is
+   above the fold in the hero (the take has a lot of plants above the head); it eases back to the full frame as the
+   video slides out of the card (--m to 1), so the flyer and the editor's copy are unchanged. It was 14% for the old,
+   closer take: on this one that put the top of the head right under the hook card (touching it at a punch-in, on a
+   phone). The bottom stays covered: in the card the frame's bottom 21% is below the card's edge, and the picture is
+   3% oversize, so its bottom edge is always 1.5% + 13% * (1 - m) of the frame below the card's edge */
+.ar-crop { position: absolute; inset: 0; display: block; transform: translate3d(0, calc((1 - var(--m)) * -8%), 0); }
+/* the punch-ins scale about the speaker's face (take-02-raw.webp: about 59% across, 43% down), so a punch-in
+   closes in on the face instead of sliding it sideways (it was 50% 36% for the old take, whose face sat higher) */
+.ar-cam { position: absolute; inset: 0; display: block; transform-origin: 59% 43%; }
+/* the punch-ins move it every frame, but only while the reel plays: a layer then, none while it stands still */
+.ar:not(.is-paused) .ar-cam { will-change: transform; }
+/* the graded take, and (editor copy only) the raw one under it. Both filters are fixed; the editor fades the
+   graded one in and out with --grade (opacity), so the grade never re-rasters the picture each frame */
+.ar-cam img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block;
+  filter: saturate(1.08) contrast(1.04) brightness(1.02);
+  transform: scale(1.03); animation: ar-hand 7s ease-in-out infinite;
+}
+.ar-cam .ar-raw { filter: saturate(0.12) contrast(0.84) brightness(0.9); }
+.ar--mon .ar-pic, .ar--flyer .ar-pic { opacity: var(--grade); }
+.ar--mon .ar-pic { will-change: opacity; }
+/* the raw take has no punch-ins: the camera holds still (beats the inline transform the timeline writes) */
+.ar.is-raw .ar-cam { transform: none !important; }
+/* a hand holding the phone; 3% oversize, so the drift never shows the frame's edge (even at the widest shot) */
+@keyframes ar-hand {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1.03); }
+  30% { transform: translate3d(0.5%, -0.35%, 0) rotate(0.18deg) scale(1.03); }
+  62% { transform: translate3d(-0.4%, 0.3%, 0) rotate(-0.14deg) scale(1.03); }
+}
+.ar-shade { position: absolute; inset: 0; display: block; background: linear-gradient(180deg, rgba(8, 8, 12, 0.3), transparent 16%, transparent 50%, rgba(8, 8, 12, 0.5) 76%, rgba(8, 8, 12, 0.78)); }
+
+/* ---------- the edit: music, and (apart) the cut strip ---------- */
+.ar-music {
+  position: absolute; left: 6em; bottom: 7em; display: flex; align-items: center; gap: 2em; height: 8.4em; padding: 0 3.2em 0 2.6em;
+  border-radius: 99em; background: rgba(18, 15, 28, 0.62); box-shadow: inset 0 0 0 1px rgba(195, 174, 255, 0.3); opacity: var(--om);
+}
+.ar-note-ic { width: 4.4em; height: 4.4em; fill: none; stroke: var(--p3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ar-wave { display: flex; align-items: center; gap: 0.8em; height: 4.6em; transform-origin: 50% 50%; }
+.ar-wave i { display: block; width: 0.95em; height: 100%; border-radius: 1em; background: var(--p3); transform: scaleY(0.4); animation: ar-bar 0.86s ease-in-out infinite alternate; animation-delay: calc(var(--d) * -0.86s); }
+.ar-wave i:nth-child(3n) { animation-duration: 0.64s; }
+.ar-wave i:nth-child(4n + 1) { animation-duration: 1.08s; }
+@keyframes ar-bar { from { transform: scaleY(0.2); } to { transform: scaleY(1); } }
+
+/* ---------- the words and graphics ---------- */
+.ar-title {
+  position: absolute; left: 0; right: 0; top: 1.56em; width: max-content; margin-inline: auto; display: flex; flex-direction: column; align-items: center;
+  font-size: 6.4em; /* top is in its own em: 1.56em here is 10% of the reel's width */ font-weight: 700; line-height: 1.04; letter-spacing: -0.03em; white-space: nowrap; color: #0E0E0E;
+  padding: 0.4em 0.72em 0.46em; border-radius: 0.74em; background: #fff;
+  box-shadow: 0 0.5em 1.4em rgba(0, 0, 0, 0.28);
+}
+.ar-title em { color: var(--p); }
+/* the words and graphics, as one: the editor fades this wrapper (the timeline animates what is inside it) */
+.ar-words { position: absolute; inset: 0; display: block; opacity: var(--ow); }
+.ar-caps { position: absolute; left: 0; right: 0; top: 107em; display: block; }
+.ar-cg { position: absolute; left: 0.6em; right: 0.6em; top: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 0.26em; font-size: 8em; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+.ar-cg b { display: inline-block; opacity: 0; text-shadow: 0 0.06em 0.45em rgba(0, 0, 0, 0.5); }
+.ar:not(.is-paused) .ar-cg b { will-change: transform, opacity; }
+.ar-cg b.is-lit { color: var(--p2); text-shadow: 0 0 0.55em rgba(136, 88, 248, 0.6), 0 0.06em 0.45em rgba(0, 0, 0, 0.4); }
+/* the finished frame without JS (and with ?still or reduced motion): the first line of captions, the one that ends
+   the hook card's phrase ("how i / make 6 figures" ... "a month"); the last line, "29 seconds", read as a fragment
+   under the hook. It is also what the reel shows first once it plays (0.2 s in), so the start-up shows no swap */
+.ar-cg:nth-child(1) b { opacity: 1; }
+/* the screen card: Atlas's three steps (idea, film, post), the one you do in white */
+.ar-broll {
+  position: absolute; left: 0; right: 0; top: 8em; width: 66em; margin-inline: auto; display: flex; flex-direction: column; gap: 2.2em; padding: 2.6em 3em 3.4em;
+  border-radius: 4.6em; background: linear-gradient(180deg, #1B1A20, #121116); opacity: 0; visibility: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 3em 7em rgba(0, 0, 0, 0.55);
+}
+.ar-broll__bar { display: flex; gap: 1em; }
+.ar-broll__bar i { width: 1.8em; height: 1.8em; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
+.ar-broll__row { display: flex; gap: 2.4em; }
+.ar-sf { flex: 1; aspect-ratio: 9 / 16; display: flex; flex-direction: column; justify-content: flex-end; gap: 1.3em; padding: 2.2em 2em; border-radius: 2.4em; background: linear-gradient(165deg, #2A2930, #17161B); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.ar-sf b { font-size: 4.2em; font-weight: 700; letter-spacing: 0.06em; color: #EDEDF2; line-height: 1; }
+.ar-sf s { display: block; height: 1.6em; border-radius: 1em; background: rgba(255, 255, 255, 0.22); }
+.ar-sf s + s { width: 64%; }
+.ar-sf.is-lit { background: #F2F2F4; }
+.ar-sf.is-lit b { color: #0E0E0E; }
+.ar-sf.is-lit s { background: rgba(14, 14, 14, 0.22); }
+
+/* ---------- the post ---------- */
+.ar-rail { position: absolute; right: 4.2em; top: 80em; display: flex; flex-direction: column; align-items: center; gap: 5em; opacity: var(--op); }
+.ar-rail svg { width: 7.4em; height: 7.4em; fill: #fff; filter: drop-shadow(0 0.3em 0.8em rgba(0, 0, 0, 0.45)); }
+.ar-heart { position: relative; display: block; }
+/* the little hearts that float up when it lands with people (a drawn heart, masked) */
+.ar-heart i {
+  --heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20.4s-7.6-4.6-7.6-10.2A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 7.6 2.7c0 5.6-7.6 10.2-7.6 10.2z'/%3E%3C/svg%3E");
+  position: absolute; left: 50%; top: 0; width: 3.6em; height: 3.6em; margin-left: -1.8em; opacity: 0; background: #fff;
+  -webkit-mask: var(--heart) center / contain no-repeat; mask: var(--heart) center / contain no-repeat;
+}
+.ar-views {
+  position: absolute; right: 5em; bottom: 7em; display: flex; align-items: center; gap: 1.8em; height: 8.4em; padding: 0 2.6em 0 3.2em;
+  border-radius: 99em; background: rgba(18, 15, 28, 0.62); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16); opacity: var(--op);
+}
+.ar-views__k { font-size: 4.2em; font-weight: 600; color: #F4F3F7; letter-spacing: 0; }
+.ar-views svg { width: 15em; height: 5em; }
+.ar-views path { fill: none; stroke: var(--p2); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.ar-views svg:first-of-type path { --vw: 1; stroke-dasharray: 100 100; stroke-dashoffset: calc(100 - 100 * max(var(--vw), var(--x))); filter: drop-shadow(0 0 0.6em rgba(136, 88, 248, 0.8)); }
+.ar-views__up { width: 3.6em !important; height: 3.6em !important; }
+.ar-views__up path { stroke: #7BE0A6; stroke-width: 2.6; }
+
+/* ================================================================
+   The flyer: the layers stand apart in 3D, each with its sheet and its label.
+   --rz / --rx are the turn, --gap the space between layers (set per screen size).
+   No opacity, filter or overflow on .ar or .ar-ly here: any of them would flatten the 3D.
+   ================================================================ */
+.ar--flyer {
+  /* --xe: how far it has shrunk, 0 to 1 (follows --x here; phones shrink it sooner, see the media query) */
+  --rz: 30deg; --rx: 54deg; --gap: 41em; --xs: 0.3; --lab: 5.6em; --tz: 0deg; --xe: var(--x);
+  transform-style: preserve-3d;
+  transform: scale(calc(1 - var(--xe) * var(--xs))) rotateX(calc(var(--x) * var(--rx))) rotateZ(calc(var(--x) * var(--rz) + var(--tz)));
+}
+/* depth of each layer in gaps: a little more room under the take, so the two hidden sheets show their bottom edge */
+.ar--flyer .ar-ly { --z: 0; transform-style: preserve-3d; transform: translate3d(0, 0, calc(var(--z) * var(--x) * var(--gap))); }
+.ar--flyer .ar-ly--idea { --z: -2.95; } .ar--flyer .ar-ly--script { --z: -1.72; } .ar--flyer .ar-ly--take { --z: -0.5; }
+.ar--flyer .ar-ly--edit { --z: 0.55; } .ar--flyer .ar-ly--words { --z: 1.6; } .ar--flyer .ar-ly--post { --z: 2.65; }
+/* the two layers under the take only exist while it is apart (nothing to fight with when flat) */
+.ar-ly--idea > .ar-clip, .ar-ly--script > .ar-clip { opacity: clamp(0, calc(var(--x) * 5 - 0.4), 1); }
+.ar-glass {
+  position: absolute; inset: 0; display: block; border-radius: var(--fr, 0);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3); opacity: clamp(0, calc(var(--x) * 3), 1);
+}
+.ar-glass--p { background: linear-gradient(180deg, rgba(136, 88, 248, 0.07), rgba(136, 88, 248, 0.26)); box-shadow: inset 0 0 0 1px rgba(195, 174, 255, 0.6), 0 0 6em rgba(136, 88, 248, 0.25); }
+.ar-sheet { border-radius: var(--fr, 0); }
+.ar-sheet--solid { display: flex; flex-direction: column; justify-content: flex-end; gap: 3.6em; padding: 9em 8em 10em; background: linear-gradient(180deg, #17161C, #0F0E13); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.ar-sh { display: flex; align-items: center; gap: 0.45em; font-size: 5em; font-weight: 600; color: var(--p3); }
+.ar-sh svg { width: 0.95em; height: 0.95em; fill: var(--p2); }
+.ar-chart { display: flex; align-items: flex-end; gap: 3em; height: 30em; padding: 0 1em; border-bottom: 1px solid rgba(255, 255, 255, 0.14); }
+.ar-chart i { flex: 1; height: calc(var(--h) * 100%); border-radius: 1.6em 1.6em 0.4em 0.4em; background: rgba(255, 255, 255, 0.14); }
+.ar-chart i.is-top { background: linear-gradient(180deg, var(--p2), var(--p)); box-shadow: 0 0 4em rgba(136, 88, 248, 0.55); }
+.ar-note { font-size: 4.4em; color: #A3A2AD; margin-top: -0.4em; }
+.ar-pick { display: flex; flex-direction: column; gap: 0.3em; font-size: 5em; font-weight: 600; line-height: 1.2; padding: 0.7em 0.8em; border-radius: 0.6em; background: rgba(136, 88, 248, 0.14); box-shadow: inset 0 0 0 1px rgba(136, 88, 248, 0.45); }
+.ar-pick b { font-size: 0.8em; font-weight: 500; color: var(--p3); }
+.ar-script { display: flex; flex-direction: column; gap: 0.55em; font-size: 5em; font-weight: 500; line-height: 1.25; color: #ECEBF2; }
+.ar-script span:nth-child(2) { color: rgba(236, 235, 242, 0.78); }
+.ar-script span:nth-child(3) { color: rgba(236, 235, 242, 0.6); }
+.ar-caret { display: inline-block; width: 0.12em; height: 1em; margin-left: 0.12em; vertical-align: -0.12em; background: var(--p2); box-shadow: 0 0 0.4em rgba(136, 88, 248, 0.9); animation: ar-caret 1s steps(1) infinite; }
+@keyframes ar-caret { 50% { opacity: 0; } }
+.ar-skel { display: flex; flex-direction: column; gap: 3em; margin-top: 1em; }
+.ar-skel i { display: block; width: calc(var(--w) * 100%); height: 2.6em; border-radius: 2em; background: rgba(255, 255, 255, 0.1); }
+/* the film strip on the edit layer: a small timeline, like the editor's own: the take as clips (frames of the real
+   take, the editor's strip image), the cut ones hatched red. As the reel stands apart the cut clips close (scaleX to
+   0) and the kept ones slide together (each moves by the cuts before it, --s), leaving the end of the track empty,
+   as the editor's timeline does once it has cut. Positions are precomputed in AtlasReel.astro, so the collapse is
+   transforms only. It sits near the top of its layer: in the 3D view that is above the take, never across the face. */
+/* it shows only once the layers are well apart (x 0.58 to 0.7): closer together, the hook on the layer above sat on
+   it (from x 0.5, "edit this" still overlapped the strip's top edge for the first frames of the split) */
+.ar-strip { position: absolute; left: 8em; top: 13em; width: 84em; height: 16em; display: block; opacity: clamp(0, calc(var(--x) * 8.33 - 4.83), 1); }
+.ar-strip::before { content: ''; position: absolute; inset: -2.2em -2.4em; border-radius: 3.4em; background: rgba(12, 11, 18, 0.8); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.13), 0 1.2em 3em rgba(0, 0, 0, 0.35); }
+.ar-strip i {
+  position: absolute; top: 0; bottom: 0; left: var(--l); width: var(--w); display: block; overflow: hidden; border-radius: 1.3em;
+  /* frames of take-02-final.mp4 (24 of 72x128, the old strip.jpg's geometry; strip.jpg stays for /work/atlas) */
+  background: #25242b url(/images/work/atlas/take-02-strip.jpg) calc(var(--o) * -1) 0 / auto 100% repeat-x;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 0.8em 2em rgba(0, 0, 0, 0.35);
+  transform: translate3d(calc(var(--s) * var(--cut)), 0, 0);
+}
+.ar-strip i.is-cut { transform-origin: 0 50%; transform: translate3d(calc(var(--s) * var(--cut)), 0, 0) scaleX(calc(1 - var(--cut))); }
+.ar-strip i.is-cut::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: repeating-linear-gradient(135deg, rgba(255, 86, 86, 0.66) 0 1.1em, rgba(255, 86, 86, 0.34) 1.1em 2.2em); box-shadow: inset 0 0 0 1px rgba(255, 130, 130, 0.85); }
+
+/* the post layer, while apart: posted to the accounts, and the views line climbing */
+.ar-posted {
+  position: absolute; left: 9em; right: 9em; top: 13em; display: flex; flex-direction: column; gap: 3em; padding: 4em 4.4em 4.6em;
+  border-radius: 4.4em; background: rgba(20, 18, 28, 0.86); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 2em 5em rgba(0, 0, 0, 0.4);
+  /* only once the layers are well apart: half folded, it sat over the hook on the layer below */
+  opacity: clamp(0, calc(var(--x) * 5 - 3), 1);
+}
+.ar-posted__row { display: flex; align-items: center; gap: 1.6em; }
+.ar-posted__row i { width: 6.4em; height: 6.4em; border-radius: 50%; margin-right: -3.2em; box-shadow: 0 0 0 0.5em #141219; background: linear-gradient(140deg, #3A3842, #23222A); }
+.ar-posted__row i:nth-child(2) { background: linear-gradient(140deg, #4A4852, #2C2B33); }
+.ar-posted__row i:nth-child(3) { background: linear-gradient(140deg, #5A5862, #34333B); margin-right: 1em; }
+.ar-posted__row b { display: flex; align-items: center; gap: 0.4em; font-size: 4.8em; font-weight: 600; color: #F4F3F7; }
+.ar-posted__row svg { width: 1em; height: 1em; fill: none; stroke: #7BE0A6; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ar-posted__chart { width: 100%; height: auto; aspect-ratio: 120 / 44; }
+.ar-posted__chart path { fill: none; stroke: var(--p2); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 0.8em rgba(136, 88, 248, 0.8)); }
+.ar-posted__chart .ar-area { fill: url(#ar-area); stroke: none; filter: none; }
+.ar-posted__chart circle { fill: #fff; filter: drop-shadow(0 0 0.6em rgba(167, 149, 255, 0.95)); }
+
+/* the labels: they ride their layer, then turn back to face the screen (the inverse of the turn, in reverse
+   order), and come in one after another from the bottom of the stack as it opens. The dot and the line back to
+   the layer are inside the label's own box: in Chrome's 3D sorting, anything a 3D layer draws outside its box
+   is dropped (tried a ::before leader first; it never showed). The dot is the pivot, on the layer's edge. */
+.ar-lab {
+  --k: clamp(0, calc((var(--x) - 0.42 - var(--n) * 0.085) * 9), 1);
+  position: absolute; left: calc(100% + 0.4em); top: var(--ly, 30%); display: flex; align-items: center;
+  font-size: var(--lab); font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; white-space: nowrap; color: #F4F3F7;
+  opacity: var(--k); transform-origin: 0 50%;
+  /* the scale undoes the stack's own shrink (1 - xe * xs), so a name is the same size on screen at every step of
+     the opening: it used to be biggest half way open, which pushed the longest name off a phone's edge */
+  transform: rotateZ(calc(var(--x) * var(--rz) * -1 - var(--tz))) rotateX(calc(var(--x) * var(--rx) * -1)) scale(calc(1.3 * (1 - var(--xs)) / (1 - var(--xe) * var(--xs)))) translate3d(calc((1 - var(--k)) * -0.6em), 0, 0);
+}
+.ar-lead { position: relative; flex: none; width: 2.9em; height: 0.4em; background: linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55)) 0.4em 50% / calc(100% - 0.4em) 1px no-repeat; }
+.ar-lead::before { content: ''; position: absolute; left: 0; top: 0; width: 0.4em; height: 0.4em; border-radius: 50%; background: #fff; box-shadow: 0 0 0.45em rgba(255, 255, 255, 0.85); }
+.ar-pill {
+  display: flex; align-items: center; gap: 0.5em; padding: 0.46em 0.95em 0.5em 0.75em; border-radius: 99em;
+  background: rgba(21, 19, 29, 0.92); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 0.7em 1.8em -0.6em rgba(0, 0, 0, 0.85);
+}
+.ar-pill svg { flex: none; width: 1em; height: 1em; fill: var(--p2); filter: drop-shadow(0 0 0.3em rgba(136, 88, 248, 0.85)); }
+/* the one thing you do: white, with a record dot instead of Atlas's spark */
+.ar-lab--you .ar-pill { color: #0E0E0E; background: #F4F3F7; box-shadow: 0 0.7em 1.8em -0.6em rgba(0, 0, 0, 0.85); }
+.ar-rec { flex: none; width: 0.52em; height: 0.52em; border-radius: 50%; background: #FF4D4D; box-shadow: 0 0 0 0.18em rgba(255, 77, 77, 0.22); }
+/* while apart, the post's small chips give way to its card (they would sit on the captions of the layer below) */
+.ar--flyer .ar-rail, .ar--flyer .ar-views { opacity: calc(var(--op) * clamp(0, calc(1 - var(--x) * 2.5), 1)); }
+
+/* phones: the card is small, so the stack shrinks more as it opens and the names get bigger (about 10.5px on
+   screen: the label scale is 1.3 * (1 - xs), so --lab grows with --xs) with a shorter leader, so the stack and the
+   longest name both stay inside the 16px gutters at every step of the opening */
+@media (max-width: 767px) {
+  /* --xe eases out: the stack is nearly at its small size by half way open (shrinking in step with the split let
+     its corner touch the screen's edge while it opened and folded) */
+  .ar--flyer { --xs: 0.44; --lab: 9.5em; --xe: calc(1 - (1 - var(--x)) * (1 - var(--x))); }
+  .ar--flyer .ar-lead { width: 2em; }
+}
+
+/* paused (off screen, or not at the front of the wheel): the CSS loops stop with the timeline */
+.ar.is-paused, .ar.is-paused * { animation-play-state: paused !important; }
+/* the editor's copy while its music pill is faded out (atlas-editor.ts, the raw take): the bars stand still */
+.ar.is-mute .ar-wave i { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .ar, .ar * { animation: none !important; }
+}

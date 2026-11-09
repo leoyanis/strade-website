@@ -1,0 +1,2 @@
+/* WebKit filter isolation: the reel glows (drop-shadow on svg icons, chart, pill) */
+.ar-rail svg, .ar-views svg:first-of-type path, .ar-posted__chart path, .ar-posted__chart circle, .ar-pill svg { filter: none !important; }

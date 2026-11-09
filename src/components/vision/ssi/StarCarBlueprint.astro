@@ -1,0 +1,137 @@
+---
+// Star Car SC-1: side elevation, front to the right.
+// Scale: ~164 px per metre (wheelbase 510 px ≈ 3.1 m). Every stroke has pathLength=1 so it can draw on.
+interface Props { callouts?: boolean; class?: string }
+const { callouts = true, class: cls } = Astro.props;
+
+// symmetric four-point star (the emblem's star, squared up)
+const star = (cx: number, cy: number, r: number) => {
+  const i = r * 0.18;
+  return `M${cx} ${cy - r} Q${cx + i} ${cy - i} ${cx + r} ${cy} Q${cx + i} ${cy + i} ${cx} ${cy + r} Q${cx - i} ${cy + i} ${cx - r} ${cy} Q${cx - i} ${cy - i} ${cx} ${cy - r}Z`;
+};
+
+// airless spring-mesh wheel: tyre, lattice, hub and spokes
+const wheel = (cx: number, cy: number) => {
+  const R = 88, r = 64, n = 22, out: string[] = [];
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * Math.PI * 2, b = a + 0.32;
+    out.push(`M${(cx + Math.cos(a) * r).toFixed(1)} ${(cy + Math.sin(a) * r).toFixed(1)} L${(cx + Math.cos(b) * R).toFixed(1)} ${(cy + Math.sin(b) * R).toFixed(1)}`);
+    out.push(`M${(cx + Math.cos(b) * r).toFixed(1)} ${(cy + Math.sin(b) * r).toFixed(1)} L${(cx + Math.cos(a) * R).toFixed(1)} ${(cy + Math.sin(a) * R).toFixed(1)}`);
+  }
+  const spokes: string[] = [];
+  for (let k = 0; k < 5; k++) {
+    const a = (k / 5) * Math.PI * 2 - Math.PI / 2;
+    spokes.push(`M${(cx + Math.cos(a) * 18).toFixed(1)} ${(cy + Math.sin(a) * 18).toFixed(1)} Q${(cx + Math.cos(a + 0.35) * 42).toFixed(1)} ${(cy + Math.sin(a + 0.35) * 42).toFixed(1)} ${(cx + Math.cos(a + 0.2) * r).toFixed(1)} ${(cy + Math.sin(a + 0.2) * r).toFixed(1)}`);
+  }
+  return { mesh: out.join(' '), spokes: spokes.join(' '), cx, cy, R, r };
+};
+const wheels = [wheel(250, 290), wheel(760, 290)];
+
+const CALL = [
+  { x: 896, y: 250, tx: 940, ty: 196, t: 'Star lights', s: 'symmetric, pointing up' },
+  { x: 530, y: 112, tx: 640, ty: 84, t: 'Light bar' },
+  { x: 418, y: 150, tx: 300, ty: 96, t: 'Roll cage' },
+  { x: 384, y: 262, tx: 300, ty: 352, t: 'Suit plug', s: 'power · cooling · O₂' },
+  { x: 520, y: 312, tx: 520, ty: 352, t: 'Solid-state battery', s: '~500 km' },
+  { x: 852, y: 296, tx: 960, ty: 352, t: 'Dust deflector', s: 'magnetic' },
+  { x: 708, y: 222, tx: 740, ty: 132, t: 'Dynamic suspension' },
+];
+---
+
+<svg viewBox="-60 60 1120 360" class:list={['scb', cls]} role="img" aria-label="Star Car SC-1, side view: a low, rounded carbon-fibre buggy with a roll cage, light bar, star headlights and large airless wheels">
+  <defs>
+    <pattern id="scb-grid" width="41" height="41" patternUnits="userSpaceOnUse" x="250" y="378">
+      <path d="M41 0H0V41" fill="none" class="grid" />
+    </pattern>
+  </defs>
+  <rect x="-60" y="60" width="1120" height="360" fill="url(#scb-grid)" class="gridfill" />
+
+  <!-- ground -->
+  <path class="ln thin" pathLength="1" d="M-40 378 H1040" />
+
+  <!-- wheels -->
+  {wheels.map((w) => (
+    <g class="wheel">
+      <circle class="ln" pathLength="1" cx={w.cx} cy={w.cy} r={w.R} />
+      <circle class="ln thin" pathLength="1" cx={w.cx} cy={w.cy} r={w.r} />
+      <path class="ln hair" pathLength="1" d={w.mesh} />
+      <path class="ln thin" pathLength="1" d={w.spokes} />
+      <circle class="ln" pathLength="1" cx={w.cx} cy={w.cy} r="18" />
+      <circle class="acc-fill" cx={w.cx} cy={w.cy} r="5" />
+    </g>
+  ))}
+
+  <!-- suspension (hidden lines behind the wheels) -->
+  <path class="ln dash" pathLength="1" d="M700 214 L742 276 M690 286 L742 290 M318 214 L268 276 M330 286 L268 290" />
+
+  <!-- body: one smooth carbon tub, fenders wrap the wheels -->
+  <path class="ln body" pathLength="1" d="M910 265 C908 232 880 196 838 188 C805 182 760 178 728 186 C700 193 676 214 652 230 L610 240 L400 240 C370 236 340 206 310 190 C270 172 210 172 168 188 C130 202 108 232 104 262 C102 286 118 302 145 304 L152 304 A98 98 0 0 1 348 304 L662 304 A98 98 0 0 1 858 304 L880 304 C900 302 912 290 910 265Z" />
+  <!-- character line -->
+  <path class="ln thin" pathLength="1" d="M898 276 C800 266 680 282 560 280 C460 278 380 268 330 258" />
+  <!-- battery floor -->
+  <path class="ln dash" pathLength="1" d="M372 312 H648" />
+
+  <!-- seat + yoke -->
+  <path class="ln" pathLength="1" d="M412 240 C416 214 422 186 430 166 C434 156 446 154 452 160 C456 166 452 186 448 206 L444 240" />
+  <path class="ln thin" pathLength="1" d="M572 238 L590 206 M582 198 L600 214" />
+
+  <!-- roll cage -->
+  <path class="ln cage" pathLength="1" d="M392 240 C392 170 410 128 460 122 L590 122 C625 122 645 160 655 228" />
+  <path class="ln thin" pathLength="1" d="M436 126 L338 196" />
+
+  <!-- light bar -->
+  <path class="ln" pathLength="1" d="M478 112 H592 Q598 112 598 118 V120 H472 V118 Q472 112 478 112Z" />
+  <path class="acc" d="M486 116 H586" />
+
+  <!-- suit plug -->
+  <circle class="ln" pathLength="1" cx="384" cy="262" r="9" />
+  <circle class="acc-fill" cx="384" cy="262" r="3" />
+
+  <!-- star lights, front and rear -->
+  <path class="star" d={star(896, 250, 15)} />
+  <path class="star rear" d={star(112, 250, 12)} />
+
+  <!-- dimensions -->
+  <g class="dim">
+    <path class="ln hair" pathLength="1" d="M250 384 V404 M760 384 V404 M250 398 H760" />
+    <text x="505" y="416" text-anchor="middle">WHEELBASE ≈ 3.1 M</text>
+    <path class="ln hair" pathLength="1" d="M1010 112 H1030 M1010 378 H1030 M1022 112 V378" />
+    <text x="1040" y="250" text-anchor="middle" transform="rotate(90 1040 250)">≈ 1.65 M</text>
+  </g>
+
+  {callouts && (
+    <g class="call">
+      {CALL.map((c) => (
+        <g class="co">
+          <circle cx={c.x} cy={c.y} r="3" class="acc-fill" />
+          <path class="ln hair lead" pathLength="1" d={`M${c.x} ${c.y} L${c.tx} ${c.ty + (c.ty > c.y ? -16 : 6)}`} />
+          <text x={c.tx} y={c.ty} text-anchor="middle" class="t">{c.t}</text>
+          {c.s && <text x={c.tx} y={c.ty + 15} text-anchor="middle" class="s">{c.s}</text>}
+        </g>
+      ))}
+    </g>
+  )}
+
+  <text x="-40" y="86" class="tag">SC-1 · SIDE</text>
+</svg>
+
+<style>
+  .scb { display: block; width: 100%; height: auto; overflow: visible; }
+  .scb .grid { stroke: rgba(255, 255, 255, 0.05); stroke-width: 1; }
+  .scb .ln { fill: none; stroke: rgba(255, 255, 255, 0.82); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .scb .thin { stroke-width: 1.25; stroke: rgba(255, 255, 255, 0.5); }
+  .scb .hair { stroke-width: 1; stroke: rgba(255, 255, 255, 0.35); }
+  .scb .dash { stroke-width: 1.25; stroke: rgba(255, 255, 255, 0.4); stroke-dasharray: 0.012 0.01; }
+  .scb .body { stroke-width: 2.4; stroke: #fff; }
+  .scb .cage { stroke-width: 3.5; stroke: #fff; }
+  .scb .acc { stroke: #00e5ff; stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px #00e5ff); }
+  .scb .acc-fill { fill: #00e5ff; }
+  .scb .star { fill: #fff; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8)); }
+  .scb .star.rear { fill: #fff; opacity: 0.85; }
+  .scb text { font-family: 'IBM Plex Mono', ui-monospace, monospace; fill: rgba(255, 255, 255, 0.7); font-size: 11px; letter-spacing: 0.08em; }
+  .scb .dim text, .scb .tag { fill: rgba(255, 255, 255, 0.5); font-size: 10px; letter-spacing: 0.16em; }
+  .scb .co .t { fill: #fff; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .scb .co .s { fill: rgba(255, 255, 255, 0.55); font-size: 10.5px; }
+  /* callouts are unreadable at phone width; the page lists the spec anyway */
+  @media (max-width: 640px) { .scb .call { display: none; } }
+</style>

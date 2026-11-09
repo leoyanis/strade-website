@@ -1,0 +1,2 @@
+/* every backdrop-filter off: what the blurred glass costs (WebKit most) */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }

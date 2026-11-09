@@ -1,0 +1,264 @@
+---
+/**
+ * LiquidGlassBar: the iPhone app's tab bar (Apple's native iOS 26 Liquid Glass UITabBar), rebuilt in CSS.
+ * One floating glass capsule with Explore, Network, Work and Profile; the selected item sits in a lighter
+ * glass capsule and wears Vaultt blue (#70A9FF), the others a grey-white at about 60%.
+ *
+ * The glass: a clear backdrop blur with saturation, a fill of white at ~10%, a lit top edge, a refraction
+ * rim (bright at the ends, like the lens edge of Liquid Glass) and a specular highlight that follows
+ * `--gx` (0% to 100%, set by the page from the pointer). On Chromium the backdrop also gets a slight SVG
+ * displacement, so what sits under the bar bends at its edges.
+ *
+ * Motion: hovering an item glides the capsule there with the app's liquid stretch (the leading edge leaves
+ * first, the trailing edge catches up over about 420 ms, it lifts a touch mid-flight, labels fade their
+ * colour over 220 ms); leaving returns it. It hops once to Explore and back the first time it is seen.
+ * Reduced motion: no glide, the capsule stays put.
+ *
+ * Props
+ * - selected?: 'explore' | 'network' (default) | 'work' | 'profile'
+ * - initials?: the avatar's letters in the Profile slot (default 'S', an invented person)
+ * - hop?:      the one hop to Explore and back the first time it is seen (default true; NetworkScreen turns it
+ *              off on a still screen, where a bar moving by itself over a frozen map looked like a glitch)
+ * - class?:    extra classes
+ *
+ * Size: put it inside a PhoneFrame screen (it sizes itself in points with --u) and give it a width;
+ * its height is 60 points.
+ */
+interface Props {
+  selected?: 'explore' | 'network' | 'work' | 'profile';
+  initials?: string;
+  hop?: boolean;
+  class?: string;
+}
+const { selected = 'network', initials = 'S', hop = true, class: cls = '' } = Astro.props;
+const items = [
+  { id: 'explore', label: 'Explore' },
+  { id: 'network', label: 'Network' },
+  { id: 'work', label: 'Work' },
+  { id: 'profile', label: 'Profile' },
+] as const;
+const sel = Math.max(0, items.findIndex((i) => i.id === selected));
+---
+
+<div class:list={['lg', cls]} data-lg data-sel={sel} data-hop={hop ? undefined : '0'} style={`--i:${sel}`} aria-hidden="true">
+  <span class="lg__glass"></span>
+  <span class="lg__thumb"></span>
+  {items.map((it, i) => (
+    <span class:list={['lg__item', i === sel && 'is-on']} data-i={i}>
+      {it.id === 'explore' && (
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.7" /><path d="M15.7 8.3 13.4 13.4 8.3 15.7 10.6 10.6Z" fill="currentColor" /></svg>
+      )}
+      {it.id === 'network' && (
+        <svg viewBox="0 0 24 24"><path d="M12 12 5.4 7.1M12 12l7.2-3.7M12 12l-1.3 7.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /><circle cx="12" cy="12" r="3.1" fill="currentColor" /><circle cx="5" cy="6.8" r="2.2" fill="currentColor" /><circle cx="19.4" cy="8.1" r="2.2" fill="currentColor" /><circle cx="10.6" cy="19.9" r="2.2" fill="currentColor" /></svg>
+      )}
+      {it.id === 'work' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.2" y="7.2" width="17.6" height="12.6" rx="2.6" /><path d="M8.8 7.2V5.6a1.8 1.8 0 0 1 1.8-1.8h2.8a1.8 1.8 0 0 1 1.8 1.8v1.6M3.4 12.6h17.2" /></svg>
+      )}
+      {it.id === 'profile' && <span class="lg__avatar">{initials}</span>}
+      <span class="lg__label">{it.label}</span>
+    </span>
+  ))}
+</div>
+
+<style>
+  .lg {
+    --gx: 32%;
+    position: relative; height: calc(var(--u, 1px) * 60); border-radius: 999px;
+    display: grid; grid-template-columns: repeat(4, 1fr); padding: 0 calc(var(--u, 1px) * 4);
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+  }
+  .lg__glass {
+    position: absolute; inset: 0; border-radius: inherit; overflow: hidden;
+    -webkit-backdrop-filter: blur(calc(var(--u, 1px) * 5)) saturate(1.9) brightness(1.1);
+    backdrop-filter: blur(calc(var(--u, 1px) * 5)) saturate(1.9) brightness(1.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05) 55%, rgba(255, 255, 255, 0.08));
+    box-shadow:
+      inset 0 calc(var(--u, 1px) * 0.9) 0 rgba(255, 255, 255, 0.42),
+      inset 0 calc(var(--u, 1px) * -0.8) 0 rgba(255, 255, 255, 0.1),
+      inset 0 0 0 calc(var(--u, 1px) * 0.6) rgba(255, 255, 255, 0.14),
+      0 calc(var(--u, 1px) * 10) calc(var(--u, 1px) * 26) calc(var(--u, 1px) * -6) rgba(0, 0, 0, 0.6);
+  }
+  /* Chromium only (set by the script): the backdrop bends at the edges, like a lens */
+  :global(.lg--lens) .lg__glass {
+    -webkit-backdrop-filter: url(#vx-lg-lens) blur(calc(var(--u, 1px) * 4)) saturate(1.9) brightness(1.1);
+    backdrop-filter: url(#vx-lg-lens) blur(calc(var(--u, 1px) * 4)) saturate(1.9) brightness(1.1);
+  }
+  /* the specular highlight: a soft hot spot that slides with the pointer */
+  .lg__glass::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; mix-blend-mode: screen;
+    background:
+      radial-gradient(60% 120% at var(--gx) -30%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06) 45%, transparent 70%),
+      radial-gradient(40% 90% at calc(100% - var(--gx)) 135%, rgba(160, 200, 255, 0.16), transparent 70%);
+    transition: background-position 0.3s;
+  }
+  /* the refraction rim: bright where the lens edge is steepest (the ends), faint along the middle */
+  .lg__glass::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: calc(var(--u, 1px) * 1.3);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08) 14%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.08) 86%, rgba(255, 255, 255, 0.42));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+  .lg__thumb {
+    position: absolute; z-index: 1; top: calc(var(--u, 1px) * 4); bottom: calc(var(--u, 1px) * 4);
+    /* no-JS place: on the selected item */
+    left: calc(var(--u, 1px) * 6 + (100% - var(--u, 1px) * 8) / 4 * var(--i));
+    width: calc((100% - var(--u, 1px) * 8) / 4 - var(--u, 1px) * 4);
+    border-radius: 999px; will-change: transform, width;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+    box-shadow: inset 0 calc(var(--u, 1px) * 0.8) 0 rgba(255, 255, 255, 0.32), inset 0 0 0 calc(var(--u, 1px) * 0.6) rgba(255, 255, 255, 0.1), 0 calc(var(--u, 1px) * 2) calc(var(--u, 1px) * 8) rgba(0, 0, 0, 0.25);
+  }
+  .lg__item {
+    position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: calc(var(--u, 1px) * 2.5); color: rgba(238, 240, 241, 0.62); transition: color 0.22s ease;
+  }
+  .lg__item.is-on { color: #70A9FF; }
+  .lg__item svg { width: calc(var(--u, 1px) * 24); height: calc(var(--u, 1px) * 24); display: block; }
+  .lg__label { font-size: calc(var(--u, 1px) * 10); font-weight: 500; letter-spacing: 0.01em; line-height: 1; }
+  .lg__avatar {
+    display: grid; place-items: center; width: calc(var(--u, 1px) * 24); height: calc(var(--u, 1px) * 24); border-radius: 50%;
+    background: linear-gradient(140deg, #FFB37A, #E0567A); color: #fff; font-size: calc(var(--u, 1px) * 11); font-weight: 700;
+    box-shadow: 0 0 0 calc(var(--u, 1px) * 1.2) rgba(238, 240, 241, 0.35);
+  }
+  .lg__item.is-on .lg__avatar { box-shadow: 0 0 0 calc(var(--u, 1px) * 1.5) #70A9FF; }
+</style>
+
+<script>
+  /*
+   * The capsule's liquid glide. Two edges, each eased toward its target every frame: the leading edge
+   * (the side it travels toward) fast, the trailing edge slower, so the capsule stretches toward where it
+   * is going and pulls itself together on arrival, as the app's VSlidingIndicator does. Runs only while
+   * moving. Tried a single translate with scaleX: the round ends squashed, so the width animates instead
+   * (one small absolutely positioned element, no reflow of anything else).
+   */
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
+  const chromium = !!(navigator as Navigator & { userAgentData?: { brands?: { brand: string }[] } }).userAgentData?.brands?.some((b) => b.brand === 'Chromium');
+
+  /** Adds the lens filter (once per page) that Chromium can use inside backdrop-filter. */
+  function ensureLens() {
+    if (document.getElementById('vx-lg-lens')) return;
+    // a displacement map that pulls pixels inward near the left and right ends of the capsule (red = x;
+    // green stays at the neutral 128, so nothing moves vertically)
+    const map = encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><defs><linearGradient id='x' x1='0' x2='1'><stop offset='0' stop-color='rgb(255,128,128)'/><stop offset='0.13' stop-color='rgb(128,128,128)'/><stop offset='0.87' stop-color='rgb(128,128,128)'/><stop offset='1' stop-color='rgb(0,128,128)'/></linearGradient></defs><rect width='200' height='60' fill='url(#x)'/></svg>`,
+    );
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.position = 'absolute';
+    svg.innerHTML = `<filter id="vx-lg-lens" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feImage href="data:image/svg+xml,${map}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter>`;
+    document.body.appendChild(svg);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-lg]').forEach((bar) => {
+    if (bar.dataset.lgOn) return;
+    bar.dataset.lgOn = '1';
+    const thumb = bar.querySelector<HTMLElement>('.lg__thumb');
+    const items = Array.from(bar.querySelectorAll<HTMLElement>('.lg__item'));
+    if (!thumb || !items.length) return;
+    const sel = Number(bar.dataset.sel ?? 1);
+    if (chromium && !still) {
+      ensureLens();
+      bar.classList.add('lg--lens');
+    }
+    if (still) return;
+
+    let slots: { l: number; r: number }[] = [];
+    const measure = () => {
+      const inset = bar.clientHeight * (2 / 60);
+      slots = items.map((it) => ({ l: it.offsetLeft + inset, r: it.offsetLeft + it.offsetWidth - inset }));
+    };
+    let L = 0;
+    let R = 0;
+    let target = sel;
+    let lit = sel;
+    let raf = 0;
+    let last = 0;
+
+    const paint = () => {
+      const base = slots[target].r - slots[target].l || 1;
+      const stretch = Math.max(0, (R - L) / base - 1);
+      thumb.style.transform = `translate3d(${L.toFixed(2)}px, ${(-stretch * bar.clientHeight * 0.05).toFixed(2)}px, 0)`;
+      thumb.style.width = `${(R - L).toFixed(2)}px`;
+    };
+    const frame = (now: number) => {
+      const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
+      last = now;
+      const s = slots[target];
+      const right = s.r > R; // travelling right: the right edge leads
+      const fast = 1 - Math.exp(-dt * 21);
+      const slow = 1 - Math.exp(-dt * 9.5);
+      L += (s.l - L) * (right ? slow : fast);
+      R += (s.r - R) * (right ? fast : slow);
+      paint();
+      // the label under the capsule lights once the capsule is mostly over it (a plain loop: findIndex made a
+      // closure every gliding frame)
+      const mid = (L + R) / 2;
+      let over = -1;
+      for (let q = 0; q < slots.length; q++) {
+        if (mid >= slots[q].l - 2 && mid <= slots[q].r + 2) {
+          over = q;
+          break;
+        }
+      }
+      if (over >= 0 && over !== lit) {
+        items[lit]?.classList.remove('is-on');
+        items[over].classList.add('is-on');
+        lit = over;
+      }
+      if (Math.abs(s.l - L) + Math.abs(s.r - R) > 0.3) raf = requestAnimationFrame(frame);
+      else {
+        L = s.l;
+        R = s.r;
+        paint();
+        raf = 0;
+        last = 0;
+      }
+    };
+    const go = (i: number) => {
+      if (i === target && !raf) return;
+      target = i;
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    let barW = 0;
+    const init = () => {
+      measure();
+      if (!slots.length || !slots[sel]) return;
+      L = slots[target].l;
+      R = slots[target].r;
+      barW = bar.clientWidth;
+      thumb.style.left = '0px';
+      paint();
+    };
+    init();
+    // a resize while the capsule glides keeps the glide: both edges scale with the bar and the frame loop
+    // carries on to the new slot (it used to jump straight to the target)
+    new ResizeObserver(() => {
+      if (!raf) return init();
+      const w = bar.clientWidth;
+      measure();
+      if (barW > 0 && w > 0) {
+        L *= w / barW;
+        R *= w / barW;
+      }
+      barW = w;
+    }).observe(bar);
+
+    bar.addEventListener('pointermove', (e) => {
+      if ((e as PointerEvent).pointerType !== 'mouse') return;
+      const it = (e.target as Element).closest<HTMLElement>('.lg__item');
+      if (it) go(Number(it.dataset.i));
+    });
+    bar.addEventListener('pointerleave', () => go(sel));
+    // the first time the bar is seen, the capsule hops to Explore and back, so the glide is noticed
+    if (bar.dataset.hop === '0') return;
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((en) => en.isIntersecting)) return;
+      io.disconnect();
+      window.setTimeout(() => go(0), 900);
+      window.setTimeout(() => go(sel), 1700);
+    }, { threshold: 0.9 });
+    io.observe(bar);
+  });
+</script>

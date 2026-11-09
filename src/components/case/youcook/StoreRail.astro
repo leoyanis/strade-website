@@ -7,6 +7,25 @@ const shots = [
   'App Store screenshot: One tap shopping list',
   'App Store screenshot: Stuck? Talk to the recipe',
 ];
+/* What the nav sees in each screenshot (Base.astro, data-nav-theme). The picture's own colour, which darkens down
+   it (measured from the images in the margin beside the phone, at the heights given), is a flat surface to the nav:
+   the ink that reads on it and a knockout in that colour, also over the title at the top. The phone, bezel included,
+   is a flat surface too, in its screen's own grey (measured: the most common colour inside it), so a link over the
+   chat or the step list takes dark ink and has the text under it cut away round its letters; its big photos and the
+   lock screen keep a pool (light bands, or a dark one). The white cards that reach past the phone are flat white. All
+   in % of the picture. Before, the picture was 'busy' with a few marker boxes over it, and wherever no box lay the nav took the
+   teal section's dark tone: white ink and a dark pool on the white chat screen, the logo white on the white recipe
+   card, "Free stuff" pale on the amber (1440 at 9020 to 9240, 2026-11-09 re-check). */
+type Shot = { tone: 'light' | 'dark'; grad: [number, string][]; phone: string; screen: string | null; photos?: string[]; cards?: string[] };
+const nav: Shot[] = [
+  { tone: 'dark', grad: [[0, '14, 146, 131'], [20, '12, 141, 130'], [30, '13, 116, 107'], [50, '8, 104, 95'], [75, '8, 95, 93'], [100, '8, 86, 90']], phone: '24.9% 4.1% 0 4.1%', screen: '#F4F4F4', photos: ['48% 9% 17% 10%'] },
+  { tone: 'light', grad: [[0, '242, 156, 12'], [10, '237, 151, 11'], [20, '231, 146, 11'], [30, '207, 129, 10'], [45, '194, 118, 6'], [60, '187, 110, 7'], [75, '178, 104, 3'], [90, '169, 96, 4'], [100, '177, 97, 3']], phone: '22% 11.8% 0 11.8%', screen: '#F8F8F8', cards: ['69.3% 10.9% 24.4% 10%', '78.6% 5.5% 13.4% 5.5%'] },
+  { tone: 'light', grad: [[0, '248, 128, 100'], [10, '243, 122, 94'], [20, '235, 117, 89'], [30, '211, 101, 77'], [45, '199, 92, 67'], [60, '191, 84, 61'], [75, '186, 79, 54'], [90, '177, 71, 47'], [100, '186, 71, 46']], phone: '22% 11.8% 0 11.8%', screen: '#F8F8F8', cards: ['42% 86.4% 41.6% 5.5%', '60.5% 4.5% 20.6% 86.4%'] },
+  { tone: 'dark', grad: [[0, '51, 63, 84'], [10, '49, 62, 83'], [20, '46, 58, 79'], [30, '41, 52, 71'], [45, '37, 48, 66'], [60, '35, 45, 62'], [75, '31, 42, 58'], [90, '28, 39, 54'], [100, '29, 40, 57']], phone: '22% 11.8% 0 11.8%', screen: null },
+  { tone: 'dark', grad: [[0, '142, 78, 205'], [10, '138, 76, 200'], [20, '131, 70, 193'], [30, '115, 60, 170'], [45, '106, 52, 161'], [60, '99, 45, 153'], [75, '90, 39, 145'], [90, '85, 31, 136'], [100, '88, 30, 143']], phone: '22% 11.8% 0 11.8%', screen: '#F8F8F8', photos: ['64% 13% 16% 16%'] },
+  { tone: 'light', grad: [[0, '245, 173, 61'], [10, '241, 168, 58'], [20, '233, 162, 54'], [30, '209, 145, 49'], [45, '196, 136, 43'], [60, '190, 128, 37'], [75, '179, 120, 33'], [90, '171, 114, 28'], [100, '177, 117, 26']], phone: '22% 11.8% 0 11.8%', screen: '#F4F4F4' },
+];
+const surface = (s: Shot) => `linear-gradient(180deg, ${s.grad.map(([p, c]) => `rgb(${c}) ${p}%`).join(', ')})`;
 ---
 
 <section class="store" id="yc-store">
@@ -25,8 +44,11 @@ const shots = [
   <div class="rail" tabindex="0" aria-label="YouCook App Store screenshots and a Meta ad">
     <ul class="rail__track">
       {shots.slice(0, 2).map((alt, i) => (
-        <li class="rail__item">
+        <li class="rail__item" data-nav-theme={nav[i].tone} data-nav-surface={surface(nav[i])}>
           <img src={`/images/work/youcook/store/s${i + 1}.webp`} alt={alt} width="440" height="952" loading="lazy" />
+          <i class="rail__nav" aria-hidden="true" data-nav-theme={nav[i].screen ? 'light' : 'dark'} data-nav-surface={nav[i].screen ?? undefined} style={`inset:${nav[i].phone}`}></i>
+          {nav[i].photos?.map((c) => <i class="rail__nav" aria-hidden="true" data-nav-theme="light" style={`inset:${c}`}></i>)}
+          {nav[i].cards?.map((c) => <i class="rail__nav" aria-hidden="true" data-nav-theme="light" data-nav-surface="#FCFCFC" style={`inset:${c}`}></i>)}
         </li>
       ))}
       <!-- The clip sits third so it is on screen while the rail drifts on desktop; phones show it first. -->
@@ -47,8 +69,11 @@ const shots = [
         <span class="rail__rec" aria-hidden="true"><i></i>App preview</span>
       </li>
       {shots.slice(2).map((alt, i) => (
-        <li class="rail__item">
+        <li class="rail__item" data-nav-theme={nav[i + 2].tone} data-nav-surface={surface(nav[i + 2])}>
           <img src={`/images/work/youcook/store/s${i + 3}.webp`} alt={alt} width="440" height="952" loading="lazy" />
+          <i class="rail__nav" aria-hidden="true" data-nav-theme={nav[i + 2].screen ? 'light' : 'dark'} data-nav-surface={nav[i + 2].screen ?? undefined} style={`inset:${nav[i + 2].phone}`}></i>
+          {nav[i + 2].photos?.map((c) => <i class="rail__nav" aria-hidden="true" data-nav-theme="light" style={`inset:${c}`}></i>)}
+          {nav[i + 2].cards?.map((c) => <i class="rail__nav" aria-hidden="true" data-nav-theme="light" data-nav-surface="#FCFCFC" style={`inset:${c}`}></i>)}
         </li>
       ))}
       <li class="rail__item rail__item--ad">
@@ -108,7 +133,8 @@ const shots = [
     gap: 22px;
     width: max-content;
   }
-  .rail__item { flex: none; width: 250px; }
+  /* position: the box the nav's boxes over each screenshot are placed in (.rail__nav); it moves nothing */
+  .rail__item { position: relative; flex: none; width: 250px; }
   .rail__item img {
     display: block;
     width: 100%;
@@ -117,6 +143,8 @@ const shots = [
     box-shadow: 0 30px 50px -24px rgba(0, 40, 35, 0.7);
   }
   .rail__item:nth-child(even) { transform: translateY(18px); }
+  /* the nav's boxes over each screenshot (see `nav` above): invisible, inert */
+  .rail__nav { position: absolute; pointer-events: none; }
   .rail__item--video { position: relative; }
   .rail__video {
     display: block;
@@ -191,6 +219,12 @@ const shots = [
     if (!m) return;
     const { gsap, ScrollTrigger } = m;
     const track = root.querySelector<HTMLElement>('.rail__track')!;
+    // The nav reads the cards' coloured tops (youcook.astro navBands) from observers that miss a sideways slide: it is
+    // told on each frame the rail moves, the drift's catch-up after the scroll stops and a phone's swipe included
+    // (Base.astro 'nav:moved'). Without it Results kept the teal page's ink over the amber card at 1440.
+    const nav = document.getElementById('site-nav');
+    const moved = () => nav?.dispatchEvent(new CustomEvent('nav:moved', { detail: track }));
+    root.querySelector<HTMLElement>('.rail')?.addEventListener('scroll', moved, { passive: true });
     const mm = gsap.matchMedia();
     mm.add('(min-width: 901px)', () => {
       const rail = root.querySelector<HTMLElement>('.rail')!;
@@ -200,6 +234,7 @@ const shots = [
         x: () => Math.min(0, window.innerWidth - track.scrollWidth),
         ease: 'none',
         scrollTrigger: { trigger: root, start: 'top 75%', end: 'bottom 15%', scrub: 0.6, invalidateOnRefresh: true },
+        onUpdate: moved,
       });
       return () => rail.classList.remove('is-scrubbed');
     });

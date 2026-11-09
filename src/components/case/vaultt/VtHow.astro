@@ -1,0 +1,263 @@
+---
+/**
+ * VtHow: how Vaultt works, told by the Network map growing from one person. The stage sticks while you
+ * scroll through four steps; each one has a few words, a number on reels and its own moment on the map:
+ *   1 Post what you're making   your projects pop out and orbit you            24.9k project views
+ *   2 Get real feedback         people bloom in by how much they chat, feedback runs along the ties
+ *                                                                                3,000+ feedback messages
+ *   3 Find people to build with  "Find people" types a need, suggestions are tied in one by one
+ *                                                                                1,500+ connection requests
+ *   4 Grow your network          the crowd of builders joins in waves           100+ nationalities
+ * Driven by case-how.ts (builder 1's engine, the 'world' look). The pointer can play with the map at any step.
+ * No JS, reduced motion or ?still: no sticking, all four steps listed beside the finished map.
+ */
+import { VAULTT_NUMBERS as N } from '../../../data/work';
+import VaulttNumber from '../../vaultt/VaulttNumber.astro';
+
+const steps = [
+  { t: "Post what you're making.", n: N.views },
+  { t: 'Get real feedback.', n: N.feedback },
+  { t: 'Find people to build with.', n: N.connections },
+  { t: 'Grow your network.', n: N.nationalities },
+];
+// an invented need, typed into the app's AI search
+const QUERY = 'a sound designer for my game';
+const sats = [
+  { k: 'game', a: -132, c: '#7A5CFF', d: 0 },
+  { k: 'film', a: -38, c: '#FF8A6E', d: -1.6 },
+  { k: 'code', a: 46, c: '#4C8DFF', d: -0.8 },
+  { k: 'art', a: 138, c: '#FF5FA2', d: -2.4 },
+];
+---
+
+<section class="vt-how" id="vt-how" aria-labelledby="vt-how-h" style={`--steps:${steps.length}`}>
+  <div class="vt-how__stage">
+    <canvas class="vt-how__net" aria-hidden="true"></canvas>
+    <span class="vt-grain" aria-hidden="true"></span>
+
+    <div class="vt-how__field" aria-hidden="true">
+      <div class="vt-how__sats">
+        {sats.map((s) => (
+          <span class:list={['vt-sat', `vt-sat--${s.k}`]} style={`--a:${s.a}deg;--c:${s.c};--d:${s.d}s`}>
+            <span class="vt-sat__float"><span class="vt-sat__glow"></span><span class="vt-sat__in"><i></i></span><span class="vt-sat__ping"></span></span>
+          </span>
+        ))}
+      </div>
+      <span class="vt-you"><b>You</b></span>
+    </div>
+
+    <div class="vt-how__find" aria-hidden="true">
+      <svg class="vt-how__spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.8c.5 3.9 2.6 6.2 6.6 6.8-4 .7-6.1 2.9-6.6 6.8-.5-3.9-2.6-6.1-6.6-6.8 4-.6 6.1-2.9 6.6-6.8ZM18.6 14.4c.24 1.7 1.1 2.7 2.9 3-1.8.3-2.66 1.3-2.9 3-.25-1.7-1.1-2.7-2.9-3 1.8-.3 2.65-1.3 2.9-3Z" /></svg>
+      <span class="vt-how__q" data-text={QUERY}>{QUERY}</span><i class="vt-how__caret"></i>
+    </div>
+
+    <div class="vt-wrap vt-how__copy">
+      <div class="vt-how__col">
+        <p class="vt-tag" id="vt-how-h">How it works</p>
+        <ol class="vt-how__steps">
+          {steps.map((s, i) => (
+            <li class:list={['vt-how__step', i === 0 && 'is-on']} data-step={i}>
+              <h3 class="vt-how__t">{s.t}</h3>
+              <VaulttNumber n={s.n} class="vt-how__num" />
+            </li>
+          ))}
+        </ol>
+        <div class="vt-how__rail">
+          {steps.map((s, i) => (
+            <button type="button" class="vt-how__seg" data-go={i} aria-label={`Step ${i + 1}: ${s.t}`}><i></i></button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <p class="vt-how__note vt-note" aria-hidden="true">The app's own physics <span>·</span> every person on a spring</p>
+  </div>
+</section>
+
+<style is:global>
+  .vt-how { position: relative; background: var(--vt-navy); }
+  .vt-how__stage {
+    --hx: 66%;
+    --hy: 50%;
+    position: relative; overflow: hidden; isolation: isolate;
+    min-height: max(100svh, 760px);
+    display: flex; align-items: center;
+  }
+  /* soft top and bottom edges: the map never ends on a line when the stage arrives or lets go (eased stops at the
+     bottom, so the glow under the map thins out instead of stopping) */
+  .vt-how__net {
+    position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block; touch-action: pan-y;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 76%, rgba(0, 0, 0, 0.62) 86%, rgba(0, 0, 0, 0.22) 94%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 76%, rgba(0, 0, 0, 0.62) 86%, rgba(0, 0, 0, 0.22) 94%, transparent 100%);
+  }
+  /* the grain fades out at the bottom as well. It lifts the navy a touch, and ending on the stage's edge it left a
+     lighter band with a hard line over "Every kind of builder" when the stage let go. The top stays solid: the
+     hero above wears the same grain */
+  .vt-how .vt-grain {
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%);
+  }
+
+  /* the hub: You, with your projects around you (positions in px from the hub) */
+  .vt-how__field { position: absolute; z-index: 1; left: var(--hx); top: var(--hy); width: 0; height: 0; pointer-events: none; --sat: 1; --fold: 1; --you: 1; }
+  .vt-you {
+    position: absolute; left: -25px; top: -25px; width: 50px; height: 50px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, #8CC6FF, #1C63F8);
+    box-shadow: 0 0 0 2px rgba(238, 240, 241, 0.92), 0 0 0 7px rgba(111, 168, 255, 0.16), 0 0 46px rgba(111, 168, 255, 0.55);
+    opacity: var(--you); transform: scale(calc(0.55 + 0.45 * var(--you)));
+  }
+  .vt-you b { font-family: Inter, system-ui, sans-serif; font-size: 15px; font-weight: 700; color: rgba(14, 26, 51, 0.88); letter-spacing: -0.01em; }
+
+  .vt-how__sats { position: absolute; left: 0; top: 0; width: 0; height: 0; --k: calc(var(--sat) * (1 - var(--fold))); }
+  .vt-sat {
+    --r: 168px;
+    position: absolute; left: 0; top: 0; width: 0; height: 0;
+    transform: rotate(var(--a)) translateX(calc(var(--r) * (0.2 + 0.8 * var(--k)))) rotate(calc(-1 * var(--a)));
+  }
+  /* each still: its colour's glow under it, the still, and a ring that goes out now and then (someone looking) */
+  .vt-sat__float { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: var(--k); scale: calc(0.3 + 0.7 * var(--k)); }
+  .vt-sat__glow { position: absolute; left: -95px; top: -75px; width: 190px; height: 150px; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 34%, transparent), transparent); }
+  .vt-sat__in {
+    position: absolute; left: -56px; top: -41px; width: 112px; height: 82px; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(232, 241, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 22px 44px -18px rgba(0, 0, 0, 0.8);
+  }
+  .vt-sat__in i { position: absolute; display: block; }
+  .vt-sat__ping { position: absolute; left: -56px; top: -41px; width: 112px; height: 82px; border-radius: 14px; box-shadow: 0 0 0 1.5px var(--c); opacity: 0; pointer-events: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-how.is-live .vt-how__sats { animation: vt-orbit 64s linear infinite; }
+    .vt-how.is-live .vt-sat__float { animation: vt-orbit-back 64s linear infinite, vt-bob 5.2s ease-in-out var(--d) infinite; }
+    .vt-how.is-live .vt-sat__ping { animation: vt-ping 3.6s cubic-bezier(0.22, 0.61, 0.36, 1) calc(var(--d) * -1.4) infinite; }
+  }
+  @keyframes vt-orbit { to { rotate: 360deg; } }
+  @keyframes vt-orbit-back { to { rotate: -360deg; } }
+  @keyframes vt-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -7px; } }
+  @keyframes vt-ping { 0% { scale: 1; opacity: 0.7; } 55%, 100% { scale: 1.32; opacity: 0; } }
+
+  /* the four project stills: a game, a film, code and a painting (drawn, nobody's real work) */
+  .vt-sat--game .vt-sat__in {
+    background:
+      radial-gradient(circle at 78% 24%, #FFF1C2 0 4.5px, rgba(255, 241, 194, 0.25) 5.5px, transparent 9px),
+      linear-gradient(#24A57E, #1B7F62) 0 100% / 100% 24% no-repeat,
+      linear-gradient(#2FD4C1, #23B3A3) 14% 58% / 34% 9% no-repeat,
+      linear-gradient(#2FD4C1, #23B3A3) 88% 40% / 24% 9% no-repeat,
+      linear-gradient(180deg, #23165A 0%, #4A2FD0 62%, #7A5CFF 100%);
+  }
+  /* the hero: a little block with an eye, mid-jump over the platform */
+  .vt-sat--game .vt-sat__in i { left: 22%; top: 34%; width: 10px; height: 11px; border-radius: 2.5px; background: #FFCF4A; box-shadow: inset -2px -2px 0 rgba(160, 90, 0, 0.35), 18px 4px 0 -3px #FFE38A; }
+  .vt-sat--game .vt-sat__in i::after { content: ''; position: absolute; right: 2px; top: 3px; width: 2.5px; height: 2.5px; border-radius: 1px; background: #23165A; }
+  .vt-sat--film .vt-sat__in {
+    background:
+      linear-gradient(#05070C 0 15%, transparent 15% 85%, #05070C 85%),
+      radial-gradient(120% 70% at 30% 100%, #2A1640 0 46%, transparent 47%),
+      radial-gradient(90% 60% at 82% 104%, #3A1D52 0 44%, transparent 45%),
+      radial-gradient(circle at 56% 60%, #FFE2B0 0 6px, rgba(255, 210, 150, 0.4) 7px, transparent 14px),
+      linear-gradient(180deg, #F7769E 0%, #FFAE7A 54%, #FF8A6E 100%);
+  }
+  .vt-sat--film .vt-sat__in i { left: 8%; top: 4%; width: 18%; height: 7%; border-radius: 2px; background: rgba(255, 255, 255, 0.85); }
+  .vt-sat--code .vt-sat__in {
+    background-color: #0F1E36;
+    background-image:
+      radial-gradient(circle at 9px 8px, #FF6B6B 0 2px, transparent 2.5px),
+      radial-gradient(circle at 16px 8px, #FFCF4A 0 2px, transparent 2.5px),
+      radial-gradient(circle at 23px 8px, #8BE04E 0 2px, transparent 2.5px),
+      linear-gradient(90deg, #4C8DFF 0 38%, transparent 38%),
+      linear-gradient(90deg, #A27BFF 0 22%, transparent 22% 26%, #8EBBFF 26% 58%, transparent 58%),
+      linear-gradient(90deg, transparent 0 10%, #8BE04E 10% 46%, transparent 46%),
+      linear-gradient(90deg, transparent 0 10%, #8EBBFF 10% 34%, transparent 34% 38%, #FF9A3D 38% 62%, transparent 62%),
+      linear-gradient(90deg, #4C8DFF 0 18%, transparent 18%);
+    background-size: auto, auto, auto, 100% 3px, 100% 3px, 100% 3px, 100% 3px, 100% 3px;
+    background-repeat: no-repeat;
+    background-position: 0 0, 0 0, 0 0, 9px 19px, 9px 26px, 9px 33px, 9px 40px, 9px 47px;
+  }
+  .vt-sat--art .vt-sat__in {
+    background:
+      radial-gradient(38% 52% at 30% 44%, #FF5FA2 0 62%, transparent 64%),
+      radial-gradient(30% 42% at 66% 60%, #FFB37A 0 60%, transparent 63%),
+      radial-gradient(22% 30% at 58% 24%, #A27BFF 0 58%, transparent 62%),
+      radial-gradient(16% 22% at 84% 30%, #2FD4C1 0 56%, transparent 60%),
+      linear-gradient(160deg, #FFF6EC, #F3E4D4);
+  }
+  .vt-sat--art .vt-sat__in i { left: 14%; bottom: 14%; width: 46%; height: 3px; border-radius: 3px; background: #2A1640; opacity: 0.7; transform: rotate(-8deg); }
+
+  /* the app's AI search, as a bubble on the map (the world's bubble style: navy panel, blue spark) */
+  .vt-how__find {
+    position: absolute; z-index: 3; left: var(--hx); bottom: max(56px, 8svh); translate: -50% 0;
+    display: inline-flex; align-items: center; gap: 11px; height: 58px; padding: 0 26px 0 18px; max-width: calc(100% - 40px);
+    border-radius: 999px; background: rgba(18, 48, 88, 0.92); color: var(--vt-light);
+    box-shadow: inset 0 0 0 1px rgba(232, 241, 255, 0.16), 0 18px 44px -18px rgba(0, 0, 0, 0.8), 0 0 0 6px rgba(111, 168, 255, 0.06);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    font-family: var(--vt-sans); font-size: 19px; font-weight: 500; white-space: nowrap;
+    pointer-events: none;
+  }
+  .vt-how__spark { width: 22px; height: 22px; flex: none; color: var(--vt-blue); filter: drop-shadow(0 0 8px rgba(111, 168, 255, 0.7)); }
+  .vt-how__q { overflow: hidden; text-overflow: clip; }
+  .vt-how__caret { width: 2px; height: 22px; border-radius: 1px; background: var(--vt-blue); margin-left: -6px; opacity: 0; }
+  .vt-how.is-live .vt-how__caret { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-how.is-live .vt-how__caret { animation: vt-caret 1s steps(1) infinite; }
+  }
+  @keyframes vt-caret { 50% { opacity: 0; } }
+  /* off screen the loops hold still where they are (case-how.ts sets .is-run while the section is near) */
+  .vt .vt-how:not(.is-run) :is(.vt-how__sats, .vt-sat__float, .vt-sat__ping, .vt-how__caret) { animation-play-state: paused; }
+
+  /* the copy */
+  .vt-how__copy { position: relative; z-index: 2; width: 100%; pointer-events: none; }
+  .vt-how__col { max-width: 520px; padding: 110px 0 90px; pointer-events: auto; }
+  .vt-how__steps { display: grid; gap: 54px; margin-top: 26px; }
+  .vt-how__t {
+    font-family: var(--vt-display); font-weight: 700;
+    font-size: clamp(38px, 4.2vw, 62px); line-height: 1; letter-spacing: -0.04em; color: var(--vt-light);
+    text-wrap: balance;
+  }
+  .vt .vt-how__num { margin-top: 26px; }
+  .vt .vt-how__num .vn__num { font-size: clamp(52px, 5.4vw, 84px); }
+  .vt .vt-how__num .vn__label { margin-top: 4px; }
+  .vt-how__rail { display: none; }
+  .vt-how__note { position: absolute; z-index: 2; right: 40px; bottom: 26px; }
+  .vt-how__note span { color: var(--vt-blue); margin: 0 5px; }
+
+  /* live: the stage sticks for the four steps, and the steps share one place */
+  .vt-how.is-live { height: calc(100svh + var(--steps) * 80svh); }
+  .vt-how.is-live .vt-how__stage { position: sticky; top: 0; height: 100svh; min-height: 0; }
+  .vt-how.is-live .vt-how__steps { grid-template-areas: 'step'; gap: 0; }
+  .vt-how.is-live .vt-how__step {
+    grid-area: step; opacity: 0; transform: translate3d(0, 34px, 0); visibility: hidden;
+    transition: opacity 0.55s var(--vt-ease), transform 0.75s var(--vt-out), visibility 0s linear 0.55s;
+  }
+  .vt-how.is-live .vt-how__step.is-past { transform: translate3d(0, -34px, 0); }
+  .vt-how.is-live .vt-how__step.is-on { opacity: 1; transform: none; visibility: visible; transition: opacity 0.55s var(--vt-ease) 0.12s, transform 0.75s var(--vt-out) 0.12s, visibility 0s; }
+  .vt-how.is-live .vt-how__rail { display: flex; gap: 8px; margin-top: 46px; }
+  .vt-how__seg { position: relative; width: 44px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .vt-how__seg::before, .vt-how__seg i { content: ''; position: absolute; left: 0; right: 0; top: 10px; height: 3px; border-radius: 3px; }
+  .vt-how__seg::before { background: var(--vt-line-2); }
+  .vt-how__seg i { background: var(--vt-blue); transform-origin: left; transform: scaleX(var(--f, 0)); box-shadow: 0 0 10px rgba(111, 168, 255, 0.6); }
+  .vt-how__seg:focus-visible { outline: 2px solid var(--vt-blue); outline-offset: 2px; border-radius: 4px; }
+
+  @media (max-width: 1023px) {
+    .vt-how__stage { --hx: 68%; }
+    .vt-how__col { max-width: 420px; }
+  }
+  /* phones: the words at the top, the map below them, the search bubble at the bottom */
+  @media (max-width: 767px) {
+    /* static (no JS): the steps are listed, the map sits in the space kept below them */
+    .vt-how__stage { --hx: 50%; --hy: calc(100% - 230px); align-items: flex-start; min-height: 100svh; }
+    .vt-how.is-live .vt-how__stage { --hy: 64%; }
+    .vt-how__col { max-width: none; padding: 92px 0 420px; }
+    .vt-how__steps { gap: 40px; margin-top: 18px; }
+    .vt-how__t { font-size: clamp(32px, 9vw, 40px); }
+    .vt .vt-how__num { margin-top: 16px; }
+    .vt .vt-how__num .vn__num { font-size: clamp(48px, 13vw, 58px); }
+    .vt .vt-how__num .vn__label { font-size: 16px; }
+    .vt-how.is-live .vt-how__col { padding: 84px 0 0; }
+    .vt-how.is-live .vt-how__rail { margin-top: 22px; }
+    .vt-how__find { bottom: 28px; height: 46px; padding: 0 18px 0 14px; font-size: 15px; gap: 8px; }
+    .vt-how__spark { width: 18px; height: 18px; }
+    .vt-how__note { display: none; }
+    .vt-sat { --r: 104px; }
+    .vt-sat__in, .vt-sat__ping { left: -36px; top: -26px; width: 72px; height: 52px; border-radius: 10px; }
+    .vt-sat__glow { left: -62px; top: -48px; width: 124px; height: 96px; }
+    .vt-you { left: -22px; top: -22px; width: 44px; height: 44px; }
+    .vt-you b { font-size: 13px; }
+  }
+</style>

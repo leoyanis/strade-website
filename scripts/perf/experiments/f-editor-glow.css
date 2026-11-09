@@ -1,0 +1,2 @@
+/* WebKit filter isolation: the glow under the Atlas editor (blur 30px) */
+.h-a-editor::before { filter: none !important; }

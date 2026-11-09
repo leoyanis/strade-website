@@ -92,15 +92,27 @@ a { color: inherit; text-decoration: none; }
   padding: 18px 44px; border-radius: 6px;
   font-weight: 600; font-size: 18px;
   border: none; cursor: pointer;
-  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s;
+  transition: scale 0.3s var(--ease-out-expo), box-shadow 0.3s;
   letter-spacing: -0.01em;
 }
-.btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 32px var(--cyan-glow); }
-.btn-primary:active { transform: scale(0.98); }
+/* The press and hover sizes use the scale property, not transform: GSAP owns these buttons' transform (the reveals on
+   /work, /free and the free pages, the magnetic download button). A CSS transition on transform made GSAP read a
+   half-transitioned offset back as the button's resting place, so "Book a call" and the download buttons stayed 22px
+   and 24px down for good, over the words below them. */
+.btn-primary:hover { scale: 1.02; box-shadow: 0 0 32px var(--cyan-glow); }
+.btn-primary:active { scale: 0.98; }
 
 /* ================================================================
    SCROLL PROGRESS BAR
    ================================================================ */
+/* Base.astro marks [data-offscreen-pause] elements .is-offscreen while they are out of view: their CSS
+   animations stop there (a running animation keeps every frame rendering, on screen or not) */
+.is-offscreen, .is-offscreen *, .is-offscreen *::before, .is-offscreen *::after { animation-play-state: paused !important; }
+
+/* Still drawn by width. Tried transform: scaleX with the same 0.05 s easing: the bar's end is then anti-aliased
+   instead of snapped to a device pixel (a visible half-pixel difference on every screenshot), and its own layer
+   moved the EXP badge's text by a pixel in WebKit. Base.astro now writes the width in rAF instead of in the
+   scroll event, which removed the forced layout it caused. */
 #scroll-progress {
   position: fixed; top: 0; left: 0; z-index: 200;
   height: 2px; width: 0%;
@@ -109,71 +121,8 @@ a { color: inherit; text-decoration: none; }
   transition: width 0.05s linear;
 }
 
-/* ================================================================
-   CURSOR GLOW
-   ================================================================ */
-#cursor-glow {
-  position: fixed; z-index: 1;
-  width: 240px; height: 240px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,229,255,0.04) 0%, transparent 70%);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  will-change: left, top;
-}
-
-/* ================================================================
-   PARTICLE CANVAS
-   ================================================================ */
-#particle-canvas {
-  position: fixed; inset: 0; z-index: 1;
-  pointer-events: none;
-  width: 100%; height: 100%;
-}
-
-/* ================================================================
-   ATMOSPHERE
-   ================================================================ */
-#atmosphere {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-}
-#dot-grid {
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, #ffffff0a 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 1; transition: opacity 1.5s var(--ease-out-expo);
-}
-#blueprint-grid {
-  position: absolute; inset: 0; opacity: 0;
-  transition: opacity 1.5s var(--ease-out-expo);
-  overflow: hidden;
-}
-#blueprint-inner {
-  width: 100%; height: 200%;
-  animation: blueprint-drift 28s linear infinite;
-  transform: perspective(800px) rotateX(55deg) scale(2.5);
-  transform-origin: center center;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 70%);
-}
-@keyframes blueprint-drift {
-  from { transform: perspective(800px) rotateX(55deg) scale(2.5) translateY(0); }
-  to   { transform: perspective(800px) rotateX(55deg) scale(2.5) translateY(-50%); }
-}
-#radial-glows { position: absolute; inset: 0; }
-#gradient-mesh {
-  position: absolute; inset: 0; opacity: 0;
-  transition: opacity 1.5s var(--ease-out-expo);
-}
-#warm-overlay {
-  position: absolute; inset: 0; opacity: 0;
-  background: #1a1410;
-  transition: opacity 1.5s var(--ease-out-expo);
-}
-@keyframes breathe-cyan {
-  0%, 100% { opacity: 0.08; transform: translate(-50%,-50%) scale(1); }
-  50% { opacity: 0.18; transform: translate(-50%,-50%) scale(1.06); }
-}
+/* The old atmosphere (cursor glow, particle canvas, dot and blueprint grids, glows) is gone: the night sky replaced it
+   (src/components/space/page-sky.ts, portfolio.css). These two drifts stay for src/components/CTABlock.astro. */
 @keyframes mesh-drift-1 {
   0%,100% { transform: translate(0,0) scale(1); }
   50% { transform: translate(40px, 30px) scale(1.05); }
@@ -184,16 +133,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ================================================================
-   MINIMAL NAV
+   MINIMAL NAV: the live nav (#site-nav) is styled in src/styles/nav.css. .nav-logo and .nav-cta belong to the
+   unused src/components/Nav.astro.
    ================================================================ */
-#site-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px;
-  pointer-events: none;
-}
-#site-nav a { pointer-events: auto; }
 .nav-logo {
   font-size: 18px; font-weight: 500; letter-spacing: -0.01em;
   color: var(--text-primary); opacity: 0.5; transition: opacity 0.3s;
@@ -846,8 +788,7 @@ img { max-width: 100%; height: auto; }
    ================================================================ */
 @media (max-width: 767px) {
 
-  /* ---- Nav ---- */
-  #site-nav { padding: 0 16px; }
+  /* ---- Nav (the live one's phone layout is in nav.css) ---- */
   .nav-logo { font-size: 16px; }
   .nav-cta { font-size: 12px; }
 
@@ -922,11 +863,6 @@ img { max-width: 100%; height: auto; }
   }
   .footer-links { gap: 20px; }
   .footer-links a { padding: 4px 0; }
-
-  /* ---- Atmosphere: simplify on mobile ---- */
-  #cursor-glow { display: none; }
-  #particle-canvas { opacity: 0.4; }
-  #blueprint-grid { display: none; }
 
   /* ---- Reveal animations: reduce movement on mobile ---- */
   .reveal-section { transform: translateY(16px); }

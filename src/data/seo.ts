@@ -47,7 +47,7 @@ export const breadcrumbList = (crumbs: Crumb[]) => ({
 
 export const projectCrumbs = (p: Project): Crumb[] => [
   { name: 'Home', path: '/' },
-  { name: 'Work', path: '/work' },
+  { name: 'Results', path: '/work' },
   { name: p.name, path: `/work/${p.slug}` },
 ];
 

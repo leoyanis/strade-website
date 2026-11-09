@@ -24,3 +24,6 @@ pnpm-debug.log*
 .idea/
 .vercel
 .env*.local
+
+# local scratch (previews, contact sheets)
+.scratch/

@@ -1,0 +1,55 @@
+---
+// Car lab: Yanis shapes the Star Car himself with sliders. Private: no site nav or footer, not indexed.
+// Scene + UI: components/vision/ssi/carlab.ts. Parametric car + slider schema: carlab-model.ts.
+import Base from '../../../../layouts/Base.astro';
+---
+
+<Base
+  title="Car lab | Strade Space Industries"
+  description="Private parametric lab for the Star Car shape."
+  path="/vision/ssi/star-car/lab"
+  bare
+  noindex
+  hideFooter
+>
+  <meta slot="head" name="theme-color" content="#000000" />
+  <div class="lab">
+    <canvas id="lab-canvas" class="lab-canvas" aria-label="Parametric Star Car clay model"></canvas>
+    <div class="lab-views" role="group" aria-label="Camera views">
+      <button type="button" data-view="3/4">3/4</button>
+      <button type="button" data-view="side">Side</button>
+      <button type="button" data-view="front">Front</button>
+      <button type="button" data-view="rear">Rear</button>
+      <button type="button" data-view="top">Top</button>
+    </div>
+    <div id="lab-gui" class="lab-gui"></div>
+    <div id="lab-toast" class="lab-toast" aria-live="polite"></div>
+  </div>
+</Base>
+
+<script>
+  import { initCarLab } from '../../../../components/vision/ssi/carlab';
+  initCarLab();
+</script>
+
+<style is:global>
+  body.is-bare { background: #000; }
+  body.is-bare #site-nav, body.is-bare #scroll-progress { display: none; }
+  .lab { position: fixed; inset: 0; background: #000; overflow: hidden; }
+  .lab-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .lab-views { position: absolute; left: 16px; bottom: 16px; display: flex; gap: 6px; flex-wrap: wrap; z-index: 2; }
+  .lab-views button {
+    font: 500 12px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.04em; color: #eee;
+    background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 9px 12px; border-radius: 999px; cursor: pointer;
+  }
+  .lab-views button:hover { background: rgba(255, 255, 255, 0.14); }
+  .lab-gui { position: absolute; top: 0; right: 0; max-height: 100%; overflow-y: auto; z-index: 3; }
+  .lab-gui .lil-gui.root { --width: 300px; --font-size: 11.5px; --widget-height: 22px; }
+  .lab-toast {
+    position: absolute; left: 50%; top: 18px; transform: translateX(-50%); z-index: 4;
+    font: 500 12px ui-monospace, Menlo, monospace; color: #000; background: #eee; padding: 8px 12px; border-radius: 6px;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .lab-toast.on { opacity: 1; }
+</style>

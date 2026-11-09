@@ -18,7 +18,9 @@ const EMAIL = SITE.email;
       <p style="color:var(--text-secondary);font-size:18px;max-width:480px;margin-bottom:48px">
         Book a 30-minute call or reach out directly.
       </p>
-      <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <!-- .hero-actions for its phone rule (every button full width, as on /404); on wider screens the inline style keeps
+           the row as it was: left-aligned, 16px apart, no extra space above -->
+      <div class="hero-actions" style="justify-content:flex-start;gap:16px;margin-top:0">
         <a href={CALENDLY} target="_blank" rel="noopener" class="btn-primary">
           Book a call &#8594;
         </a>

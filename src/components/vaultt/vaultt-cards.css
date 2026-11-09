@@ -1,0 +1,167 @@
+/* ================================================================
+   VaulttCards (VaulttCards.astro): drawn pieces of the Vaultt app for the homepage numbers.
+   One point is var(--k) (vaultt-home.css sets --vx-k from the column's width), the box 460 x 400 points.
+   The app's look, from NetworkScreen.astro: the page #131517, text #EEF0F1, secondary #CDD1D5, muted #959EA7,
+   blue #70A9FF, glass at white 12% to 5% with a lit top edge, Inter. Static and finished as written here;
+   vaultt-cards.ts moves the cards (transform and opacity only) while their number arrives and leaves.
+   ================================================================ */
+.vxv {
+  --k: var(--vx-k, 1px);
+  position: relative; flex: none; width: calc(var(--k) * 460); height: calc(var(--k) * 400);
+  font-family: Inter, system-ui, -apple-system, sans-serif; color: #EEF0F1; -webkit-font-smoothing: antialiased;
+  line-height: 1.2; letter-spacing: -0.005em;
+  /* a picture, not copy: a drag across it plays with the network behind instead of selecting card text */
+  -webkit-user-select: none; user-select: none;
+}
+
+/* a card: the app's charcoal lifted a step (#1D2024 to #17191C), a hairline rim and a lit top edge, and a long
+   soft shadow onto the navy so it floats over the network */
+.vxv__card {
+  position: absolute; display: block; overflow: hidden; border-radius: calc(var(--k) * 20);
+  background: linear-gradient(180deg, #1F2226 0%, #17191C 100%);
+  box-shadow:
+    inset 0 0 0 calc(var(--k) * 1) rgba(255, 255, 255, 0.075),
+    inset 0 calc(var(--k) * 1) 0 rgba(255, 255, 255, 0.07),
+    0 calc(var(--k) * 30) calc(var(--k) * 56) calc(var(--k) * -20) rgba(2, 8, 22, 0.78),
+    0 calc(var(--k) * 8) calc(var(--k) * 20) rgba(2, 8, 22, 0.32);
+}
+.vxv__card > * { position: absolute; }
+
+/* avatars: a deep tint of the person's kind colour, a ring in that colour and their initials (the Network map's
+   connections, NetworkMap / network.ts) */
+.vxv__av {
+  display: grid; place-items: center; border-radius: 50%; color: #fff; font-weight: 700; letter-spacing: 0.01em;
+  background: color-mix(in srgb, var(--c, #70A9FF) 42%, #121417);
+}
+.vxv__av--lg {
+  left: calc(var(--k) * 14); top: calc(var(--k) * 50); width: calc(var(--k) * 58); height: calc(var(--k) * 58); font-size: calc(var(--k) * 18);
+  box-shadow: 0 0 0 calc(var(--k) * 3) #1E2125, 0 0 0 calc(var(--k) * 5) var(--c, #70A9FF);
+}
+.vxv__av--sm {
+  position: static; width: calc(var(--k) * 18); height: calc(var(--k) * 18); font-size: calc(var(--k) * 7.5);
+  box-shadow: 0 0 0 calc(var(--k) * 1.2) var(--c, #70A9FF);
+}
+
+/* ---------- builders: profile cards fanned from a pivot below them, the front one in the middle ---------- */
+.vxv--builders .vxv__person {
+  left: calc(var(--k) * 132); top: calc(var(--k) * 64); width: calc(var(--k) * 196); height: calc(var(--k) * 262);
+  transform-origin: 50% calc(var(--k) * 560); transform: rotate(var(--r));
+}
+.vxv__cover { left: 0; top: 0; right: 0; height: calc(var(--k) * 80); border-radius: 0; }
+.vxv__name { left: calc(var(--k) * 14); top: calc(var(--k) * 120); font-size: calc(var(--k) * 17); font-weight: 600; letter-spacing: -0.015em; }
+.vxv__line { left: calc(var(--k) * 14); top: calc(var(--k) * 143); font-size: calc(var(--k) * 12.5); font-weight: 600; color: color-mix(in srgb, var(--c) 72%, #fff); }
+.vxv__city { left: calc(var(--k) * 14); top: calc(var(--k) * 162); display: flex; align-items: center; gap: calc(var(--k) * 4); font-size: calc(var(--k) * 12); font-weight: 500; color: #959EA7; }
+.vxv__city svg { width: calc(var(--k) * 12); height: calc(var(--k) * 12); }
+.vxv__shots { left: calc(var(--k) * 14); top: calc(var(--k) * 192); display: flex; gap: calc(var(--k) * 6); }
+.vxv__shots > .vxs { position: relative; display: block; width: calc(var(--k) * 52); height: calc(var(--k) * 52); border-radius: calc(var(--k) * 11); }
+
+/* ---------- projects: five cards by kind, spread on the table ---------- */
+.vxv--projects .vxv__proj {
+  left: calc(var(--k) * (var(--x) - 78)); top: calc(var(--k) * (var(--y) - 94)); width: calc(var(--k) * 156); height: calc(var(--k) * 188);
+  transform: rotate(var(--r)); border-radius: calc(var(--k) * 18);
+}
+.vxv__still { left: calc(var(--k) * 8); top: calc(var(--k) * 8); right: calc(var(--k) * 8); height: calc(var(--k) * 112); border-radius: calc(var(--k) * 12); }
+.vxv__title { left: calc(var(--k) * 14); top: calc(var(--k) * 131); font-size: calc(var(--k) * 14.5); font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; }
+.vxv__by { left: calc(var(--k) * 14); top: calc(var(--k) * 154); display: flex; align-items: center; gap: calc(var(--k) * 6); font-size: calc(var(--k) * 11.5); font-weight: 500; color: #CDD1D5; }
+.vxv__chip {
+  left: calc(var(--k) * 15); top: calc(var(--k) * 15); display: flex; align-items: center; gap: calc(var(--k) * 5);
+  height: calc(var(--k) * 19); padding: 0 calc(var(--k) * 8) 0 calc(var(--k) * 7); border-radius: 999px;
+  font-size: calc(var(--k) * 10.5); font-weight: 600; letter-spacing: 0.005em; color: #EEF0F1;
+  /* a dark pill over the still (no backdrop blur: the card moves, and a moving backdrop filter repaints every frame) */
+  background: rgba(14, 16, 19, 0.74); box-shadow: inset 0 0 0 calc(var(--k) * 0.8) rgba(255, 255, 255, 0.12);
+}
+.vxv__chip i { width: calc(var(--k) * 6); height: calc(var(--k) * 6); border-radius: 50%; background: var(--c); box-shadow: 0 0 calc(var(--k) * 5) var(--c); }
+
+/* ---------- jobs: the Work tab's cards with their Applied state ---------- */
+.vxv--jobs .vxv__job {
+  left: calc(var(--k) * var(--x)); top: calc(var(--k) * var(--y)); width: calc(var(--k) * 412); height: calc(var(--k) * 100);
+  transform: rotate(var(--r)); border-radius: calc(var(--k) * 20);
+}
+.vxv__logo {
+  left: calc(var(--k) * 16); top: calc(var(--k) * 22); width: calc(var(--k) * 56); height: calc(var(--k) * 56); border-radius: calc(var(--k) * 16);
+  display: grid; place-items: center; overflow: hidden; box-shadow: inset 0 0 0 calc(var(--k) * 1) rgba(255, 255, 255, 0.12);
+}
+.vxv__logo svg { width: 64%; height: 64%; display: block; }
+/* Tidewick: waves over teal; Moonbarrow: a crescent over violet; Quillfern: a leaf over green */
+.vxv__logo--wave { background: linear-gradient(150deg, #3FE0CD, #1C86B8); }
+.vxv__logo--moon { background: radial-gradient(circle at 72% 24%, rgba(255, 255, 255, 0.18), transparent 46%), linear-gradient(150deg, #8A6CFF, #3B1D8F); }
+.vxv__logo--leaf { background: linear-gradient(150deg, #9BE85C, #2B9A5A); }
+.vxv__role { left: calc(var(--k) * 88); top: calc(var(--k) * 21); font-size: calc(var(--k) * 15.5); font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; }
+.vxv__co { left: calc(var(--k) * 88); top: calc(var(--k) * 44); font-size: calc(var(--k) * 12.5); font-weight: 500; color: #959EA7; white-space: nowrap; }
+.vxv__co b { font-weight: 500; margin: 0 calc(var(--k) * 2); color: #6B737B; }
+.vxv__tags { left: calc(var(--k) * 88); top: calc(var(--k) * 66); display: flex; gap: calc(var(--k) * 6); }
+.vxv__tags span {
+  display: flex; align-items: center; height: calc(var(--k) * 20); padding: 0 calc(var(--k) * 8); border-radius: 999px;
+  font-size: calc(var(--k) * 10.5); font-weight: 500; color: #CDD1D5;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04)); box-shadow: inset 0 0 0 calc(var(--k) * 0.7) rgba(255, 255, 255, 0.09);
+}
+/* the state: Apply (the app's blue pill) or Applied (a green tick); both sit in one place and cross-fade */
+.vxv__state { right: calc(var(--k) * 16); top: 50%; translate: 0 -50%; display: grid; justify-items: end; }
+.vxv__state > span {
+  grid-area: 1 / 1; display: flex; align-items: center; gap: calc(var(--k) * 5); height: calc(var(--k) * 32); border-radius: 999px;
+  font-size: calc(var(--k) * 13); font-weight: 600; white-space: nowrap;
+  transition: opacity 0.32s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.vxv__apply { padding: 0 calc(var(--k) * 17); background: #70A9FF; color: #171A1C; box-shadow: 0 calc(var(--k) * 6) calc(var(--k) * 18) rgba(112, 169, 255, 0.3); }
+.vxv__applied {
+  padding: 0 calc(var(--k) * 13) 0 calc(var(--k) * 10); color: #A9EE80; background: rgba(139, 224, 78, 0.13);
+  box-shadow: inset 0 0 0 calc(var(--k) * 0.8) rgba(139, 224, 78, 0.3);
+}
+.vxv__applied svg { width: calc(var(--k) * 15); height: calc(var(--k) * 15); }
+.vxv__job .vxv__applied { opacity: 0; transform: scale(0.7); }
+.vxv__job.is-applied .vxv__applied { opacity: 1; transform: none; }
+.vxv__job.is-applied .vxv__apply { opacity: 0; transform: scale(0.85); }
+/* The live card (the last job) reads Applied as written: the finished state without JS, with reduced motion and
+   with ?still. When a script will turn it (html.vx-live, set by an inline script in VaulttHome.astro before the
+   cards are parsed) it starts on Apply from the very first paint, and vaultt-cards.ts turns it to Applied with the
+   scroll while its number holds, so a reload part-way down never shows Applied, then Apply, then Applied */
+html.vx-live .vxv__job--live:not(.is-done) .vxv__applied { opacity: 0; transform: scale(0.7); }
+html.vx-live .vxv__job--live:not(.is-done) .vxv__apply { opacity: 1; transform: none; }
+/* once the script has the card (html.vx-live-on) it places both states for the scroll (inline opacity and
+   transform), so they must not ease behind it */
+html.vx-live-on .vxv__job--live .vxv__state > span { transition: none; }
+
+/* ---------- drawn project stills (soft colour fields with one shape each; nobody's real work) ----------
+   Sized in percentages, so the same still works as a cover, a thumbnail or a card's picture. Their shape is the
+   first child. The recipes follow the case study's feed (VtApps.astro), redrawn to scale with their box. */
+.vxs { display: block; overflow: hidden; }
+.vxs > * { position: absolute; display: block; }
+/* art: dusk, a sun over a dark hill */
+.vxs--dusk { background: radial-gradient(circle at 64% 56%, #FFE6B8 0 8%, rgba(255, 214, 160, 0.4) 9.5%, transparent 21%), radial-gradient(130% 62% at 18% 108%, #2A1640 0 50%, transparent 51%), linear-gradient(180deg, #F7769E, #FFAE7A 62%, #FF8A6E); }
+/* film: a night scene in letterbox bars, a lit bus crossing it */
+.vxs--reel { background: linear-gradient(#05070C 0 12%, transparent 12% 88%, #05070C 88%), radial-gradient(90% 70% at 72% 100%, #0B1F3E 0 45%, transparent 46%), linear-gradient(180deg, #3D7FD6, #1C4FB8 70%, #13308A); }
+.vxs--reel > * { left: 18%; width: 46%; bottom: 22%; height: 17%; border-radius: 0.3em; background: repeating-linear-gradient(90deg, #FFD27A 0 13%, #16203A 13% 18%) 50% 30% / 84% 42% no-repeat, #16203A; box-shadow: 0 0 1.2em rgba(255, 210, 122, 0.35); }
+/* art: paper cut-outs */
+.vxs--paper { background: radial-gradient(40% 46% at 32% 42%, #FF5FA2 0 60%, transparent 63%), radial-gradient(30% 36% at 68% 62%, #FFB37A 0 58%, transparent 62%), radial-gradient(22% 26% at 62% 24%, #A27BFF 0 56%, transparent 60%), linear-gradient(160deg, #2A1E3F, #1B1430); }
+/* art: a neon ring */
+.vxs--neon { background: radial-gradient(circle at 50% 48%, transparent 0 24%, #FF5FA2 25% 28%, transparent 29.5%), radial-gradient(circle at 50% 48%, rgba(255, 95, 162, 0.35), transparent 62%), linear-gradient(160deg, #1A0E3A, #3B1D8F); }
+/* code: lines of code on navy */
+.vxs--code {
+  background-color: #0F1E36;
+  background-image: linear-gradient(#4C8DFF, #4C8DFF), linear-gradient(#8BE04E, #8BE04E), linear-gradient(#8EBBFF, #8EBBFF), linear-gradient(#FF9A3D, #FF9A3D), linear-gradient(#A27BFF, #A27BFF), linear-gradient(#8EBBFF, #8EBBFF);
+  background-size: 44% 6%, 40% 6%, 26% 6%, 22% 6%, 30% 6%, 48% 6%;
+  background-position: 25% 23%, 36.7% 36%, 29.7% 49%, 66.7% 49%, 20% 62%, 42.3% 75%;
+  background-repeat: no-repeat;
+}
+/* games: a platformer, a block hero and a coin */
+.vxs--arcade { background: linear-gradient(#24A57E, #1B7F62) 0 100% / 100% 22% no-repeat, linear-gradient(#2FD4C1, #23B3A3) 18% 62% / 40% 7% no-repeat, linear-gradient(#2FD4C1, #23B3A3) 88% 36% / 28% 7% no-repeat, linear-gradient(180deg, #23165A, #4A2FD0 64%, #7A5CFF); }
+.vxs--arcade > * { left: 26%; top: 44%; width: 14%; aspect-ratio: 1; border-radius: 22%; background: #FFCF4A; box-shadow: inset -0.12em -0.12em 0 rgba(160, 90, 0, 0.35), 3.2em -1.5em 0 -0.2em #FFE07A; font-size: 1px; }
+/* games: a night garden */
+.vxs--garden { background: radial-gradient(60% 40% at 30% 100%, #1F7A52 0 60%, transparent 62%), radial-gradient(50% 36% at 76% 100%, #4E9A2E 0 58%, transparent 60%), radial-gradient(circle at 70% 30%, #FFF1C2 0 7%, rgba(255, 241, 194, 0.25) 8.5%, transparent 18%), linear-gradient(180deg, #13305A, #2F5E8F); }
+/* music: keys and a speaker */
+.vxs--synth { background: repeating-linear-gradient(90deg, rgba(232, 241, 255, 0.85) 0 9%, #0B1220 9% 10.5%) 0 100% / 100% 36% no-repeat, linear-gradient(160deg, #C2621C, #E09A1E); }
+.vxs--synth > * { left: 12%; top: 14%; width: 26%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 42% 42%, #fff 0 9%, #0B1220 11% 100%); }
+/* science: orbits round a planet */
+.vxs--orbit { background: radial-gradient(circle at 50% 54%, #D7C4FF 0 7%, #A27BFF 8.5%, transparent 9.5%), radial-gradient(circle at 50% 54%, transparent 0 23.5%, rgba(195, 166, 255, 0.6) 24% 25%, transparent 25.5%), radial-gradient(circle at 50% 54%, transparent 0 37.5%, rgba(139, 224, 78, 0.5) 38% 39%, transparent 39.5%), linear-gradient(160deg, #1B1440, #2C1F66); }
+.vxs--orbit > * { left: 70%; top: 30%; width: 8%; aspect-ratio: 1; border-radius: 50%; background: #8BE04E; box-shadow: 0 0 0.6em #8BE04E; font-size: 10px; }
+/* business: a chart climbing */
+.vxs--chart {
+  background-image: linear-gradient(#FFCF4A, #F5A623), linear-gradient(#FFB45E, #F59A2A), linear-gradient(#FF9A3D, #EE7F22), linear-gradient(#FF9A3D, #E2701A), linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.28)), linear-gradient(160deg, #2C1C0E, #46280F);
+  background-size: 12% 26%, 12% 40%, 12% 54%, 12% 68%, 76% 1.6%, 100% 100%;
+  background-position: 18.2% 75.7%, 38.6% 70%, 59.1% 60.9%, 79.5% 43.75%, 50% 83.4%, 0 0;
+  background-repeat: no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vxv__state > span { transition: none; }
+}

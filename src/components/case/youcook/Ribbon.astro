@@ -4,7 +4,7 @@ const front = ['Photo, voice or text in', 'A recipe in seconds', 'Step-by-step c
 const back = ['🍚 Rice', '🥦 Broccoli', '🥬 Lettuce', '🍊 Orange', '🥩 Beef', '🥛 Milk', '🥚 Eggs', '🧈 Butter', '🧀 Parmesan', '🌶️ Chilli', '🍝 Pasta', '🐟 Tuna', '🍋 Lemon', '🧅 Onion', '🥕 Carrot', '🍗 Chicken'];
 ---
 
-<div class="ribbons" aria-label="What YouCook does">
+<div class="ribbons" data-offscreen-pause aria-label="What YouCook does">
   <div class="ribbon ribbon--back" aria-hidden="true">
     <div class="ribbon__track ribbon__track--rev">
       {[0, 1].map(() => back.map((t) => <span class="ribbon__item ribbon__item--sm">{t}</span>))}

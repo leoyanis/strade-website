@@ -1,0 +1,466 @@
+---
+// Strade Space Industries: the company, then its range. Standalone, private page: no site nav or footer, not indexed.
+// Super minimal: each section carries one thing. A WebGL night sky sits behind the whole page
+// (src/components/vision/ssi/starfield.ts); motion and the sky "director" live in motion.ts.
+// Mobility: a frosted-glass card; one WebGL cinematic plays inside it (src/components/vision/ssi/mob-*.ts):
+// lights in the dark (the Star Car's headlights ignite), then the Moon; the beat's line on the right,
+// scrubbed by the scroll.
+// The rest of the range is one pinned scene per category (src/components/vision/ssi/land-scene-*.ts).
+// Black and white; cyan (#00e5ff) only for tiny details. Geist for all text; Michroma only for the tiny product codes.
+import Base from '../../layouts/Base.astro';
+import Emblem from '../../components/vision/ssi/Emblem.astro';
+
+const FONTS =
+  'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Michroma&display=swap';
+
+// The divisions: one row under the title that sticks over the range as its tab bar. The lit one follows
+// the scroll (motion.ts); Mining is real but closed for now.
+const DIVISIONS: { name: string; href?: string; on?: boolean }[] = [
+  { name: 'Vehicles', href: '#ssi-vehicles', on: true },
+  { name: 'Energy', href: '#ssi-energy' },
+  { name: 'Mining' },
+];
+
+// Mobility: one line per beat of the card's cinematic (mob-timeline.ts keys its timing to this order).
+const BEATS: { h: string; line?: string }[] = [
+  { h: 'Star Car.' },
+  { h: '500 km on one charge.', line: 'Then a Starcell swap, and 500 more.' },
+];
+
+type Item = { code: string; name: string; line: string; href?: string };
+const RANGE: { id: string; name: string; items: Item[] }[] = [
+  {
+    id: 'energy',
+    name: 'Energy',
+    items: [
+      { code: 'SCL', name: 'Starcell', line: 'One swappable battery in every Strade machine.' },
+      { code: 'SPR', name: 'Spire', line: 'Tall solar masts that follow the low polar sun.' },
+      { code: 'NBK', name: 'Nightbank', line: 'Stores daylight as water and gives it back through the 14-day night.' },
+      { code: 'GRD', name: 'Gridline', line: 'Buried cable that ties masts, banks and bases into one grid.' },
+    ],
+  },
+];
+---
+
+<Base
+  title="Strade Space Industries"
+  description="Infrastructure for the stars: vehicles, energy, mining, connection and spacecraft for the Moon and Mars."
+  path="/vision/ssi"
+  pageType="article"
+  crumbs={[
+    { name: 'Home', path: '/' },
+    { name: 'Strade Space Industries', path: '/vision/ssi' },
+  ]}
+  bare
+  noindex
+  hideFooter
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={FONTS} />
+  <meta slot="head" name="theme-color" content="#000000" />
+  <!-- intro gate: hide the hero parts until the motion takes over (failsafe if JS never arrives) -->
+  <script slot="head" is:inline>
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var h = document.documentElement;
+      h.classList.add('ssi-intro');
+      setTimeout(function () { h.classList.remove('ssi-intro'); }, 9000);
+    }
+  </script>
+
+  <div class="ssi" id="ssi">
+    <!-- static stars for the first paint and for no-JS; the WebGL sky covers them -->
+    <div class="ssi-fallback" aria-hidden="true"></div>
+
+    <!-- ============ hero ============ -->
+    <section class="ssi-hero" id="ssi-top" data-sky-live data-fx="hero">
+      <div class="ssi-hero-in">
+        <!--
+          EMBLEM SLOT: the animated SVG emblem (Emblem.astro). motion.ts → hero plays its "ignition"
+          intro (emblem-motion.ts, tuned values in ignition-settings.json) once the stars are out.
+          Without JS or with reduced motion it simply shows the finished emblem.
+          To swap it for another file later, replace <Emblem> and keep the .ssi-mark wrapper.
+        -->
+        <div class="ssi-mark" data-intro data-emblem-slot>
+          <Emblem uid="ssi-hero-emb" class="ssi-emb" />
+        </div>
+        <h1 class="ssi-h1" data-intro>
+          <span class="sr">Strade Space Industries</span>
+          <img src="/images/ssi/emblem-wordmark.webp" alt="" width="752" height="147" />
+        </h1>
+      </div>
+    </section>
+
+    <!-- ============ the company: one statement ============ -->
+    <section class="ssi-co" aria-labelledby="ssi-co-h" data-sky-live data-fx="company">
+      <div class="ssi-co-in">
+        <!-- "the stars." is one unit: it arrives as one, and never wraps apart -->
+        <h2 class="ssi-co-h" id="ssi-co-h">Infrastructure for <span class="u">the stars.</span></h2>
+      </div>
+    </section>
+
+    <!-- ============ the divisions: one row under the title; it sticks over the range below as its tab bar ============ -->
+    <div class="ssi-run">
+    <!-- where the row starts to stick: motion.ts watches this marker to shade the row once content runs under it -->
+    <i class="ssi-run-top" aria-hidden="true"></i>
+    <nav class="ssi-div" aria-label="Divisions" data-fx="divisions">
+      <ul class="div-list">
+        {DIVISIONS.map((d) => (
+          <li class:list={['div-it', d.on && 'is-on', !d.href && 'is-off']} data-div={d.href ? d.href.slice(1) : undefined}>
+            {d.href ? (
+              <a href={d.href} aria-current={d.on ? 'true' : undefined}>{d.name}</a>
+            ) : (
+              <span aria-disabled="true">{d.name}<small class="soon">Soon</small></span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- ============ Mobility: the glass card; the cinematic plays inside it ============ -->
+    <section class="ssi-mob" id="ssi-vehicles" aria-labelledby="ssi-mob-h" data-fx="mobility">
+      <div class="mob-stage">
+        <div class="mob-grid">
+          <div class="mob-left">
+            <div class="mob-card"></div>
+          </div>
+          <div class="mob-copy">
+            <h2 class="mob-h" id="ssi-mob-h">Mobility</h2>
+            <ol class="mob-beats">
+              {BEATS.map((b) => (
+                <li class="mob-beat">
+                  <h3>{b.h}</h3>
+                  {b.line && <p>{b.line}</p>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+        <canvas class="mob-gl" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <!-- ============ the range: one pinned scene per category ============ -->
+    {RANGE.map((c) => (
+      <section class="ssi-cat" id={`ssi-${c.id}`} aria-labelledby={`ssi-${c.id}-h`} data-fx="cat" data-scene={c.id}>
+        <div class="ssi-stage" aria-hidden="true"><canvas></canvas></div>
+        <div class="ssi-cat-text">
+          <h2 class="ssi-cat-h" id={`ssi-${c.id}-h`}>{c.name}</h2>
+          <div class="ssi-win">
+            <ol class="ssi-list">
+              {c.items.map((it) => (
+                <li class="ssi-p">
+                  <h3 class="name">
+                    {it.href ? <a href={it.href}>{it.name}<span class="arw" aria-hidden="true"> →</span></a> : it.name}
+                    <span class="code">{it.code}</span>
+                  </h3>
+                  <p class="line">{it.line}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+    ))}
+    </div>
+
+    <!-- ============ end: the sky opens back up around the star ============ -->
+    <section class="ssi-end" data-sky-live data-fx="end">
+      <a href="#ssi-top" class="ssi-end-star" aria-label="Back to the top">
+        <img src="/images/ssi/emblem-star.webp" alt="" width="393" height="500" loading="lazy" />
+      </a>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { initSSI } from '../../components/vision/ssi/motion';
+  initSSI();
+</script>
+
+<style is:global>
+  /* ---------- standalone page: none of the site chrome ---------- */
+  body.is-bare { background: #000; }
+  body.is-bare #site-nav, body.is-bare #scroll-progress { display: none; }
+
+  /* ---------- tokens: this page is its own small brand ---------- */
+  .ssi {
+    --bg: #000;
+    --ink: #f5f5f5;
+    --hi: #fff;
+    --soft: rgba(245, 245, 245, 0.66);
+    --faint: rgba(245, 245, 245, 0.4);
+    --line: rgba(245, 245, 245, 0.14);
+    --accent: #00e5ff; /* tiny details only: ~1% of the page */
+    --sans: 'Geist', 'Inter Tight', system-ui, -apple-system, sans-serif;
+    --wide: 'Michroma', var(--sans); /* tiny product codes only */
+    --fs-line: clamp(17px, 1.25vw, 20px);
+    --fs-item: clamp(21px, 1.7vw, 27px);
+    --fs-body: clamp(15px, 1.05vw, 17px);
+    --fs-code: 9.5px;
+    --gutter: 16px;
+    --peek: clamp(72px, 13svh, 132px);
+    --out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    position: relative;
+    z-index: 2;
+    overflow-x: clip;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  @media (min-width: 768px) { .ssi { --gutter: 40px; } }
+  .ssi ::selection { background: rgba(255, 255, 255, 0.88); color: #000; }
+  .ssi a:focus-visible { outline: 2px solid var(--hi); outline-offset: 4px; }
+  .ssi .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- the sky ---------- */
+  .ssi-canvas {
+    position: fixed; left: 0; top: 0; z-index: -1; display: block;
+    width: 100%; height: 100vh; height: 100lvh; pointer-events: none;
+  }
+  .ssi-fallback {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background:
+      radial-gradient(1px 1px at 12% 22%, #fff9, transparent), radial-gradient(1px 1px at 78% 14%, #fffa, transparent),
+      radial-gradient(1.5px 1.5px at 64% 68%, #fff8, transparent), radial-gradient(1px 1px at 32% 80%, #fff7, transparent),
+      radial-gradient(1px 1px at 88% 52%, #fff9, transparent), radial-gradient(1px 1px at 46% 36%, #fff6, transparent),
+      radial-gradient(1.5px 1.5px at 20% 58%, #fff8, transparent), radial-gradient(1px 1px at 92% 86%, #fff6, transparent),
+      radial-gradient(1px 1px at 6% 90%, #fff7, transparent), radial-gradient(1px 1px at 55% 8%, #fff8, transparent),
+      radial-gradient(1px 1px at 71% 39%, #fff5, transparent), radial-gradient(1px 1px at 26% 9%, #fff6, transparent);
+  }
+  .ssi.has-sky .ssi-fallback { display: none; }
+  /* intro gate: the logo waits for the stars (motion.ts fades it in; this is only the no-JS failsafe) */
+  .ssi [data-intro] { transition: opacity 2.4s ease; }
+  .ssi-intro [data-intro] { opacity: 0; }
+
+  /* ---------- hero ---------- */
+  .ssi-hero {
+    position: relative; display: grid; place-items: center;
+    min-height: calc(100svh - var(--peek)); padding: 72px var(--gutter) 40px;
+  }
+  .ssi-hero-in { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 26px; }
+  /* a soft dark pool behind the title, so it reads over the Milky Way */
+  .ssi-hero-in::before {
+    content: ''; position: absolute; z-index: -1; left: 50%; top: 50%; width: 150%; height: 140%; translate: -50% -50%;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.3) 55%, transparent);
+    pointer-events: none;
+  }
+  /* the emblem slot: sized box; whatever sits inside fills it */
+  .ssi-mark { width: clamp(96px, 11vw, 150px); aspect-ratio: 393 / 500; filter: drop-shadow(0 0 22px rgba(215, 240, 255, 0.34)); }
+  .ssi-mark > * { display: block; width: 100%; height: 100%; object-fit: contain; overflow: visible; }
+  .ssi-h1 { width: min(540px, 80vw); margin: 2px 0 0; }
+  .ssi-h1 img { display: block; width: 100%; height: auto; }
+
+  /* ---------- the company ---------- */
+  /* the title sits at the foot of its block, so the divisions row follows right under it */
+  .ssi-co { position: relative; min-height: 62svh; display: grid; place-items: end center; padding: 40px var(--gutter) 0; text-align: center; }
+  .ssi-co-in { position: relative; display: grid; justify-items: center; gap: clamp(22px, 2.6vw, 36px); }
+  .ssi-co-in::before {
+    content: ''; position: absolute; z-index: -1; left: 50%; top: 50%; width: 112%; height: 130%; translate: -50% -50%;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.16) 60%, transparent);
+    pointer-events: none;
+  }
+  .ssi-co-h {
+    margin: 0; max-width: 13ch; font-weight: 500; font-size: clamp(46px, 8.4vw, 148px); line-height: 0.96; letter-spacing: -0.045em;
+    color: var(--hi); text-wrap: balance;
+  }
+  .ssi-co-h .w, .ssi-co-h .u { display: inline-block; }
+
+  /* ---------- the divisions: one row right under the title, then the range's sticky tab bar ---------- */
+  /* .ssi-run holds the row and the range, so the row sticks exactly as long as the range lasts */
+  .ssi-run { position: relative; }
+  .ssi-div { position: sticky; top: 0; z-index: 6; padding: clamp(14px, 2.4svh, 26px) var(--gutter); pointer-events: none; }
+  /* Once the row sticks, content runs under it: the Moon on phones, a range heading as its section leaves. Without a
+     shade the big heading slid right through the names ("Energy" over "Mining"). The shade is opaque down past the
+     names and gone 48px below the row; motion.ts sets .is-stuck from the marker, so it only exists while the row is
+     stuck, and fades the range's text out before it reaches the row (a partial shade alone left a dim ghost of it). */
+  .ssi-run-top { position: absolute; left: 0; top: 0; width: 1px; height: 1px; pointer-events: none; }
+  .ssi-div::before {
+    content: ''; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: calc(100% + 48px); pointer-events: none;
+    background: linear-gradient(#000 58%, rgba(0, 0, 0, 0.75) 74%, transparent);
+    opacity: 0; transition: opacity 0.45s var(--out);
+  }
+  .ssi-div.is-stuck::before { opacity: 1; }
+  .div-list {
+    list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: nowrap;
+    gap: clamp(16px, 2.4vw, 44px);
+  }
+  .div-it { position: relative; pointer-events: auto; }
+  .div-it > a, .div-it > span {
+    position: relative; display: inline-block; font-weight: 500; font-size: clamp(28px, 3.9vw, 64px); line-height: 1;
+    letter-spacing: -0.045em; white-space: nowrap; color: rgba(245, 245, 245, 0.26); text-decoration: none;
+    transition: color 0.5s var(--out);
+  }
+  .div-it.is-on > a { color: var(--hi); }
+  .div-it > a:not([aria-current]):hover { color: rgba(245, 245, 245, 0.62); }
+  .div-it.is-off > span { color: rgba(245, 245, 245, 0.13); cursor: default; user-select: none; }
+  /* closed: a tiny note on hover, nothing more */
+  .div-it .soon {
+    position: absolute; left: calc(100% + 10px); top: 0.3em; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; line-height: 1;
+    color: rgba(245, 245, 245, 0.62); opacity: 0; translate: -6px 0; transition: opacity 0.35s var(--out), translate 0.35s var(--out);
+  }
+  .div-it.is-off:hover .soon { opacity: 1; translate: 0 0; }
+  .div-it > a:focus-visible { outline: 2px solid var(--hi); outline-offset: 6px; }
+
+  /* ---------- Mobility: selector + glass card + the beat's line ---------- */
+  /* without JS: one screen, the card and the lines as a list. Live (mob-stage.ts): a tall runway,
+     the stage sticks while the cinematic scrubs through it */
+  .ssi-mob { --run: 420vh; position: relative; }
+  .mob-stage { position: relative; min-height: 100svh; }
+  .ssi-mob.is-live { height: calc(100vh + var(--run)); }
+  /* The range's first scene rises over the last 20% of the runway, while the Moon fades out (mob-timeline.ts: TL.exit
+     starts at 0.87, mob-engine.ts has the Moon gone by 0.93), so the plain and its name are up by the time the Moon has
+     gone. Without the overlap a screen of empty sky sat between the two; at 15% the frame after the Moon still showed
+     little more than the name coming in. Reduced motion keeps the Moon still to the end of the runway (below). */
+  .ssi-mob.is-live { margin-bottom: calc(var(--run) * -0.2); }
+  .ssi-mob.is-live .mob-stage { position: sticky; top: 0; height: 100vh; height: 100svh; min-height: 0; overflow: hidden; }
+  .mob-grid {
+    position: relative; min-height: 100svh; display: grid; align-content: center;
+    grid-template-columns: minmax(0, 1fr); gap: 22px; padding: 64px var(--gutter) 28px;
+  }
+  .ssi-mob.is-live .mob-grid { position: absolute; inset: 0; min-height: 0; }
+  .mob-left { position: relative; display: grid; gap: 12px; min-width: 0; }
+  /* the WebGL cinematic: one canvas over the whole stage, drawn clipped to the card (and freed for the dissolve) */
+  .mob-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 3; }
+
+
+  /* the card: frosted just enough that the stars behind it read, blurred */
+  .mob-card {
+    position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 54svh; border-radius: 22px; overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.075), transparent 55%),
+      rgba(255, 255, 255, 0.028);
+    -webkit-backdrop-filter: blur(3.5px) brightness(1.6) saturate(1.1); backdrop-filter: blur(3.5px) brightness(1.6) saturate(1.1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 30px 80px -30px rgba(0, 0, 0, 0.9);
+  }
+  /* the Moon: the glass steps away on a clock (mob-stage.ts sets .is-moon past a scroll threshold) */
+  .ssi-mob.is-live .mob-card { transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .ssi-mob.is-moon .mob-card { opacity: 0; }
+  /* the lit lamp's picture covers the glass: skip blurring the sky behind it */
+  .ssi-mob.gl-cover .mob-card { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .mob-copy { position: relative; z-index: 4; min-width: 0; }
+  .mob-h { margin: 0 0 14px; font-weight: 500; font-size: clamp(40px, 11vw, 60px); line-height: 0.95; letter-spacing: -0.045em; color: var(--hi); }
+  .mob-beats { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+  .mob-beat h3 { margin: 0; font-weight: 500; font-size: clamp(21px, 5.6vw, 26px); line-height: 1.15; letter-spacing: -0.025em; color: var(--hi); }
+  .mob-beat p { margin: 6px 0 0; max-width: 34ch; font-size: var(--fs-body); line-height: 1.5; color: var(--soft); }
+  /* live (mob-stage.ts): the lines share one slot and swap with the picture */
+  .ssi-mob.is-live .mob-beats { display: grid; grid-template-areas: 'one'; gap: 0; }
+  .ssi-mob.is-live .mob-beat { grid-area: one; opacity: 0; will-change: opacity, transform, filter; }
+  .ssi-mob.is-live .mob-beat:first-child { opacity: 1; }
+
+  @media (min-width: 901px) {
+    .mob-grid {
+      grid-template-columns: minmax(0, 62fr) minmax(0, 38fr); align-items: center; align-content: stretch;
+      gap: clamp(36px, 4.6vw, 84px); padding: 0 clamp(40px, 5vw, 96px);
+    }
+    .mob-left { align-self: center; gap: 14px; }
+    .mob-card { aspect-ratio: 4 / 3; max-height: calc(100vh - 190px); border-radius: 26px; }
+    .mob-h { margin-bottom: clamp(22px, 3.4vh, 38px); font-size: clamp(56px, 5.6vw, 96px); }
+    .mob-beat h3 { font-size: clamp(24px, 2.05vw, 34px); }
+    .mob-beat p { font-size: var(--fs-line); }
+  }
+  @media (max-width: 900px) {
+    .ssi-mob { --run: 380vh; }
+  }
+  /* reduced motion and no JS: the card is a picture frame, the lines a plain list */
+  @media (prefers-reduced-motion: reduce) {
+    .ssi-mob.is-live .mob-card { transition: none; }
+    .ssi-mob.is-live { margin-bottom: 0; }
+    .div-it > a, .div-it > span, .div-it .soon, .ssi-div::before { transition: none; }
+  }
+
+  /* ---------- the range: one scene per category ---------- */
+  /* phones and no-JS: picture on top, the products below */
+  .ssi-cat { position: relative; display: flex; flex-direction: column; }
+  .ssi-stage { position: relative; height: 66svh; min-height: 380px; }
+  /* the picture rises out of the sky above it and dissolves into the sky below it (a mask, not a black fade, so the
+     stars carry on). Its top edge used to be hard: the plain's sun wash met the night in a straight line. The top fade
+     runs about as far as the desktop one (160px or so); over 16% the wash still showed as a band coming up. */
+  .ssi-stage canvas {
+    display: block; width: 100%; height: 100%;
+    -webkit-mask: linear-gradient(transparent, #000 28%, #000 68%, transparent);
+    mask: linear-gradient(transparent, #000 28%, #000 68%, transparent);
+  }
+  .ssi-cat-text { position: relative; padding: 4px var(--gutter) clamp(72px, 14svh, 120px); }
+  .ssi-cat-h {
+    margin: 0 0 28px; font-weight: 500; font-size: clamp(44px, 12vw, 64px); line-height: 0.95; letter-spacing: -0.045em; color: var(--hi);
+  }
+  .ssi-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; }
+  .ssi-p { --k: 1; position: relative; }
+  .ssi-p .name {
+    display: flex; align-items: baseline; gap: 12px; margin: 0;
+    font-weight: 500; font-size: var(--fs-item); line-height: 1.15; letter-spacing: -0.02em; color: var(--hi);
+    opacity: calc(0.36 + var(--k) * 0.64);
+  }
+  .ssi-p .name a { color: inherit; text-decoration: none; }
+  .ssi-p .name .arw { display: inline-block; color: var(--accent); font-weight: 400; transition: translate 0.4s var(--out); }
+  .ssi-p .name a:hover .arw { translate: 5px 0; }
+  .ssi-p .code {
+    font-family: var(--wide); font-size: var(--fs-code); letter-spacing: 0.14em; font-weight: 400; color: var(--faint);
+    translate: 0 -0.25em;
+  }
+  .ssi-p .line {
+    margin: 6px 0 0; max-width: 34ch; font-size: var(--fs-body); line-height: 1.5; color: var(--soft);
+    opacity: calc(0.3 + var(--k) * 0.7);
+  }
+
+  /* desktop: the picture fills the screen, the products sit on the right and step through as you scroll */
+  @media (min-width: 901px) {
+    .ssi-cat { display: block; height: 100vh; min-height: 620px; overflow: hidden; }
+    .ssi-stage { position: absolute; inset: 0; height: auto; min-height: 0; }
+    .ssi-stage canvas { -webkit-mask: none; mask: none; }
+    /* The scene and its shade (::after) fade in and out at the section's top and bottom, so the section rises out of the
+       sky and leaves into it with no edge. Before, its top was a lighter rectangle with a straight seam as it came up
+       (the sun wash), and its bottom cut the grid and the shade off in a line as it left. While pinned the fades sit
+       under the row's shade at the top and at the bottom of the screen. Static mask: nothing on it animates. */
+    .ssi-stage {
+      -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+      mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+    }
+    .ssi-stage::after {
+      content: ''; position: absolute; pointer-events: none;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 48%, rgba(0, 0, 0, 0.55) 66%, rgba(0, 0, 0, 0.82)),
+        linear-gradient(transparent 82%, rgba(0, 0, 0, 0.6));
+    }
+    .ssi-cat-text {
+      position: absolute; top: 0; bottom: 0; right: clamp(40px, 6vw, 112px); width: min(420px, 31vw);
+      display: flex; flex-direction: column; justify-content: center; padding: 0;
+      /* its own layer above the scene, so the pool below sits between the grid and the words */
+      z-index: 1;
+    }
+    /* A soft dark pool behind the name and the products: the growing grid's lines and nodes ran straight through the
+       dim product lines (Nightbank, Gridline), and the shade above (::after) only halves them there. Behind the words
+       the pool keeps about a tenth of a line; past its soft edge the grid shows as before. It is part of the text block,
+       so it leaves with the text when the section unpins (motion.ts). Static: nothing on it animates. */
+    .ssi-cat-text::before {
+      content: ''; position: absolute; z-index: -1; pointer-events: none;
+      inset: 8% -30% 14%;
+      background: radial-gradient(closest-side, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.9) 64%, rgba(0, 0, 0, 0.55) 86%, transparent);
+    }
+    .ssi-cat-h { margin-bottom: clamp(28px, 4.4vh, 48px); font-size: clamp(56px, 5.6vw, 96px); }
+    .ssi-list { gap: clamp(22px, 3.2vh, 34px); }
+  }
+  /* pinned (set by motion.ts): the list scrolls through a window, the active product on its first line */
+  .ssi-cat.is-pinned .ssi-win {
+    height: min(46vh, 420px); overflow: hidden;
+    -webkit-mask: linear-gradient(transparent, #000 4%, #000 58%, transparent 96%);
+    mask: linear-gradient(transparent, #000 4%, #000 58%, transparent 96%);
+  }
+  .ssi-cat.is-pinned .ssi-list { padding-top: 14px; will-change: transform; }
+
+  /* ---------- end ---------- */
+  .ssi-end { position: relative; min-height: 100svh; display: grid; place-items: center; padding: 96px var(--gutter); }
+  .ssi-end-star { display: block; width: clamp(64px, 6.5vw, 92px); aspect-ratio: 393 / 500; border-radius: 8px; filter: drop-shadow(0 0 24px rgba(215, 240, 255, 0.4)); }
+  .ssi-end-star img { display: block; width: 100%; height: 100%; transition: scale 0.6s var(--out); }
+  .ssi-end-star:hover img { scale: 1.08; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ssi-end-star img, .ssi [data-intro] { transition: none; animation: none; }
+  }
+</style>

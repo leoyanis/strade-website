@@ -30,7 +30,18 @@
   font-size: clamp(54px, 10vw, 128px); letter-spacing: -0.055em; line-height: 0.9;
   margin-top: 18px;
 }
-.ql-hero h1 span { color: transparent; -webkit-text-stroke: 1.5px rgba(240, 240, 240, 0.55); }
+/* Outlined words: the stroke is painted first and a fill the colour of the sky behind it over the stroke (paint-order),
+   so the fill hides the stroke's inner half (hence 3px for the 1.5px line) and every place the font's outlines overlap.
+   With a plain stroke on a transparent fill, the crossbars of Inter's t and f were drawn across their stems inside the
+   letters. The sky behind these headings is black (sampled: 0 to 1 of 255), so the fill reads as hollow. The line is
+   opaque, rgb(132 132 132), what the old 55% white made on that black: where two letters touch, two see-through
+   strokes added up to a brighter dash. Split letters keep "ff" in one span (free/motion/core.ts). The same idea as the
+   free act's heading (free-act.css, .fa-h__o). */
+.ql-hero h1 span { color: #000; -webkit-text-stroke: 3px rgb(132 132 132); paint-order: stroke fill; }
+/* /work's headline is a solid word and an outlined full stop. Alone, the 1.5px ring read faint beside the 700 weight at
+   128px, so the dot's ring grows with the type: 1.5px on a phone, about 2.3px at full size (double that as the stroke,
+   which the fill halves), a little brighter. Kept to the dot: a whole outlined word reads best at the lighter line. */
+.ql-hero h1 .ql-hero__dot { -webkit-text-stroke-width: max(3px, 0.036em); -webkit-text-stroke-color: rgb(163 163 163); }
 .ql-hero p { color: var(--text-secondary); font-size: 18px; max-width: 560px; margin-top: 22px; line-height: 1.6; }
 
 /* ---------- HUD stats ---------- */
@@ -58,11 +69,14 @@
   background: linear-gradient(180deg, #ffffff 30%, #7deeff);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   text-shadow: 0 0 40px rgba(0, 229, 255, 0.18);
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .ql-stat__desc { display: block; margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
 .ql-stat__bar { display: block; margin-top: 16px; height: 2px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
 .ql-stat__bar i { display: block; height: 100%; width: var(--fill, 100%); background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transform-origin: left; }
+/* a word unit after a number ("6+ figs"): small, so the stat fits its cell like "112.5B" (data/work.ts STATS) */
+.ql-stat__value small { font-size: 0.42em; letter-spacing: 0; }
 @media (max-width: 900px) { .ql-stats { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 420px) { .ql-stat { padding: 20px 14px 18px; } .ql-stat__desc { font-size: 13px; } }
 
@@ -300,51 +314,80 @@
 }
 
 /* ================================================================
-   ARCHIVE (old projects, generated art instead of screenshots)
+   HONORABLE MENTIONS (built, not testable live: generated art instead of screenshots)
    ================================================================ */
-.aq { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
-.aq-card {
+/* min(100%, 280px): one column on a narrow phone without the grid ever widening the page */
+.hm { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 18px; }
+.hm-card {
   --c: 16px;
-  position: relative; height: 260px; overflow: hidden; isolation: isolate;
+  position: relative; display: flex; flex-direction: column; isolation: isolate;
   clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
-  background: linear-gradient(160deg, #0b0c10, #050608);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 8%, #0b0c10), #050608 72%);
 }
-.aq-card__art { position: absolute; inset: 0; z-index: 0; opacity: 0.85; }
-.aq-card__body { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 20px 22px; background: linear-gradient(transparent, rgba(4, 5, 8, 0.95) 45%); }
-.aq-card__meta { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; }
-.aq-card h3 { font-size: 22px; margin-top: 6px; letter-spacing: -0.02em; }
-.aq-card p { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
+/* the art has the top of the card to itself and fades out above the words: nothing it draws runs under them */
+.hm-card__art {
+  position: relative; flex: none; height: 168px; overflow: hidden; opacity: 0.85;
+  -webkit-mask-image: linear-gradient(#000 62%, transparent); mask-image: linear-gradient(#000 62%, transparent);
+}
+.hm-card__body { flex: 1; padding: 2px 22px 24px; }
+.hm-card__meta { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; }
+.hm-card h3 { font-size: 22px; margin-top: 6px; letter-spacing: -0.02em; line-height: 1.15; }
+.hm-card p { font-size: 13.5px; color: var(--text-secondary); margin-top: 8px; line-height: 1.55; }
 
 /* art: orbit */
-.art-orbit { display: grid; place-items: center; }
-.art-orbit span { position: absolute; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); animation: art-rot 9s linear infinite; }
+.art-orbit span { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); animation: art-rot 9s linear infinite; }
 .art-orbit span::after { content: ''; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
-.art-orbit span:nth-child(1) { width: 70px; height: 70px; top: calc(40% - 35px); left: calc(50% - 35px); animation-duration: 4s; }
-.art-orbit span:nth-child(2) { width: 140px; height: 140px; top: calc(40% - 70px); left: calc(50% - 70px); animation-duration: 7s; animation-direction: reverse; }
-.art-orbit span:nth-child(3) { width: 220px; height: 220px; top: calc(40% - 110px); left: calc(50% - 110px); animation-duration: 12s; }
+.art-orbit span:nth-child(1) { width: 60px; height: 60px; margin: -30px 0 0 -30px; animation-duration: 4s; }
+.art-orbit span:nth-child(2) { width: 112px; height: 112px; margin: -56px 0 0 -56px; animation-duration: 7s; animation-direction: reverse; }
+.art-orbit span:nth-child(3) { width: 166px; height: 166px; margin: -83px 0 0 -83px; animation-duration: 12s; }
 @keyframes art-rot { to { transform: rotate(360deg); } }
 /* art: wave */
-.art-wave svg { position: absolute; inset: 0; width: 100%; height: 70%; }
+.art-wave svg { position: absolute; left: 0; top: 14%; width: 100%; height: 72%; }
 .art-wave path { fill: none; stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 6 10; animation: art-dash 2.4s linear infinite; opacity: 0.7; }
 .art-wave path:nth-child(2) { opacity: 0.4; animation-duration: 3.6s; }
 .art-wave path:nth-child(3) { opacity: 0.2; animation-duration: 5s; }
 @keyframes art-dash { to { stroke-dashoffset: -64; } }
-/* art: grid (synth floor) */
+/* art: grid (a synth floor rolling towards you: the floor slides one cell and starts over, a transform, so it never
+   repaints) */
 .art-grid { perspective: 260px; }
 .art-grid span {
-  position: absolute; left: -50%; right: -50%; bottom: -10%; height: 90%;
+  position: absolute; left: -50%; right: -50%; bottom: -48px; height: calc(120% + 48px);
   background-image: linear-gradient(color-mix(in srgb, var(--accent) 60%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent) 1px, transparent 1px);
   background-size: 34px 34px; transform: rotateX(62deg); transform-origin: bottom;
   animation: art-floor 1.6s linear infinite;
-  mask-image: linear-gradient(transparent, #000 60%); -webkit-mask-image: linear-gradient(transparent, #000 60%);
+  -webkit-mask-image: linear-gradient(transparent, #000 60%); mask-image: linear-gradient(transparent, #000 60%);
 }
-@keyframes art-floor { to { background-position: 0 34px; } }
-/* art: pulse (radar) */
-.art-pulse { display: grid; place-items: center; }
-.art-pulse span { position: absolute; top: calc(40% - 90px); left: calc(50% - 90px); width: 180px; height: 180px; border-radius: 50%; background: conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 55%, transparent), transparent 25%); animation: art-rot 3s linear infinite; mask-image: radial-gradient(circle, #000 60%, transparent 70%); -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 70%); }
-.art-pulse span + span { background: none; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); animation: none; }
+@keyframes art-floor { from { transform: rotateX(62deg) translateY(-34px); } to { transform: rotateX(62deg) translateY(0); } }
+/* art: pulse (a radar sweep) */
+.art-pulse span { position: absolute; top: 50%; left: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 55%, transparent), transparent 25%); animation: art-rot 3s linear infinite; -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 70%); mask-image: radial-gradient(circle, #000 60%, transparent 70%); }
+.art-pulse span + span { background: none; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); animation: none; -webkit-mask-image: none; mask-image: none; }
+/* art: bars (a console's chart, its bars rising and settling in turn) */
+.art-bars__set { position: absolute; left: 50%; bottom: 30px; display: flex; align-items: flex-end; gap: 10px; height: 96px; transform: translateX(-50%); border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); padding: 0 6px; }
+.art-bars__set span { width: 14px; height: 100%; transform-origin: bottom; background: linear-gradient(color-mix(in srgb, var(--accent) 75%, transparent), color-mix(in srgb, var(--accent) 12%, transparent)); animation: art-bar 3.2s ease-in-out infinite alternate; }
+.art-bars__set span:nth-child(1) { --lo: 0.3; --hi: 0.62; animation-delay: -0.4s; }
+.art-bars__set span:nth-child(2) { --lo: 0.5; --hi: 0.86; animation-delay: -1.9s; }
+.art-bars__set span:nth-child(3) { --lo: 0.24; --hi: 0.5; animation-delay: -1.1s; }
+.art-bars__set span:nth-child(4) { --lo: 0.62; --hi: 1; animation-delay: -2.6s; }
+.art-bars__set span:nth-child(5) { --lo: 0.4; --hi: 0.72; animation-delay: -0.8s; }
+.art-bars__set span:nth-child(6) { --lo: 0.56; --hi: 0.9; animation-delay: -2.2s; }
+@keyframes art-bar { from { transform: scaleY(var(--lo)); } to { transform: scaleY(var(--hi)); } }
+/* art: stack (three app windows, drifting a little out of step) */
+.art-stack span {
+  position: absolute; left: 50%; top: 50%; width: 132px; height: 84px; border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background: linear-gradient(color-mix(in srgb, var(--accent) 20%, transparent) 0 14px, color-mix(in srgb, var(--accent) 6%, #07080b) 14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  animation: art-float 4.8s ease-in-out infinite alternate;
+}
+.art-stack span::before { content: ''; position: absolute; left: 8px; top: 5px; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); box-shadow: 8px 0 0 color-mix(in srgb, var(--accent) 60%, transparent), 16px 0 0 color-mix(in srgb, var(--accent) 35%, transparent); }
+.art-stack span:nth-child(1) { --x: -96px; --y: -64px; opacity: 0.5; animation-delay: -1.6s; }
+.art-stack span:nth-child(2) { --x: -66px; --y: -46px; opacity: 0.75; animation-delay: -3.2s; }
+.art-stack span:nth-child(3) { --x: -36px; --y: -28px; }
+@keyframes art-float { from { transform: translate(var(--x), var(--y)); } to { transform: translate(var(--x), calc(var(--y) - 6px)); } }
 @media (prefers-reduced-motion: reduce) {
-  .art-orbit span, .art-wave path, .art-grid span, .art-pulse span { animation: none; }
+  .art-orbit span, .art-wave path, .art-grid span, .art-pulse span, .art-bars__set span, .art-stack span { animation: none; }
+  .art-bars__set span { transform: scaleY(var(--hi)); }
+  .art-stack span { transform: translate(var(--x), var(--y)); }
 }
 
 /* ---------- bottom CTA ---------- */
@@ -370,9 +413,12 @@
 @media (max-width: 1023px) {
   .mq .qp--main, .qp--side { height: auto; }
   .qp__frame { position: relative; inset: auto; margin: 1px; }
-  .qp__media { position: relative; height: 250px; }
+  /* the band clips its picture: at rest it is scaled to 1.08, and unclipped its lower edge ran 9px past the band's
+     shade into the words (a light strip above the kicker, Atlas's OG card through the kicker at 768) */
+  .qp__media { position: relative; height: 250px; overflow: hidden; }
   .qp--side .qp__media { height: 210px; }
-  .qp__media.is-contain img { padding: 16px 16px 0; }
+  /* and the picture starts under the HUD (its status, "Work in progress" among them, ran across a phone's top) */
+  .qp__media.is-contain img, .qp__media.is-contain::after { padding: 46px 16px 14px; }
   .qp__shade { bottom: auto; height: 250px; background: linear-gradient(180deg, rgba(4, 5, 8, 0.55) 0%, rgba(4, 5, 8, 0) 28%, rgba(4, 5, 8, 0) 62%, #050608 100%); }
   .qp--side .qp__shade { height: 210px; }
   .qp__content { position: relative; padding: 4px 22px 24px; }
@@ -388,7 +434,64 @@
 .sq { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 1023px) { .sq { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .sq { grid-template-columns: minmax(0, 1fr); } }
-/* main quests: contained product shots sit above the text block */
-@media (min-width: 1024px) { .qp--main .qp__media.is-contain img { padding: 64px 28px 34%; } }
+/* ---------- wide screens: a contained cover always sits above the words ----------
+   A contained cover (a product shot, an OG card: pictures with text of their own) sat in a box padded by a guess (34%
+   of the width under main panels, 90px under side panels) while the words grew up from the panel's foot. Whenever the
+   panel ran short or the words ran long, the picture's own text drew over them: Atlas's OG card over its summary at
+   laptop sizes, the phones behind Endless Pursuit's and Kleus's titles, Playivity's art under its title. Now the frame
+   is two rows: the words take what they need at the foot, and the picture is contained in what is left above them, in
+   every state (collapsed, expanded, hovered). Full-bleed covers and the mocks still lie behind the whole panel. */
+@media (min-width: 1024px) {
+  /* minmax(0, 1fr) across: an auto column grew to the kicker's and title's one-line width and pushed them past the
+     panel's edge instead of ending them in an ellipsis */
+  .qp__frame { display: grid; grid-template-rows: minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); }
+  /* placed explicitly, row and column: the dark ground below shares the words' cell, and an auto-placed item would
+     have been moved into a new column beside it */
+  .qp__content { position: relative; grid-row: 2; grid-column: 1; left: auto; right: auto; bottom: auto; transition: padding-bottom 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+  /* on hover the bottom-left bracket moves in to 8px from the foot and grows to 26px, and its upright crossed the
+     foot of "Open quest": the words rise 12px out of its way as it comes */
+  .qp:hover .qp__content, .qp:focus-visible .qp__content { padding-bottom: 38px; }
+  /* A hovered side panel showed a six-line summary, the numbers and the tags in a 462px frame: with three numbers
+     (Outreach, Playivity) the words ran up under the HUD or out of the panel's foot, before this change as well.
+     The numbers go, as they already do on touch screens (hover: none, above), and stay on the case study. */
+  .qp--side .qp__metrics { display: none; }
+  /* the brand colour behind the picture fills the whole frame, as it did when the picture's box did */
+  .qp--contain .qp__frame { background: var(--qbg); }
+  .qp__media.is-contain { position: relative; inset: auto; grid-row: 1; grid-column: 1; min-height: 0; background: none; }
+  /* and so does the accent tint over it (it paints before the shade and the words, so they stay untinted) */
+  .qp__media.is-contain::before { bottom: -2000px; }
+  .qp--main .qp__media.is-contain img, .qp--main .qp__media.is-contain::after { padding: 64px 28px 18px; }
+  .qp--side .qp__media.is-contain img, .qp--side .qp__media.is-contain::after { padding: 52px 22px 14px; }
+  /* a side panel's words grow on hover (six lines, then the numbers and tags) and take the picture's room: it fades
+     out of their way, as the mocks do */
+  .qp--side .qp__media.is-contain img { transition: filter 0.7s ease, transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease; }
+  .qp--side:hover .qp__media.is-contain img, .qp--side:focus-visible .qp__media.is-contain img { opacity: 0.22; }
+  /* A main panel's summary and link take no room while the panel is collapsed (the container query below), so its
+     title sits at the foot and its picture gets the room above; they open smoothly as the accordion widens it.
+     (Kept at full height but invisible, as before, they lifted the title to mid-panel, over the phones.) */
+  .qp--main .qp__summary { max-height: 12em; overflow: hidden; transition: opacity 0.4s, max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .qp--main .qp__cta { max-height: 2em; transition: opacity 0.4s, max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  /* Words over a contained picture's colour (Kleus's paper, Playivity's white) get a dark ground of their own: a
+     second item in the words' grid cell, reaching 36px up into the picture's margin. z-index 5 puts it over the
+     shade and under the corner brackets (6) and the words (7). Tried it as a ::before of the words: it painted in
+     their layer, over the brackets, and stopping it short of them left a lighter band at the panel's foot. */
+  .qp--contain .qp__frame::after {
+    content: ''; position: relative; z-index: 5; grid-row: 2; grid-column: 1; margin-top: -36px; pointer-events: none;
+    background: linear-gradient(rgb(4 5 8 / 0), rgb(4 5 8 / 0.88) 64px);
+  }
+}
+/* the same for an expanded main panel in a short window (its frame shrinks to 520px): Atlas's numbers and tags no
+   longer fit under its HUD, so the tags go (measured: they fit from 780px of window height) */
+@media (min-width: 1024px) and (max-height: 780px) {
+  .qp--main .qp__tags { display: none; }
+}
+/* collapsed main panels (wide screens only: the accordion is their container) */
+@container (max-width: 420px) {
+  .qp--main .qp__summary, .qp--main .qp__cta { max-height: 0; margin-top: 0; overflow: hidden; }
+  /* the status runs down the right edge here: the picture starts below its last letter. --qp-status-n is the
+     status's length (QuestPanel.astro); a letter of 11px JetBrains Mono at 0.16em tracking is 8.4px, and the HUD's
+     top, the dot and a gap come to 47px. */
+  .qp--main .qp__media.is-contain img, .qp--main .qp__media.is-contain::after { padding-top: calc(47px + var(--qp-status-n, 4) * 8.4px); }
+}
 .qp__media .mock-story { min-height: 0; padding: 7%; }
 .qp__media .mock-story b { font-size: clamp(8px, 0.8vw, 11px); }

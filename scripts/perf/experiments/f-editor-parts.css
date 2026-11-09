@@ -1,0 +1,2 @@
+/* WebKit filter isolation: the editor foot grade and graphics title shadow */
+.ae-gfx-title, .ae-ly--foot img { filter: none !important; }

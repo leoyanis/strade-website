@@ -1,0 +1,61 @@
+---
+/**
+ * VtJourney: the build in five beats, one line each, on a rail that fills as you scroll past
+ * (motion.ts: journey()). The true parts of the old page's story, without the paragraphs.
+ * No JS or reduced motion: the rail is full and every beat is visible.
+ */
+const steps = [
+  { when: '2025', title: "Liam's idea, built from zero" },
+  { when: '3 months later', title: 'v1 live: an app and a website' },
+  { when: '2026', title: 'Off FlutterFlow, Supabase at the core' },
+  { when: '2026', title: 'StudentVenture becomes Vaultt' },
+  { when: 'Now', title: 'Live on iPhone and Android', now: true },
+];
+---
+
+<section class="vt-journey" id="vt-journey" aria-labelledby="vt-journey-h">
+  <div class="vt-wrap">
+    <div class="vt-journey__head">
+      <p class="vt-tag" id="vt-journey-h">The journey</p>
+      <p class="vt-note">Dates are approximate</p>
+    </div>
+    <div class="vt-journey__track">
+      <span class="vt-journey__rail" aria-hidden="true"><span class="vt-journey__fill"></span></span>
+      <ol class="vt-journey__list">
+        {steps.map((s) => (
+          <li class:list={['vt-journey__step', s.now && 'is-now']}>
+            <span class="vt-journey__node" aria-hidden="true"></span>
+            <span class="vt-journey__when">{s.when}</span>
+            <strong class="vt-journey__title">{s.title}</strong>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .vt-journey { position: relative; background: var(--vt-navy); padding: clamp(84px, 10vw, 140px) 0 clamp(40px, 5vw, 64px); }
+  .vt-journey__head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .vt-journey__track { position: relative; margin-top: 40px; }
+  .vt-journey__list { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 24px; }
+  .vt-journey__rail { position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--vt-line-2); border-radius: 2px; overflow: hidden; }
+  .vt-journey__fill { position: absolute; inset: 0; background: linear-gradient(90deg, var(--vt-blue-deep), var(--vt-blue)); transform-origin: left; transform: scaleX(var(--p, 1)); }
+  .vt-journey__step { position: relative; display: flex; flex-direction: column; gap: 10px; padding-top: 36px; }
+  .vt-journey__node { position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--vt-navy); border: 2px solid var(--vt-blue); }
+  .vt-journey__step.is-now .vt-journey__node { background: var(--vt-blue); box-shadow: 0 0 0 6px rgba(111, 168, 255, 0.18), 0 0 24px rgba(111, 168, 255, 0.7); }
+  .vt-journey__when { font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vt-blue); }
+  .vt-journey__title { font-family: var(--vt-display); font-size: clamp(20px, 1.8vw, 25px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.12; color: var(--vt-light); text-wrap: balance; }
+  .vt-journey__step.is-now .vt-journey__title { color: var(--vt-blue); }
+  /* the stack follows straight on: a section's full top padding here left a hole */
+  .vt-journey + .vt-stack { padding-top: clamp(72px, 8vw, 112px); }
+
+  @media (max-width: 860px) {
+    .vt-journey__list { grid-template-columns: 1fr; gap: 26px; padding-left: 36px; }
+    .vt-journey__rail { left: 7px; right: auto; top: 6px; bottom: 6px; width: 2px; height: auto; }
+    .vt-journey__fill { background: linear-gradient(180deg, var(--vt-blue-deep), var(--vt-blue)); transform-origin: top; transform: scaleY(var(--p, 1)); }
+    .vt-journey__step { padding-top: 0; gap: 6px; }
+    .vt-journey__node { left: -36px; top: 1px; }
+    .vt-journey__title { font-size: 21px; }
+  }
+</style>

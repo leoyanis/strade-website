@@ -1,0 +1,2 @@
+/* WebKit filter isolation: the hero emblem and wordmark drop-shadows */
+.sx-emblem__still, .sx-word img { filter: none !important; }

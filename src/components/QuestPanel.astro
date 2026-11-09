@@ -18,9 +18,10 @@ const img = p.cover.type === 'image' ? p.cover : null;
 
 <a
   href={`/work/${p.slug}`}
-  class={`qp qp--${variant}`}
-  style={`--accent:${p.accent};--qbg:${p.brand.bg};${img ? `--img:url('${img.src}')` : ''}`}
+  class={`qp qp--${variant}${img?.fit === 'contain' ? ' qp--contain' : ''}`}
+  style={`--accent:${p.accent};--qbg:${p.brand.bg};--qp-status-n:${p.status.length};${img ? `--img:url('${img.src}')` : ''}`}
   data-quest
+  data-offscreen-pause
 >
   <span class="qp__edge" aria-hidden="true"></span>
   <div class="qp__frame">

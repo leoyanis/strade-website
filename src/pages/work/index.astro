@@ -1,20 +1,27 @@
 ---
 import Base from '../../layouts/Base.astro';
 import QuestPanel from '../../components/QuestPanel.astro';
-import { MAIN_QUESTS, SIDE_QUESTS, STATS, visibleArchived } from '../../data/work';
+import { MAIN_QUESTS, SIDE_QUESTS, STATS, HONORABLE_MENTIONS } from '../../data/work';
 import { SITE } from '../../data/site';
 import '../../styles/quests.css';
 
-const archived = visibleArchived();
+const mentions = HONORABLE_MENTIONS;
 const fmt = (n: number, d: number) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 const fills = ['92%', '78%', '34%', '64%'];
 ---
 
 <Base
-  title="My work | Yanis Schweizer"
-  description="Everything I've built: the main quests (Vaultt, Kleus, Endless Pursuit) and every side quest, from shipped apps to builds in progress."
+  title="Results | Yanis Schweizer"
+  description="Everything completed: the main quests (Vaultt, Kleus, Endless Pursuit) and every side quest, plus what's still in the forge."
   path="/work"
-  crumbs={[{ name: 'Home', path: '/' }, { name: 'Work', path: '/work' }]}
+  crumbs={[{ name: 'Home', path: '/' }, { name: 'Results', path: '/work' }]}
+  navBands={{
+    // Covers are busy pictures, and stay so on phones too. Tried giving the light app screens the light pool
+    // there (whole cover, then only the part clear of .qp__shade): a cover is dimmed to a mid tone (quests.css),
+    // so a white pool read as a white box on it as much as the dark one reads as grey, and per part the links
+    // flipped tone twice per cover.
+    '.qp__media': 'busy',
+  }}
   ogImage="/og/work.png"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,16 +30,16 @@ const fills = ['92%', '78%', '34%', '64%'];
 
   <section class="ql-hero">
     <div class="container">
-      <span class="ql-hero__label">WORK // EVERYTHING I'VE BUILT</span>
-      <h1>My <span>work.</span></h1>
-      <p>Main quests are the big ones. Side quests are everything else I've shipped, designed or have in the build right now.</p>
+      <span class="ql-hero__label">RESULTS // EVERYTHING COMPLETED</span>
+      <h1>Results<span class="ql-hero__dot">.</span></h1>
+      <p>Main quests are the big ones. Side quests are everything else: shipped, designed or in the build right now.</p>
 
       <div class="ql-stats" role="list">
         {STATS.map((s, i) => (
           <div class="ql-stat" role="listitem">
-            <span class="ql-stat__label">{['SYS.TOKENS', 'SYS.CLAUDE_CODE', 'SYS.CODEX', 'SYS.USERS'][i] ?? 'SYS'}</span>
-            <span class="ql-stat__value" data-count={s.value} data-decimals={s.decimals} data-prefix={s.prefix ?? ''} data-suffix={s.suffix}>
-              {s.prefix ?? ''}{fmt(s.value, s.decimals)}{s.suffix}
+            <span class="ql-stat__label">{['SYS.TOKENS', 'SYS.CLAUDE_CODE', 'SYS.CODEX', 'SYS.REVENUE'][i] ?? 'SYS'}</span>
+            <span class="ql-stat__value" data-count={s.static ? undefined : s.value} data-decimals={s.decimals} data-prefix={s.prefix ?? ''} data-suffix={s.suffix}>
+              {s.prefix ?? ''}{fmt(s.value, s.decimals)}{s.suffix}{s.unit && <small>{'\u00a0' + s.unit}</small>}
             </span>
             <span class="ql-stat__desc">{s.label}</span>
             <span class="ql-stat__bar" style={`--fill:${fills[i] ?? '60%'}`}><i></i></span>
@@ -69,46 +76,48 @@ const fills = ['92%', '78%', '34%', '64%'];
     </div>
   </section>
 
-  {archived.length > 0 && (
-    <section class="ql-section" id="archive">
-      <div class="container">
-        <div class="ql-title">
-          <h2>Archived</h2>
-          <span class="ql-title__count">[{String(archived.length).padStart(2, '0')}]</span>
-          <span class="ql-title__line"></span>
-        </div>
-        <p class="ql-sub">Older projects whose sites are gone. Rebuilt here as signals, so they're not forgotten.</p>
-        <div class="aq">
-          {archived.map((a) => (
-            <article class="aq-card" style={`--accent:${a.accent}`}>
-              <div class={`aq-card__art art-${a.art}`} aria-hidden="true">
-                {a.art === 'orbit' && (<><span></span><span></span><span></span></>)}
-                {a.art === 'wave' && (
-                  <svg viewBox="0 0 300 120" preserveAspectRatio="none">
-                    <path d="M0 60 Q 37 10 75 60 T 150 60 T 225 60 T 300 60" />
-                    <path d="M0 70 Q 37 30 75 70 T 150 70 T 225 70 T 300 70" />
-                    <path d="M0 50 Q 37 0 75 50 T 150 50 T 225 50 T 300 50" />
-                  </svg>
-                )}
-                {a.art === 'grid' && <span></span>}
-                {a.art === 'pulse' && (<><span></span><span></span></>)}
-              </div>
-              <div class="aq-card__body">
-                <span class="aq-card__meta">Archived · {a.year}</span>
-                <h3>{a.name}</h3>
-                <p>{a.what}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+  <!-- Built but not testable live: no links, generated art instead of screenshots (data: HONORABLE_MENTIONS).
+       data-offscreen-pause stops the art's loops while the section is out of view (Base.astro, global.css). -->
+  <section class="ql-section" id="honorable-mentions" data-offscreen-pause>
+    <div class="container">
+      <div class="ql-title">
+        <h2>Honorable mentions</h2>
+        <span class="ql-title__count">[{String(mentions.length).padStart(2, '0')}]</span>
+        <span class="ql-title__line"></span>
       </div>
-    </section>
-  )}
+      <p class="ql-sub">You can't try these live, but they're worth a mention: private consoles, local tools and apps that aren't out.</p>
+      <div class="hm">
+        {mentions.map((m) => (
+          <article class="hm-card" style={`--accent:${m.accent}`}>
+            <div class={`hm-card__art art-${m.art}`} aria-hidden="true">
+              {m.art === 'orbit' && (<><span></span><span></span><span></span></>)}
+              {m.art === 'wave' && (
+                <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+                  <path d="M0 60 Q 37 10 75 60 T 150 60 T 225 60 T 300 60" />
+                  <path d="M0 70 Q 37 30 75 70 T 150 70 T 225 70 T 300 70" />
+                  <path d="M0 50 Q 37 0 75 50 T 150 50 T 225 50 T 300 50" />
+                </svg>
+              )}
+              {m.art === 'grid' && <span></span>}
+              {m.art === 'pulse' && (<><span></span><span></span></>)}
+              {m.art === 'bars' && <div class="art-bars__set">{[0, 1, 2, 3, 4, 5].map(() => <span></span>)}</div>}
+              {m.art === 'stack' && (<><span></span><span></span><span></span></>)}
+            </div>
+            <div class="hm-card__body">
+              <span class="hm-card__meta">{m.stage} · {m.kind}</span>
+              <h3>{m.name}</h3>
+              <p>{m.what}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
   <section class="ql-cta">
     <div class="container">
       <h2>Got a quest for me?</h2>
-      <p>Apps, automations and internal tools, built fast and at a fixed price. I make the decisions, AI does the typing, and you own the code.</p>
+      <p>Want something built?</p>
       <div class="hero-actions">
         <a href={SITE.booking} class="btn-primary hero-cta" target="_blank" rel="noopener">
           Book a call
@@ -196,8 +205,8 @@ const fills = ['92%', '78%', '34%', '64%'];
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
       gsap.registerPlugin(ScrollTrigger);
       gsap.from('.ql-stat__bar i', { scaleX: 0, duration: 1.6, ease: 'power3.out', stagger: 0.12, delay: 0.3 });
-      document.querySelectorAll<HTMLElement>('.mq, .sq, .aq').forEach((group) => {
-        const items = group.querySelectorAll<HTMLElement>('.qp, .aq-card');
+      document.querySelectorAll<HTMLElement>('.mq, .sq').forEach((group) => {
+        const items = group.querySelectorAll<HTMLElement>('.qp');
         gsap.fromTo(items, { clipPath: 'inset(48% 0% 48% 0%)', opacity: 0 }, {
           clipPath: 'inset(0% 0% 0% 0%)',
           opacity: 1,
@@ -208,6 +217,21 @@ const fills = ['92%', '78%', '34%', '64%'];
           scrollTrigger: { trigger: group, start: 'top 85%', once: true },
         });
       });
+      // The honorable mentions rise and fade in instead of opening from a scan line: a clip-path tween repaints each
+      // card every frame while their art runs inside it (README, performance rule 1), and on these cards it replaced
+      // their own chamfered clip-path for the length of the tween, so the corners popped back at the end.
+      const mentions = document.querySelector<HTMLElement>('.hm');
+      if (mentions) {
+        gsap.fromTo(mentions.querySelectorAll<HTMLElement>('.hm-card'), { opacity: 0, y: 28 }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power4.out',
+          stagger: 0.08,
+          clearProps: 'opacity,transform',
+          scrollTrigger: { trigger: mentions, start: 'top 85%', once: true },
+        });
+      }
     } catch { /* content is already visible */ }
   })();
 </script>

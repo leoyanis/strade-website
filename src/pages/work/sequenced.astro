@@ -57,7 +57,7 @@ const grammar = [
 
 const decisions = [
   { t: 'The AI chooses. The code draws.', b: 'Every layout lives in code, built from the studio’s own pages. Claude only picks one per page and fills its slots. That keeps a ten-page sequence on-brand, and a designer can still finish the last 10% by hand.' },
-  { t: 'A design check, not a redraw.', b: 'The check sends the rendered pages back to Claude as images. It returns corrected specs, so the fix goes through the same layouts instead of new pixels.' },
+  { t: 'A design check instead of a redraw.', b: 'The check sends the rendered pages back to Claude as images. It returns corrected specs, so the fix goes through the same layouts instead of new pixels.' },
   { t: 'Export for the person who finishes it.', b: 'The .pptx measures the browser layout and writes every line break, so Canva can’t re-wrap the text and the pills stay aligned.' },
   { t: 'Bring your own key.', b: 'Requests go straight from the browser to Anthropic and photos are stored in the browser. No server route, so no serverless timeouts.' },
 ];
@@ -241,7 +241,7 @@ const decisions = [
           </div>
           <div class="sq-layers__side">
             <p class="sq-p">The export is an editable .pptx that opens in Canva. Photos arrive pre-cropped, highlights become vector shapes, and the hand-drawn marks and gradients become PNG layers. Every line break is written in, so nothing re-wraps.</p>
-            <div class="sq-panel" role="list" aria-label="Layers, as Canva shows them">
+            <div class="sq-panel" role="list" aria-label="Layers, as Canva shows them" data-nav-theme="light">
               <p class="sq-panel__t">Layers</p>
               {layers.map((l) => (
                 <div class="sq-panel__row" role="listitem" data-layer-id={l.id} tabindex="0">
@@ -302,7 +302,7 @@ const decisions = [
       <div class="sq-wrap">
         <p class="sq-kicker">how i built it:</p>
         <h2 class="sq-h2 sq-h2--xl"><span class="sq-boxed">claude doesn’t draw pixels.</span></h2>
-        <p class="sq-p sq-p--lead">That one rule shaped the whole build. I decided where the AI is good (choosing, writing, checking) and where code is better (layout, type, export), then had AI write the code to my plan.</p>
+        <p class="sq-p sq-p--lead">That one rule shaped the whole build. It's why the export lands in Canva as editable layers.</p>
         <ol class="sq-dec">
           {decisions.map((d, i) => (
             <li>

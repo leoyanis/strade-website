@@ -10,5 +10,5 @@ export const SITE = {
   linkedin: 'https://www.linkedin.com/in/yanis-schweizer',
   avatar: '/images/yanis-avatar.webp',
   portrait: '/images/yanis-1100.webp',
-  tagline: "AI made the code free. It didn't make the decisions free.",
+  tagline: "For problems that should be software by now.",
 };

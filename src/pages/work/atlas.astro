@@ -1,0 +1,603 @@
+---
+// Atlas: the hero case study, in Atlas's own look (getatlas.site): near-black, a faint grid, Geist,
+// an Instrument Serif italic for the word that matters, and Atlas purple only where the AI acts.
+// Everything moves: a ring of reels turns in 3D over a moving floor, the editor tilts up out of the page and
+// takes a raw take apart while you scroll (pinned), the three styles fan out in 3D, the pipeline draws itself,
+// the site swings up flat, and the cards lean towards the pointer.
+// Every video on this page is Atlas's own output, cut from one 2:07 phone take of Yanis.
+import Base from '../../layouts/Base.astro';
+import CaseNext from '../../components/CaseNext.astro';
+import Editor from '../../components/atlas/Editor.astro';
+import { getProject } from '../../data/work';
+import { SITE } from '../../data/site';
+import { projectSchema, projectCrumbs } from '../../data/seo';
+
+const p = getProject('atlas')!;
+const img = (f: string) => `/images/work/atlas/${f}`;
+const site = p.links?.[0]?.href ?? 'https://getatlas.site';
+
+// the ring in the hero: Atlas's own reels, every style twice
+const reels = [
+  { video: img('reel-loop.mp4'), poster: img('reel-poster.webp'), label: 'Kallaway' },
+  { video: img('style-clean.mp4'), poster: img('style-clean.webp'), label: 'Clean minimal' },
+  { video: img('style-split.mp4'), poster: img('style-split.webp'), label: 'Canvas split' },
+  { video: img('style-kallaway.mp4'), poster: img('style-kallaway.webp'), label: 'Kallaway' },
+];
+const ring = [...reels, ...reels];
+const styles = [
+  { name: 'Clean minimal', note: 'A title, the captions, and nothing in the way of the face.', video: img('style-clean.mp4'), poster: img('style-clean.webp') },
+  { name: 'Kallaway', note: 'A black canvas up top for the idea, the take underneath.', video: img('style-kallaway.mp4'), poster: img('style-kallaway.webp') },
+  { name: 'Canvas split', note: 'Typed pills and graphics on white, with the take below.', video: img('style-split.mp4'), poster: img('style-split.webp') },
+];
+// each step gets a small drawn icon (paths on a 24 grid)
+const pipeline = [
+  ['Your take', 'a phone video, retakes and all', 'M4 7h11v10H4z M15 10l5-3v10l-5-3'],
+  ['Transcript', 'every word, with its energy', 'M5 7h14 M5 12h14 M5 17h9'],
+  ['The plan', 'Claude decides the cut and the graphics', 'M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z'],
+  ['The check', 'Atlas’s own rules, and one repair if it fails them', 'M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z M8.5 12l2.5 2.5 4.5-5'],
+  ['The render', 'Remotion on AWS Lambda', 'M12 4l8 4-8 4-8-4z M4 12l8 4 8-4 M4 16l8 4 8-4'],
+  ['Posted', 'seven platforms, from one place', 'M21 3L10 14 M21 3l-7 18-4-7-7-4z'],
+];
+const builtKinds = ['The engine', 'The styles', 'The agent', 'The builders', 'Posting', 'The product'];
+const words = p.problem.split(' ');
+---
+
+<Base
+  title={`${p.name}: case study | Strade`}
+  description={p.summary}
+  path="/work/atlas"
+  pageType="article"
+  schema={projectSchema(p)}
+  crumbs={projectCrumbs(p)}
+  bare
+  navTheme="dark"
+  ogImage="/og/work-atlas.png"
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={p.brand.fontsHref} />
+  <meta slot="head" name="theme-color" content="#0B0B0D" />
+
+  <main class="at">
+    <div class="at-grid" aria-hidden="true"></div>
+
+    <!-- ============ hero: the title, and a ring of reels turning in 3D over a moving floor ============ -->
+    <section class="at-hero" data-offscreen-pause aria-labelledby="at-h1">
+      <div class="at-floor" aria-hidden="true"><div class="at-floor__grid"></div></div>
+      <div class="at-wrap at-hero__grid">
+        <div class="at-hero__copy">
+          <a class="at-back" href="/work">← All work</a>
+          <span class="at-eyebrow" data-at-in>Case study · Client · {p.status}</span>
+          <span class="at-logo" data-at-in><img src={img('mark-white.svg')} alt="" width="30" height="30" />atlas</span>
+          <h1 class="at-h1" id="at-h1"><span class="at-line"><span>Raw footage in.</span></span> <span class="at-line"><span><em>Finished</em> videos out.</span></span></h1>
+          <p class="at-lede" data-at-in>{p.summary}</p>
+          <div class="at-ctas" data-at-in>
+            <a class="at-btn at-btn--ai" href={site} target="_blank" rel="noopener">Open getatlas.site <span aria-hidden="true">↗</span></a>
+            <a class="at-btn" href="#at-editor" data-at-jump>Watch it edit <span aria-hidden="true">↓</span></a>
+          </div>
+          <dl class="at-facts" data-at-in>
+            <div><dt>Client</dt><dd>{p.client}</dd></div>
+            <div><dt>Year</dt><dd>{p.year}</dd></div>
+            <div><dt>Status</dt><dd><i class="at-live" aria-hidden="true"></i>{p.status}</dd></div>
+            <div><dt>Our part</dt><dd>Product, engineering, website</dd></div>
+          </dl>
+        </div>
+        <div class="at-stage" aria-hidden="true">
+          <div class="at-orb"></div>
+          <div class="at-ring-tilt" data-at-tilt-ring>
+            <div class="at-ring-in">
+              <div class="at-ring" data-at-ring>
+                {ring.map((r, i) => (
+                  <figure class="at-ring__card" style={`--i:${i};--n:${ring.length}`}>
+                    <video src={r.video} poster={r.poster} muted loop playsinline preload="none"></video>
+                    <figcaption>{r.label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ the brief: the words light up as you read ============ -->
+    <section class="at-sec at-brief">
+      <div class="at-wrap">
+        <span class="at-eyebrow" data-at-reveal>The brief</span>
+        <p class="at-big" data-at-words>{words.map((w) => <span>{w} </span>)}</p>
+      </div>
+    </section>
+
+    <!-- ============ the editor, pinned: the scroll runs it, from the raw take to the finished reel ============ -->
+    <section class="at-editor" id="at-editor" aria-label="The Atlas editor at work">
+      <div class="at-editor__pin">
+        <div class="at-editor__head">
+          <span class="at-eyebrow">Live edit · scroll to run it</span>
+          <h2 class="at-h2">Watch Atlas <em>take a take apart.</em></h2>
+        </div>
+        <div class="at-editor__stage">
+          <Editor variant="full" />
+        </div>
+        <div class="at-editor__bar" aria-hidden="true"><i data-at-progress></i></div>
+      </div>
+    </section>
+
+    <!-- ============ numbers ============ -->
+    {p.metrics && (
+      <section class="at-numbers" aria-label="Atlas in numbers">
+        <div class="at-wrap at-numbers__row">
+          {p.metrics.map((m) => (
+            <div class="at-num" data-at-reveal>
+              <strong>{m.value}</strong>
+              <span>{m.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- ============ one take, three styles: three phones fan out in 3D ============ -->
+    <section class="at-sec at-styles" aria-labelledby="at-styles-h">
+      <div class="at-wrap">
+        <span class="at-eyebrow" data-at-reveal>Proof</span>
+        <h2 class="at-h2" id="at-styles-h" data-at-reveal>One raw take. <em>Three</em> styles.</h2>
+        <p class="at-sub" data-at-reveal>A 2:07 phone take with retakes and long pauses, cut by Atlas’s own pipeline into a 51-second reel three times over. Same footage, three looks, and no editor touched any of them.</p>
+      </div>
+      <div class="at-fan" data-at-fan>
+        <div class="at-fan__in" data-at-fan-in>
+          {styles.map((s, i) => (
+            <figure class="at-fan__card" style={`--i:${i - 1};--a:${Math.abs(i - 1)}`}>
+              <div class="at-fan__phone"><video src={s.video} poster={s.poster} muted loop playsinline preload="none"></video></div>
+              <figcaption><strong>{s.name}</strong><span>{s.note}</span></figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ how it runs: the pipeline draws itself ============ -->
+    <section class="at-sec">
+      <div class="at-wrap">
+        <span class="at-eyebrow" data-at-reveal>Under the hood</span>
+        <h2 class="at-h2" data-at-reveal>From a phone take to <em>seven</em> platforms.</h2>
+        <p class="at-sub" data-at-reveal>{p.how}</p>
+        <ol class="at-pipe" data-at-pipe>
+          {pipeline.map(([t, d, icon]) => (
+            <li><span class="at-pipe__dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={icon} /></svg></span><strong>{t}</strong><small>{d}</small></li>
+          ))}
+        </ol>
+        <div class="at-tags" data-at-reveal>{p.tags.map((t) => <span>{t}</span>)}</div>
+      </div>
+    </section>
+
+    <!-- ============ the site: it swings up out of the page ============ -->
+    <section class="at-sec at-site">
+      <div class="at-wrap">
+        <span class="at-eyebrow" data-at-reveal>And the website</span>
+        <h2 class="at-h2" data-at-reveal>getatlas.site, <em>built by us</em> too.</h2>
+      </div>
+      <div class="at-window-wrap">
+        <a class="at-window" href={site} target="_blank" rel="noopener" data-at-window aria-label="Open getatlas.site">
+          <span class="at-window__bar" aria-hidden="true"><i></i><i></i><i></i><b>getatlas.site</b></span>
+          <img src={img('og.webp')} alt="The getatlas.site homepage" width="1200" height="630" loading="lazy" decoding="async" />
+          <span class="at-window__shine" aria-hidden="true"></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ what we built: cards that lean towards the pointer ============ -->
+    <section class="at-sec">
+      <div class="at-wrap">
+        <span class="at-eyebrow" data-at-reveal>What we built</span>
+        <h2 class="at-h2" data-at-reveal>The whole thing, <em>end to end.</em></h2>
+        <ul class="at-bento">
+          {p.built.map((b, i) => (
+            <li class="at-tile" data-at-tilt>
+              <span class="at-tile__glare" aria-hidden="true"></span>
+              <span class="at-tile__kind">{builtKinds[i] ?? 'Built'}</span>
+              <p>{b}</p>
+            </li>
+          ))}
+        </ul>
+        {p.outcome && (
+          <p class="at-outcome" data-at-reveal>
+            {p.outcome}
+            <a href={SITE.booking} target="_blank" rel="noopener">Want one built for you? Book a call →</a>
+          </p>
+        )}
+      </div>
+    </section>
+  </main>
+
+  <CaseNext current="atlas" />
+</Base>
+
+<style>
+  .at {
+    --bg: #0B0B0D; --panel: #141418; --line: rgba(255, 255, 255, 0.08); --ink: #F2F2F4; --mute: #8E8E98;
+    --ai: #A795FF; --ai-2: #7658FF;
+    position: relative; overflow-x: clip; background: var(--bg); color: var(--ink);
+    font-family: 'Geist', 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  }
+  .at :global(em) { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+  /* only as tall as its fade: a masked layer the height of the whole page is too big for phones' GPUs */
+  .at-grid {
+    position: absolute; left: 0; right: 0; top: 0; height: 1400px; pointer-events: none;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px; -webkit-mask-image: linear-gradient(#000, transparent 1400px); mask-image: linear-gradient(#000, transparent 1400px);
+  }
+  .at-wrap { position: relative; width: min(1180px, 100% - 48px); margin: 0 auto; }
+  .at-eyebrow { display: block; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+  .at-h2 { margin-top: 16px; font-size: clamp(34px, 4.2vw, 62px); font-weight: 700; letter-spacing: -0.045em; line-height: 1.02; text-wrap: balance; }
+  .at-sub { margin-top: 18px; max-width: 640px; font-size: 17px; line-height: 1.6; color: #B9B9C3; }
+
+  /* ---------- hero ---------- */
+  .at-hero { position: relative; min-height: 100svh; display: flex; align-items: center; padding: 116px 0 70px; overflow: hidden; }
+  .at-floor {
+    position: absolute; left: -50%; right: -50%; bottom: 0; height: 58%; overflow: hidden; pointer-events: none;
+    transform: perspective(520px) rotateX(62deg); transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(transparent, #000 50%); mask-image: linear-gradient(transparent, #000 50%);
+  }
+  .at-floor__grid {
+    position: absolute; left: 0; right: 0; top: -80px; bottom: 0; will-change: transform;
+    background-image: linear-gradient(rgba(167, 149, 255, 0.42) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(167, 149, 255, 0.42) 1.5px, transparent 1.5px);
+    background-size: 80px 80px; animation: at-floor 3.2s linear infinite;
+  }
+  @keyframes at-floor { to { transform: translate3d(0, 80px, 0); } }
+  .at-hero__grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: center; gap: 24px; }
+  .at-hero__copy { position: relative; z-index: 2; }
+  .at-back { display: inline-block; margin-bottom: 26px; font-size: 14px; color: var(--mute); transition: color 0.2s; }
+  .at-back:hover { color: var(--ink); }
+  .at-logo { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+  .at-h1 { margin-top: 16px; font-size: clamp(40px, 4.45vw, 66px); font-weight: 700; letter-spacing: -0.05em; line-height: 1.02; }
+  .at-line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+  .at-line > span { display: block; }
+  .at-h1 em { font-size: 1.08em; }
+  .at-lede { margin-top: 22px; max-width: 520px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: #C5C5CE; }
+  .at-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .at-btn {
+    display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 22px; border-radius: 12px;
+    font-size: 15px; font-weight: 600; color: var(--ink); background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+  .at-btn:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.09); }
+  .at-btn--ai {
+    color: #fff;
+    background: radial-gradient(120% 140% at 20% 0%, rgba(203, 192, 255, 0.55), transparent 55%), radial-gradient(120% 140% at 90% 100%, rgba(118, 88, 255, 0.85), transparent 60%), linear-gradient(180deg, #A795FF, #7658FF);
+    box-shadow: 0 12px 40px rgba(118, 88, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+  .at-btn--ai:hover { box-shadow: 0 18px 54px rgba(118, 88, 255, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+  .at-facts { display: grid; grid-template-columns: repeat(4, auto); gap: 22px; margin-top: 32px; justify-content: start; }
+  .at-facts dt { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); }
+  .at-facts dd { margin-top: 6px; font-size: 14.5px; font-weight: 500; display: flex; align-items: center; gap: 7px; }
+  .at-live { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 10px #4ADE80; }
+
+  /* the ring of reels */
+  .at-stage { --w: clamp(132px, 11vw, 168px); --R: calc(var(--w) * 1.5); position: relative; height: clamp(460px, 44vw, 620px); perspective: 1500px; perspective-origin: 50% 35%; }
+  .at-orb { position: absolute; left: 50%; top: 52%; width: 130%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(140, 112, 255, 0.3), rgba(118, 88, 255, 0.1) 50%, transparent); pointer-events: none; }
+  .at-ring-tilt { --tx: 0deg; --ty: 0deg; position: absolute; left: 50%; top: 50%; transform-style: preserve-3d; transform: rotateX(var(--tx)) rotateY(var(--ty)); }
+  .at-ring-in { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
+  .at-ring { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transform: rotateX(-9deg) rotateY(0deg); animation: at-spin 56s linear infinite; }
+  @keyframes at-spin { from { transform: rotateX(-9deg) rotateY(0deg); } to { transform: rotateX(-9deg) rotateY(-360deg); } }
+  .at-ring__card {
+    position: absolute; left: calc(var(--w) / -2); top: calc(var(--w) * -0.889); width: var(--w); aspect-ratio: 9 / 16; margin: 0;
+    border-radius: calc(var(--w) * 0.1); overflow: hidden; background: #000; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--R));
+    box-shadow: 0 0 0 1px rgba(167, 149, 255, 0.5), 0 30px 70px rgba(0, 0, 0, 0.55);
+  }
+  .at-ring__card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .at-ring__card figcaption { position: absolute; left: 9px; bottom: 9px; padding: 4px 9px; border-radius: 99px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; color: #fff; background: rgba(12, 10, 24, 0.78); box-shadow: inset 0 0 0 1px rgba(167, 149, 255, 0.5); }
+
+  /* ---------- brief: words light up ---------- */
+  .at-sec { position: relative; padding: 130px 0 0; }
+  .at-big { margin-top: 18px; max-width: 1000px; font-size: clamp(25px, 2.8vw, 40px); font-weight: 500; letter-spacing: -0.025em; line-height: 1.28; color: #E7E7EC; }
+  .at-big span { opacity: 0.16; transition: opacity 0.25s; }
+  .at-big span.on { opacity: 1; }
+
+  /* ---------- the pinned editor ---------- */
+  .at-editor { position: relative; margin-top: 90px; }
+  .at-editor__pin { position: relative; height: 100svh; min-height: 560px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 76px 24px 26px; perspective: 2200px; }
+  .at-editor__head { text-align: center; }
+  .at-editor__head .at-h2 { margin-top: 8px; font-size: clamp(26px, 2.7vw, 42px); }
+  .at-editor__stage { --ae-fs: clamp(5px, min((100svh - 230px) / 52, (100vw - 48px) / 84), 13.5px); transform-origin: 50% 80%; will-change: transform; }
+  .at-editor__bar { flex: none; width: min(560px, 80vw); height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+  .at-editor__bar i { display: block; height: 100%; width: 100%; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, #7658FF, #C9B8FF); }
+
+  /* ---------- numbers ---------- */
+  .at-numbers { position: relative; margin-top: 40px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, 0.015); }
+  .at-numbers__row { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .at-num { padding: 38px 28px; display: flex; flex-direction: column; gap: 8px; }
+  .at-num + .at-num { border-left: 1px solid var(--line); }
+  .at-num strong { font-size: clamp(32px, 3.6vw, 52px); font-weight: 700; letter-spacing: -0.04em; }
+  .at-num:first-child strong { color: var(--ai); }
+  .at-num span { font-size: 14px; color: var(--mute); }
+
+  /* ---------- styles: the fan ---------- */
+  .at-fan { --fan: 1; --pw: clamp(116px, 19vw, 250px); position: relative; height: calc(var(--pw) * 16 / 9 + 120px); margin-top: 60px; perspective: 1600px; }
+  .at-fan__in { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .at-fan__card {
+    position: absolute; left: 50%; top: 0; width: var(--pw); margin: 0 0 0 calc(var(--pw) / -2); z-index: calc(3 - var(--a));
+    transform: translate3d(calc(var(--i) * var(--fan) * 112%), calc(var(--a) * var(--fan) * 26px), calc(var(--a) * var(--fan) * -110px)) rotateY(calc(var(--i) * var(--fan) * 22deg));
+    will-change: transform;
+  }
+  .at-fan__phone { position: relative; aspect-ratio: 9 / 16; overflow: hidden; border-radius: calc(var(--pw) * 0.11); background: #000; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 40px 90px rgba(0, 0, 0, 0.6); }
+  .at-fan__card:nth-child(2) .at-fan__phone { box-shadow: 0 0 0 1px rgba(167, 149, 255, 0.6), 0 40px 90px rgba(0, 0, 0, 0.6), 0 0 80px rgba(118, 88, 255, 0.3); }
+  .at-fan__phone video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .at-fan__card figcaption { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; text-align: center; opacity: var(--fan); }
+  .at-fan__card strong { font-size: 17px; font-weight: 600; }
+  .at-fan__card figcaption span { font-size: 13.5px; line-height: 1.45; color: var(--mute); }
+
+  /* ---------- pipeline ---------- */
+  .at-pipe { --draw: 1; position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin: 54px 0 0; padding: 0; list-style: none; perspective: 900px; }
+  .at-pipe::before { content: ''; position: absolute; left: 22px; right: 22px; top: 22px; height: 2px; background: linear-gradient(90deg, #7658FF, #C9B8FF); transform-origin: 0 50%; transform: scaleX(var(--draw)); box-shadow: 0 0 14px rgba(167, 149, 255, 0.6); }
+  .at-pipe li { position: relative; display: flex; flex-direction: column; gap: 6px; }
+  .at-pipe__dot { display: grid; place-items: center; width: 46px; height: 46px; margin-bottom: 10px; border-radius: 14px; color: #D3C4FF; background: var(--panel); box-shadow: inset 0 0 0 1px rgba(167, 149, 255, 0.45), 0 10px 30px rgba(0, 0, 0, 0.4); }
+  .at-pipe__dot svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .at-pipe strong { font-size: 16px; font-weight: 600; }
+  .at-pipe small { font-size: 13.5px; line-height: 1.45; color: var(--mute); }
+  .at-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 34px; }
+  .at-tags span { padding: 7px 12px; border-radius: 8px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #D6D6DE; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+
+  /* ---------- the site ---------- */
+  .at-window-wrap { width: min(1040px, 100% - 48px); margin: 56px auto 0; perspective: 1800px; }
+  .at-window {
+    position: relative; display: block; overflow: hidden; border-radius: 16px; background: #0d0d10; transform-origin: 50% 100%; will-change: transform;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 50px 120px rgba(0, 0, 0, 0.6), 0 0 120px rgba(118, 88, 255, 0.16);
+  }
+  .at-window__bar { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px; background: #151519; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+  .at-window__bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+  .at-window__bar b { margin-left: 12px; padding: 4px 12px; border-radius: 7px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 400; color: #C9C9D2; background: rgba(255, 255, 255, 0.05); }
+  .at-window img { display: block; width: 100%; height: auto; }
+  .at-window__shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.08) 45%, transparent 60%); transform: translateX(var(--shine, -60%)); pointer-events: none; }
+
+  /* ---------- bento: lean towards the pointer ---------- */
+  .at-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 44px; list-style: none; padding: 0; perspective: 1200px; }
+  .at-tile {
+    --rx: 0deg; --ry: 0deg; --gx: 50%; --gy: 50%;
+    position: relative; display: flex; flex-direction: column; gap: 18px; min-height: 196px; padding: 26px; border-radius: 18px; overflow: hidden;
+    background: var(--panel); box-shadow: inset 0 0 0 1px var(--line);
+    transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 0.3s ease-out, box-shadow 0.4s;
+  }
+  .at-tile:hover { box-shadow: inset 0 0 0 1px rgba(167, 149, 255, 0.45), 0 26px 60px rgba(0, 0, 0, 0.45); }
+  .at-tile__glare { position: absolute; inset: 0; background: radial-gradient(420px circle at var(--gx) var(--gy), rgba(167, 149, 255, 0.16), transparent 45%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .at-tile:hover .at-tile__glare { opacity: 1; }
+  /* three rows of three: the 1st, 4th and 6th cards are wide */
+  .at-tile:nth-child(1), .at-tile:nth-child(4), .at-tile:nth-child(6) { grid-column: span 2; }
+  .at-tile:nth-child(1) { background: radial-gradient(90% 120% at 100% 0%, rgba(118, 88, 255, 0.22), transparent 60%), var(--panel); }
+  .at-tile:nth-child(4) { background: radial-gradient(90% 120% at 0% 100%, rgba(118, 88, 255, 0.16), transparent 60%), var(--panel); }
+  .at-tile:nth-child(6) { background: radial-gradient(80% 140% at 100% 100%, rgba(118, 88, 255, 0.16), transparent 60%), var(--panel); }
+  .at-tile__kind { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ai); }
+  .at-tile p { position: relative; font-size: 17px; line-height: 1.5; color: #E2E2E8; }
+  .at-tile:first-child p { font-size: clamp(19px, 1.7vw, 23px); font-weight: 500; letter-spacing: -0.015em; }
+  .at-outcome { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; margin: 60px 0 0; padding-bottom: 130px; font-size: clamp(20px, 2vw, 26px); font-weight: 500; letter-spacing: -0.02em; color: #E7E7EC; }
+  .at-outcome a { font-size: 0.8em; color: var(--ai); white-space: nowrap; }
+
+  [data-at-reveal] { opacity: 0; transform: translateY(26px); transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+  [data-at-reveal].is-in { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .at-hero { padding-top: 100px; }
+    .at-hero__grid { grid-template-columns: 1fr; }
+    .at-stage { --w: clamp(100px, 28vw, 140px); height: clamp(360px, 96vw, 480px); margin-top: 6px; }
+    .at-facts { grid-template-columns: repeat(2, auto); }
+    .at-numbers__row { grid-template-columns: 1fr; }
+    .at-num + .at-num { border-left: 0; border-top: 1px solid var(--line); }
+    .at-pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
+    .at-pipe::before { display: none; }
+    .at-bento { grid-template-columns: 1fr; }
+    .at-tile:nth-child(n) { grid-column: auto; }
+  }
+  @media (max-width: 760px) {
+    .at-editor__pin { padding: 70px 12px 22px; gap: 16px; }
+    .at-editor__stage { --ae-fs: clamp(6px, min(2.05vw, (100svh - 220px) / 60), 9.5px); width: 100%; }
+    .at-fan__card figcaption span { display: none; }
+    .at-fan__card strong { font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .at-floor__grid, .at-ring { animation: none; }
+    [data-at-reveal] { opacity: 1; transform: none; transition: none; }
+    .at-big span { opacity: 1; }
+  }
+</style>
+
+<script>
+  import { mountEditor } from '../../scripts/atlas-editor';
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
+  const finePointer = matchMedia('(pointer: fine)').matches;
+
+  /* ---------- reveal on scroll ---------- */
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      }
+    },
+    { threshold: 0.15 },
+  );
+  document.querySelectorAll('[data-at-reveal]').forEach((el) => (reduce ? el.classList.add('is-in') : io.observe(el)));
+
+  /* ---------- the styles' videos play while the fan is on screen ---------- */
+  const fanVids = Array.from(document.querySelectorAll<HTMLVideoElement>('.at-fan video'));
+  new IntersectionObserver(([e]) => {
+    fanVids.forEach((v) => (e.isIntersecting && !reduce ? v.play().catch(() => {}) : v.pause()));
+  }, { threshold: 0.25 }).observe(document.querySelector('.at-fan')!);
+
+  /* ---------- the ring: only the reel that faces you plays ---------- */
+  const ring = document.querySelector<HTMLElement>('[data-at-ring]');
+  const ringVids = Array.from(document.querySelectorAll<HTMLVideoElement>('.at-ring video'));
+  let ringOn = false;
+  if (ring) {
+    new IntersectionObserver(([e]) => {
+      ringOn = e.isIntersecting;
+      if (!ringOn) ringVids.forEach((v) => v.pause());
+    }).observe(ring.closest('.at-stage')!);
+    const anim = ring.getAnimations?.()[0];
+    const facing = () => {
+      if (!ringOn || reduce) return;
+      const t = Number(anim?.currentTime ?? 0);
+      const spin = -360 * ((t / 56000) % 1);
+      ringVids.forEach((v, i) => {
+        const a = ((((i * (360 / ringVids.length) + spin) % 360) + 360) % 360);
+        const front = a < 50 || a > 310;
+        if (front && v.paused) v.play().catch(() => {});
+        else if (!front && !v.paused) v.pause();
+      });
+    };
+    window.setInterval(facing, 400);
+  }
+
+  /* ---------- the cards lean towards the pointer, with a glare that follows it ---------- */
+  if (!reduce && finePointer) {
+    document.querySelectorAll<HTMLElement>('[data-at-tilt]').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        card.style.setProperty('--ry', `${((x - 0.5) * 10).toFixed(2)}deg`);
+        card.style.setProperty('--rx', `${((0.5 - y) * 8).toFixed(2)}deg`);
+        card.style.setProperty('--gx', `${(x * 100).toFixed(1)}%`);
+        card.style.setProperty('--gy', `${(y * 100).toFixed(1)}%`);
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--ry', '0deg');
+        card.style.setProperty('--rx', '0deg');
+      });
+    });
+  }
+
+  /* ---------- "Watch it edit": a slow scroll down to the editor ---------- */
+  document.querySelectorAll<HTMLAnchorElement>('[data-at-jump]').forEach((a) =>
+    a.addEventListener('click', (e) => {
+      const el = document.querySelector<HTMLElement>(a.getAttribute('href')!);
+      if (!el) return;
+      e.preventDefault();
+      const y = el.getBoundingClientRect().top + window.scrollY;
+      const to = (top: number) => window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+      if (reduce) return to(y);
+      const y0 = window.scrollY;
+      const t0 = performance.now();
+      const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const step = (now: number) => {
+        const k = Math.min(1, (now - t0) / 1300);
+        to(y0 + (y - y0) * ease(k));
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }),
+  );
+
+  (async () => {
+    if (reduce) {
+      document.querySelectorAll('.at-big span').forEach((s) => s.classList.add('on'));
+      return;
+    }
+    const { gsap } = await import('gsap');
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ---------- hero: the title rises line by line, the rest follows, the ring flies in ---------- */
+    gsap.from('.at-line > span', { yPercent: 105, duration: 1.2, ease: 'power4.out', stagger: 0.12, delay: 0.1 });
+    gsap.from('[data-at-in]', { y: 20, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07, delay: 0.3 });
+    // (no opacity on the 3D wrappers: below 1 it would flatten the ring)
+    gsap.from('.at-ring-in', { scale: 0.35, rotationY: 150, duration: 2.2, ease: 'expo.out', delay: 0.15 });
+    gsap.from('.at-orb', { scale: 0.6, opacity: 0, duration: 1.6, ease: 'power3.out' });
+    // the pointer tilts the ring
+    const tilt = document.querySelector<HTMLElement>('[data-at-tilt-ring]');
+    if (tilt && finePointer) {
+      const st = { x: 0, y: 0 };
+      const paint = () => {
+        tilt.style.setProperty('--tx', `${st.x.toFixed(2)}deg`);
+        tilt.style.setProperty('--ty', `${st.y.toFixed(2)}deg`);
+      };
+      const qx = gsap.quickTo(st, 'x', { duration: 0.9, ease: 'power3', onUpdate: paint });
+      const qy = gsap.quickTo(st, 'y', { duration: 0.9, ease: 'power3', onUpdate: paint });
+      window.addEventListener('pointermove', (e) => {
+        qx(((e.clientY / window.innerHeight) - 0.5) * -12);
+        qy(((e.clientX / window.innerWidth) - 0.5) * 22);
+      }, { passive: true });
+    }
+    // scrolling away lifts the ring off and the floor sinks
+    gsap.to('.at-stage', { yPercent: -18, scale: 0.86, opacity: 0.2, ease: 'none', scrollTrigger: { trigger: '.at-hero', start: 'top top', end: 'bottom top', scrub: 0.5 } });
+    gsap.to('.at-floor', { yPercent: 30, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.at-hero', start: 'top top', end: 'bottom top', scrub: 0.5 } });
+
+    /* ---------- the brief: each word lights up as the line passes ---------- */
+    const wordEls = Array.from(document.querySelectorAll<HTMLElement>('.at-big span'));
+    let lit = -1;
+    ScrollTrigger.create({
+      trigger: '[data-at-words]', start: 'top 82%', end: 'bottom 48%',
+      onUpdate: (self) => {
+        const n = Math.round(self.progress * wordEls.length);
+        if (n === lit) return;
+        lit = n;
+        wordEls.forEach((w, i) => w.classList.toggle('on', i < n));
+      },
+    });
+
+    /* ---------- the editor: it swings up out of the page, then pins while the scroll runs the edit ---------- */
+    const ed = document.querySelector<HTMLElement>('.at-editor .ae');
+    const pin = document.querySelector<HTMLElement>('.at-editor__pin');
+    const bar = document.querySelector<HTMLElement>('[data-at-progress]');
+    if (ed && pin) {
+      gsap.fromTo('.at-editor__stage', { rotateX: 32, y: 90, scale: 0.88 }, {
+        rotateX: 0, y: 0, scale: 1, ease: 'none',
+        scrollTrigger: { trigger: '.at-editor', start: 'top bottom', end: 'top top', scrub: 0.6 },
+      });
+      gsap.from('.at-editor__head', { y: 30, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.at-editor', start: 'top 85%', end: 'top 30%', scrub: 0.6 } });
+      mountEditor(ed, {
+        gsap, ScrollTrigger, mode: 'scrub', reduced: false, pin, scrubEnd: '+=320%',
+        onProgress: (k) => { if (bar) bar.style.transform = `scaleX(${k.toFixed(4)})`; },
+      });
+    }
+
+    /* ---------- numbers: they land one after another ---------- */
+    gsap.from('.at-num strong', { yPercent: 60, opacity: 0, duration: 1, ease: 'power4.out', stagger: 0.12, scrollTrigger: { trigger: '.at-numbers', start: 'top 85%', once: true } });
+
+    /* ---------- styles: the three phones fan out of one pile as the section comes up ---------- */
+    gsap.fromTo('[data-at-fan]', { '--fan': 0 }, {
+      '--fan': 1, ease: 'none',
+      scrollTrigger: { trigger: '[data-at-fan]', start: 'top 92%', end: 'top 30%', scrub: 0.6 },
+    });
+    if (finePointer) {
+      const fan = document.querySelector<HTMLElement>('[data-at-fan]');
+      const fanIn = document.querySelector<HTMLElement>('[data-at-fan-in]');
+      if (fan && fanIn) {
+        const rot = gsap.quickTo(fanIn, 'rotationY', { duration: 1, ease: 'power3' });
+        const rotX = gsap.quickTo(fanIn, 'rotationX', { duration: 1, ease: 'power3' });
+        fan.addEventListener('pointermove', (e) => {
+          const r = fan.getBoundingClientRect();
+          rot(((e.clientX - r.left) / r.width - 0.5) * 12);
+          rotX((0.5 - (e.clientY - r.top) / r.height) * 6);
+        });
+        fan.addEventListener('pointerleave', () => { rot(0); rotX(0); });
+      }
+    }
+
+    /* ---------- pipeline: the line draws, the steps flip in ---------- */
+    gsap.fromTo('[data-at-pipe]', { '--draw': 0 }, { '--draw': 1, ease: 'none', scrollTrigger: { trigger: '[data-at-pipe]', start: 'top 85%', end: 'top 40%', scrub: 0.6 } });
+    gsap.from('.at-pipe li', {
+      opacity: 0, y: 34, rotateX: -50, transformOrigin: '50% 0%', duration: 0.9, ease: 'power3.out', stagger: 0.09,
+      scrollTrigger: { trigger: '[data-at-pipe]', start: 'top 82%', once: true }, clearProps: 'transform,opacity',
+    });
+
+    /* ---------- the site: it swings up flat as it comes in, and a light passes over it ---------- */
+    gsap.fromTo('[data-at-window]', { rotateX: 30, y: 60, scale: 0.9 }, {
+      rotateX: 0, y: 0, scale: 1, ease: 'none',
+      scrollTrigger: { trigger: '.at-window-wrap', start: 'top bottom', end: 'top 25%', scrub: 0.6 },
+    });
+    gsap.fromTo('[data-at-window]', { '--shine': '-60%' }, {
+      '--shine': '60%', ease: 'none',
+      scrollTrigger: { trigger: '.at-window-wrap', start: 'top 70%', end: 'bottom 30%', scrub: 0.8 },
+    });
+
+    /* ---------- the cards flip in ---------- */
+    gsap.from('.at-tile', {
+      opacity: 0, y: 60, rotateX: -26, transformOrigin: '50% 0%', duration: 1, ease: 'expo.out', stagger: 0.08,
+      scrollTrigger: { trigger: '.at-bento', start: 'top 85%', once: true }, clearProps: 'transform,opacity',
+    });
+
+    window.addEventListener('load', () => ScrollTrigger.refresh());
+  })();
+</script>

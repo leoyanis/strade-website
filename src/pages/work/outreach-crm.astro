@@ -45,7 +45,7 @@ const tests = [
 
 const decisions = [
   { t: 'Failures that aren’t the lead’s fault never cost the lead its email.', b: 'A full mailbox or a wrong secret pauses sending with Microsoft’s reason, and throttling just waits. The lead keeps its place.' },
-  { t: 'An email Microsoft didn’t confirm is never retried.', b: 'If a send can’t be confirmed, it is skipped, not repeated. Nobody gets the same email twice.' },
+  { t: 'An email Microsoft didn’t confirm is never retried.', b: 'If a send can’t be confirmed, it is skipped instead of repeated. Nobody gets the same email twice.' },
   { t: 'No open tracking. People set the status.', b: 'The app only marks New reply when an answer arrives. Interested, Ready for a call and the rest are a person’s call.' },
   { t: 'Catch-all addresses are capped at 20%.', b: 'Addresses that can’t be fully verified still go out, but never more than a fifth of a mailbox’s sends.' },
 ];
@@ -437,7 +437,7 @@ const I = {
               <li><b>{d.t}</b><span>{d.b}</span></li>
             ))}
           </ol>
-          <div class="oc-term" id="oc-term" aria-label="The engine’s test suite">
+          <div class="oc-term" id="oc-term" aria-label="The engine’s test suite" data-nav-theme="dark">
             <div class="oc-term__bar" aria-hidden="true"><i></i><i></i><i></i><span>npm run test</span></div>
             <div class="oc-term__body">
               <p class="oc-term__cmd"><span>$</span> vitest run</p>
@@ -1055,6 +1055,9 @@ const I = {
             .to(below, { y: 0, duration: 0.45, ease: 'power3.inOut' }, '<')
             .add(() => setCounts(2, 1), '<')
             .to(drag, { autoAlpha: 1, duration: 0.3 });
+          // it repeats forever and animates heights (a layout every frame): only while the board can be seen.
+          // Off screen it waits where it is and picks up from there, which a loop never shows
+          ScrollTrigger.create({ trigger: board, start: 'top bottom', end: 'bottom top', onToggle: (self) => (self.isActive ? tl.play() : tl.pause()) });
         };
         ScrollTrigger.create({ trigger: board, start: 'top 70%', once: true, onEnter: run });
       }

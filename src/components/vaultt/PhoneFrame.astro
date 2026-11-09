@@ -1,0 +1,86 @@
+---
+/**
+ * PhoneFrame: an iPhone (iPhone 16 Pro proportions, black titanium) or an Android phone drawn in CSS.
+ * The screen is 393 x 852 design points, so anything inside can size itself in iPhone points
+ * with `calc(var(--u) * N)` (--u is one point in CSS px, --sw the screen width).
+ *
+ * Props
+ * - platform?: 'ios' (default: Dynamic Island, side buttons left and right) or 'android' (punch-hole camera, flatter corners)
+ * - class?:    extra classes; set the size with `--phone-w` on it or on any parent (the phone's outer width, default 300px)
+ *
+ * Slot: the screen content (for example <NetworkScreen />). The frame adds a faint glass glare on top.
+ */
+interface Props { platform?: 'ios' | 'android'; class?: string }
+const { platform = 'ios', class: cls = '' } = Astro.props;
+---
+
+<div class:list={['vp', `vp--${platform}`, cls]}>
+  {platform === 'ios' ? (
+    <>
+      <span class="vp__btn vp__btn--action"></span>
+      <span class="vp__btn vp__btn--vol1"></span>
+      <span class="vp__btn vp__btn--vol2"></span>
+      <span class="vp__btn vp__btn--power"></span>
+      <span class="vp__btn vp__btn--cam"></span>
+    </>
+  ) : (
+    <>
+      <span class="vp__btn vp__btn--apower"></span>
+      <span class="vp__btn vp__btn--avol"></span>
+    </>
+  )}
+  <div class="vp__glass">
+    <div class="vp__screen">
+      <slot />
+      {platform === 'ios' ? <span class="vp__island"></span> : <span class="vp__cam"></span>}
+      <span class="vp__glare"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .vp {
+    --pw: var(--phone-w, 300px);
+    --bz: calc(var(--pw) * 0.0322);
+    --sw: calc(var(--pw) - var(--bz) * 2);
+    --u: calc(var(--sw) / 393);
+    --r-screen: calc(var(--sw) * 0.137);
+    position: relative; width: var(--pw); height: calc(var(--sw) * 852 / 393 + var(--bz) * 2);
+    border-radius: calc(var(--r-screen) + var(--bz));
+    /* the titanium band: lit top left, dark bottom right */
+    background: linear-gradient(150deg, #5a5e66 0%, #24262a 18%, #0f1012 48%, #1b1c20 78%, #4a4d54 100%);
+    box-shadow: 0 50px 90px -30px rgba(0, 0, 0, 0.75), 0 22px 40px -22px rgba(0, 0, 0, 0.6);
+  }
+  .vp__glass {
+    position: absolute; inset: 1.6px; border-radius: calc(var(--r-screen) + var(--bz) - 1.6px);
+    background: #020203; padding: calc(var(--bz) - 1.6px);
+    box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, 0.07);
+  }
+  .vp__screen {
+    position: relative; width: var(--sw); height: calc(var(--sw) * 852 / 393); overflow: hidden;
+    border-radius: var(--r-screen); background: #131517; isolation: isolate;
+  }
+  .vp__island {
+    position: absolute; z-index: 30; left: 50%; top: calc(var(--u) * 11); width: calc(var(--u) * 124); height: calc(var(--u) * 36);
+    translate: -50% 0; border-radius: 999px; background: #000;
+  }
+  .vp__cam {
+    position: absolute; z-index: 30; left: 50%; top: calc(var(--u) * 13); width: calc(var(--u) * 12); height: calc(var(--u) * 12);
+    translate: -50% 0; border-radius: 50%; background: #000; box-shadow: 0 0 0 calc(var(--u) * 1.2) #0b0c0e;
+  }
+  .vp__glare {
+    position: absolute; z-index: 40; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(118deg, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.02) 22%, transparent 38%);
+  }
+  .vp__btn { position: absolute; width: calc(var(--pw) * 0.012); border-radius: 2px; background: linear-gradient(90deg, #121316, #45484f); }
+  .vp__btn--action { left: calc(var(--pw) * -0.008); top: 17.5%; height: 3.6%; }
+  .vp__btn--vol1 { left: calc(var(--pw) * -0.008); top: 24%; height: 6.4%; }
+  .vp__btn--vol2 { left: calc(var(--pw) * -0.008); top: 32%; height: 6.4%; }
+  .vp__btn--power { right: calc(var(--pw) * -0.008); top: 27%; height: 10%; background: linear-gradient(270deg, #121316, #45484f); }
+  .vp__btn--cam { right: calc(var(--pw) * -0.006); top: 56%; height: 4.6%; background: linear-gradient(270deg, #121316, #3a3d43); }
+
+  /* Android: flatter corners, an even bezel, power and volume on the right */
+  .vp--android { --bz: calc(var(--pw) * 0.03); --r-screen: calc(var(--sw) * 0.085); background: linear-gradient(150deg, #4a4f57 0%, #1d1f23 22%, #0e0f11 55%, #2a2d33 100%); }
+  .vp__btn--apower { right: calc(var(--pw) * -0.009); top: 22%; height: 7%; background: linear-gradient(270deg, #121316, #474b52); }
+  .vp__btn--avol { right: calc(var(--pw) * -0.009); top: 32%; height: 12%; background: linear-gradient(270deg, #121316, #474b52); }
+</style>

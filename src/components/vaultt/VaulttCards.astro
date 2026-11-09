@@ -1,0 +1,101 @@
+---
+/**
+ * VaulttCards: pieces of the Vaultt app drawn in HTML and CSS, no phone around them, one set per homepage number.
+ * They wear the app's own look (NetworkScreen.astro): the charcoal page (#131517) lifted into cards, Inter, the
+ * Vaultt blue (#70A9FF), avatars as a deep tint of the Network map's kind colour with a ring and initials, and
+ * the drawn project stills of the case study's feed (VtApps.astro). Everyone and everything on them is invented:
+ * first names, initials, project titles and company names; no real member, no real company.
+ *
+ * Props
+ * - kind: 'builders' (a fanned stack of profile cards: name, discipline, city, three projects)
+ *         'projects' (a spread of project cards by kind: games, art and film, code, science, business)
+ *         'jobs'     (job cards: role, company, place and their Applied state; the last one applies as you watch)
+ *
+ * Size: one point is var(--vx-k) (set by vaultt-home.css from the column's width); the box is 460 x 400 points.
+ * Every card rests where this file and vaultt-cards.css put it, so without JS (and with reduced motion) the set
+ * reads finished. vaultt-cards.ts moves them on the homepage: in with the number, out with it.
+ */
+import './vaultt-cards.css';
+
+interface Props { kind: 'builders' | 'projects' | 'jobs' }
+const { kind } = Astro.props;
+
+// kind colours: the Network map's (mapGlow) and the case study's kinds (VtKinds.astro)
+const C = { art: '#FF5FA2', code: '#4C8DFF', games: '#2FD4C1', sci: '#A27BFF', biz: '#FF9A3D' };
+
+// the fan, turned about a pivot below the cards: r is each card's angle in degrees, z puts the middle card (Maya) on
+// top and each pair under the one inside it, so the cards behind show their left (avatar and name) or right edge
+const people = [
+  { name: 'Kofi', init: 'KA', line: 'Game Dev', city: 'Accra', c: C.games, cover: 'arcade', shots: ['arcade', 'garden', 'neon'], r: -16, z: 1 },
+  { name: 'Theo', init: 'TB', line: 'Research', city: 'Leeds', c: C.sci, cover: 'orbit', shots: ['orbit', 'chart', 'code'], r: 16, z: 1 },
+  { name: 'Ines', init: 'IM', line: 'Software Dev', city: 'Porto', c: C.code, cover: 'code', shots: ['code', 'reel', 'paper'], r: -8, z: 2 },
+  { name: 'Lena', init: 'LK', line: 'Marketing', city: 'Berlin', c: C.biz, cover: 'synth', shots: ['chart', 'synth', 'dusk'], r: 8, z: 2 },
+  { name: 'Maya', init: 'MR', line: 'Creative Arts', city: 'Lisbon', c: C.art, cover: 'dusk', shots: ['dusk', 'paper', 'reel'], r: 0, z: 3 },
+];
+
+// the spread: centre (x, y) and turn in points, the kind's chip and an invented maker. Each row is stacked left
+// under right, so a card's neighbour only ever covers its right edge (its title, maker and chip are on the left),
+// and the middle of the box (the network's hub, with its drawn "You") is always under a card
+const projects = [
+  { t: 'Tidepool', k: 'Games', c: C.games, still: 'arcade', who: 'Kofi', init: 'KA', x: 90, y: 114, r: -7, z: 1 },
+  { t: 'Night Bus', k: 'Art & film', c: C.art, still: 'reel', who: 'Maya', init: 'MR', x: 234, y: 100, r: 2, z: 2 },
+  { t: 'orbit-ui', k: 'Code', c: C.code, still: 'code', who: 'Ines', init: 'IM', x: 374, y: 126, r: 8, z: 3 },
+  { t: 'Bee Counter', k: 'Science', c: C.sci, still: 'orbit', who: 'Theo', init: 'TB', x: 182, y: 286, r: 4, z: 4 },
+  { t: 'Thrift Run', k: 'Business', c: C.biz, still: 'chart', who: 'Lena', init: 'LK', x: 334, y: 300, r: -5, z: 5 },
+];
+
+// the jobs: invented companies (never a real one; all three names searched 2026-11-08, no company found), the Work
+// tab's Applied state. Every card reads Applied as written (the finished state for no-JS and reduced motion); the
+// live one starts on Apply when a script will drive it (html.vx-live, set before first paint by VaulttHome.astro's
+// inline gate) and turns to Applied while its number holds the screen (vaultt-cards.ts)
+const jobs = [
+  { role: 'Motion Designer', co: 'Tidewick Studio', where: 'London', tags: ['Paid', 'Hybrid'], logo: 'wave', applied: true, x: 30, y: 34, r: -1.5 },
+  { role: 'Junior Game Developer', co: 'Moonbarrow Games', where: 'Remote', tags: ['Paid', 'Full-time'], logo: 'moon', applied: true, x: 14, y: 148, r: 1 },
+  { role: 'Frontend Intern', co: 'Quillfern Labs', where: 'Manchester', tags: ['Paid', 'Internship'], logo: 'leaf', applied: false, x: 36, y: 262, r: -0.5 },
+];
+---
+
+<div class:list={['vxv', `vxv--${kind}`]} data-vxv={kind} aria-hidden="true">
+  {kind === 'builders' && people.map((p) => (
+    <div class="vxv__card vxv__person" data-r={p.r} style={`--r:${p.r}deg;--c:${p.c};z-index:${p.z}`}>
+      <span class:list={['vxv__cover', `vxs vxs--${p.cover}`]}><i></i></span>
+      <span class="vxv__av vxv__av--lg">{p.init}</span>
+      <span class="vxv__name">{p.name}</span>
+      <span class="vxv__line">{p.line}</span>
+      <span class="vxv__city">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z" /><circle cx="12" cy="10" r="2.3" /></svg>
+        {p.city}
+      </span>
+      <span class="vxv__shots">{p.shots.map((s) => <i class:list={['vxs', `vxs--${s}`]}><b></b></i>)}</span>
+    </div>
+  ))}
+
+  {kind === 'projects' && projects.map((p) => (
+    <div class="vxv__card vxv__proj" data-x={p.x} data-y={p.y} data-r={p.r} style={`--x:${p.x};--y:${p.y};--r:${p.r}deg;--c:${p.c};z-index:${p.z}`}>
+      <span class:list={['vxv__still', `vxs vxs--${p.still}`]}><i></i></span>
+      <span class="vxv__chip"><i></i>{p.k}</span>
+      <span class="vxv__title">{p.t}</span>
+      <span class="vxv__by"><span class="vxv__av vxv__av--sm">{p.init}</span>{p.who}</span>
+    </div>
+  ))}
+
+  {kind === 'jobs' && jobs.map((j, i) => (
+    <div class:list={['vxv__card vxv__job is-applied', !j.applied && 'vxv__job--live']} data-x={j.x} data-y={j.y} data-r={j.r} style={`--x:${j.x};--y:${j.y};--r:${j.r}deg;z-index:${3 - i}`}>
+      <span class:list={['vxv__logo', `vxv__logo--${j.logo}`]}>
+        {j.logo === 'wave' && <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M3 10.5c2-2.4 4-2.4 6 0s4 2.4 6 0 4-2.4 6 0" /><path d="M3 15.5c2-2.4 4-2.4 6 0s4 2.4 6 0 4-2.4 6 0" opacity=".55" /></svg>}
+        {j.logo === 'moon' && <svg viewBox="0 0 24 24"><path d="M14.6 4.2a7.9 7.9 0 1 0 5.2 13.4 8.6 8.6 0 0 1-5.2-13.4Z" fill="#FFE7A8" /><path d="m18.2 5.6.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5Z" fill="#fff" /></svg>}
+        {j.logo === 'leaf' && <svg viewBox="0 0 24 24"><path d="M5 19.2C5 10.6 10.4 5 19.2 5c0 8.7-5.6 14.2-14.2 14.2Z" fill="#fff" /><path d="M7.6 16.6c2.6-3.4 5.6-6.2 8.8-8.4" stroke="#2B9A5A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".6" /></svg>}
+      </span>
+      <span class="vxv__role">{j.role}</span>
+      <span class="vxv__co">{j.co} <b>·</b> {j.where}</span>
+      <span class="vxv__tags">{j.tags.map((t) => <span>{t}</span>)}</span>
+      <span class="vxv__state">
+        <span class="vxv__apply">Apply</span>
+        <span class="vxv__applied">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 12.5 4.2 4.2 8.8-9.4" /></svg>
+          Applied
+        </span>
+      </span>
+    </div>
+  ))}
+</div>

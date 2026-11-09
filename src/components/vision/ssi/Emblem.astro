@@ -1,0 +1,67 @@
+---
+// The SSI emblem as inline, animatable SVG (same paths as /images/ssi/emblem-star.svg).
+// Origin (0,0) is the star centre. The star is split along the slash into an upper and a lower half,
+// each half carries its ring swoosh, so the emblem can be cut apart and put back together.
+// Everything renders as the finished emblem without JS; emblem-motion.ts sets the hidden states.
+interface Props { uid: string; class?: string }
+const { uid, class: cls } = Astro.props;
+const STAR = 'M0.00 -241.88C-9.05 -113.84 17.77 -8.07 -185.50 2.00C27.08 10.12 -11.69 108.05 0.00 233.50C6.78 82.62 -9.44 1.68 184.75 -1.25C176.77 -2.54 168.32 -2.81 160.25 -3.26C135.30 -4.66 105.33 -11.03 82.35 -20.72C72.76 -24.77 65.44 -32.98 58.00 -40.25C55.70 -42.50 52.42 -43.93 49.75 -45.85C37.51 -54.63 27.08 -65.02 19.73 -78.25C14.44 -87.76 10.28 -98.97 8.56 -109.75C2.83 -145.60 2.51 -182.06 0.51 -218.25C0.08 -226.01 1.23 -234.07 0.00 -241.88Z';
+const SLASH = 'M-41.00 62.00C-39.79 61.32 -47.24 63.12 -48.50 63.31C-54.05 64.15 -59.41 66.39 -65.00 67.27C-82.71 70.03 -99.94 73.49 -118.00 72.49C-123.64 72.18 -135.00 70.24 -134.22 62.50C-132.97 49.96 -102.92 31.61 -92.50 24.99C-59.60 4.11 -6.88 -25.95 30.50 -35.44C39.65 -37.77 48.78 -38.72 58.00 -40.25L35.75 -72.25C37.83 -71.33 52.35 -76.00 56.00 -76.65C74.20 -79.90 91.94 -83.00 110.50 -83.00C117.43 -83.00 127.86 -82.65 132.99 -77.25C137.75 -72.24 133.40 -65.95 129.81 -61.75C120.79 -51.23 107.63 -44.46 96.00 -37.30C65.49 -18.52 11.53 3.59 -23.00 14.57C-30.45 16.94 -60.11 24.69 -63.25 26.00Z';
+const RING_L = 'M-89.50 16.00C-95.43 22.91 -147.75 45.63 -151.65 66.00C-153.61 76.30 -132.16 77.75 -125.75 77.75C-104.89 77.75 -60.56 69.94 -41.35 62.22C-39.79 61.32 -47.24 63.12 -48.50 63.31C-54.05 64.15 -59.41 66.39 -65.00 67.27C-82.71 70.03 -99.94 73.49 -118.00 72.49C-123.64 72.18 -135.00 70.24 -134.22 62.50C-132.97 49.96 -102.92 31.61 -92.50 24.99C-59.60 4.11 -6.88 -25.95 30.50 -35.44C39.65 -37.77 48.78 -38.72 58.00 -40.25C17.75 -46.50 -52.25 -10.50 -89.50 16.00Z';
+const RING_R = 'M82.00 -21.00C87.11 -25.45 103.64 -31.97 110.75 -35.96C120.55 -41.45 130.24 -47.11 139.25 -53.84C145.41 -58.45 154.81 -65.30 156.19 -73.50C158.45 -86.89 136.88 -88.75 127.75 -88.75C99.60 -88.75 72.92 -81.98 45.75 -75.39C42.35 -74.57 39.13 -73.11 35.75 -72.25C37.83 -71.33 52.35 -76.00 56.00 -76.65C74.20 -79.90 91.94 -83.00 110.50 -83.00C117.43 -83.00 127.86 -82.65 132.99 -77.25C137.75 -72.24 133.40 -65.95 129.81 -61.75C120.79 -51.23 107.63 -44.46 96.00 -37.30C65.49 -18.52 11.53 3.59 -23.00 14.57C-30.45 16.94 -60.11 24.69 -63.25 26.00C0.75 43.50 40.75 21.50 82.00 -21.00Z';
+const UP = 'M-400 24L-90 24L-63 22L-23 3L30 -22L58 -30L64 -45L400 -45L400 -400L-400 -400Z';
+const LO = 'M-400 24L-90 24L-63 22L-23 3L30 -22L58 -30L64 -45L400 -45L400 400L-400 400Z';
+const box = { x: -400, y: -400, width: 800, height: 800 };
+---
+<svg class:list={['emb', cls]} viewBox="-190 -246 380 484" overflow="visible" fill="#fff" aria-hidden="true" data-uid={uid}>
+  <defs>
+    <mask id={`${uid}-cut`} maskUnits="userSpaceOnUse" {...box}>
+      <rect {...box} fill="#fff" />
+      <path class="e-slash" d={SLASH} fill={`url(#${uid}-wipeg)`} />
+    </mask>
+    <mask id={`${uid}-sweep`} maskUnits="userSpaceOnUse" {...box}>
+      <path class="e-sweep" d="M-400 -400H400V400H-400Z" fill="#fff" />
+    </mask>
+    <mask id={`${uid}-fill`} maskUnits="userSpaceOnUse" {...box}>
+      <path class="e-fillshape" d="M-400 -400H400V400H-400Z" fill="#fff" />
+    </mask>
+    <filter id={`${uid}-soft`} x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5" /></filter>
+    <!-- the cut is painted with this band (black inside, white outside) sliding along the cut's axis, so its shape never distorts -->
+    <linearGradient id={`${uid}-wipeg`} class="e-wipe" gradientUnits="userSpaceOnUse" x1="-240" y1="0" x2="240" y2="0" gradientTransform="translate(0 -5) rotate(-28)">
+      <stop offset="0" stop-color="#fff" /><stop offset="0" stop-color="#000" /><stop offset="1" stop-color="#000" /><stop offset="1" stop-color="#fff" />
+    </linearGradient>
+    <clipPath id={`${uid}-up`}><path d={UP} /></clipPath>
+    <clipPath id={`${uid}-lo`}><path d={LO} /></clipPath>
+    <filter id={`${uid}-blur`} x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="14" /></filter>
+    <radialGradient id={`${uid}-core`}><stop offset="0" stop-color="#fff" /><stop offset="0.25" stop-color="#fff" stop-opacity="0.9" /><stop offset="1" stop-color="#bff6ff" stop-opacity="0" /></radialGradient>
+    <linearGradient id={`${uid}-beam`}><stop offset="0" stop-color="#fff" stop-opacity="0" /><stop offset="0.5" stop-color="#fff" /><stop offset="1" stop-color="#fff" stop-opacity="0" /></linearGradient>
+  </defs>
+
+  <g class="e-back"></g>
+  <ellipse class="e-orbit" rx="162" ry="162" fill="none" stroke="#fff" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity="0" />
+
+  <!-- ignition: the cross of fine rays the star fills out of -->
+  <path class="e-bloom" d="M0 0Z" filter={`url(#${uid}-blur)`} opacity="0" />
+  <g class="e-rays" opacity="0" mask={`url(#${uid}-cut)`}>
+    <path class="e-ray-v" d="M0 -241.88L0.7 0L0 233.5L-0.7 0Z" />
+    <path class="e-ray-h" d="M-185.5 2L0 -0.7L184.75 -1.25L0 0.7Z" />
+  </g>
+
+  <g mask={`url(#${uid}-fill)`}>
+    <g class="e-star">
+      <g mask={`url(#${uid}-cut)`}><path class="e-glow" d={STAR} filter={`url(#${uid}-blur)`} opacity="0" /></g>
+      <g class="e-up"><path d={STAR} clip-path={`url(#${uid}-up)`} mask={`url(#${uid}-cut)`} /></g>
+      <g class="e-lo"><path d={STAR} clip-path={`url(#${uid}-lo)`} mask={`url(#${uid}-cut)`} /></g>
+    </g>
+  </g>
+  <g class="e-ring" mask={`url(#${uid}-sweep)`}>
+    <g class="e-up-ring"><path d={RING_L} /></g>
+    <g class="e-lo-ring"><path d={RING_R} /></g>
+  </g>
+
+  <g class="e-front"></g>
+  <circle class="e-core" r="26" fill={`url(#${uid}-core)`} opacity="0" />
+  <circle class="e-dot" r="3.5" opacity="0" />
+  <rect class="e-flare" x="-260" y="-1.5" width="520" height="3" fill={`url(#${uid}-beam)`} opacity="0" />
+  <rect class="e-blade" x="-220" y="-1.5" width="440" height="3" fill={`url(#${uid}-beam)`} opacity="0" />
+</svg>

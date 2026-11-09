@@ -1,0 +1,57 @@
+---
+/**
+ * NetworkMap: Vaultt's Network map, alive, on a canvas (engine: ./network.ts). Invented people only.
+ *
+ * Props
+ * - look?:     'app' (default: the phone's map on the app's charcoal, sized in iPhone points) or
+ *              'world' (the vaultt.io-navy backdrop; transparent canvas, put it over #0C2748)
+ * - live?:     animate (default true). false paints one still frame. Reduced motion and ?still always paint still.
+ * - seed?:     which network (same seed, same people). Default 7.
+ * - hubY?:     app look: where the viewer sits, in points from the top of a 393 x 852 screen (default 430)
+ * - topInset?: app look: points at the top kept free of people (header, tabs). Default 0.
+ * - hubX?, hubYFraction?: world look without a host: hub position as fractions of the canvas (default 0.5, 0.5)
+ * - density?:  'full' (default) or 'lite' (fewer people, for small screens)
+ * - managed?:  true when a page script mounts it itself (the homepage world); skips auto-mounting
+ * - class?:    size it with CSS (the canvas fills whatever box you give it)
+ *
+ * Interaction (live): hover lights a person and their tie; drag a dot and the springs throw it back;
+ * on the world look, clicking empty space ripples the field and ties a new connection in.
+ * Runs only while on screen and while the tab is visible; DPR is capped at 2.
+ */
+interface Props {
+  look?: 'app' | 'world';
+  live?: boolean;
+  seed?: number;
+  hubY?: number;
+  topInset?: number;
+  hubX?: number;
+  hubYFraction?: number;
+  density?: 'full' | 'lite';
+  managed?: boolean;
+  class?: string;
+}
+const { look = 'app', live = true, seed = 7, hubY, topInset, hubX, hubYFraction, density = 'full', managed = false, class: cls = '' } = Astro.props;
+---
+
+<canvas
+  class:list={['vnm', cls]}
+  data-vx-net
+  data-look={look}
+  data-live={live ? '1' : '0'}
+  data-seed={seed}
+  data-hub-y={look === 'app' ? hubY : hubYFraction}
+  data-hub-x={hubX}
+  data-top={topInset}
+  data-density={density}
+  data-managed={managed ? '1' : undefined}
+  aria-hidden="true"
+></canvas>
+
+<style>
+  .vnm { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+</style>
+
+<script>
+  import { mountNetworks } from './network-mount';
+  mountNetworks();
+</script>

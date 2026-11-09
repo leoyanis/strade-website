@@ -283,7 +283,7 @@ const bars = [92, 78, 0, 84, 66, 88, 0, 72, 90, 58, 0, 80];
               <li>Notes in a project tree, stored locally in SQLite.</li>
               <li>Token and cost tracking, so you always know what you’re spending.</li>
             </ul>
-            <p class="nl-era__note">The warm amber is on purpose: notes should feel like paper, not a dashboard.</p>
+            <p class="nl-era__note">The warm amber is on purpose: notes should feel like paper rather than a dashboard.</p>
           </div>
           <div class="nl-era__media nl-era__media--v2">
             <img class="nl-shot nl-shot--a" src={img('g1.webp')} alt={p.gallery?.[0]?.alt ?? 'Chat that writes notes'} width="1029" height="1600" loading="lazy" decoding="async" />
@@ -342,8 +342,7 @@ const bars = [92, 78, 0, 84, 66, 88, 0, 72, 90, 58, 0, 80];
           <p class="nl-label" data-reveal>How I built it</p>
           <h2 id="nl-how-h" class="nl-h2" data-reveal>One contract for every model. <span>Strict tools for every edit.</span></h2>
           <p class="nl-how__lede" data-reveal>
-            For v2 I wrote the spec and the design system first, then had AI write the Flutter code against them. I made
-            the calls. It did the typing.
+            For v2 I wrote the spec and the design system first, then built the Flutter app against them.
           </p>
         </header>
         <ol class="nl-how__list">
@@ -354,7 +353,7 @@ const bars = [92, 78, 0, 84, 66, 88, 0, 72, 90, 58, 0, 80];
           </li>
           <li data-reveal>
             <span class="nl-mono">02</span>
-            <h3>Tools, not free text</h3>
+            <h3>Tools instead of free text</h3>
             <p>The assistant can only change notes through a fixed set of tools with strict inputs. It asks before anything destructive.</p>
           </li>
           <li data-reveal>

@@ -1,0 +1,142 @@
+/* ================================================================
+   EXP · the hero's wheel of project cards (src/scripts/home-wheel.ts)
+   Each card hangs from one pivot far below the screen (transform-origin),
+   so rotating it by its offset puts it on the arc. JS writes only transforms.
+   ================================================================ */
+.wc-wheel {
+  /* --cw / --ch come from .sx-hero, which sizes the hero around them */
+  --R: 1500px; --step: 8.4deg; --top: 70px;
+  position: relative; width: 100%; flex: none; margin-top: auto;
+  height: calc(var(--top) + var(--ch) + 140px);
+  touch-action: pan-y; user-select: none; -webkit-user-select: none; outline: none; cursor: grab;
+  -webkit-mask-image: linear-gradient(#000 64%, transparent 97%); mask-image: linear-gradient(#000 64%, transparent 97%);
+}
+.wc-wheel.is-dragging { cursor: grabbing; }
+.wc-wheel:focus-visible .wc.is-front .wc__face { outline: 2px solid #fff; outline-offset: 4px; }
+.wc {
+  position: absolute; left: 50%; top: var(--top); width: var(--cw); aspect-ratio: 9 / 16; margin-left: calc(var(--cw) / -2);
+  border-radius: calc(var(--cw) * 0.09); transform-origin: 50% calc(100% + var(--R)); will-change: transform;
+  -webkit-tap-highlight-color: transparent; -webkit-user-drag: none;
+}
+.wc__in { position: absolute; inset: 0; display: block; border-radius: inherit; transition: transform 0.6s var(--ease-out-expo); }
+.wc-wheel:not(.is-dragging) .wc:hover .wc__in { transform: translateY(-14px); }
+.wc__face {
+  position: absolute; inset: 0; display: block; overflow: hidden; border-radius: inherit; isolation: isolate;
+  background: var(--bg); color: var(--ink);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.5s var(--ease-out-expo);
+}
+.wc.is-light .wc__face { box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.5); }
+.wc.is-front .wc__face { box-shadow: 0 34px 80px rgba(0, 0, 0, 0.62), 0 0 0 1px color-mix(in srgb, var(--accent) 75%, transparent), 0 0 70px color-mix(in srgb, var(--accent) 32%, transparent); }
+.wc.is-flying .wc__face { visibility: hidden; }
+.wc__face::before { content: ''; position: absolute; inset: 0; z-index: 0; background: radial-gradient(75% 48% at 50% 74%, var(--glow, transparent), transparent 72%); }
+.wc__art { position: absolute; inset: 0; z-index: 1; display: block; }
+.wc__head {
+  position: absolute; z-index: 3; left: 8%; right: 8%; top: 6.5%; display: flex; flex-direction: column; gap: 0.32em;
+  font-size: calc(var(--cw) * 0.074); line-height: 1.05; text-align: left; pointer-events: none;
+}
+.wc__head strong { font-weight: 750; letter-spacing: -0.025em; }
+.wc__head small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.48em; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.62; }
+
+/* the reel: full bleed, with a little shade up top for the name */
+.wc__art video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.wc--video .wc__art video { top: 21%; height: 79%; object-position: 50% 0; border-radius: calc(var(--cw) * 0.06) calc(var(--cw) * 0.06) 0 0; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.wc--video .wc__art { background: radial-gradient(80% 40% at 50% 100%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 70%); }
+.wc__art video.is-contain { top: 21%; height: 82%; object-fit: contain; object-position: 50% 0; }
+
+/* a phone with the real screen in it, cropped by the bottom of the card */
+.wc-phone {
+  position: absolute; left: 50%; top: 24%; width: 72%; aspect-ratio: 9 / 19.5; translate: -50% 0; display: block;
+  padding: 3.2%; border-radius: 14% / 6.5%; background: #0a0a0c;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 22px 44px rgba(0, 0, 0, 0.5);
+}
+.wc.is-light .wc-phone { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 22px 44px rgba(20, 24, 48, 0.24); }
+.wc-phone img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; display: block; border-radius: 11% / 5.1%; }
+.wc-phone::after { content: ''; position: absolute; left: 50%; top: 4.6%; width: 25%; height: 2.6%; translate: -50% 0; border-radius: 99px; background: #000; }
+.wc-pal { position: absolute; left: -3%; bottom: 3%; width: 46%; height: auto; transform: rotate(-8deg); filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.22)); }
+
+/* a device that is already in the picture */
+.wc-contain { position: absolute; left: 50%; bottom: -5%; height: 77%; width: auto; max-width: 98%; object-fit: contain; object-position: 50% 100%; translate: -50% 0; display: block; }
+
+/* a desktop window, cropped off the right and the bottom */
+.wc-window {
+  position: absolute; left: 8%; right: -22%; top: 25%; bottom: -8%; display: block; overflow: hidden;
+  border-radius: calc(var(--cw) * 0.05); background: #16161a; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 22px 44px rgba(0, 0, 0, 0.55);
+}
+.wc-window__bar { display: flex; align-items: center; gap: 4px; height: calc(var(--cw) * 0.07); padding-left: calc(var(--cw) * 0.035); background: #1f1f24; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.wc-window__bar i { width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); }
+.wc-window img { display: block; width: 100%; height: auto; }
+
+/* drawn: the outreach pipeline board */
+.wc-crm { position: absolute; left: 7%; right: 7%; top: 25%; bottom: 13%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4%; font-size: calc(var(--cw) * 0.036); }
+.wc-crm__col { display: flex; flex-direction: column; gap: 0.6em; padding: 0.7em 0.5em; border-radius: 0.9em; background: rgba(31, 27, 24, 0.045); border: 1px solid rgba(31, 27, 24, 0.07); }
+.wc-crm__col em { display: flex; justify-content: space-between; align-items: center; font-style: normal; font-weight: 650; color: #1F1B18; white-space: nowrap; overflow: hidden; }
+.wc-crm__col em i { font-style: normal; font-size: 0.85em; padding: 0.05em 0.5em; border-radius: 99px; background: var(--accent); color: #fff; }
+.wc-crm__col b { display: flex; flex-direction: column; gap: 0.4em; padding: 0.65em 0.55em; border-radius: 0.6em; background: #fff; box-shadow: 0 2px 8px rgba(31, 27, 24, 0.08); }
+.wc-crm__col b s { display: block; height: 0.45em; border-radius: 99px; background: #E7E2DD; text-decoration: none; }
+.wc-crm__col b s:first-child { background: #C9C7F0; }
+.wc-crm__col:last-child b { box-shadow: 0 0 0 1.5px var(--accent), 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent); }
+.wc-crm__pill { position: absolute; left: 0; bottom: -3.4em; padding: 0.45em 0.9em; border-radius: 99px; font-weight: 600; color: #fff; background: var(--accent); white-space: nowrap; box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* drawn: three story frames in the studio's style */
+.wc-stories { position: absolute; left: 0; right: 0; top: 27%; bottom: 0; display: block; }
+.wc-story {
+  position: absolute; top: 12%; width: 47%; aspect-ratio: 9 / 16; display: flex; flex-direction: column; justify-content: flex-end; gap: 0.35em;
+  padding: 9% 8%; border-radius: calc(var(--cw) * 0.045); font-size: calc(var(--cw) * 0.05); text-align: left;
+  background: linear-gradient(165deg, #1d1d1d, #0b0b0b); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 18px 34px rgba(0, 0, 0, 0.6);
+}
+.wc-story em { font-family: 'JetBrains Mono', ui-monospace, monospace; font-style: normal; font-size: 0.6em; letter-spacing: 0.12em; color: var(--accent); }
+.wc-story b { font-weight: 800; line-height: 1.04; letter-spacing: -0.02em; color: #fff; }
+.wc-story.is-l { left: 3%; rotate: -10deg; }
+.wc-story.is-r { right: 3%; rotate: 10deg; }
+.wc-story.is-m { left: 26.5%; top: 2%; z-index: 2; background: var(--accent); }
+.wc-story.is-m em, .wc-story.is-m b { color: #111; }
+
+/* the picked card (index.astro): a copy of the Atlas card that lifts out of the hand, comes apart into its layers
+   in mid-air (atlas-reel.css, .ar--flyer) and settles into the Atlas editor. It is laid out at --fw, the biggest
+   size it is shown at, and only ever scaled down by its one transform, so it stays sharp. --fk is --fw over the
+   card's width (the card's pixel shadows, scaled to match). --m turns it from the card (name on top, reel below)
+   into the bare reel; --fr is its corner radius, the card's turning into the preview's. It drops into the editor's
+   preview from the front (the editor's title bar has no text while the card is over it; index.astro sets --tb on the
+   editor), and the preview's own frame, ring and shadow are already there around it. Will-change only while it flies. */
+.wc-flyer {
+  --m: 0; --fk: 1;
+  position: fixed; left: 0; top: 0; z-index: 60; width: var(--fw, var(--cw)); aspect-ratio: 9 / 16;
+  pointer-events: none; visibility: hidden; transform-origin: 50% 50%; perspective: 1500px;
+}
+.wc-flyer.is-on { visibility: visible; will-change: transform; }
+/* their opacity changes every frame of the flight: on their own layers, so the flyer is never repainted for it */
+.wc-flyer.is-on .wc-flyer__pool, .wc-flyer.is-on .wc-flyer__face { will-change: opacity; }
+/* the layers and their names move in 3D every frame: keep their raster (the flyer is laid out at its biggest
+   size, so the locked scale is a sharp one) instead of re-rastering them as the angle changes */
+.wc-flyer.is-on .ar-ly { will-change: transform; }
+.wc-flyer.is-on .ar-lab { will-change: transform, opacity; }
+/* the card itself (its colour, name and front-card glow), fading as the video slides up out of it */
+.wc-flyer__face {
+  border-radius: var(--fr); opacity: calc(1 - var(--m));
+  box-shadow: 0 calc(34px * var(--fk)) calc(80px * var(--fk)) rgba(0, 0, 0, 0.62), 0 0 0 calc(1px * var(--fk)) color-mix(in srgb, var(--accent) 75%, transparent), 0 0 calc(70px * var(--fk)) color-mix(in srgb, var(--accent) 32%, transparent);
+}
+.wc-flyer .wc__head { font-size: calc(var(--fw) * 0.074); }
+.wc-flyer .ar { --rw: var(--fw); }
+/* (no landing ring of its own any more: it settles in through the preview's frame, whose ring and shadow show
+   round it, so a second ring here doubled the preview's for the length of the landing) */
+/* behind the stack while it is apart: a soft dark pool with Atlas's purple at its heart, so the names read clean
+   against the wheel and the AI's work glows (--xa is how far apart it is; the script sets it) */
+.wc-flyer__pool {
+  position: absolute; left: -95%; right: -190%; top: -30%; bottom: -30%; pointer-events: none; opacity: var(--xa, 0);
+  background: radial-gradient(closest-side at 34% 50%, rgba(136, 88, 248, 0.2), rgba(9, 8, 14, 0.82) 44%, rgba(9, 8, 14, 0.6) 72%, transparent);
+}
+/* the reel in a wheel card: same ring as the old video had, nothing behind it */
+.wc--reel .wc__art { background: none; }
+
+/* intro gate (index.astro's inline head script) */
+.hero-intro .wc__in { opacity: 0; }
+
+@media (max-width: 767px) {
+  .wc-wheel { --R: 820px; --step: 12.5deg; --top: 64px; }
+}
+/* laptop screens up to 1000px tall: a tighter gap between the hero's buttons and the cards, so the front card's face
+   shows above the fold (home.css, the same query). 58px still leaves room for the front card's lift and its hover */
+@media (min-width: 768px) and (max-height: 1000px) {
+  .wc-wheel { --top: 58px; }
+}

@@ -1,0 +1,234 @@
+/* ================================================================
+   FREE STUFF: the act between Side quests and Kleus
+   (src/components/free-act: FreeAct.astro, HoleWorld.astro,
+   free-act.ts, hole-video.ts).
+   A hard sci-fi world: a black hole, a pre-rendered loop, rising as
+   a dome over the playful stripes, then the free skills on a band
+   whose tilt follows the scroll. Light ink on near-black.
+   ================================================================ */
+
+/* ---------- the world: a fixed theme layer ----------
+   `.themes .theme--hole`, not `.theme--hole`: home.css's `.theme` rule (clip-path: inset(100% 0 0 0)) may load
+   after this file and would hide the layer. The layer itself never moves or clips: the dome inside does. */
+.themes .theme--hole { clip-path: none; will-change: auto; }
+
+/* The dome: a circle of radius --R whose top point free-act.ts glues to the act's top edge (transform only).
+   Wide screens: 80vw, a clear curve (the edge sits 17.6vw lower at the screen's sides). Once its edge has risen
+   past the top corners the circle must still hold the bottom ones, which needs a radius of at least half the
+   screen's diagonal: 40vw + 40vh is always a little more than that for screens up to 1:2.5 (hypot() would be
+   exact, but older Safari lacks it). Tried max(80vw, 56vh) first: a 768x1024 tablet and a 375x667 phone kept
+   two bare corners at the bottom. free-act.ts reads the dome's real size, so this is the one place the radius
+   is set. Parked below the screen until the script runs. */
+.hole-dome {
+  --R: max(80vw, 40vw + 40vh);
+  position: absolute; top: 0; left: calc(50vw - var(--R));
+  width: calc(var(--R) * 2); height: calc(var(--R) * 2);
+  border-radius: 50%; overflow: hidden;
+  transform: translate3d(0, 110vh, 0); will-change: transform;
+  background: #020306;
+}
+/* undoes the dome's move, so the black hole stays still on the screen. 100vh, not the fixed stack's height:
+   a phone's URL bar showing or hiding resized that, and with it the video's frame (hole-video.ts reads this box) */
+.hole-dome__in {
+  position: absolute; top: 0; left: calc(var(--R) - 50vw); width: 100vw; height: 100vh;
+  transform: translate3d(0, -110vh, 0); will-change: transform;
+}
+/* The black hole, a pre-rendered loop (hole-video.ts). The stage is the video's frame: the script sizes and places
+   it (left, top, width, height on resize) so the hole lands where the CSS drawing below has it, and drives the
+   scroll's parallax through its transform (about the hole's centre, its transform-origin). The video sits under
+   its poster at full opacity, never hidden (iOS will not start a hidden muted video). The stage fades in over the
+   CSS drawing once the poster is decoded (.has-hole), and the poster fades out once the video has shown a frame
+   (.is-playing), which is the poster's own frame. Until 2026-11-08 this was a WebGL canvas (black-hole.ts). */
+.hole-stage { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; opacity: 0; will-change: transform; }
+.theme--hole.has-hole .hole-stage { opacity: 1; transition: opacity 0.6s ease; }
+.hole-video, .hole-poster, .hole-poster img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hole-poster { transition: opacity 0.45s ease; }
+.theme--hole.is-playing .hole-poster { opacity: 0; }
+/* The CSS drawing under the stage cross-fades with it: once the poster is on (.has-hole) the stage fades in over
+   the drawing, which then goes, the instant that fade has finished, so the two never dim each other halfway */
+.hole-art { transition: opacity 0.6s ease; }
+.theme--hole.has-hole .hole-art { opacity: 0; transition: opacity 0s linear 0.6s; }
+
+/* The CSS drawing of the black hole: under the loop until its poster is decoded, and alone without JS (below).
+   Same place and size as the loop's (hole-video.ts place(): x 0.68, y 0.52 minus the drift's rise on wide
+   screens; x 0.5, y 0.31 on narrow ones, shadow radius r), and the same look: the side turning towards
+   us burns blue-white (right), the side turning away is a dim amber (left), with a thin bright ring round the
+   shadow. The shapes are drawn in neutral white, and one conic gradient, multiplied over them, colours them by
+   their angle round the hole. What sits above the tint keeps its own colour: the stars, the photon ring's cool
+   white, and the near side of the disc, which crosses just under the centre, where the angle swings from one side
+   to the other within a few pixels (tinted, it split into amber and white with a hard seam), so it is two
+   overlapping ellipses, amber left and blue-white right. Top to bottom: stars; the near side of the disc in front
+   of the shadow; the photon ring and its halo; the tint; the shadow; the blazing spot where the far side's light
+   comes round on the right; the far side bent over and under the shadow (one tilted ring: its top is the wide arc
+   above, its bottom the thin arc below); the flat disc out to the sides; a faint glow; deep space. Painted once
+   (nothing in it moves). */
+.hole-art,
+html:not(.has-themes) .act--free::before {
+  --cx: 68%; --cy: 49.5%; --r: min(7.8vw, 13vh);
+  background:
+    radial-gradient(1px 1px at 14% 22%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1px 1px at 31% 71%, rgba(214, 228, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 48% 13%, rgba(255, 244, 228, 0.8), transparent),
+    radial-gradient(1px 1px at 8% 86%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 88% 18%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 93% 77%, rgba(214, 228, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 22% 47%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1px 1px at 58% 88%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(ellipse calc(var(--r) * 2.9) calc(var(--r) * 0.17) at calc(var(--cx) + var(--r) * 1.55) calc(var(--cy) + var(--r) * 0.12), rgba(246, 250, 255, 0.95), rgba(236, 244, 255, 0.5) 45%, rgba(230, 240, 255, 0.12) 75%, transparent),
+    radial-gradient(ellipse calc(var(--r) * 2.6) calc(var(--r) * 0.19) at calc(var(--cx) - var(--r) * 1.35) calc(var(--cy) + var(--r) * 0.16), rgba(226, 164, 92, 0.8), rgba(206, 136, 66, 0.4) 45%, rgba(190, 120, 56, 0.1) 75%, transparent),
+    radial-gradient(circle at var(--cx) var(--cy), transparent calc(var(--r) - 1.6px), rgba(238, 244, 255, 0.95) calc(var(--r) - 0.3px), rgba(206, 222, 255, 0.5) calc(var(--r) + 1.8px), rgba(176, 200, 255, 0.14) calc(var(--r) + 6px), transparent calc(var(--r) + 15px)),
+    conic-gradient(from 0deg at var(--cx) var(--cy), #f0dec4 0deg, #f8f3ea 40deg, #f4f8ff 75deg, #ecf3ff 105deg, #dde7fb 140deg, #e8dac4 180deg, #e0b274 215deg, #c68a46 252deg, #bb7c3c 290deg, #dcb07a 325deg, #f0dec4 360deg),
+    radial-gradient(circle at var(--cx) var(--cy), #000 0, #000 calc(var(--r) - 1px), transparent calc(var(--r) + 0.5px)),
+    radial-gradient(ellipse calc(var(--r) * 0.62) calc(var(--r) * 0.92) at calc(var(--cx) + var(--r) * 1.12) calc(var(--cy) - var(--r) * 0.24), #fff, rgba(255, 255, 255, 0.75) 30%, rgba(255, 255, 255, 0.24) 66%, transparent),
+    radial-gradient(ellipse calc(var(--r) * 1.95) calc(var(--r) * 1.52) at calc(var(--cx) + var(--r) * 0.08) calc(var(--cy) - var(--r) * 0.15), transparent 76%, rgba(255, 252, 246, 0.9) 85%, rgba(255, 248, 238, 0.46) 92%, transparent),
+    radial-gradient(ellipse calc(var(--r) * 2.25) calc(var(--r) * 1.78) at calc(var(--cx) + var(--r) * 0.12) calc(var(--cy) - var(--r) * 0.2), transparent 86%, rgba(255, 244, 228, 0.3) 92%, transparent),
+    radial-gradient(ellipse calc(var(--r) * 5.4) calc(var(--r) * 0.44) at calc(var(--cx) + var(--r) * 0.2) var(--cy), rgba(255, 250, 242, 0.62), rgba(255, 246, 234, 0.28) 46%, rgba(255, 240, 224, 0.06) 80%, transparent),
+    radial-gradient(ellipse calc(var(--r) * 7) calc(var(--r) * 0.9) at calc(var(--cx) + var(--r) * 0.3) var(--cy), rgba(255, 240, 222, 0.14), transparent 75%),
+    radial-gradient(ellipse calc(var(--r) * 3.6) calc(var(--r) * 2.7) at calc(var(--cx) + var(--r) * 0.4) calc(var(--cy) - var(--r) * 0.1), rgba(255, 240, 225, 0.12), transparent 70%),
+    #020306;
+  /* one value per layer above (19): only the tint multiplies */
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal, normal, normal, normal, normal, multiply, normal, normal, normal, normal, normal, normal, normal;
+}
+.hole-art { position: absolute; inset: 0; }
+@media (max-width: 899px) {
+  .hole-art, html:not(.has-themes) .act--free::before { --cx: 50%; --cy: 28.5%; --r: min(15.5vw, 8.5vh); }
+}
+
+/* no JS (or no GSAP): the act paints its own space, with the drawing behind its words */
+html:not(.has-themes) .act--free { background: #020306; }
+html:not(.has-themes) .act--free::before {
+  content: ''; position: absolute; left: 0; right: 0; top: calc(17.6vw + 6vh); height: 100vh; pointer-events: none;
+}
+
+/* ---------- the act ----------
+   The top padding is the dome's rise: the words sit low enough that they only come on screen once the dark
+   has covered it (free-act.ts also holds them until then). 17.6vw is how much lower the dome's edge is at the
+   screen's sides than at its top point, so the heading lands about 38% down the screen as the cover completes. */
+.act--free {
+  position: relative; color: #EEEBE4;
+  padding: calc(38vh + 17.6vw) 0 clamp(190px, 27vh, 280px);
+}
+@media (max-width: 899px) {
+  /* narrow screens: the black hole sits high and centred (hole-video.ts place()), so the words land below it, about 55%
+     down the screen, instead of on its disc */
+  .act--free { padding-top: calc(55vh + 17.6vw); padding-bottom: 170px; }
+}
+@media (max-width: 899px) and (max-aspect-ratio: 7/10) {
+  /* tall phones: the dome's radius comes from the diagonal, and its edge is only about 10 to 12vw lower at the sides */
+  .act--free { padding-top: calc(55vh + 12vw); }
+}
+.fa-intro { position: relative; z-index: 2; }
+@media (max-width: 899px) {
+  /* Narrow screens: the black hole is fixed high and centred, so the words scroll right across its brightest
+     disc, and the grey line and the outlined word lost their contrast there (reviewer, 2026-11-08; a text-shadow
+     did not rescue them). A soft dark backing rides behind the words: an ellipse wider than the screen (the act
+     clips it sideways) fading out well past the text, so no edge shows. On space it is dark on dark, invisible;
+     over the disc it keeps the line at about 5:1. Static, so it costs nothing per frame; it needs no fade of its
+     own, because the held words sit below the hole's light until they rise in. */
+  .fa-intro::before {
+    content: ''; position: absolute; z-index: -1; left: -25%; right: -25%; top: -64px; bottom: -56px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(2, 3, 6, 0.74), rgba(2, 3, 6, 0.68) 42%, rgba(2, 3, 6, 0.44) 68%, rgba(2, 3, 6, 0.16) 86%, rgba(2, 3, 6, 0));
+  }
+}
+.fa-h {
+  font-size: clamp(58px, 8.2vw, 124px); font-weight: 800; letter-spacing: -0.058em; line-height: 0.9;
+  color: #F4F1EA; overflow: hidden; padding-bottom: 0.08em;
+}
+/* "stuff." in outline, as on the /free page, with a dark body so it holds up when the black hole's light is behind
+   it. The stroke is painted first and the fill over it (paint-order), so the fill hides the stroke's inner half
+   (hence 3px for a 1.5px line) and every place where outlines overlap: Geist's variable outlines overlap inside
+   the t and the f, and at -0.058em neighbouring letters overlapped too, so the word looked scribbled (reviewer,
+   2026-11-08). Hence also the looser -0.02em. Letters are split into separate boxes for the rise (free-act.ts),
+   and each box paints on its own, so "ff" is kept in one box there. A browser whose paint-order does not reach
+   HTML text paints the whole 3px stroke over the dark body: a bolder outline, still clean. */
+.fa-h__o {
+  letter-spacing: -0.02em; color: #05060a;
+  -webkit-text-stroke: 3px rgba(244, 241, 234, 0.66); paint-order: stroke fill;
+}
+/* the letters free-act.ts splits the heading into: inline boxes ignore transforms, so they rise as blocks */
+.fa-w { display: inline-block; white-space: nowrap; }
+.fa-c { display: inline-block; }
+.fa-line { margin-top: 22px; max-width: 430px; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; color: rgba(238, 235, 228, 0.78); text-shadow: 0 1px 14px rgba(2, 3, 6, 0.85); }
+.fa-follow {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 26px;
+  padding: 12px 19px 12px 16px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24); background: rgba(4, 5, 8, 0.62);
+  color: #F4F1EA; font-size: 15px; font-weight: 600;
+  transition: border-color 0.25s, background-color 0.25s, translate 0.35s var(--ease-out-expo);
+}
+.fa-follow:hover { border-color: #e1306c; background-color: rgba(225, 48, 108, 0.1); translate: 0 -2px; }
+
+/* ---------- the band ----------
+   Full bleed, wider than the screen so its tilted ends never show (.act clips it sideways). The resting tilt
+   here is what reduced motion, ?still and no JS see; free-act.ts scrubs it between about -7 and +5 degrees. */
+.fa-band {
+  position: relative; z-index: 1; width: 132vw; margin: clamp(96px, 13vh, 150px) 0 0 -16vw;
+  padding: 58px 0; transform: rotate(-3deg); transform-origin: 50% 50%; will-change: transform;
+}
+/* dark glass with hairline edges and ruler ticks, like a strip of instrument tape across the hole */
+.fa-band__strip {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px 120px) 0 0 / 100% 12px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.17) 0 1px, transparent 1px 24px) 0 0 / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px 120px) 0 100% / 100% 12px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.17) 0 1px, transparent 1px 24px) 0 100% / 100% 6px no-repeat,
+    linear-gradient(180deg, rgba(7, 8, 12, 0.8), rgba(7, 8, 12, 0.6) 50%, rgba(7, 8, 12, 0.8));
+  border-top: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.fa-track {
+  position: relative; display: flex; justify-content: center; gap: 22px; list-style: none; margin: 0; padding: 0;
+  will-change: transform;
+}
+.fa-slot { flex: 0 0 auto; width: clamp(224px, 20vw, 284px); transform: rotate(1.5deg); will-change: transform; }
+
+/* Every card looks the same: the title and line in the same white as the heading and line above, on plain dark
+   glass, and the skill's accent (--acc, resources.ts) in one place only, its "Get it free" link. Until 2026-11-08
+   each card also wore an accent hairline along its top, a mono "FREE CLAUDE SKILL" eyebrow with a glowing dot, an
+   accent wash in its corner and an accent border and glow on hover; Yanis found that the generic AI look and asked
+   for the clean white type of "Free stuff." on every card, with one accent each. The hover stays neutral. */
+.fa-card {
+  position: relative; display: flex; flex-direction: column; height: 100%; min-height: 274px;
+  padding: 26px 24px 22px; border-radius: 18px; overflow: hidden;
+  background: #0A0B10;
+  border: 1px solid rgba(255, 255, 255, 0.1); color: #F4F1EA;
+  transition: translate 0.45s var(--ease-out-expo), border-color 0.3s, box-shadow 0.45s var(--ease-out-expo);
+}
+.fa-card:hover, .fa-card:focus-visible {
+  translate: 0 -6px; border-color: rgba(255, 255, 255, 0.26);
+  box-shadow: 0 26px 60px -26px rgba(0, 0, 0, 0.9);
+}
+.fa-card__title { font-size: 25px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.06; color: #F4F1EA; }
+.fa-card__line { margin-top: 10px; font-size: 15px; line-height: 1.45; color: rgba(238, 235, 228, 0.78); }
+.fa-card__go { display: inline-flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 20px; font-size: 15px; font-weight: 700; color: var(--acc); }
+.fa-card__go i { font-style: normal; transition: translate 0.4s var(--ease-out-expo); }
+.fa-card:hover .fa-card__go i { translate: 5px 0; }
+
+.fa-all { position: relative; z-index: 2; display: flex; justify-content: flex-end; margin-top: clamp(84px, 12vh, 130px); }
+.fa-all__link {
+  display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24); background: rgba(4, 5, 8, 0.62);
+  color: #F4F1EA; font-size: 15px; font-weight: 700;
+  transition: border-color 0.25s, background-color 0.25s;
+}
+.fa-all__link i { font-style: normal; transition: translate 0.4s var(--ease-out-expo); }
+.fa-all__link:hover { border-color: rgba(255, 255, 255, 0.6); background-color: rgba(255, 255, 255, 0.06); }
+.fa-all__link:hover i { translate: 5px 0; }
+
+/* ---------- smaller screens ---------- */
+@media (max-width: 1023px) {
+  /* two by two inside the band */
+  .fa-track { flex-wrap: wrap; max-width: 640px; margin: 0 auto; }
+  .fa-slot { width: calc(50% - 11px); }
+}
+@media (max-width: 639px) {
+  /* phones: the cards stacked inside the band, which tilts about half as far */
+  .fa-band { width: 150vw; margin: 84px 0 0 -25vw; padding: 34px 0; transform: rotate(-2.5deg); }
+  .fa-track { flex-direction: column; flex-wrap: nowrap; align-items: center; gap: 14px; max-width: none; }
+  .fa-slot { width: min(calc(100vw - 48px), 380px); transform: rotate(1.25deg); }
+  .fa-card { min-height: 0; padding: 22px 20px 18px; }
+  .fa-card__title { font-size: 23px; }
+  .fa-card__go { padding-top: 16px; }
+  .fa-follow { margin-top: 22px; }
+  .fa-all { justify-content: flex-start; margin-top: 76px; }
+}

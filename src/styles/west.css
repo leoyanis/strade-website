@@ -1,0 +1,427 @@
+/* ================================================================
+   ACT IV · WEST: #about in its own world, a frontier town at sundown
+   (index.astro #act-west; the world is src/components/west/WestWorld.astro, its motion west.ts)
+
+   Performance rules (README "Rules for new sections") this follows:
+   - only transform and opacity move: the reveal is a transform wipe (not an animated clip-path), the parallax
+     is translate on whole layers, the night is one layer's opacity, the shimmer is a banded strip that wavers.
+     No SVG filter moves: the two noise images below are static backgrounds, rasterised once.
+   - every loop is a CSS animation, paused unless the act is on screen (.is-onscreen, set in index.astro), and
+     none at all under reduced motion or ?still (.w-still, west.ts). As few of them as the scene allows: see
+     "Loops and their cost" below.
+   - will-change only on what moves all the time: the wipe, the five parallax layers, the night, the shimmer and
+     dust strips, the poster and the small loopers.
+   ================================================================ */
+
+/* ---------- the fixed world ---------- */
+.theme--west {
+  /* the scene's height: every layer is sized from it, so they line up at any screen size. The scene is
+     1600 x 1000 units; it covers the screen's width (62.5vw = 100vw / 1.6) and is anchored to the bottom.
+     lvh, not % or vh: a phone's toolbar sliding in must not resize (and re-raster) the scene, only move it */
+  --sh: max(100vh, 62.5vw);
+  /* --sb: where the scene's bottom sits. On screens wider than the scene (1280x720, 1920x1080) it is taller than the
+     screen; cropping only its sky lifted the town into the headline, so it is cropped evenly, top and bottom */
+  --sb: min(0px, (100vh - var(--sh)) / 2);
+  clip-path: none; will-change: auto;
+}
+@supports (height: 1lvh) { .theme--west { --sh: max(100lvh, 62.5vw); --sb: min(0px, (100lvh - var(--sh)) / 2); } }
+/* tall screens (phones, portrait tablets): the town takes the lower part and the night sky the rest */
+@media (max-aspect-ratio: 1/1) {
+  .theme--west { --sh: max(58vh, 62.5vw); --sb: 0px; }
+  @supports (height: 1lvh) { .theme--west { --sh: max(58lvh, 62.5vw); --sb: 0px; } }
+}
+
+/* the reveal: .w-wipe is moved down to #act-west's top edge and .w-wipe__inner moved back up by the same amount,
+   so the world stays put while the edge sweeps up over it (the stripes' trick: compositor only, unlike the
+   blueprint's clip-path, which repaints every frame) */
+.w-wipe { position: absolute; inset: 0; overflow: hidden; transform: translate3d(0, 100vh, 0); will-change: transform; }
+.w-wipe__inner { position: absolute; inset: 0; transform: translate3d(0, -100vh, 0); will-change: transform; }
+/* the blueprint sheet's torn edge, riding the act's top edge (west.ts) */
+.w-tear { position: absolute; left: 0; top: 0; width: 2600px; height: 50px; z-index: 2; transform: translate3d(0, 110vh, 0); will-change: transform; pointer-events: none; }
+.w-tear svg { display: block; }
+
+/* the sky: indigo overhead, through rose and orange to the glow on the horizon (36% of the scene up). The stops
+   are measured from the bottom in scene heights, so the glow meets the mesas at every size */
+.w-sky {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 72% calc(var(--sh) * 0.4) at 62.5% calc(100% - var(--sb) - var(--sh) * 0.41), rgba(255, 178, 106, 0.5), rgba(255, 140, 92, 0.16) 55%, transparent 100%),
+    linear-gradient(to top,
+      #3A2228 0, #FFC77C calc(var(--sb) + var(--sh) * 0.335), #FFB168 calc(var(--sb) + var(--sh) * 0.362), #F38C56 calc(var(--sb) + var(--sh) * 0.398),
+      #DA6A4F calc(var(--sb) + var(--sh) * 0.444), #AA4B58 calc(var(--sb) + var(--sh) * 0.512), #75365A calc(var(--sb) + var(--sh) * 0.6), #44275A calc(var(--sb) + var(--sh) * 0.715),
+      #251F4B calc(var(--sb) + var(--sh) * 0.855), #131337 calc(var(--sb) + var(--sh)), #0B0C28 100%);
+}
+/* a fine grain over the long gradient: without it the dark purples show steps on 8-bit screens */
+.w-sky::after {
+  content: ''; position: absolute; inset: 0; opacity: 0.55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* parallax layers: full-screen wrappers (west.ts moves them by yPercent of the screen), each holding one art box.
+   The art box spans the rows its viewBox crops (--k of the scene, --b up from its bottom) at the scene's aspect */
+.w-l { position: absolute; inset: 0; will-change: transform; pointer-events: none; }
+.w-art {
+  position: absolute; left: 50%; bottom: calc(var(--sb) + var(--sh) * var(--b, 0));
+  height: calc(var(--sh) * var(--k)); aspect-ratio: var(--ar);
+  translate: calc(-50% + var(--dx, 0%)) 0;
+}
+.w-art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.w-art--sun { --k: 1; --ar: 1600 / 1000; }
+.w-art--far { --k: 0.7; --ar: 1600 / 700; }
+.w-art--mid { --k: 0.38; --b: 0.2; --ar: 1600 / 380; }
+.w-art--town { --k: 0.72; --ar: 1600 / 720; }
+.w-art--near { --k: 0.42; --ar: 1600 / 420; }
+/* the painted signs (SALOON, GENERAL STORE): weathered paint on a facade in its own shadow (the sun is behind the
+   town), about 2:1 on the boards. At #8E675A (3:1) "SALOON" competed with the headline rising over it (W2) */
+.w-paint { font-family: 'Geist', 'Inter', system-ui, sans-serif; font-weight: 800; fill: #694C45; }
+
+/* the sun at (1000, 590) */
+.w-sun__glow {
+  position: absolute; left: 62.5%; top: 59%; width: 66%; height: 64%; translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(255, 234, 176, 0.9), rgba(255, 192, 112, 0.5) 24%, rgba(244, 128, 84, 0.18) 58%, transparent);
+}
+.w-sun__disc {
+  position: absolute; left: 62.5%; top: 59%; width: 7.6%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #FFFCEC 0, #FFEEC2 48%, #FFD894 100%);
+  box-shadow: 0 0 22px 6px rgba(255, 224, 164, 0.62), 0 0 80px 30px rgba(255, 182, 104, 0.34);
+}
+
+/* the night: a few early stars from the start; west.ts scrubs it on as the act scrolls */
+.w-night { position: absolute; inset: 0; opacity: 0.14; background-repeat: no-repeat; will-change: opacity; }
+
+/* heat shimmer: faint lines over the hot floor that sway and breathe; strongest round the road. Two bands of lines
+   (the lower at 70%) in one strip on one clock: they were two strips with two animations (W6), and the strip's
+   scale range is narrower to move its lines about as far as each strip's own did */
+.w-shimmer {
+  position: absolute; left: -2%; top: 50.4%; width: 104%; height: 6.8%;
+  background:
+    linear-gradient(180deg, transparent 0, rgba(255, 216, 178, 0.1) 10%, transparent 16%, rgba(255, 216, 178, 0.2) 30%, transparent 36%,
+      rgba(255, 216, 178, 0.26) 50%, transparent 56%, rgba(255, 216, 178, 0.18) 70%, transparent 76%, rgba(255, 216, 178, 0.08) 90%, transparent 96%) top / 100% 52.94% no-repeat,
+    linear-gradient(180deg, transparent 0, rgba(255, 216, 178, 0.07) 10%, transparent 16%, rgba(255, 216, 178, 0.14) 30%, transparent 36%,
+      rgba(255, 216, 178, 0.18) 50%, transparent 56%, rgba(255, 216, 178, 0.126) 70%, transparent 76%, rgba(255, 216, 178, 0.056) 90%, transparent 96%) bottom / 100% 52.94% no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent 4%, #000 34%, #000 78%, transparent 98%); mask-image: linear-gradient(90deg, transparent 4%, #000 34%, #000 78%, transparent 98%);
+  will-change: transform; animation: w-shimmer 2.8s ease-in-out infinite alternate;
+}
+@keyframes w-shimmer { from { transform: translateX(-0.35%) scaleY(0.88); } to { transform: translateX(0.35%) scaleY(1.15); } }
+
+/* the hawk circles an ellipse over the sun once every 14 s, shrinking on the far side and banking with its swing:
+   one animation (@keyframes w-hawk, sampled in WestWorld.astro) where three nested ones (x, y and the bank) were */
+.w-hawk { position: absolute; left: 62.8%; top: 9.4%; width: 2.3%; aspect-ratio: 60 / 24; }
+.w-hawk__fly { position: absolute; inset: 0; will-change: transform; animation: w-hawk 14s linear infinite; }
+.w-hawk__bird { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* tumbleweeds: cross the street (and one far out on the floor), bouncing, then wait off screen. The near one rolls on
+   its wrapper and hops and spins on .w-tumble__hop (@keyframes w-hop-spin, sampled in WestWorld.astro), its shadow
+   squashing under the hops; the far one rolls and spins in one animation (w-roll-spin). Seven animations became four */
+.w-tumble {
+  position: absolute; left: 0; bottom: calc(var(--sb) + var(--sh) * var(--tb)); width: calc(var(--sh) * var(--ts)); aspect-ratio: 1;
+  will-change: transform; animation: w-roll var(--tr) linear var(--tdl) infinite;
+}
+.w-tumble--near { --tb: 0.152; --ts: 0.064; --tr: 17s; --tdl: -4s; }
+.w-tumble--far { --tb: 0.296; --ts: 0.024; --tr: 33s; --tdl: -21s; opacity: 0.8; animation-name: w-roll-spin; }
+.w-tumble__hop { position: absolute; inset: 0; will-change: transform; animation: w-hop-spin 3.1s linear infinite; }
+.w-tumble__ball { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.w-tumble__shadow {
+  position: absolute; left: 14%; right: 14%; bottom: -5%; height: 12%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(14, 6, 10, 0.55), transparent); animation: w-hop-shadow 3.1s linear infinite;
+}
+@keyframes w-roll { 0% { transform: translateX(-14vw); } 62% { transform: translateX(110vw); } 100% { transform: translateX(110vw); } }
+/* nine turns on the way across (it was a turn every 2.3 s, on the ball) */
+@keyframes w-roll-spin { 0% { transform: translateX(-14vw) rotate(0deg); } 62% { transform: translateX(110vw) rotate(3240deg); } 100% { transform: translateX(110vw) rotate(3240deg); } }
+/* the shadow under the three hops (the hop's own keyframes, rise eased out and fall eased in, are in WestWorld.astro) */
+@keyframes w-hop-shadow {
+  0% { transform: scaleX(1); opacity: 1; animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1); }
+  15% { transform: scaleX(0.7); opacity: 0.6; animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  31% { transform: scaleX(1); opacity: 1; animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1); }
+  42% { transform: scaleX(0.86); opacity: 0.8; animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  53% { transform: scaleX(1); opacity: 1; animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1); }
+  76% { transform: scaleX(0.6); opacity: 0.5; animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  100% { transform: scaleX(1); opacity: 1; }
+}
+
+/* lit windows: halos that flicker like lamps, brightening as night falls (west.ts scrubs .w-glows) */
+.w-glows { position: absolute; inset: 0; opacity: 0.74; will-change: opacity; }
+.w-glow {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 198, 112, 0.6), rgba(255, 170, 92, 0.2) 55%, transparent);
+  animation: w-flicker 4.3s linear infinite;
+}
+/* the saloon's upstairs window and its doorway: one box over both (34..290 x 556..802 in the scene), a halo each where
+   each had its own box, at the same size and place (each halo's radii are half its old box, in % of this one) */
+.w-glow--ab {
+  border-radius: 0;
+  background:
+    radial-gradient(25% 26.02% at 25% 26.02%, rgba(255, 198, 112, 0.6), rgba(255, 170, 92, 0.2) 55%, transparent),
+    radial-gradient(27.34% 25.61% at 72.66% 74.39%, rgba(255, 198, 112, 0.6), rgba(255, 170, 92, 0.2) 55%, transparent);
+}
+.w-glow--c { animation-duration: 3.7s; animation-delay: -1.1s; }
+.w-glow--lamp { background: radial-gradient(closest-side, rgba(255, 220, 150, 0.85), rgba(255, 182, 100, 0.26) 50%, transparent); animation: w-flicker 2.4s linear -0.7s infinite; }
+@keyframes w-flicker {
+  0%, 100% { opacity: 1; } 7% { opacity: 0.8; } 11% { opacity: 0.96; } 29% { opacity: 0.9; } 33% { opacity: 1; }
+  51% { opacity: 0.76; } 54% { opacity: 0.94; } 69% { opacity: 0.88; } 73% { opacity: 1; } 88% { opacity: 0.82; } 91% { opacity: 0.97; }
+}
+/* chimney smoke: two soft puffs that rise, swell and thin out downwind, half a cycle apart (there were three: one
+   puff is always rising, so two keep the plume, for one animation less) */
+.w-smoke { position: absolute; }
+.w-smoke i {
+  position: absolute; left: 30%; bottom: 0; width: 40%; aspect-ratio: 1; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, rgba(216, 192, 208, 0.55), rgba(216, 192, 208, 0));
+  will-change: transform, opacity; animation: w-smoke 6.6s linear infinite;
+}
+.w-smoke i:nth-child(2) { animation-delay: -3.3s; }
+@keyframes w-smoke {
+  0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+  14% { opacity: 0.75; }
+  100% { transform: translate(110%, -230%) scale(2.4); opacity: 0; }
+}
+.w-still .w-smoke i:first-child { opacity: 0.5; transform: translate(30%, -70%) scale(1.4); }
+@media (prefers-reduced-motion: reduce) { .w-smoke i:first-child { opacity: 0.5; transform: translate(30%, -70%) scale(1.4); } }
+/* the saloon's sign swings from its bracket (the top edge of its box) */
+.w-sign { position: absolute; transform-origin: 50% 2%; will-change: transform; animation: w-swing 3.4s ease-in-out infinite alternate; }
+.w-sign svg { display: block; width: 100%; height: 100%; }
+@keyframes w-swing { from { transform: rotate(-4.5deg); } to { transform: rotate(4.5deg); } }
+
+/* dust in the low sun: each depth is a strip two screens wide that drifts right by one screen width a cycle, its
+   motes drawn twice a screen apart (WestWorld.astro), so the loop has no seam; the strip's inner box bobs it on its
+   own clock. Two animations per depth where each mote had its own drift (W6). The far motes are slowest, as each
+   depth's motes were on average (46 to 62 s, 30 to 40 s, 19 to 27 s across the screen) */
+.w-dust { position: absolute; inset: 0; overflow: hidden; }
+.w-dust__g { position: absolute; top: 0; bottom: 0; left: 0; width: 200vw; will-change: transform; animation: w-drift 54s linear -19s infinite; }
+.w-dust__g--mid { animation-duration: 35s; animation-delay: -7s; }
+.w-dust__g--near { animation-duration: 23s; animation-delay: -15s; }
+.w-dust__b { position: absolute; inset: 0; will-change: transform; animation: w-bob 5.4s ease-in-out infinite alternate; }
+.w-dust__g--mid .w-dust__b { animation-duration: 4.3s; animation-delay: -1.7s; }
+.w-dust__g--near .w-dust__b { animation-duration: 6.8s; animation-delay: -3.1s; }
+.w-dust i {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, #FFF2D4 0, rgba(255, 216, 150, 0.7) 36%, rgba(255, 200, 130, 0) 70%);
+}
+@keyframes w-drift { from { transform: translateX(-100vw); } to { transform: translateX(0); } }
+@keyframes w-bob { from { transform: translateY(-12px); } to { transform: translateY(12px); } }
+
+/* phones and other tall screens: the saloon is brought into the crop (the store and tower leave it), fewer motes,
+   one tumbleweed */
+@media (max-aspect-ratio: 1/1) {
+  .w-art--town { --dx: 22%; }
+  .w-art--near { --dx: 9%; }
+  /* (the store's window glow leaves the crop with the store: no loop for a window nobody sees) */
+  .w-tumble--far, .w-glow--c, .w-dust i.x { display: none; }
+}
+
+/* Loops and their cost (W6, measured 2026-11-08 at rest in the act: desktop Chromium, production build,
+   .scratch/fix-west/rest.mjs, median of 3). ScrollTrigger keeps a no-op requestAnimationFrame loop running for good
+   (_rafBugFix in gsap's ScrollTrigger, a Firefox workaround), so this page renders a frame at every vsync, and Blink
+   then services every running CSS animation on the main thread at each one: a style recalc per frame, on the
+   compositor or not. On a page with no such loop the same animations cost 0.2%. Here the first costs about 2.6% and
+   each one more about 0.05 to 0.09%, so the 35 loops were merged into 19 (the dust strips, the hawk, the tumbleweeds,
+   the shimmer, two windows, the smoke) with nothing taken out of the scene: about a point less at rest (paired runs
+   at load 8 to 12: 9.1% to 7.9%, 9.5% to 8.6%). The act cannot reach the README's 5% on its own while that loop
+   runs (one loop alone is 5.3%, none 2.7%); with it dropped (an init script, measurement only) the act at rest is
+   0.7% with every loop running. */
+/* loops run only while the act is on screen (index.astro toggles .is-onscreen on the act and this layer) */
+.theme--west:not(.is-onscreen) *, #act-west:not(.is-onscreen) .w-poster { animation-play-state: paused; }
+/* reduced motion and ?still: the finished, still scene (west.ts adds .w-still for ?still) */
+@media (prefers-reduced-motion: reduce) {
+  .theme--west *, .w-poster { animation: none !important; }
+}
+.w-still * { animation: none !important; }
+/* (the dust strips rest untransformed, so each mote shows at its first copy's place) */
+.w-still .w-tumble--near { transform: translateX(31vw); }
+.w-still .w-tumble--far { transform: translateX(76vw); }
+.w-still .w-night { opacity: 0.2; }
+@media (prefers-reduced-motion: reduce) {
+  .w-tumble--near { transform: translateX(31vw); }
+  .w-tumble--far { transform: translateX(76vw); }
+}
+
+/* ---------- the act: #about's words, the poster and the papers, on the scene ---------- */
+/* a tall act: the sky and the town get a moment to themselves, then the label and the headline come up right above
+   the poster and the papers, as one group (Yanis, 2026-11-08: the headline used to open the act, a screen of scene
+   above the cards), and the empty sky at the end is where the night falls before the finale's circle opens. The group
+   keeps the place it had in the act (the finale's timing and the nav's bands depend on it): the space that was
+   between the headline and the cards (--w-was) now sits above the label instead, less the new gap (--w-gap) */
+.act--west {
+  --w-lead: clamp(110px, 17vh, 170px);
+  --w-was: clamp(190px, 44vh, 440px);
+  --w-gap: clamp(36px, 5vh, 56px);
+  color: #F4E6CE; padding: calc(var(--w-lead) + var(--w-was) - var(--w-gap)) 0 clamp(240px, 46vh, 460px);
+}
+.act--west .container { position: relative; }
+/* (no-JS: the theme layers are hidden, so the act paints a dusk of its own) */
+html:not(.has-themes) .act--west {
+  background: linear-gradient(180deg, #0E1030 0%, #1E1A42 34%, #45285A 58%, #A04A5A 78%, #E2804E 90%, #3A2228 90.4%, #22151A 100%);
+}
+/* lets the sky sleep through the blueprint-to-west hand-over: index.astro registers it as one of the sky's covers.
+   It reaches a screen above the act, so while that edge crosses the screen (blueprint above it, west below, both
+   opaque) one cover still fills the whole screen; the act alone covers it only once its top has passed the top */
+.w-cover { position: absolute; left: 0; top: -100vh; top: -100lvh; bottom: 0; width: 1px; visibility: hidden; pointer-events: none; }
+
+.act--west .bp-fig { color: rgba(246, 222, 186, 0.74); }
+.act--west .bp-about h2 { color: #F8EBD6; }
+/* a soft dark pool behind the label and the headline: they rise over the lit town while the world is revealed, and
+   the pool keeps them readable there; up in the night sky, where they come to rest, it hardly shows. (Not a
+   text-shadow: .h-split clips its box, and a wide shadow would show a hard cut above the first line.)
+   Centred on the words' left half and running well past their start, since that is where they cross the saloon's
+   sign and lit windows (W2); centred on the whole block at 0.5 it left "The guy" and "quests." on the sign almost
+   bare. Its centre sits about a third of the way into the first line. */
+.act--west .bp-about { position: relative; isolation: isolate; }
+.act--west .bp-about::before {
+  content: ''; position: absolute; z-index: -1; left: -32%; top: -150px; width: min(1180px, 121%); height: 520px; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(12, 7, 22, 0.66), rgba(12, 7, 22, 0.52) 40%, rgba(12, 7, 22, 0.22) 72%, transparent);
+}
+.act--west .bp-about__grid { margin-top: var(--w-gap); }
+/* fading out under the finale's cross-fade (reduced motion; index.astro sets its opacity): a layer of its own only
+   while see-through */
+.act--west .bp-about__grid.is-fading { will-change: opacity; }
+/* clipped to outside the finale's opening circle (index.astro): a layer of its own while the clip moves, so each new
+   clip redraws only the mask, not the paper and the photo under it */
+.act--west .bp-about.is-clipped { will-change: transform; }
+
+/* the WANTED poster (WantedPoster.astro). It hangs from one nail and sways on it */
+.w-poster-host { position: relative; padding-top: 6px; }
+.w-poster {
+  position: relative; container-type: inline-size;
+  transform-origin: 50% 16.5px; will-change: transform; animation: w-sway 6.6s ease-in-out infinite alternate;
+}
+@keyframes w-sway { from { transform: rotate(-0.7deg); } to { transform: rotate(0.7deg); } }
+.w-poster__shadow { position: absolute; inset: 18px 8px 6px 12px; box-shadow: 0 30px 60px rgba(4, 3, 14, 0.56), 0 10px 22px rgba(4, 3, 14, 0.42); }
+.w-poster__paper {
+  position: relative; padding: 8cqw 7.5cqw 7cqw; text-align: center; color: #2A170B;
+  background-color: #E9D4A6;
+  background-image:
+    radial-gradient(ellipse 34% 20% at 22% 16%, rgba(146, 92, 40, 0.16), transparent 70%),
+    radial-gradient(ellipse 28% 18% at 80% 86%, rgba(132, 80, 34, 0.2), transparent 70%),
+    radial-gradient(ellipse 22% 14% at 70% 30%, rgba(160, 110, 50, 0.1), transparent 70%),
+    radial-gradient(ellipse 120% 110% at 50% 46%, transparent 52%, rgba(120, 70, 28, 0.36) 86%, rgba(92, 50, 18, 0.6) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .18  0 0 0 0 .07  0 0 0 .6 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.w-poster__wanted {
+  display: block; font-family: 'Geist', 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 19.5cqw; line-height: 0.86;
+  letter-spacing: 0.02em; margin-right: -0.02em; color: #2A170B;
+}
+.w-poster__rule { display: block; height: 2.2cqw; margin: 2.8cqw 0 3.6cqw; border-top: 0.9cqw solid #2A170B; border-bottom: 0.4cqw solid #2A170B; }
+.w-poster__photo { position: relative; border: 0.8cqw solid #2A170B; background: #2A170B; }
+.w-poster__photo img {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 35%;
+  filter: grayscale(1) sepia(0.62) contrast(1.16) brightness(0.95);
+}
+/* the print: ink pooled at the edges and the paper's grain over the picture */
+.w-poster__photo::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 76% at 50% 42%, transparent 54%, rgba(66, 38, 14, 0.5)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .18  0 0 0 0 .07  0 0 0 .6 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.w-poster__hole { position: absolute; width: 14cqw; height: 14cqw; translate: -50% -50%; z-index: 1; }
+/* one in the photo's top corner (clear of his face), one punched through the A of WANTED */
+.w-poster__hole--a { left: 83%; top: 12%; }
+.w-poster__hole--b { left: 31.2%; top: 8.4%; width: 12cqw; height: 12cqw; }
+.w-poster__tag { display: block; margin-top: 4.6cqw; color: #2A170B; }
+.w-poster__sub {
+  display: flex; align-items: center; justify-content: center; gap: 3cqw;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; font-size: 3.5cqw; letter-spacing: 0.32em;
+}
+.w-poster__sub::before, .w-poster__sub::after { content: ''; flex: 1; height: 0.45cqw; background: currentColor; opacity: 0.8; }
+/* the trailing letter-spacing sits after the last letter: the same space before the first keeps it centred */
+.w-poster__sub::before { margin-right: 0.32em; }
+.w-poster__name { display: block; margin-top: 1.8cqw; font-family: 'Geist', 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 9.4cqw; line-height: 1; letter-spacing: 0.05em; margin-right: -0.05em; }
+.w-poster__nail {
+  position: absolute; left: 50%; top: 9px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%; z-index: 2;
+  background: radial-gradient(circle at 36% 32%, #C2B8AE 0, #6E655E 30%, #2A2420 68%, #15110E 100%);
+  box-shadow: 1px 3px 3px rgba(10, 6, 4, 0.6), 0 0 0 1px rgba(20, 12, 8, 0.35);
+}
+
+/* the papers on the right: the spec sheet as a ledger page, the field note as a telegram slip */
+.w-ledger, .act--west .bp-quote {
+  position: relative; color: #24180E;
+  box-shadow: 0 28px 56px rgba(4, 3, 14, 0.5), 0 8px 18px rgba(4, 3, 14, 0.36);
+}
+/* nails: two at the ledger's top corners, one at the telegram's top. The head and its soft shadow are two
+   gradients (no filter: a static filter in the page's own layer is redone whenever something near it repaints) */
+.w-ledger::before, .w-ledger::after, .act--west .bp-quote::after {
+  content: ''; position: absolute; top: 9px; width: 16px; height: 16px; pointer-events: none;
+  background:
+    radial-gradient(circle at 6px 6px, #C2B8AE 0, #6E655E 1.8px, #2A2420 3.6px, #15110E 5.2px, rgba(21, 17, 14, 0) 6px),
+    radial-gradient(circle at 7.5px 8.5px, rgba(10, 6, 4, 0.5) 0, rgba(10, 6, 4, 0.3) 4px, rgba(10, 6, 4, 0) 7.5px);
+}
+.w-ledger::before { left: 10px; }
+.w-ledger::after { right: 6px; }
+.act--west .bp-quote::after { left: 50%; margin-left: -6px; top: 5px; }
+.w-ledger {
+  padding: 34px clamp(20px, 2.8vw, 36px) 20px;
+  background-color: #EEE1C3;
+  background-image:
+    radial-gradient(ellipse 40% 24% at 84% 12%, rgba(140, 90, 40, 0.12), transparent 70%),
+    radial-gradient(ellipse 130% 120% at 50% 40%, transparent 60%, rgba(120, 76, 34, 0.22) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .18  0 0 0 0 .07  0 0 0 .6 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.bp-spec { width: 100%; border-collapse: collapse; font-size: 16px; }
+.bp-spec th, .bp-spec td { text-align: left; padding: 15px 0; border-bottom: 1px solid rgba(110, 70, 36, 0.28); vertical-align: top; }
+.bp-spec tr:last-child th, .bp-spec tr:last-child td { border-bottom: 0; }
+.bp-spec th { width: 34%; padding-top: 18px; padding-right: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 500; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #80502E; }
+/* the ledger's red double margin rule runs down between the labels and the entries */
+.bp-spec td { padding-left: 18px; border-left: 3px double rgba(176, 62, 42, 0.5); font-weight: 500; color: #23170D; }
+.bp-spec a { border-bottom: 1.5px solid currentColor; }
+.act--west .bp-quote {
+  margin-top: 30px; padding: 30px clamp(20px, 2.8vw, 32px) 22px;
+  background-color: #F2E7C8;
+  background-image:
+    radial-gradient(circle, rgba(70, 46, 24, 0.32) 1.3px, transparent 1.7px),
+    radial-gradient(ellipse 40% 30% at 12% 88%, rgba(140, 90, 40, 0.1), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .18  0 0 0 0 .07  0 0 0 .6 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* the perforation: one row of small holes across the top of the slip */
+  background-size: 10px 4px, auto, auto; background-position: 0 20px, 0 0, 0 0; background-repeat: repeat-x, no-repeat, repeat;
+  background-origin: border-box;
+}
+.bp-quote small { display: block; padding: 8px 0 10px; border-bottom: 1px dashed rgba(150, 60, 38, 0.45); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #9A3E28; }
+.bp-quote blockquote { margin-top: 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: clamp(14px, 1.12vw, 15.5px); line-height: 1.7; color: #22160C; }
+.bp-quote cite { display: flex; align-items: center; gap: 12px; margin-top: 16px; font-style: normal; font-size: 14px; color: #4A3422; }
+.bp-quote cite img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; filter: grayscale(1) sepia(0.4); box-shadow: 0 0 0 2px rgba(60, 40, 20, 0.22); }
+
+/* The nav's light bands (.w-navband, data-nav-theme="light", in index.astro and WantedPoster.astro): Base.astro's
+   corner observer reads them as parchment under a corner, which then gets dark ink instead of light ink on a grey
+   smear, and no pool: each declares its paper's painted colour (data-nav-surface), and the links wear a knockout in
+   it, so the card's text is cut away round them (a light pool there read as a white glow, 2026-11-09). Invisible boxes rather than the cards themselves, so they can differ from the cards where
+   that reads better:
+   - each paper has its own band (the ledger's, the slip's): the 30px of night sky between them is dark under the
+     nav like any other sky. (Tried one band over both papers, through the gap, so the ink would not flip there: the
+     links then kept dark ink on a light pool over the dark gap, 2026-11-08 scripted nav sweep);
+   - the poster has one over WANTED and its rule and one over the name plate, and none over the photo, which is
+     dark: the photo's top and bottom are 33.4cqw and 139.2cqw down .w-poster (measured in both engines), so these
+     two follow .w-poster__paper's padding, WANTED's size and the rule's margins: change them together;
+   - every band is its card's box, on phones too: the nav gives each link the tone under it (and splits a link an
+     edge runs through) and stops each pool short of the other tone, so a corner half over a card takes dark ink on a
+     light pool over the card and light ink with no light pool over the night beside it. (Until 2026-11-08 the bands
+     spanned a phone's whole width, because a band as narrow as a card used to leave a whole corner on the stronger
+     grey pool; with the per-link tones that left the logo in dark ink on a light pool over the dark margin, which the
+     nav rule no longer allows.)
+   The finale's wipe takes them off (.is-gone, index.astro) once it has faded the cards.
+   Their background colour is the parchment's base colour, never painted (visibility: hidden): Base.astro reads it for
+   a pool's tint, which only shows if a band loses its data-nav-surface (the declared colour is what the knockout
+   uses: the paper as painted, its grain and stains included, is a little deeper than these). */
+.w-papers { position: relative; }
+.w-navband { position: absolute; inset: 0; visibility: hidden; pointer-events: none; background-color: #EEE1C3; }
+.w-navband--slip { background-color: #F2E7C8; }
+.w-navband--top { bottom: auto; height: 33.4cqw; background-color: #E9D4A6; }
+.w-navband--foot { top: 139.2cqw; background-color: #E9D4A6; }
+.bp-about__grid.is-gone .w-navband { display: none; }
+
+@media (max-width: 1023px) {
+  .w-poster-host { width: min(100%, 400px); margin: 0 auto; }
+}
+/* short laptop screens (1280x720, 1366x768): the group sits a little higher */
+@media (min-aspect-ratio: 3/2) and (max-height: 820px) {
+  .act--west { --w-lead: clamp(80px, 12.5vh, 120px); }
+}
+/* tall screens: the town takes the lower 58% of the screen (its rooftops end about 60% down); the group comes up over
+   it from the bottom */
+@media (max-aspect-ratio: 1/1) {
+  .act--west { --w-lead: max(140px, calc(60vh - 170px)); --w-was: clamp(190px, 33vh, 330px); }
+}
+@media (max-width: 640px) {
+  .w-poster-host { width: min(100%, 330px); }
+  .w-ledger { padding: 30px 18px 14px; }
+  .bp-spec { font-size: 15px; }
+  .bp-spec th { width: 36%; }
+  .bp-spec td { padding-left: 14px; }
+}

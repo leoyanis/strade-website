@@ -1,0 +1,398 @@
+---
+// Emblem intro lab: the SSI emblem's intro animations side by side, each with a replay.
+// Private like /vision/ssi: no site nav or footer, not indexed.
+import Base from '../../../layouts/Base.astro';
+import Emblem from '../../../components/vision/ssi/Emblem.astro';
+
+const FONTS =
+  'https://fonts.googleapis.com/css2?family=Saira:wdth,wght@75..125,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap';
+
+const VARIANTS = [
+  { id: 'ignition', no: '04', name: 'Ignition', line: 'A dot, four fine lines, the star fills out of them while the cut opens and the comet draws the orbit. Tune every timing on the right; drag bars on the timeline, click it to scrub.' },
+  { id: 'birth', no: '01', name: 'Birth', line: 'A point of light ignites, the star unfolds, the ring slices through and wraps it.' },
+  { id: 'cut', no: '02', name: 'Cut + orbit', line: 'The star is cut in two, moons start orbiting, the ring draws itself and the halves lock back.' },
+  { id: 'spin', no: '03', name: 'Spin lock', line: 'An orbit tumbles in around the star, flattens and locks into the ring.' },
+];
+---
+
+<Base
+  title="Emblem intros | Strade Space Industries"
+  description="Intro animation drafts for the Strade Space Industries emblem."
+  path="/vision/ssi/emblem"
+  bare
+  noindex
+  hideFooter
+>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link slot="head" rel="stylesheet" href={FONTS} />
+  <meta slot="head" name="theme-color" content="#000000" />
+
+  <main class="lab">
+    <header class="lab-head">
+      <p class="lab-tag">SSI · Emblem intros</p>
+      <button class="lab-all" type="button" data-play="all">Play all</button>
+    </header>
+    <div class="lab-grid">
+      {VARIANTS.map((v) => (
+        <section class:list={['lab-card', v.id === 'ignition' && 'is-hero']}>
+          {v.id === 'ignition' ? (
+            <div class="tune-row">
+              <div>
+                <div class="lab-stage">
+                  <Emblem uid={`emb-${v.id}`} class="lab-emb" />
+                </div>
+                <div class="tune-transport">
+                  <button type="button" id="tune-toggle">Pause</button>
+                  <button type="button" data-play="ignition">Replay</button>
+                  <span class="tune-time" id="tune-time">0.00s</span>
+                </div>
+                <div class="tune-track" id="tune-track" aria-label="Timeline: drag a bar to move it, click or drag elsewhere to scrub"></div>
+              </div>
+              <aside class="tune" id="tune" aria-label="Ignition settings"></aside>
+            </div>
+          ) : (
+            <div class="lab-stage">
+              <Emblem uid={`emb-${v.id}`} class="lab-emb" />
+            </div>
+          )}
+          <div class="lab-meta">
+            <div>
+              <h2><span>{v.no}</span>{v.name}</h2>
+              <p>{v.line}</p>
+            </div>
+            <button type="button" data-play={v.id}>Replay</button>
+          </div>
+        </section>
+      ))}
+    </div>
+  </main>
+</Base>
+
+<script>
+  import { gsap } from 'gsap';
+  import {
+    mountEmblem, birth, cutOrbit, spinLock, ignition, IGNITION_DEFAULTS, type IgnitionConfig,
+  } from '../../../components/vision/ssi/emblem-motion';
+
+  const run = { ignition, birth, cut: cutOrbit, spin: spinLock } as const;
+  type Key = keyof typeof run;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const live: Partial<Record<Key, any>> = {};
+  const ems = Object.fromEntries(
+    (Object.keys(run) as Key[]).map((k) => [k, mountEmblem(document.querySelector(`[data-uid="emb-${k}"]`) as SVGSVGElement)]),
+  ) as Record<Key, ReturnType<typeof mountEmblem>>;
+
+  /* ---------------- ignition settings ---------------- */
+  const STORE = 'ssi-ignition-v1';
+  let cfg: IgnitionConfig = { ...IGNITION_DEFAULTS };
+  try {
+    const saved = localStorage.getItem(STORE);
+    if (saved) cfg = { ...cfg, ...JSON.parse(saved) };
+  } catch { /* storage blocked: defaults */ }
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch { /* ignore */ } };
+
+  function play(k: Key) {
+    if (reduced) return;
+    live[k]?.kill();
+    live[k] = k === 'ignition' ? ignition(gsap, ems.ignition, cfg) : run[k](gsap, ems[k]);
+    if (k === 'ignition') setToggle();
+  }
+
+  const EASES = ['none', 'sine.inOut', 'sine.out', 'power1.inOut', 'power2.inOut', 'power3.inOut', 'power2.out', 'power3.out', 'power4.out', 'expo.out', 'expo.inOut', 'circ.out', 'back.out(1.4)'];
+  type Field =
+    | { key: keyof IgnitionConfig; label: string; min: number; max: number; step: number; unit?: string; when?: () => boolean }
+    | { key: keyof IgnitionConfig; label: string; ease: true; when?: () => boolean }
+    | { key: keyof IgnitionConfig; label: string; check: true };
+  const following = () => cfg.cutFollow;
+  const GROUPS: { name: string; fields: Field[] }[] = [
+    { name: 'Dot + lines', fields: [
+      { key: 'dotSize', label: 'Dot size', min: 0.5, max: 10, step: 0.1 },
+      { key: 'rayWidth', label: 'Line width', min: 0.1, max: 3, step: 0.05 },
+      { key: 'raysStart', label: 'Lines start', min: 0, max: 3, step: 0.05, unit: 's' },
+      { key: 'raysDur', label: 'Lines grow for', min: 0.05, max: 3, step: 0.05, unit: 's' },
+      { key: 'raysLag', label: 'Side lines lag', min: 0, max: 1, step: 0.01, unit: 's' },
+      { key: 'raysEase', label: 'Lines ease', ease: true },
+      { key: 'dotFadeStart', label: 'Dot fades at', min: 0, max: 4, step: 0.05, unit: 's' },
+      { key: 'dotFadeDur', label: 'Dot fades for', min: 0, max: 2, step: 0.05, unit: 's' },
+      { key: 'raysFadeStart', label: 'Lines fade at', min: 0, max: 4, step: 0.05, unit: 's' },
+      { key: 'raysFadeDur', label: 'Lines fade for', min: 0, max: 2, step: 0.05, unit: 's' },
+    ] },
+    { name: 'Star fills out', fields: [
+      { key: 'fillStart', label: 'Starts at', min: 0, max: 4, step: 0.05, unit: 's' },
+      { key: 'fillDur', label: 'Takes', min: 0.1, max: 4, step: 0.05, unit: 's' },
+      { key: 'fillEase', label: 'Ease', ease: true },
+    ] },
+    { name: 'Cut', fields: [
+      { key: 'cutFollow', label: 'Comet opens the cut', check: true },
+      { key: 'cutStart', label: 'Starts at', min: 0, max: 4, step: 0.05, unit: 's', when: () => !following() },
+      { key: 'cutDur', label: 'Takes', min: 0.05, max: 3, step: 0.05, unit: 's', when: () => !following() },
+      { key: 'cutEase', label: 'Ease', ease: true, when: () => !following() },
+      { key: 'cutA', label: 'Opens from (of lap)', min: 0, max: 1, step: 0.01, when: following },
+      { key: 'cutB', label: 'Fully open at (of lap)', min: 0, max: 1, step: 0.01, when: following },
+    ] },
+    { name: 'Comet + orbit', fields: [
+      { key: 'cometStart', label: 'Starts at', min: 0, max: 4, step: 0.05, unit: 's' },
+      { key: 'cometDur', label: 'One lap takes', min: 0.2, max: 5, step: 0.05, unit: 's' },
+      { key: 'cometEase', label: 'Ease', ease: true },
+    ] },
+    { name: 'Moons', fields: [
+      { key: 'moons', label: 'How many', min: 0, max: 6, step: 1 },
+      { key: 'moonsStart', label: 'Appear at', min: 0, max: 6, step: 0.05, unit: 's' },
+    ] },
+    { name: 'Playback', fields: [
+      { key: 'speed', label: 'Speed', min: 0.1, max: 2, step: 0.05, unit: '×' },
+    ] },
+  ];
+
+  const panel = document.getElementById('tune')!;
+  const fmt = (v: number, unit = '') => (Number.isInteger(v) && !unit ? String(v) : v.toFixed(2)) + unit;
+  let replayTimer = 0;
+  const changed = () => {
+    save();
+    syncWhen();
+    drawTrack();
+    clearTimeout(replayTimer);
+    replayTimer = window.setTimeout(() => play('ignition'), 120);
+  };
+  const rows: { f: Field; row: HTMLElement; sync: () => void }[] = [];
+
+  function buildPanel() {
+    panel.innerHTML = '';
+    rows.length = 0;
+    for (const g of GROUPS) {
+      const box = document.createElement('fieldset');
+      box.innerHTML = `<legend>${g.name}</legend>`;
+      for (const f of g.fields) {
+        const row = document.createElement('label');
+        row.className = 'tune-f';
+        const id = `t-${String(f.key)}`;
+        if ('check' in f) {
+          row.classList.add('is-check');
+          row.innerHTML = `<input type="checkbox" id="${id}"><span>${f.label}</span>`;
+          const inp = row.querySelector('input')!;
+          const sync = () => { inp.checked = Boolean(cfg[f.key]); };
+          inp.addEventListener('change', () => { (cfg as any)[f.key] = inp.checked; changed(); });
+          rows.push({ f, row, sync });
+        } else if ('ease' in f) {
+          row.innerHTML = `<span>${f.label}</span><select id="${id}">${EASES.map((e) => `<option>${e}</option>`).join('')}</select>`;
+          const sel = row.querySelector('select')!;
+          const sync = () => { sel.value = String(cfg[f.key]); };
+          sel.addEventListener('change', () => { (cfg as any)[f.key] = sel.value; changed(); });
+          rows.push({ f, row, sync });
+        } else {
+          row.innerHTML = `<span>${f.label}</span><output></output><input type="range" id="${id}" min="${f.min}" max="${f.max}" step="${f.step}">`;
+          const inp = row.querySelector('input')!;
+          const out = row.querySelector('output')!;
+          const sync = () => { inp.value = String(cfg[f.key]); out.textContent = fmt(Number(cfg[f.key]), f.unit); };
+          inp.addEventListener('input', () => { (cfg as any)[f.key] = Number(inp.value); out.textContent = fmt(Number(inp.value), f.unit); changed(); });
+          rows.push({ f, row, sync });
+        }
+        box.appendChild(row);
+      }
+      panel.appendChild(box);
+    }
+    const actions = document.createElement('div');
+    actions.className = 'tune-actions';
+    actions.innerHTML = '<button type="button" data-a="copy">Copy settings</button><button type="button" data-a="reset">Reset</button>';
+    actions.addEventListener('click', async (e) => {
+      const a = (e.target as HTMLElement).closest('button')?.dataset.a;
+      const btn = (e.target as HTMLElement).closest('button')!;
+      if (a === 'reset') { cfg = { ...IGNITION_DEFAULTS }; rows.forEach((r) => r.sync()); changed(); }
+      if (a === 'copy') {
+        try { await navigator.clipboard.writeText(JSON.stringify(cfg, null, 2)); btn.textContent = 'Copied'; }
+        catch { btn.textContent = 'Copy failed'; }
+        setTimeout(() => (btn.textContent = 'Copy settings'), 1400);
+      }
+    });
+    panel.appendChild(actions);
+    rows.forEach((r) => r.sync());
+    syncWhen();
+  }
+  function syncWhen() {
+    rows.forEach(({ f, row }) => row.classList.toggle('is-off', 'when' in f && !!f.when && !f.when()));
+  }
+
+  /* ---------------- timeline track ---------------- */
+  const track = document.getElementById('tune-track')!;
+  const timeLabel = document.getElementById('tune-time')!;
+  type Bar = { label: string; start: keyof IgnitionConfig | null; s: number; d: number };
+  const bars = (): Bar[] => {
+    const lap = (f: number) => cfg.cometStart + f * cfg.cometDur;
+    return [
+      { label: 'Lines', start: 'raysStart', s: cfg.raysStart, d: cfg.raysDur + cfg.raysLag },
+      { label: 'Dot fades', start: 'dotFadeStart', s: cfg.dotFadeStart, d: cfg.dotFadeDur },
+      { label: 'Lines fade', start: 'raysFadeStart', s: cfg.raysFadeStart, d: cfg.raysFadeDur },
+      { label: 'Star fills', start: 'fillStart', s: cfg.fillStart, d: cfg.fillDur },
+      cfg.cutFollow
+        ? { label: 'Cut (≈)', start: null, s: lap(cfg.cutA), d: Math.max(0.02, lap(cfg.cutB) - lap(cfg.cutA)) }
+        : { label: 'Cut', start: 'cutStart', s: cfg.cutStart, d: cfg.cutDur },
+      { label: 'Comet', start: 'cometStart', s: cfg.cometStart, d: cfg.cometDur },
+      { label: 'Moons', start: 'moonsStart', s: cfg.moonsStart, d: 0 },
+    ];
+  };
+  const total = () => Math.max(3, ...bars().map((b) => b.s + b.d)) + 0.4;
+  let head: HTMLElement;
+  function drawTrack() {
+    const T = total();
+    track.innerHTML = '';
+    const lanes = document.createElement('div');
+    lanes.className = 'tt-lanes';
+    for (const b of bars()) {
+      const lane = document.createElement('div');
+      lane.className = 'tt-lane';
+      lane.innerHTML = `<span class="tt-name">${b.label}</span><div class="tt-run"><i class="tt-bar${b.d === 0 ? ' is-mark' : ''}${b.start ? '' : ' is-locked'}" style="left:${(b.s / T) * 100}%;width:${(b.d / T) * 100}%"></i></div>`;
+      const bar = lane.querySelector<HTMLElement>('.tt-bar')!;
+      if (b.start) dragBar(bar, b.start, lane.querySelector('.tt-run')!);
+      lanes.appendChild(lane);
+    }
+    const ticks = document.createElement('div');
+    ticks.className = 'tt-ticks';
+    for (let t = 0; t <= T; t += 0.5) ticks.insertAdjacentHTML('beforeend', `<span style="left:${(t / T) * 100}%">${t % 1 === 0 ? t + 's' : ''}</span>`);
+    head = document.createElement('div');
+    head.className = 'tt-head';
+    track.append(ticks, lanes, head);
+  }
+  function dragBar(bar: HTMLElement, key: keyof IgnitionConfig, runEl: HTMLElement) {
+    bar.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      bar.setPointerCapture(e.pointerId);
+      const T = total();
+      const w = runEl.getBoundingClientRect().width;
+      const x0 = e.clientX;
+      const v0 = Number(cfg[key]);
+      const move = (ev: PointerEvent) => {
+        const v = Math.max(0, Math.round((v0 + ((ev.clientX - x0) / w) * T) * 20) / 20);
+        (cfg as any)[key] = v;
+        bar.style.left = `${(v / T) * 100}%`;
+        rows.find((r) => r.f.key === key)?.sync();
+      };
+      const up = () => { bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); changed(); };
+      bar.addEventListener('pointermove', move);
+      bar.addEventListener('pointerup', up);
+    });
+  }
+  // click or drag on the track scrubs
+  track.addEventListener('pointerdown', (e) => {
+    const tl = live.ignition;
+    if (!tl) return;
+    const runEl = track.querySelector('.tt-run')!.getBoundingClientRect();
+    const seek = (ev: PointerEvent) => {
+      const f = Math.min(1, Math.max(0, (ev.clientX - runEl.left) / runEl.width));
+      tl.pause();
+      tl.time(Math.min(f * total(), tl.duration()));
+      setToggle();
+    };
+    seek(e);
+    track.setPointerCapture(e.pointerId);
+    const up = () => { track.removeEventListener('pointermove', seek); track.removeEventListener('pointerup', up); };
+    track.addEventListener('pointermove', seek);
+    track.addEventListener('pointerup', up);
+  });
+  const toggle = document.getElementById('tune-toggle')!;
+  function setToggle() {
+    const tl = live.ignition;
+    toggle.textContent = tl && !tl.paused() && tl.progress() < 1 ? 'Pause' : 'Play';
+  }
+  toggle.addEventListener('click', () => {
+    const tl = live.ignition;
+    if (!tl) return;
+    if (tl.progress() >= 1) play('ignition');
+    else tl.paused(!tl.paused());
+    setToggle();
+  });
+  (function tick() {
+    const tl = live.ignition;
+    if (tl && head) {
+      const t = tl.time();
+      head.style.left = `calc(var(--name) + (100% - var(--name)) * ${Math.min(1, t / total())})`;
+      timeLabel.textContent = `${t.toFixed(2)}s`;
+      if (tl.progress() >= 1 && toggle.textContent === 'Pause') setToggle();
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  buildPanel();
+  drawTrack();
+
+  document.querySelectorAll<HTMLButtonElement>('[data-play]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const k = b.dataset.play as Key | 'all';
+      if (k === 'all') (Object.keys(run) as Key[]).forEach(play);
+      else play(k);
+    }),
+  );
+  (Object.keys(run) as Key[]).forEach(play);
+</script>
+
+<style is:global>
+  body.is-bare { background: #000; }
+  body.is-bare #site-nav, body.is-bare #scroll-progress { display: none; }
+
+  .lab {
+    --ink: #f5f5f5;
+    --soft: rgba(245, 245, 245, 0.62);
+    --faint: rgba(245, 245, 245, 0.36);
+    --line: rgba(245, 245, 245, 0.1);
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    min-height: 100svh; background: #000; color: var(--ink);
+    font-family: 'Saira', system-ui, sans-serif;
+    padding: 28px 16px 48px; max-width: 1400px; margin: 0 auto;
+  }
+  @media (min-width: 768px) { .lab { padding: 40px 40px 64px; } }
+  .lab-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  .lab-tag { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint); }
+  .lab button {
+    font: 500 11px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink); background: none; border: 1px solid var(--line); border-radius: 999px;
+    padding: 10px 16px; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .lab button:hover { border-color: rgba(245, 245, 245, 0.5); background: rgba(255, 255, 255, 0.05); }
+  .lab-grid { display: grid; gap: 40px 24px; }
+  @media (min-width: 960px) {
+    .lab-grid { grid-template-columns: repeat(3, 1fr); }
+    .lab-card.is-hero { grid-column: 1 / -1; }
+    .lab-card.is-hero .lab-stage { aspect-ratio: 16 / 9; }
+    .lab-card.is-hero .lab-emb { width: 30%; }
+    .tune-row { grid-template-columns: minmax(0, 1fr) 340px; }
+    .tune { max-height: calc((100vw - 80px - 364px) * 9 / 16 + 230px); }
+  }
+
+  /* ---------- ignition tuning ---------- */
+  .tune-row { display: grid; gap: 24px; margin-bottom: 18px; }
+  .tune-transport { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; }
+  .tune-time { margin-left: auto; font: 12px var(--mono); color: var(--soft); font-variant-numeric: tabular-nums; }
+  .tune-track { --name: 92px; position: relative; padding: 18px 0 4px; cursor: ew-resize; user-select: none; touch-action: none; }
+  .tt-ticks { position: absolute; top: 0; left: var(--name); right: 0; height: 100%; pointer-events: none; }
+  .tt-ticks span { position: absolute; top: 0; bottom: 0; border-left: 1px solid rgba(245, 245, 245, 0.06); font: 10px var(--mono); color: var(--faint); padding-left: 4px; }
+  .tt-lanes { display: grid; gap: 4px; }
+  .tt-lane { display: grid; grid-template-columns: var(--name) 1fr; align-items: center; height: 18px; }
+  .tt-name { font: 10.5px var(--mono); color: var(--soft); text-transform: uppercase; letter-spacing: 0.08em; }
+  .tt-run { position: relative; height: 100%; }
+  .tt-bar { position: absolute; top: 3px; bottom: 3px; min-width: 2px; background: rgba(245, 245, 245, 0.78); border-radius: 2px; cursor: grab; }
+  .tt-bar:active { cursor: grabbing; }
+  .tt-bar.is-mark { width: 3px !important; background: #00e5ff; }
+  .tt-bar.is-locked { background: rgba(245, 245, 245, 0.35); cursor: inherit; }
+  .tt-head { position: absolute; top: 0; bottom: 0; width: 1px; background: #00e5ff; pointer-events: none; }
+
+  .tune { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
+  .tune fieldset { margin: 0; padding: 12px 0 0; border: 0; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+  .tune legend { padding: 0 0 2px; font: 500 10.5px var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); }
+  .tune-f { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; font-size: 13.5px; color: var(--soft); }
+  .tune-f input[type='range'] { grid-column: 1 / -1; width: 100%; margin: 0; accent-color: #f5f5f5; }
+  .tune-f output { font: 12px var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tune-f select { font: 12px var(--mono); color: var(--ink); background: #0b0b0b; border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; }
+  .tune-f.is-check { grid-template-columns: auto 1fr; cursor: pointer; }
+  .tune-f.is-check input { accent-color: #f5f5f5; margin: 0; }
+  .tune-f.is-off { opacity: 0.3; pointer-events: none; }
+  .tune-actions { display: flex; gap: 8px; padding-top: 4px; }
+  .lab-stage {
+    position: relative; aspect-ratio: 4 / 5; display: grid; place-items: center; overflow: hidden;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255, 255, 255, 0.035), transparent 70%);
+  }
+  .lab-emb { width: 52%; height: auto; overflow: visible; }
+  .lab-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .lab-meta h2 { margin: 0 0 6px; font-size: 20px; font-weight: 600; font-stretch: 112%; text-transform: uppercase; letter-spacing: 0.02em; }
+  .lab-meta h2 span { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--faint); margin-right: 10px; vertical-align: 3px; }
+  .lab-meta p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--soft); max-width: 36ch; }
+</style>

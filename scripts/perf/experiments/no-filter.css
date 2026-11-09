@@ -1,0 +1,2 @@
+/* every CSS filter off (blur, drop-shadow, grayscale on images, the reel grade) */
+*, *::before, *::after { filter: none !important; }

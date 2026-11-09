@@ -2,13 +2,45 @@
 import Base from '../layouts/Base.astro';
 import { SITE } from '../data/site';
 import { getProject, SIDE_QUESTS, STATS } from '../data/work';
-import { visibleResources } from '../data/resources';
+import FreeAct from '../components/free-act/FreeAct.astro';
+import HoleWorld from '../components/free-act/HoleWorld.astro';
+import WheelCard from '../components/home/WheelCard.astro';
+import type { WheelItem } from '../components/home/wheel-types';
+import Editor from '../components/atlas/Editor.astro';
+import AtlasReel from '../components/atlas/AtlasReel.astro';
+import EpSection from '../components/ep/EpSection.astro';
+import VaulttHome from '../components/vaultt/VaulttHome.astro';
+import VaulttWorld from '../components/vaultt/VaulttWorld.astro';
+import WestWorld from '../components/west/WestWorld.astro';
+import WantedPoster from '../components/west/WantedPoster.astro';
+import KlCommits from '../components/case/kleus/KlCommits.astro';
+import { VAULTT_NUMBERS } from '../data/work';
 import '../styles/home.css';
+import '../styles/home-wheel.css';
+// after home.css: the west act overrides a few of its shared rules (.theme's clip-path among them)
+import '../styles/west.css';
 
+const atlas = getProject('atlas')!;
 const vaultt = getProject('vaultt')!;
 const ep = getProject('endless-pursuit')!;
-const freebie = visibleResources()[0];
-const marquee = ['Vaultt', 'Kleus', 'Endless Pursuit', 'YouCook', 'Sequenced', 'Fallow', 'Outreach & CRM', 'Playivity', 'Noteless'];
+
+// The hero's wheel: every project, in ring order. Atlas starts at the front; the cards next to it are the
+// strongest, and the ring gets quieter towards its back (slightly mixed, so it never reads as a ranking).
+const wheel: WheelItem[] = [
+  { slug: 'atlas', name: 'Atlas', kind: 'Client · Idea to posted video', bg: '#0B0B0D', ink: '#fff', accent: '#A795FF', art: { t: 'reel' } },
+  { slug: 'endless-pursuit', name: 'Endless Pursuit', kind: 'Client · iOS + Android', bg: '#0A0A0A', ink: '#F4F4F2', accent: '#E3C588', glow: 'rgba(227, 197, 136, 0.3)', art: { t: 'phone', src: '/images/cards/ep.webp' } },
+  { slug: 'fallow', name: 'Fallow', kind: 'Our product · iOS', bg: '#0F0C08', ink: '#EDE3D1', accent: '#C9A24A', glow: 'rgba(201, 162, 74, 0.32)', art: { t: 'phone', src: '/images/cards/fallow.webp' } },
+  { slug: 'youcook', name: 'YouCook', kind: 'Our product · App Store', bg: '#FFF1EC', ink: '#2B1E1A', accent: '#F26B4F', light: true, art: { t: 'video-contain', src: '/images/cards/youcook.mp4', poster: '/images/cards/youcook.webp' } },
+  { slug: 'outreach-crm', name: 'Outreach & CRM', kind: 'Client · white label', bg: '#F7F5F3', ink: '#1F1B18', accent: '#5B5BF6', light: true, art: { t: 'crm' } },
+  { slug: 'playivity', name: 'Playivity', kind: 'Client · design system', bg: '#F2F9E6', ink: '#1D2340', accent: '#85D015', light: true, glow: 'rgba(133, 208, 21, 0.25)', art: { t: 'phone', src: '/images/cards/playivity.webp', pal: '/images/work/playivity/poses/movi-celebrate.webp' } },
+  { slug: 'noteless', name: 'Noteless', kind: 'Our product · AI notes', bg: '#0E0E10', ink: '#E8E8ED', accent: '#D4A574', glow: 'rgba(212, 165, 116, 0.22)', art: { t: 'window', src: '/images/cards/noteless.webp' } },
+  { slug: 'sequenced', name: 'Sequenced', kind: 'Client · AI design tool', bg: '#050505', ink: '#fff', accent: '#FFBD59', glow: 'rgba(255, 189, 89, 0.22)', art: { t: 'stories' } },
+  { slug: 'kleus', name: 'Kleus', kind: 'Our product · learning', bg: '#F0EEE9', ink: '#1B1A18', accent: '#B87A1F', light: true, art: { t: 'contain', src: '/images/cards/kleus.webp' } },
+  { slug: 'vaultt', name: 'Vaultt', kind: `Client · ${VAULTT_NUMBERS.builders.display} builders`, bg: '#0C2748', ink: '#E8F1FF', accent: '#6FA8FF', glow: 'rgba(111, 168, 255, 0.38)', art: { t: 'phone', src: '/images/cards/vaultt-network.webp' } },
+];
+// the card that gets picked and flies into the Atlas editor (its name and colours, for the flying copy)
+const atlasItem = wheel.find((w) => w.slug === 'atlas')!;
+
 const stat = (i: number) => STATS[i];
 const fmt = (n: number, d: number) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
@@ -18,20 +50,6 @@ const inkFor = (hex: string) => {
   const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#111' : '#fff';
 };
-
-// Endless Pursuit's infinity loop (a lemniscate, same curve as its case study).
-const loop = (() => {
-  const a = 560;
-  let d = '';
-  for (let i = 0; i <= 160; i++) {
-    const t = (i / 160) * Math.PI * 2;
-    const s = Math.sin(t);
-    const c = Math.cos(t);
-    const den = 1 + s * s;
-    d += `${i ? 'L' : 'M'}${((a * c) / den).toFixed(1)} ${(((a * s * c) / den) * 1.18).toFixed(1)} `;
-  }
-  return d.trim() + 'Z';
-})();
 
 // Act II decoration: stark palette, scattered at random (seeded so it's stable
 // between builds). Stripes are spaced far apart so they never stack into bands.
@@ -56,21 +74,120 @@ const shapes = [
   { kind: 'ring', x: 62, y: 88, size: 60, color: '#FF4F1F', speed: 1.5 },
 ];
 
+// Kleus's figures under its drawing (Yanis, 2026-11-08: "get some more elements over" from the case study): the path
+// from the case study's KlPath, its six real lessons for the Napoleon documentary, fanned on a loose arc in a
+// 1100 x 250 stage (KlPath's geometry, smaller)
+const KL_LESSONS = [
+  { t: 'How revolutionaries crowned an emperor', m: 5 },
+  { t: 'Brumaire: the coup that ended the Republic', m: 6 },
+  { t: 'The Concordat: peace with the Church', m: 5 },
+  { t: 'The Civil Code that outlived him', m: 6 },
+  { t: 'Austerlitz and the empire at its peak', m: 5 },
+  { t: 'Moscow, 1812: where it broke', m: 6 },
+];
+const KL_JIT: [number, number, number][] = [[3, 4, -1.5], [-4, -3, 1.2], [2, 5, -0.6], [-3, -2, 1.8], [4, 3, -1.1], [-2, 6, 0.9]];
+const klFan = KL_LESSONS.map((l, i) => {
+  const W = 150, GAP = 26, CX = 550, TOP = 96, ARC = 22, TILT = 4;
+  const u = (i / (KL_LESSONS.length - 1)) * 2 - 1;
+  const x = CX - (KL_LESSONS.length * W + (KL_LESSONS.length - 1) * GAP) / 2 + i * (W + GAP) + W / 2 + KL_JIT[i][0];
+  const y = TOP + ARC * (1 - u * u) + KL_JIT[i][1];
+  const Y = y - 8;
+  return {
+    ...l, x, y, r: -TILT * u + KL_JIT[i][2],
+    d: `M${CX} 0 C ${CX} ${(Y * 0.55).toFixed(1)}, ${x.toFixed(1)} ${(Y * 0.4).toFixed(1)}, ${x.toFixed(1)} ${Y.toFixed(1)}`,
+    head: `M${(x - 4.5).toFixed(1)} ${(Y - 6).toFixed(1)} L${x.toFixed(1)} ${Y.toFixed(1)} L${(x + 4.5).toFixed(1)} ${(Y - 6).toFixed(1)}`,
+  };
+});
+// the check's ring: the case study's KlCheck result, 93 out of 100
+const KL_CIRC = 2 * Math.PI * 60;
+
 ---
 
 <Base
-  title="Yanis Schweizer: I build apps, automations and AI tools"
-  description="Yanis Schweizer builds apps, automations and AI tools at a fixed price, and you own the code. Vaultt, Kleus, Endless Pursuit and more."
+  title="Strade: we build apps, automations and AI tools"
+  description="Strade builds apps, automations and AI tools for founders and teams. The studio behind Atlas, Vaultt and Kleus."
   locale="en"
   path="/"
   pageType="profile"
+  bare
+  navBands={{
+    // each side quest tile takes the tone of its own colour: on a phone a tile spans the screen under the links,
+    // and the cream act's light pool laid a pale fog over the saturated blue ones
+    '.h-tile': 'auto',
+    // the blueprint's black callout labels: a link over one takes light ink without a pool, as over any dark card
+    // (the light pool washed the label out under Results, 2026-11-08 scripted nav sweep)
+    '.bp-callout': 'dark',
+    // the method's black "02" node: on a phone it passes right under the logo
+    '.bp-step--me .bp-step__node': 'dark',
+    // the white mock card with Kleus's screen on the blueprint: its own white, flat (no pool, a knockout in white).
+    // Untagged, the knockout wore the blueprint's paper on it, a beige outline round each word at 1440 (10140 to 10270)
+    // and a faint square round the logo on a phone (11331, 2026-11-09 re-check)
+    '.bp-drawing__img': { tone: 'light', surface: 'auto' },
+    // the quests' "Open the case study" pills (Atlas's pale one, Endless Pursuit's gold one), light by their own
+    // colour: a link over one takes dark ink, as over any light card (on a phone they pass right under the links,
+    // and Endless Pursuit's under Results when scrolling back up on a laptop)
+    '.h-a-btn--main': 'auto',
+    '.ep3__btn--gold': 'auto',
+    // Atlas's editor screen plays its reel (dark sheets, the video, a pale post card): no one tone holds for it, so
+    // it only makes the pool stronger while it passes under the links, as any picture does
+    '.ae-mon': 'busy',
+    // the poster's photo: sepia, light and dark in places, a picture like any other
+    '.w-poster__photo': 'busy',
+    // Endless Pursuit's phone and the sound pill under it: dark objects with a busy screen, so a link over them takes
+    // light ink on a dark pool, also while the stripes wipe tells the nav the rest is plain night or cream (a page
+    // band wins over what a script paints under the bands, Base.astro toneIn). Tagged 'busy' instead, they kept the
+    // cream's tone, and the light pool blurred the dark pill on the cream in reduced motion (2026-11-09 re-check).
+    '.ep3-phone': 'dark',
+    '.ep3-sound': 'dark',
+    // the phone's body layer carries its drop shadow (90px of blur, 60px down): tagged so the nav keeps every knockout
+    // off the shade it casts on the stripes act's cream (Base.astro castReach), where the paper-coloured patch showed as a
+    // paler square (390, reduced motion, 2026-11-09 re-check)
+    '.ep3-ly--body': 'dark',
+    // and the darkest of that shade, its first 35px under the phone (about half black there, by its two shadows): dark
+    // and plain, so a link over it takes light ink where the shade has turned the cream grey. With the knockout gone
+    // from the shade, the links' dark ink sat on it barely readable (390, reduced motion, 6500 to 6530, WebKit). Phones
+    // only: at 1440 the links pass beside the phone, where its shade is pale, and "Resu" took pale light ink on it
+    // (reduced motion, 6368 to 6411, 2026-11-09 re-check); there the knockout takes the shade's own grey (koShade)
+    '.ep3-phone .ep3-ly--body': { tone: 'dark', inset: '100% 0 -35px 0', surface: 'plain', media: '(max-width: 600px)' },
+    // the west act's label and headline, light type on the dusk sky (a plain surface, #act-west: no pool there), get
+    // the pool back while they pass under a corner. The label is inline, so its box is its words; the headline is a
+    // block as wide as the container, and its words reach under the links only up to 1245px wide (from 1250 its first
+    // line breaks shorter: measured at 1190 to 1279 and 1440, Chromium); wider, its box alone laid a pool behind
+    // Results with nothing under it
+    '#act-west .bp-fig': 'busy',
+    '#about-h': { tone: 'busy', media: '(max-width: 1245px)' },
+    // the finale's night once its stage lets go and the white headline scrolls up under the links: a flat dark surface
+    // in the night's own near-black (measured under the corners: 3 3 4 at 1440, 7 7 7 on a phone), so the links wear a
+    // knockout in it and the headline's letters are cut away round them (Base.astro keeps that knockout under the
+    // circle's whole-nav force, whose tone it shares). Before, the night was only forced dark: white letters ran
+    // straight through the white links (2026-11-09 re-check). The section's top reaches the nav line only after the
+    // circle has opened, so it never overrides the wipe's paint.
+    '#finale': { tone: 'dark', surface: '#050506' },
+  }}
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
   <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700;800&display=swap" />
+  <!-- Vaultt's section speaks vaultt.io's type, Bricolage Grotesque and Hanken Grotesk: self-hosted subsets defined in
+       src/components/vaultt/vaultt-home.css (scripts/fonts/subset-vaultt.sh), no Google stylesheet for them -->
+  <!-- intro gate: hide the hero's parts until the motion takes over (failsafe if JS never arrives). hero-flight stays:
+       the Atlas card's flight will run, so the hero carries its extra stretch of sky (home.css .sx-hero__flight), set
+       before the first paint so nothing below moves -->
+  <script slot="head" is:inline>
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.indexOf('still') < 0) {
+      var hh = document.documentElement;
+      hh.classList.add('hero-intro', 'hero-flight');
+      setTimeout(function () { hh.classList.remove('hero-intro'); }, 4500);
+    }
+  </script>
 
   <!-- Fixed theme layers that wipe in act by act -->
   <div class="themes" aria-hidden="true">
+    <!-- the work's worlds (src/scripts/backdrops.ts): Atlas's near-black under the act, then Vaultt's navy and network,
+         then Endless Pursuit's black; each fades in over the one before when the scroll passes its switch point -->
+    <div class="theme theme--atlas"></div>
+    <VaulttWorld />
+    <div class="theme theme--ep"><div class="theme--ep__grain"></div></div>
     <div class="theme theme--stripes">
       <div class="wipe"><div class="wipe__inner">
       <div class="stripe-field">
@@ -91,171 +208,116 @@ const shapes = [
       ))}
       </div></div>
     </div>
+    <!-- the free stuff act's black hole (src/components/free-act): it rises as a dome over the stripes, and the
+         blueprint's sheet paints over it with its own edge and scan line -->
+    <HoleWorld />
     <div class="theme theme--blueprint">
       <span class="bp-mark bp-mark--tl"></span><span class="bp-mark bp-mark--tr"></span>
       <span class="bp-mark bp-mark--bl"></span><span class="bp-mark bp-mark--br"></span>
       <span class="bp-scan"></span>
     </div>
-    <div class="theme theme--finale"><div class="stars"></div><div class="stars--2"></div></div>
+    <!-- act IV: the Wild West town at sundown behind #about (src/components/west) -->
+    <WestWorld />
+    <!-- the finale: a faint tint over the hero's own sky, which is lifted above the other worlds during its wipe -->
+    <div class="theme theme--finale"></div>
   </div>
 
   <!-- ============================================================
-       ACT I — ASTRAL
+       ACT I: ASTRAL
        ============================================================ -->
-  <section id="hero" class="act h-worlds" aria-label="Yanis Schweizer: four worlds, one builder">
-    <div class="worlds">
-      <a class="world world--astral" href="#mq-vaultt">
-        <div class="world__art" aria-hidden="true">
-          <span class="world__planet"></span>
-          <img src="/images/work/vaultt/panel.webp" alt="" width="827" height="999" />
-        </div>
-        <div class="world__meta">
-          <span class="world__kind"><span class="world__num">I</span>Astral · Client</span>
-          <strong>Vaultt</strong>
-          <small>12.4k users and climbing</small>
-        </div>
-      </a>
-      <a class="world world--stripes" href="#mq-endless-pursuit">
-        <div class="world__art" aria-hidden="true">
-          <img src="/images/work/endless-pursuit/onboarding.webp" alt="" width="780" height="1688" />
-        </div>
-        <div class="world__meta">
-          <span class="world__kind"><span class="world__num">II</span>Stripes · Client</span>
-          <strong>Endless <em>Pursuit</em></strong>
-          <small>{ep.status}</small>
-        </div>
-      </a>
-      <a class="world world--blueprint" href="#mq-kleus">
-        <div class="world__art" aria-hidden="true">
-          <img src="/images/work/kleus/panel.webp" alt="" width="660" height="1362" />
-        </div>
-        <div class="world__meta">
-          <span class="world__kind"><span class="world__num">III</span>Blueprint · My product</span>
-          <strong><span class="bp-k__phi">Φ</span> Kleus</strong>
-          <small>15-minute daily lessons</small>
-        </div>
-      </a>
-      <a class="world world--finale" href={SITE.booking} target="_blank" rel="noopener">
-        <div class="world__art" aria-hidden="true">
-          <img src={SITE.portrait} alt="" width="1100" height="1467" />
-        </div>
-        <div class="world__meta">
-          <span class="world__kind"><span class="world__num">IV</span>Finale · You</span>
-          <strong>Your build</strong>
-          <small class="world__cta">Book a call <i>↗</i></small>
-        </div>
-      </a>
-    </div>
-
-    <div class="hero-head">
-    <div class="worlds__title">
-      <h1 class="worlds__name" id="hero-h1">Yanis Schweizer</h1>
-      <p class="worlds__line" id="hero-body">I build apps, automations and AI tools.</p>
-    </div>
-
-    <div class="hero-ctas" id="hero-cta">
-      <a class="cta-call" href={SITE.booking} target="_blank" rel="noopener">
-        <span class="cta-call__label">Book a call · 20 min · free</span>
-        <strong>I can build you anything.</strong>
-        <span class="cta-call__sub">Exhibit A: the site you're scrolling. Let's talk about yours.</span>
-        <span class="cta-call__go" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
-      </a>
-      <a class="cta-free" href="/free">
-        <span class="cta-free__sheets" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="cta-free__body">
-          <span class="cta-free__label">Free · from my DMs</span>
-          <strong>Open free stuff</strong>
-          <span class="cta-free__sub">Templates, prompts and tools I actually use.</span>
-        </span>
-      </a>
-    </div>
-    </div>
-  </section>
-
-  <section id="now" class="act act--astral h-now">
-    <div class="h-band">
-      <div class="h-marquee" aria-label={`Now building: ${marquee.join(', ')}`}>
-        <div class="h-marquee__track" aria-hidden="true">
-          {[...marquee, ...marquee].map((m) => <span class="h-marquee__item">{m}<i>✦</i></span>)}
-        </div>
+  <section id="hero" class="act sx-hero" data-sky-live aria-labelledby="hero-h1">
+    <div class="sx-hero__head">
+      <div class="sx-emblem" aria-hidden="true">
+        <img class="sx-emblem__still" src="/images/space/emblem-star.svg" alt="" width="380" height="484" />
+        <canvas class="sx-emblem__dust"></canvas>
+      </div>
+      <h1 class="sx-word" id="hero-h1">
+        <span class="sr-only">Strade, a studio that builds apps, automations and AI tools</span>
+        <img src="/images/space/strade-wordmark.png" alt="" width="748" height="72" />
+      </h1>
+      <p class="sx-kicker" data-hero-in>Product studio</p>
+      <p class="sx-line" data-hero-in>We build apps, automations and AI tools. Fixed price, no matter how ambitious.</p>
+      <div class="sx-ctas" data-hero-in>
+        <a class="sx-btn sx-btn--primary" href={SITE.booking} target="_blank" rel="noopener">
+          Book a call
+          <span class="sx-btn__go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
+        <a class="sx-btn sx-btn--ghost" href="#mq-atlas" data-scroll-to="#mq-atlas">See our work</a>
       </div>
     </div>
-    <div class="container">
-      <p class="h-now__line" data-reveal>
-        Three main quests. A handful of side quests. <em>One rule: I decide, AI types.</em>
-      </p>
-    </div>
-  </section>
 
-  <section id="mq-vaultt" class="act act--astral h-mq h-mq--vaultt" style={`--accent:${vaultt.accent}`}>
-    <div class="container h-mq__grid">
-      <div class="h-mq__text">
-        <span class="h-label h-mq__label" data-reveal>Main quest 01 · Client · Live</span>
-        <h2 class="h-mq__name h-split" data-split>Vaultt</h2>
-        <p class="h-mq__line" data-reveal>Where young talent gets hired on proof, not a CV. Built from zero with founder Liam Jeffery.</p>
-        <div class="h-mq__stat" data-reveal>
-          <strong data-count="12.4" data-decimals="1" data-suffix="k">12.4k</strong>
-          <span>users, and we're still building.</span>
-        </div>
-        <a class="h-link" href="/work/vaultt" data-reveal>Open the case study <i>→</i></a>
-      </div>
-      <div class="h-v-visual" aria-hidden="true">
-        <div class="h-planet"></div>
-        <img class="h-v-cards" src="/images/work/vaultt/cards.webp" alt="" width="900" height="900" loading="lazy" />
-        <img class="h-v-phone" src="/images/work/vaultt/app-phone.webp" alt="" width="700" height="1128" loading="lazy" />
-      </div>
+    <!-- every project on one slowly turning wheel: drag it or scroll sideways to turn it, click a card to open it -->
+    <div class="wc-wheel" tabindex="0" role="group" aria-label="Our work: every project on a slowly turning wheel of cards. Drag it, or scroll sideways, to turn it.">
+      {wheel.map((item, i) => <WheelCard item={item} index={i} total={wheel.length} />)}
+    </div>
+    <!-- the extra sky the Atlas card flies through: its ways out of the hand and into the editor take 1.5 times their old
+         scroll (home.css .sx-hero__flight, airU in the script; none without the flight) -->
+    <div class="sx-hero__flight" aria-hidden="true"></div>
+    <!-- the picked card: a copy of the Atlas card that lifts out of the wheel, comes apart into its layers in
+         mid-air (each one named) and folds back together as it lands in the Atlas editor below -->
+    <div class="wc-flyer" aria-hidden="true" style={`--bg:${atlasItem.bg};--ink:${atlasItem.ink};--accent:${atlasItem.accent}`}>
+      <span class="wc-flyer__pool"></span>
+      <span class="wc__face wc-flyer__face"><span class="wc__art"></span><span class="wc__head"><strong>{atlasItem.name}</strong><small>{atlasItem.kind}</small></span></span>
+      <AtlasReel variant="flyer" />
     </div>
   </section>
 
   <!-- ============================================================
-       ACT II — STRIPES
+       THE WORK, straight after the wheel: Atlas, Vaultt, Endless Pursuit, then the rest
        ============================================================ -->
-  <section id="act-stripes" class="act act--stripes" data-nav-theme="light">
-    <div id="mq-endless-pursuit" class="container h-ep__grid">
-      <div class="h-ep__text knock">
-        <span class="h-label" data-reveal>Main quest 02 · Client · {ep.status}</span>
-        <h2 class="h-ep__name h-split" data-split>Endless <em>Pursuit</em></h2>
-        <p class="h-ep__line" data-reveal>You say you'll train, build or read. Your circle sees whether you did. I'm building it with founder Nickolas Lazarev.</p>
-        <div class="h-chips" data-reveal>
-          <span class="h-chip"><i style="--dot:#DE7546"></i>Train &amp; fuel</span><span class="h-chip"><i style="--dot:#948AEA"></i>Build &amp; ship</span><span class="h-chip"><i style="--dot:#84BE71"></i>Read &amp; reflect</span>
-        </div>
-        <div class="h-ep__go" data-reveal>
-          <a class="h-btn-dark" href={`/work/${ep.slug}`}>Open the case study <span aria-hidden="true">→</span></a>
-          <span class="h-ep__wip"><i aria-hidden="true"></i>Not published yet</span>
+  <!-- Atlas, in Atlas's own world (getatlas.site): near-black, a faint grid, a purple glow where the AI works.
+       It rises out of the space sky at its top edge while the card lands; its bottom edge is plain near-black. -->
+  <section id="mq-atlas" class="act act--astral h-mq h-mq--atlas" style={`--accent:${atlas.accent}`} aria-labelledby="mq-atlas-h">
+    <div class="h-aw" aria-hidden="true">
+      <div class="h-aw__base" id="mq-atlas-world"></div>
+      <div class="h-aw__grid"></div>
+      <div class="h-aw__glow"></div>
+    </div>
+    <div class="container h-mq__grid h-mq__grid--atlas">
+      <div class="h-mq__text">
+        <span class="h-a-live" data-reveal><i></i>Live since 1 October 2026</span>
+        <h2 class="h-mq__name h-split" id="mq-atlas-h" data-split>Atlas</h2>
+        <p class="h-a-tag" data-reveal>You film it. Atlas does the <em>rest</em>.</p>
+        <p class="h-mq__line" data-reveal>It finds an idea that worked, writes it in your voice, edits the video, posts it and shows you what did well.</p>
+        <div class="h-a-ctas" data-reveal>
+          <a class="h-a-btn h-a-btn--main" href="/work/atlas">Open the case study<span class="h-a-btn__go" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></a>
+          <a class="h-a-link" href={atlas.links?.[0]?.href ?? 'https://getatlas.site'} target="_blank" rel="noopener">getatlas.site <span aria-hidden="true">↗</span></a>
         </div>
       </div>
-      <div class="h-ep__visual" aria-hidden="true">
-        <svg class="h-ep__art" viewBox="-600 -600 1200 1200">
-          <defs>
-            <radialGradient id="h-ep-sun" cx="50%" cy="36%" r="64%">
-              <stop offset="0" stop-color="#2c261e" />
-              <stop offset="1" stop-color="#121110" />
-            </radialGradient>
-            <linearGradient id="h-ep-gold" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0" stop-color="#F0DCAF" />
-              <stop offset="1" stop-color="#D9B678" />
-            </linearGradient>
-            <clipPath id="h-ep-clip"><circle r="450" /></clipPath>
-            <filter id="h-ep-blur" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="10" /></filter>
-          </defs>
-          <circle class="h-ep__sun" r="450" fill="url(#h-ep-sun)" />
-          <path class="h-ep__track" d={loop} pathLength="1000" />
-          <path class="h-ep__track h-ep__track--in" d={loop} pathLength="1000" clip-path="url(#h-ep-clip)" />
-          <path class="h-ep__glow" d={loop} pathLength="1000" filter="url(#h-ep-blur)" />
-          <path class="h-ep__comet" d={loop} pathLength="1000" />
-        </svg>
-        <div class="h-phone h-phone--back"><img src="/images/work/endless-pursuit/tribe.webp" alt="" width="780" height="1688" loading="lazy" /></div>
-        <div class="h-phone h-phone--front"><img src="/images/work/endless-pursuit/today.webp" alt="" width="780" height="1688" loading="lazy" /></div>
-        <span class="h-ep__stamp">
-          <svg class="h-ep__stamp-ring" viewBox="0 0 120 120">
-            <defs><path id="h-ep-ring" d="M60 60m-45 0a45 45 0 1 1 90 0a45 45 0 1 1-90 0" /></defs>
-            <text><textPath href="#h-ep-ring" textLength="282" lengthAdjust="spacing">WORK IN PROGRESS ✦ NOT PUBLISHED YET ✦ </textPath></text>
-          </svg>
-          <svg class="h-ep__stamp-inf" viewBox="0 0 24 24"><path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" /></svg>
-        </span>
+      <div class="h-a-editor">
+        <Editor variant="compact" />
+        <!-- the editor's loop will run (JS on, motion allowed, no ?still): reserve the room its playback bar hangs into
+             under the window on narrow screens (home.css .h-a-editor.has-bar). Set here, before the first paint, so
+             nothing below moves once the bar appears; without the loop there is no bar and no extra gap -->
+        <script is:inline>
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !new URLSearchParams(location.search).has('still')) document.currentScript.parentElement.classList.add('has-bar');
+        </script>
       </div>
     </div>
+  </section>
 
+  <!-- Vaultt, on vaultt.io's navy with its living network (src/components/vaultt). Its world is a fixed theme layer
+       (VaulttWorld) that fades in over Atlas's as the intro arrives and never moves; in front of it a stage holds
+       still while the scroll moves the intro and the three numbers through it, one at a time (switches scrubbed by
+       the scroll, nothing timed), and the jobs leave with the page. -->
+  <VaulttHome />
+
+  <!-- ============================================================
+       CASE STUDY 03 · ENDLESS PURSUIT: a working slice of the app, built from
+       its own design system (src/components/ep). Its background is a fixed
+       theme layer (.theme--ep), so the stripes below wipe over it on one
+       clean diagonal.
+       ============================================================ -->
+  <EpSection slug={ep.slug} />
+
+  <!-- ============================================================
+       ACT II: STRIPES
+       ============================================================ -->
+  <!-- for the nav only, never shown: the plain night a script tells it it paints (Base.astro nav.toneAt): Endless
+       Pursuit's black beyond the stripes wipe's edge and the inside of the free act's rising dome, where the nav
+       shows no pool and no knockout (data-nav-surface="plain") -->
+  <i id="nav-paint-night" data-nav-theme="dark" data-nav-surface="plain" hidden aria-hidden="true"></i>
+  <section id="act-stripes" class="act act--stripes" data-nav-theme="light" data-nav-surface="#F4F0E7">
     <div class="container h-side" id="side">
       <div class="h-side__head">
         <h2 class="knock h-split" data-split>Side quests.</h2>
@@ -271,33 +333,20 @@ const shapes = [
           </a>
         ))}
       </div>
-      <div class="h-tiles__all"><a href="/work">See all my work →</a></div>
+      <div class="h-tiles__all"><a href="/work">See all results →</a></div>
     </div>
-
-    {freebie && (
-      <div class="container h-free" id="free-teaser">
-        <div class="h-free__box">
-          <div>
-            <span class="h-label">Came from Instagram?</span>
-            <h2>Your free stuff lives here.</h2>
-            <p>Everything I give away in my DMs, in one place. Templates, prompts and tools I actually use.</p>
-            <a class="h-link" href="/free" style="color:#F5F1E8">All free stuff <i>→</i></a>
-          </div>
-          <a class="h-free__res" href={`/free/${freebie.slug}`}>
-            <small>{freebie.kind} · Free</small>
-            <h3>{freebie.title}</h3>
-            <p>{freebie.summary}</p>
-            <span>Get it free →</span>
-          </a>
-        </div>
-      </div>
-    )}
   </section>
 
   <!-- ============================================================
-       ACT III — BLUEPRINT
+       FREE STUFF: the free Claude skills on a tilted band, over a black hole
+       (src/components/free-act). The playful stripes give way to a hard sci-fi world.
        ============================================================ -->
-  <section id="act-blueprint" class="act act--blueprint" data-nav-theme="light">
+  <FreeAct />
+
+  <!-- ============================================================
+       ACT III: BLUEPRINT
+       ============================================================ -->
+  <section id="act-blueprint" class="act act--blueprint" data-nav-theme="light" data-nav-surface="#F2F0EB, vignette 50% 40% 55% 0.1">
     <div class="container">
       <div class="bp-sec bp-k" id="mq-kleus">
         <div class="bp-k__grid">
@@ -317,21 +366,89 @@ const shapes = [
             <span class="bp-callout bp-callout--b">Coach checks in</span>
           </div>
         </div>
+        <!-- Kleus's figures, from its case study (src/components/case/kleus, Yanis 2026-11-08: "get some more elements
+             over"): the path one saved source becomes, the check every lesson ends in, every day of commits. Drawn on
+             the sheet in ink, each following the scroll (home.css .bp-kx, the script's act III) -->
+        <div class="bp-kx" data-kx>
+          <div class="bp-kx__fig bp-kx__fig--path" data-kx-fig="path">
+            <span class="bp-fig">Fig. 03a · Any material in</span>
+            <div class="kxp">
+              <div class="kxp__src">
+                <span class="kxp__play" aria-hidden="true"></span>
+                <span class="kxp__srcl"><small>A documentary</small>Napoleon</span>
+                <span class="kxp__dur">2:41:07</span>
+              </div>
+              <div class="kxp__split">
+                <span class="kxp__stem" aria-hidden="true"></span>
+                <span class="kxp__label">Gets split into core concepts &amp; topics</span>
+              </div>
+              <div class="kxp__stage">
+                <svg class="kxp__arrows" viewBox="0 0 1100 250" aria-hidden="true">
+                  {klFan.map((c, i) => (
+                    <g style={`--i:${i}`}><path class="kxp__curve" d={c.d} pathLength="1" /><path class="kxp__head" d={c.head} /></g>
+                  ))}
+                </svg>
+                <ol class="kxp__cards" aria-label="An example path, built from the documentary">
+                  {klFan.map((c, i) => (
+                    <li class="kxp__card" style={`--i:${i};--x:${c.x.toFixed(1)};--y:${c.y.toFixed(1)};--r:${c.r.toFixed(2)}deg`}>
+                      <span class="kxp__n">Lesson {i + 1}</span>
+                      <span class="kxp__t">{c.t}</span>
+                      <span class="kxp__m">about {c.m} min</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+          <div class="bp-kx__fig bp-kx__fig--check" data-kx-fig="check">
+            <span class="bp-fig">Fig. 03b · Coach checks in</span>
+            <div class="kxc" style={`--circ:${KL_CIRC.toFixed(2)}`}>
+              <div class="kxc__head">
+                <span class="kxc__ring">
+                  <svg viewBox="0 0 132 132" aria-hidden="true"><circle class="kxc__track" cx="66" cy="66" r="60" /><circle class="kxc__prog" cx="66" cy="66" r="60" style={`stroke-dasharray:${KL_CIRC.toFixed(2)}`} /></svg>
+                  <b data-kx-score>93</b>
+                </span>
+                <span class="kxc__headtext"><span class="kxc__band">Solid</span><span class="kxc__title">You've got this.</span></span>
+                <span class="kxc__out" aria-hidden="true">/100</span>
+              </div>
+              <div class="kxc__row">
+                <span class="kxc__concept"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" /></svg>Justifying hereditary imperial rule</span>
+                <span class="kxc__score">85</span>
+              </div>
+              <p class="kxc__mark kxc__mark--good"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" /></svg><span><b>What landed:</b> The land argument, and that the threat was framed as protection rather than power.</span></p>
+              <p class="kxc__mark kxc__mark--gap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16.2v.1" /></svg><span><b>What was missing:</b> The vote. Parliament and a national plebiscite gave the crown legal cover, which is why it held where a decree would not have.</span></p>
+            </div>
+          </div>
+          <div class="bp-kx__fig bp-kx__fig--commits" data-kx-fig="commits">
+            <span class="bp-fig">Fig. 03c · 1,400+ commits</span>
+            <KlCommits />
+          </div>
+        </div>
+      </div>
+
+      <!-- the cut between Kleus and the method (Yanis, 2026-11-08: they read as one section): a section line across the
+           sheet, ruled like a scale, a registration mark at each end and a section bubble in the middle (sheet 03 above,
+           04 below, its arrow pointing on), drawing out from the bubble with the scroll (home.css .bp-cut) -->
+      <div class="bp-cut" aria-hidden="true" data-bp-cut>
+        <span class="bp-cut__reg"></span>
+        <span class="bp-cut__rule bp-cut__rule--l"></span>
+        <span class="bp-cut__bubble"><b>03</b><b>04</b></span>
+        <span class="bp-cut__rule bp-cut__rule--r"></span>
+        <span class="bp-cut__reg"></span>
       </div>
 
       <div class="bp-sec bp-method" id="method">
         <span class="bp-fig" data-reveal>Fig. 04 · How I work</span>
-        <h2 class="h-split" data-split>The decisions are mine. <em>The typing isn't.</em></h2>
+        <h2 class="h-split" data-split>Problem in. <em>Product out.</em></h2>
         <div class="bp-flow">
           <svg aria-hidden="true"><path class="bp-flow__path" fill="none" stroke="#111" stroke-width="1.5" /></svg>
           <div class="bp-flow__steps">
             <div class="bp-step" data-reveal><span class="bp-step__node">01</span><h3>You bring the problem</h3><p>A process that eats your week, an app idea, a tool your team keeps asking for.</p></div>
-            <div class="bp-step bp-step--me" data-reveal><span class="bp-step__node">02</span><h3>I make every call</h3><p>Scope, architecture, design, and what not to build. The decisions stay human.</p></div>
-            <div class="bp-step" data-reveal><span class="bp-step__node">03</span><h3>AI does the typing</h3><p>I steer Claude Code through the build. Fast, but never unsupervised.</p></div>
-            <div class="bp-step" data-reveal><span class="bp-step__node">04</span><h3>You own all of it</h3><p>The code, the accounts, the IP. No black boxes and no lock-in.</p></div>
+            <div class="bp-step bp-step--me" data-reveal><span class="bp-step__node">02</span><h3>Exceptional software</h3><p>By all standards. As fast as possible.</p></div>
+            <div class="bp-step" data-reveal><span class="bp-step__node">03</span><h3>I build it, fast</h3><p>With Claude Code, and shipped where your users are.</p></div>
+            <div class="bp-step" data-reveal><span class="bp-step__node">04</span><h3>It goes to work</h3><p>Live, in use, and doing the job it was built for.</p></div>
           </div>
         </div>
-        <p class="bp-note" data-reveal>Fixed price · You own the code · No black boxes</p>
       </div>
 
       <div class="bp-sec bp-stats" id="numbers">
@@ -340,37 +457,55 @@ const shapes = [
         <div class="bp-measures">
           {STATS.map((s, i) => (
             <div class="bp-measure" data-reveal>
-              <strong data-count={s.value} data-decimals={s.decimals} data-prefix={s.prefix ?? ''} data-suffix={s.suffix}>{s.prefix ?? ''}{fmt(s.value, s.decimals)}{s.suffix}</strong>
+              <strong data-count={s.static ? undefined : s.value} data-decimals={s.decimals} data-prefix={s.prefix ?? ''} data-suffix={s.suffix}>{s.prefix ?? ''}{fmt(s.value, s.decimals)}{s.suffix}{s.unit && <small>{'\u00a0' + s.unit}</small>}</strong>
               <span>{s.label}</span>
               {i === STATS.length - 1 && <i class="bp-measure__end" aria-hidden="true"></i>}
             </div>
           ))}
         </div>
       </div>
+    </div>
+  </section>
 
+  <!-- ============================================================
+       ACT IV · WEST: #about in its own world, a frontier town at sundown. The world is a fixed theme layer
+       (WestWorld, src/components/west); the blueprint sheet tears away from its top edge.
+       ============================================================ -->
+  <!-- data-nav-surface="plain": the dusk sky is a field with nothing to cut, so a corner over it shows no pool (Base.astro
+       plainBand); the papers, the photo, the label and the headline over it carry their own bands -->
+  <section id="act-west" class="act act--west" data-nav-theme="dark" data-nav-surface="plain" aria-labelledby="about-h">
+    <span class="w-cover" id="west-cover" aria-hidden="true"></span>
+    <div class="container">
       <div class="bp-sec bp-about" id="about">
         <span class="bp-fig" data-reveal>Fig. 06 · Spec sheet</span>
-        <h2 class="h-split" data-split>The guy <em>behind</em> the quests.</h2>
+        <h2 class="h-split" id="about-h" data-split>The guy behind the quests.</h2>
         <div class="bp-about__grid">
-          <div class="bp-photo" data-reveal>
-            <img src={SITE.portrait} alt="Yanis Schweizer" width="1100" height="1467" loading="lazy" />
-            <span class="bp-cross" aria-hidden="true"></span>
-            <span class="bp-photo__tag">SUBJECT 01 · Y. SCHWEIZER</span>
+          <!-- .w-navband: invisible light bands for the nav's corner observer (Base.astro), so a corner over the parchment
+               takes dark ink and no pool, with a knockout in the paper's colour (sizes in west.css; the poster carries its
+               own, WantedPoster.astro). data-nav-surface is each paper as painted under the links, measured from the
+               pixels with the nav hidden (1440 and 390, Chromium and WebKit, within 6 levels); the ledger's stain is its
+               CSS one (west.css .w-ledger), whose middle passes right under the links at 1440 -->
+          <div class="w-poster-host" data-reveal>
+            <WantedPoster src={SITE.portrait} alt="Yanis Schweizer" tag="SUBJECT 01 · Y. SCHWEIZER" />
           </div>
-          <div data-reveal>
+          <div class="w-papers" data-reveal>
+            <div class="w-ledger">
+            <i class="w-navband" data-nav-theme="light" data-nav-surface="#DECEAE, stain 84% 12% 40% 24% 70% #8C5A28 0.12" aria-hidden="true"></i>
             <table class="bp-spec">
               <tbody>
                 <tr><th scope="row">Name</th><td>Yanis Schweizer</td></tr>
                 <tr><th scope="row">Class</th><td>Builder. Apps, automations and AI tools.</td></tr>
                 <tr><th scope="row">Based</th><td>Europe, working with teams everywhere</td></tr>
                 <tr><th scope="row">Speaks</th><td>English, German, Spanish, Romanian</td></tr>
-                <tr><th scope="row">Rule</th><td>I decide. AI types. You own it.</td></tr>
+                <tr><th scope="row">Final product</th><td>As ambitious as you can dream</td></tr>
                 <tr><th scope="row">Claude Code</th><td>{fmt(stat(1).value, 0)} hours and counting</td></tr>
                 <tr><th scope="row">Find me</th><td><a href={SITE.instagram} target="_blank" rel="noopener">{SITE.instagramHandle}</a> · <a href={SITE.linkedin} target="_blank" rel="noopener">LinkedIn</a></td></tr>
               </tbody>
             </table>
+            </div>
             {vaultt.testimonial && (
               <figure class="bp-quote">
+                <i class="w-navband w-navband--slip" data-nav-theme="light" data-nav-surface="#E0D1B0" aria-hidden="true"></i>
                 <small>Field note · from a client</small>
                 <blockquote>"Working with Yanis has been game-changing for the success of StudentVenture. From design to development, his quick understanding and execution have turned ideas into reality within months. It's truly unbelievable what he can accomplish."</blockquote>
                 <cite><img src={vaultt.testimonial.photo} alt="" width="40" height="40" loading="lazy" /><span><strong>{vaultt.testimonial.name}</strong>, {vaultt.testimonial.role}</span></cite>
@@ -383,25 +518,37 @@ const shapes = [
   </section>
 
   <!-- ============================================================
-       FINALE — the same CTA as the top
+       FINALE: the same CTA as the top
        ============================================================ -->
-  <section id="finale" class="act act--finale">
-    <div class="hero-inner">
-      <h2 class="hero-h1" id="final-h1" aria-label="Got something to build? Let's talk.">
-        <span class="hero-line">Got something to build?</span><br />
-        <span class="hero-line hero-line--accent">Let's talk.</span>
-      </h2>
-      <p class="hero-body" data-reveal>
-        I build apps, automations and AI tools for founders and teams. Fast, fixed price, and you own every line.
-      </p>
-      <div class="hero-actions" data-reveal>
-        <a href={SITE.booking} class="btn-primary hero-cta" target="_blank" rel="noopener">
-          Book a call
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="/work" class="btn-ghost">See my work</a>
+  <!-- back under the hero's night sky: data-sky-live gives it the meteors and the lens; the Strade star shows faintly
+       behind the headline (a second stardust emblem), over a soft dark pool so the words read over the Milky Way.
+       Its opening, all scrubbed by the scroll (src/components/space/finale-flight.ts): the circle wipe opens with a
+       shooting star already in it, which flies through the screen's middle and out, dropping a spray of the emblem's
+       stars that hangs, then is drawn down into the emblem (on .fin-flight, a canvas fixed to the screen, until the
+       emblem's own canvas takes over) as the stage (.fin-stage, sticky) slows to a stop; held still, the letters rise
+       in from below and the emblem fades to its faint rest, then the stage lets go; data-fin-in is what rises in
+       after the letters (instead of the generic data-reveal) -->
+  <section id="finale" class="act act--finale" data-sky-live>
+    <div class="fin-stage">
+    <div class="hero-inner fin-inner">
+      <div class="fin-head">
+        <div class="fin-emblem" aria-hidden="true">
+          <img class="fin-emblem__still" src="/images/space/emblem-star.svg" alt="" width="380" height="484" loading="lazy" decoding="async" />
+          <canvas class="fin-emblem__dust"></canvas>
+        </div>
+        <h2 class="hero-h1" id="final-h1" aria-label="Got something to build? Let's talk.">
+          <span class="hero-line">Got something to build?</span><br />
+          <span class="hero-line hero-line--accent">Let's talk.</span>
+        </h2>
       </div>
-      <div class="social-row" data-reveal>
+      <div class="sx-ctas fin-ctas" data-fin-in>
+        <a class="sx-btn sx-btn--primary" href={SITE.booking} target="_blank" rel="noopener">
+          Book a call
+          <span class="sx-btn__go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
+        <a class="sx-btn sx-btn--ghost" href="/work">See the results</a>
+      </div>
+      <div class="social-row" data-fin-in>
         <a class="social-btn is-ig" href={SITE.instagram} target="_blank" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           Follow {SITE.instagramHandle}
@@ -409,12 +556,161 @@ const shapes = [
         <a class="social-btn" href="/free">Free stuff</a>
       </div>
     </div>
+    </div>
+    <canvas class="fin-flight" aria-hidden="true"></canvas>
   </section>
 </Base>
 
 <script>
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  import { createSky } from '../components/space/starfield';
+  import { createStardust } from '../components/space/stardust';
+  import { createWheel } from '../scripts/home-wheel';
+  import { mountEditor } from '../scripts/atlas-editor';
+  import { createBackdrops } from '../scripts/backdrops';
+  import { createReel, type Reel } from '../scripts/atlas-reel';
+  import { initVaulttHome } from '../components/vaultt/vaultt-home';
+  import { mountEp } from '../components/ep/ep-section';
+  import { mountFreeAct } from '../components/free-act/free-act';
+  import { initWest } from '../components/west/west';
+  import { mountFinaleFlight, type FinaleFlight } from '../components/space/finale-flight';
+
+  // ?still renders the page in its finished state (reduced motion), handy for screenshots
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
   document.documentElement.classList.add('has-themes');
+
+  /* ---------- infinite CSS loops run only while they can be seen ----------
+     A running CSS animation keeps the whole page rendering every frame, even off screen or under a clip: the
+     Atlas pill's box-shadow pulse, the portrait's crosshair and the finale's twinkle kept every section at 120
+     frames a second at rest (measured: stripes and blueprint at rest 30% main thread and 180 ms/s of GPU, 6% and
+     2 ms/s with them paused). home.css pauses them unless .is-onscreen is set; set here, so it works without GSAP
+     and in ?still too. The west act's loops (dust, tumbleweeds, the hawk, the windows, the poster's sway; west.css)
+     live in its fixed theme layer as well as in the act, so the act is what is watched and both get the class.
+     (The crosshair and the finale's twinkle are gone: the poster's bullet holes and the finale's real sky replaced
+     them.) */
+  const westLayer = document.querySelector('.theme--west');
+  const onscreen = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const el = e.target as HTMLElement;
+      el.classList.toggle('is-onscreen', e.isIntersecting);
+      if (el.id === 'act-west') westLayer?.classList.toggle('is-onscreen', e.isIntersecting);
+    }
+  });
+  document.querySelectorAll('.h-a-live, #act-west').forEach((el) => onscreen.observe(el));
+
+  /* ---------- the night sky behind act I (the SSI sky) and the emblem made of stars ---------- */
+  const themes = document.querySelector<HTMLElement>('.themes');
+  const sky = themes ? createSky(themes, { reduced: reduce }) : null;
+  if (sky) {
+    document.documentElement.classList.add('has-sky');
+    // opaque sections that hide the whole sky: stop drawing while one covers the screen
+    // (west-cover is #act-west's cover, reaching a screen above the act: the sky also sleeps while the blueprint-to-
+    // west edge crosses the screen, when neither act alone fills it; west.css)
+    // (Atlas, Vaultt and Endless Pursuit have no covers here: their worlds are fixed layers that cross-fade, so
+    // src/scripts/backdrops.ts puts the sky to sleep from where Atlas's near-black covers the screen until the stripes
+    // act does)
+    ['act-stripes', 'act-free', 'act-blueprint', 'west-cover'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) sky.cover(el);
+    });
+    /* The sky's parallax: it lifts with the page from the top (5% of the scroll), and in the finale it frames as it
+       did in the hero. A screen before the finale's wipe starts (the west act still covers the sky there, so nothing
+       shows it) the lift eases over to the finale's own: 0 through the wipe, then the same 5% from the finale's top,
+       so the finale at the top of the screen is the hero's sky at scroll 0. The finale's place and the screen's
+       height are measured on resize and when the page's height changes, never in the scroll listener. */
+    const finaleEl = document.getElementById('finale');
+    let finTop = Infinity;
+    let skyH = window.innerHeight;
+    const measureFin = () => {
+      skyH = window.innerHeight;
+      if (finaleEl) finTop = finaleEl.getBoundingClientRect().top + window.scrollY;
+    };
+    measureFin();
+    new ResizeObserver(measureFin).observe(document.body);
+    window.addEventListener('resize', measureFin, { passive: true });
+    const lift = () => {
+      const y = window.scrollY;
+      const hero = Math.min(sky.limits.shiftMax, y * 0.05);
+      const fin = Math.min(sky.limits.shiftMax, Math.max(0, (y - finTop) * 0.05));
+      const t = Math.min(1, Math.max(0, (y - (finTop - 2 * skyH)) / skyH));
+      sky.state.shift = hero + (fin - hero) * t * t * (3 - 2 * t);
+    };
+    lift();
+    window.addEventListener('scroll', lift, { passive: true });
+  }
+  const dustCanvas = document.querySelector<HTMLCanvasElement>('.sx-emblem__dust');
+  const dust = dustCanvas ? createStardust(dustCanvas, { reduced: reduce }) : null;
+  if (dust) document.documentElement.classList.add('has-stardust');
+  // the same star, faint behind the finale's headline: its own instance, which has no intro of its own. With motion it
+  // is made by the finale's shooting star (flight mode, wired to the circle wipe below: finale-flight.ts), on the
+  // .fin-flight canvas, which scrolls with the page. Under reduced motion it draws the finished emblem. Its still
+  // image shows until it exists
+  const finDustCanvas = document.querySelector<HTMLCanvasElement>('.fin-emblem__dust');
+  const finFlightCanvas = document.querySelector<HTMLCanvasElement>('.fin-flight');
+  const finDust = finDustCanvas
+    ? createStardust(finDustCanvas, reduce
+      ? { reduced: true, seed: 20261107, density: 0.5 }
+      : { reduced: false, seed: 20261107, density: 0.5, intro: false, flight: finFlightCanvas })
+    : null;
+  if (finDust) finDustCanvas?.parentElement?.classList.add('has-dust');
+
+  /* ---------- the wheel of project cards ---------- */
+  const wheelEl = document.querySelector<HTMLElement>('.wc-wheel');
+  // the Atlas card's reel is built in code: the wheel says when it may play (at the front, on screen, not picked);
+  // the reel itself is made once GSAP has loaded, and the flight below owns it while the card is picked
+  let cardReel: Reel | null = null;
+  let cardWant = false;
+  let cardHeld = false;
+  const wheel = wheelEl
+    ? createWheel(wheelEl, {
+        reduced: reduce,
+        onPlayable: (slug, on) => {
+          if (slug !== 'atlas') return;
+          cardWant = on;
+          if (!cardReel || cardHeld) return;
+          if (on) cardReel.play();
+          else cardReel.pause();
+        },
+      })
+    : null;
+
+  /* ---------- "See our work": a slow, deliberate scroll (about 1.6 s) instead of a jump.
+     It ends on the Atlas card taken apart in mid-air (workY, set with the flight); any wheel, touch or key from the
+     visitor takes over. ---------- */
+  let workY: (() => number) | null = null;
+  const smoothTo = (y: number, ms: number) => {
+    const to = (top: number) => window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+    if (reduce) return to(y);
+    const y0 = window.scrollY;
+    const t0 = performance.now();
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let stopped = false;
+    const stop = () => { stopped = true; };
+    const opts = { passive: true, once: true } as AddEventListenerOptions;
+    window.addEventListener('wheel', stop, opts);
+    window.addEventListener('touchstart', stop, opts);
+    window.addEventListener('keydown', stop, opts);
+    const step = (now: number) => {
+      if (stopped) return;
+      const k = Math.min(1, (now - t0) / ms);
+      to(y0 + (y - y0) * ease(k));
+      if (k < 1) requestAnimationFrame(step);
+      else {
+        window.removeEventListener('wheel', stop);
+        window.removeEventListener('touchstart', stop);
+        window.removeEventListener('keydown', stop);
+      }
+    };
+    requestAnimationFrame(step);
+  };
+  document.querySelectorAll<HTMLAnchorElement>('[data-scroll-to]').forEach((a) =>
+    a.addEventListener('click', (e) => {
+      const el = document.querySelector<HTMLElement>(a.dataset.scrollTo!);
+      if (!el) return;
+      e.preventDefault();
+      const y = workY && a.dataset.scrollTo === '#mq-atlas' ? workY() : el.getBoundingClientRect().top + window.scrollY - 40;
+      smoothTo(y, 1600);
+    }),
+  );
 
   /** Split a headline into words and characters so it can be animated. */
   function splitChars(root: HTMLElement): HTMLElement[] {
@@ -464,19 +760,13 @@ const shapes = [
       ({ ScrollTrigger } = await import('gsap/ScrollTrigger'));
       gsap.registerPlugin(ScrollTrigger);
     } catch {
-      document.documentElement.classList.remove('has-themes');
+      document.documentElement.classList.remove('has-themes', 'hero-intro');
       return;
     }
 
-    /* ---------- nav ink follows the act under it ---------- */
-    const lightActs = Array.from(document.querySelectorAll<HTMLElement>('[data-nav-theme="light"]'));
-    let navTriggers: ScrollTrigger[] = [];
-    navTriggers = lightActs.map((act) =>
-      ScrollTrigger.create({ trigger: act, start: 'top 40px', end: 'bottom 40px', onToggle: () => syncNav() })
-    );
-    function syncNav() {
-      document.body.dataset.nav = navTriggers.some((t) => t.isActive) ? 'light' : 'dark';
-    }
+    /* ---------- nav ink ----------
+       Base.astro flips the nav whenever a [data-nav-theme] act spans its content line, on every page. Only the
+       stripes wipe needs help here (below, after the wipe): its cream arrives before its act does. */
 
     /* ---------- theme wipes ---------- */
     /* Stripes: the original diagonal wipe, done with transforms instead of
@@ -486,20 +776,121 @@ const shapes = [
     const wipe = document.querySelector<HTMLElement>('.wipe')!;
     const wipeInner = document.querySelector<HTMLElement>('.wipe__inner')!;
     const wipeState = { p: 0 };
+    // the screen's size from resize events (on phones every read of innerWidth/innerHeight runs a layout first),
+    // and the wipe's box written only when it changed: it runs on every scroll update of the act
+    let ww = window.innerWidth;
+    let wh = window.innerHeight;
+    let stackH = document.querySelector<HTMLElement>('.themes')?.offsetHeight ?? 0;
+    let wipeBox = '';
+
+    /* Nav ink over the wipe. The cream reaches the top-left corner well before the top-right one, and both
+       long before #act-stripes' own top reaches the nav line, where Base.astro's band observer would flip the
+       ink. So while the wipe crosses, each corner follows the wipe's edge on its own (body[data-nav-force-l|r],
+       read by Base.astro): the logo turns light once the edge has passed above its centre on the nav line, the
+       links once it has cleared Work, and Book a call once it reaches the pill's middle (body[data-nav-force-p]).
+       Once the act's top has left the screen the observer already agrees (the act spans the line
+       by then) and the forces are dropped, so they never outlive the stripes. Handing over at 'top top' rather
+       than at the nav line keeps the two from disagreeing for the frame an IntersectionObserver lags behind.
+       Arithmetic only per update: the edge's y at x is yL + x * tan(theta) (paintWipe), and the corners' x are
+       measured at start and on resize (the nav is fixed, so they never move with the scroll). */
+    const stripesAct = document.getElementById('act-stripes');
+    const stripesTone = stripesAct?.dataset.navTheme === 'dark' ? 'dark' : 'light';
+    const NAV_LINE = 32; // Base.astro's nav line: the centre of the 64px nav row
+    // Where each part of the nav turns on the nav line: the logo's centre; the right end of Work, the first link
+    // (at the middle of the link row instead, Work sat in light ink on the cream for 60px of scroll); and the
+    // middle of Book a call, which carries its own fill and keeps the tone it had until the edge reaches it
+    // (body[data-nav-force-p], Base.astro). Measured at start and on resize: the nav is fixed.
+    let navCorners = [60, ww - 330, ww - 100];
+    const measureNavCorners = () => {
+      const box = (sel: string) => {
+        const r = document.querySelector(sel)?.getBoundingClientRect();
+        return r && r.width ? r : null;
+      };
+      const brand = box('.nav-brand');
+      const work = box('.nav-links a');
+      const book = box('.nav-links .nav-book');
+      navCorners = [brand ? brand.left + brand.width / 2 : 60, work ? work.right : ww - 330, book ? book.left + book.width / 2 : ww - 100];
+    };
+    measureNavCorners();
+    let wipeHandedOver = false;
+    const setNavForce = (key: 'navForceL' | 'navForceR' | 'navForceP', v: string | null) => {
+      const d = document.body.dataset;
+      if ((d[key] ?? null) === v) return;
+      if (v) d[key] = v;
+      else delete d[key];
+    };
+    // What the wipe paints under the nav (Base.astro, nav.toneAt and 'nav:paint'), as surfaces under the page's
+    // bands: below the edge the stripes act's own cream (its declared paper colour, so the corners there show no pool
+    // and knock out in it), above it Endless Pursuit's black as a plain field (#nav-paint-night: no pool, no
+    // knockout). Its phone and sound pill are dark bands (navBands, above), which win over the paint, so a dark pool
+    // still backs the links over them on either side of the edge. Each link takes the tone under it, split where the diagonal runs through it.
+    // Before, the wipe only said 'light' or 'dark' there, and the pools showed on both sides: a frosted patch over the
+    // blue stripes behind the logo, a white band behind Book a call, a grey smear along the diagonal (2026-11-09
+    // re-check, real-time scroll). (Tried telling the nav where the phone and pill were from their document boxes:
+    // they move with the section's own motion, and in reduced motion a dark pool sat on the cream after they had
+    // gone.)
+    const navEl = document.getElementById('site-nav') as (HTMLElement & { toneAt?: ((x: number, y: number) => string | Element | null) | null }) | null;
+    const wipedTone = stripesTone === 'light' ? 'dark' : 'light';
+    const paintNight = document.getElementById('nav-paint-night');
+    let edgeY0 = 0;
+    let edgeK = 0;
+    const wipeToneAt = (x: number, y: number): string | Element => {
+      if (y > edgeY0 + x * edgeK) return stripesAct ?? stripesTone;
+      return paintNight ?? wipedTone;
+    };
+    let wipePainting = false;
+    const syncWipeNav = () => {
+      let l: string | null = null;
+      let r: string | null = null;
+      let p: string | null = null;
+      const painting = !wipeHandedOver && wipeState.p > 0;
+      if (painting) {
+        // the screen the wipe is drawn on: paintWipe's own height (.themes is 100lvh, taller than innerHeight on a
+        // phone while its toolbar shows), or the nav's edge ran below the painted one there
+        const h = Math.max(wh, stackH);
+        const yL = h * (1 - 1.3 * wipeState.p);
+        const k = (h * 0.3) / ww;
+        edgeY0 = yL;
+        edgeK = k;
+        if (yL + navCorners[0] * k < NAV_LINE) l = stripesTone;
+        if (yL + navCorners[1] * k < NAV_LINE) r = stripesTone;
+        // the pill would follow its corner's force: hold it on the tone being wiped away until the edge reaches it
+        if (r) p = yL + navCorners[2] * k < NAV_LINE ? stripesTone : wipedTone;
+      }
+      setNavForce('navForceL', l);
+      setNavForce('navForceR', r);
+      setNavForce('navForceP', p);
+      if (navEl && (painting || wipePainting)) {
+        wipePainting = painting;
+        navEl.toneAt = painting ? wipeToneAt : null;
+        navEl.dispatchEvent(new Event('nav:paint'));
+      }
+    };
+
     const paintWipe = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = ww;
+      // the large screen (.themes is 100lvh): the wipe covers all of it and parks below all of it (sized from
+      // innerHeight it parked just under the visible area, which a phone's collapsing toolbar uncovers)
+      const h = Math.max(wh, stackH);
       const theta = Math.atan2(h * 0.3, w);
       // left end of the edge travels from the bottom to 30% above the top
       const yL = h * (1 - 1.3 * wipeState.p);
       // oversized on purpose: it must still cover the bottom-right corner once
       // the edge has passed the top of the screen
-      wipe.style.width = `${w + h}px`;
-      wipe.style.height = `${h * 2}px`;
-      wipeInner.style.width = `${w}px`;
-      wipeInner.style.height = `${h}px`;
+      if (wipeBox !== `${w}x${h}`) {
+        wipeBox = `${w}x${h}`;
+        wipe.style.width = `${w + h}px`;
+        wipe.style.height = `${h * 2}px`;
+        wipeInner.style.width = `${w}px`;
+        wipeInner.style.height = `${h}px`;
+      }
       wipe.style.transform = `translate3d(0, ${yL}px, 0) rotate(${theta}rad)`;
       wipeInner.style.transform = `rotate(${-theta}rad) translate3d(0, ${-yL}px, 0)`;
+      // Reduced motion: the cream comes in at once, after the act's heading is already up over Endless Pursuit's
+      // black, and the knockout round the letters (home.css .knock) drew them as cream outlines there. It waits for
+      // the cream (with motion the diagonal is always behind the heading before it shows).
+      if (reduce) stripesAct?.classList.toggle('is-bare', wipeState.p < 1);
+      syncWipeNav();
     };
     paintWipe();
     if (reduce) {
@@ -514,41 +905,296 @@ const shapes = [
         scrollTrigger: { trigger: '#act-stripes', start: 'top bottom', end: 'top 12%', scrub: true, onRefresh: paintWipe },
       });
     }
-    window.addEventListener('resize', paintWipe);
+    // the hand-over point for the nav (see syncWipeNav above); progress is current by the time onRefresh runs
+    if (stripesAct) {
+      ScrollTrigger.create({
+        trigger: stripesAct, start: 'top top', end: 'max',
+        onEnter: () => { wipeHandedOver = true; syncWipeNav(); },
+        onLeaveBack: () => { wipeHandedOver = false; syncWipeNav(); },
+        onRefresh: (self) => { wipeHandedOver = self.progress > 0; syncWipeNav(); },
+      });
+    }
+    window.addEventListener('resize', () => {
+      ww = window.innerWidth;
+      wh = window.innerHeight;
+      stackH = document.querySelector<HTMLElement>('.themes')?.offsetHeight ?? 0;
+      measureNavCorners();
+      paintWipe();
+    });
+
+    /* Where the blueprint act and Endless Pursuit's section sit in the document, and the screen's height: the
+       layer painters below ran on every scroll update and each read the section's rect after the frame's
+       writes, a forced style recalc and layout every frame. Measured on ScrollTrigger refreshes and whenever
+       the page's height changes (fonts, images); the scroll position comes from ScrollTrigger's own cached read.
+       innerHeight is kept from resize events: on phones every read of it runs a layout first. */
+    // (here vh is where the blueprint's sheet and scan line park while the act is below the screen: past the large
+    // screen, .themes' own height (100lvh), not innerHeight, or a phone's toolbar collapsing showed them along the
+    // bottom of the screen; Mobile Safari, iOS 26.3)
+    const themesBox = document.querySelector<HTMLElement>('.themes');
+    let vh = Math.max(window.innerHeight, themesBox?.offsetHeight ?? 0);
+    addEventListener('resize', () => {
+      vh = Math.max(window.innerHeight, themesBox?.offsetHeight ?? 0);
+      paintBlueprint();
+    }, { passive: true });
+    const docTop = (el: Element) => el.getBoundingClientRect().top + window.scrollY;
+    const tops = new Map<Element, number>();
+    const measureTops = () => { for (const el of tops.keys()) tops.set(el, docTop(el)); };
+    const topOf = (el: Element, scroll: number) => (tops.get(el) ?? docTop(el)) - scroll;
+    ScrollTrigger.addEventListener('refresh', measureTops);
+    new ResizeObserver(measureTops).observe(document.body);
 
     // Blueprint is glued to the top edge of its act; the scan line rides that edge.
     const bpLayer = document.querySelector<HTMLElement>('.theme--blueprint')!;
     const bpAct = document.getElementById('act-blueprint')!;
-    const paintBlueprint = () => {
-      const top = Math.min(Math.max(bpAct.getBoundingClientRect().top, 0), window.innerHeight);
+    tops.set(bpAct, docTop(bpAct));
+    const paintBlueprint = (self?: ScrollTrigger) => {
+      const top = Math.min(Math.max(topOf(bpAct, self ? self.scroll() : window.scrollY), 0), vh);
       bpLayer.style.clipPath = `inset(${top}px 0 0 0)`;
     };
-    ScrollTrigger.create({ trigger: bpAct, start: 'top bottom', end: 'top top', onUpdate: paintBlueprint, onRefresh: paintBlueprint, onLeave: paintBlueprint, onLeaveBack: paintBlueprint });
+    ScrollTrigger.create({ trigger: bpAct, start: 'top bottom', end: 'top top', onUpdate: paintBlueprint, onRefresh: (self) => { measureTops(); paintBlueprint(self); }, onLeave: paintBlueprint, onLeaveBack: paintBlueprint });
     paintBlueprint();
-    const finaleFrom = 'circle(0% at 50% 100%)';
-    const finaleTo = 'circle(150% at 50% 100%)';
+    /* The finale opens on the hero's own night sky. Its circle wipe (from the bottom centre) lifts the WebGL sky
+       canvas above the other worlds and clips it to the same circle, with the finale's faint tint over it: no second
+       WebGL context, no regenerated stars. Lifted, the sky draws on top of everything else in .themes, so it never
+       draws under an opaque layer; before the wipe it sleeps under the west act's cover (sky.cover, above). Both
+       circles are written here from one value, so the tint and the sky never disagree by a pixel.
+       (Before: the finale's layer was opaque and sky.hide() stopped the sky under it once the wipe was done.)
+       body.dataset.navForce = 'dark' from the moment the circle covers the screen's top corners (the nav reads it):
+       they are hypot(w/2, h) from the circle's centre, and a circle() radius in % is of hypot(w, h) / √2.
+       The west act's foreground (#about: the label, the headline, the poster, the ledger and the telegram slip) sits
+       in main, above every theme layer, so the circle cannot cover it by itself: it is clipped to outside the same
+       circle (a clip-path with the circle cut out, in its own coordinates, written with the circle from one value), so
+       the night opens over it exactly as over the scene, and once the circle holds all of it, it is hidden and gives up
+       its nav bands (.is-gone, west.css). While the circle opens, it also tells the nav that it paints the night inside
+       it (nav.toneAt, Base.astro), so a link over the black takes light ink with no light pool even where a card's band
+       still lies under it. (Before, the foreground faded as the circle's edge swept over it, from its nearest point to
+       60% of the way to its farthest: the telegram slip at the top of the screen stayed opaque over the circle's crown,
+       and a faint ghost of it was left on the black, 2026-11-09.) */
+    const finLayer = document.querySelector<HTMLElement>('.theme--finale');
+    const skyCanvas = sky?.canvas ?? null;
+    const westFg = document.querySelector<HTMLElement>('#about .bp-about__grid');
+    const westAbout = document.getElementById('about');
+    // #about's box in document pixels: measured on refresh and when the page's height changes, never per frame
+    const fgBox = { t: 0, b: 0, l: 0, r: 0 };
+    const measureFg = () => {
+      if (!westAbout) return;
+      const r = westAbout.getBoundingClientRect();
+      fgBox.t = r.top + window.scrollY;
+      fgBox.b = r.bottom + window.scrollY;
+      fgBox.l = r.left;
+      fgBox.r = r.right;
+    };
+    measureFg();
+    ScrollTrigger.addEventListener('refresh', measureFg);
+    new ResizeObserver(measureFg).observe(document.body);
+    /* #about clipped to outside the circle of radius R centred on the stack's bottom middle (.themes is 100lvh, its
+       bottom below the visible one while a phone's toolbar shows): no clip until the circle reaches its box (with a
+       margin for the poster's sway and the cards' shadows), hidden once the circle holds all of it, and between, a
+       path that is a large rectangle with the circle cut out (evenodd), in #about's own coordinates from the cached box
+       and the given scroll. Arithmetic only per update; written only when it changes. */
+    let westClip = '';
+    let westHidden = false;
+    const clipWest = (R: number, scroll: number) => {
+      if (!westAbout) return;
+      const hc = Math.max(wh, stackH);
+      const m = 60;
+      const top = fgBox.t - scroll - m;
+      const bot = fgBox.b - scroll + m;
+      const l = fgBox.l - m;
+      const r = fgBox.r + m;
+      const cx = ww / 2;
+      const near = Math.hypot(Math.max(l - cx, 0, cx - r), Math.max(0, hc - bot));
+      const far = Math.hypot(Math.max(cx - l, r - cx), hc - top);
+      const hidden = R >= far;
+      let clip = '';
+      if (!hidden && R > near) {
+        const x = cx - fgBox.l;
+        const y = hc - (fgBox.t - scroll);
+        const d = (2 * R).toFixed(1);
+        clip = `path(evenodd, "M-4000 -4000H9000V20000H-4000ZM${(x - R).toFixed(1)} ${y.toFixed(1)}a${R.toFixed(1)} ${R.toFixed(1)} 0 1 0 ${d} 0a${R.toFixed(1)} ${R.toFixed(1)} 0 1 0 -${d} 0Z")`;
+      }
+      if (clip !== westClip) {
+        westClip = clip;
+        westAbout.style.clipPath = clip;
+        westAbout.classList.toggle('is-clipped', !!clip);
+      }
+      if (hidden !== westHidden) {
+        westHidden = hidden;
+        westAbout.style.visibility = hidden ? 'hidden' : '';
+        westFg?.classList.toggle('is-gone', hidden);
+      }
+    };
+    // While the circle opens, the night it paints, for the nav (Base.astro's nav.toneAt and 'nav:paint'): dark inside
+    // the circle, nothing outside (the bands decide there). Only until the circle has the screen's top corners, when the
+    // whole-nav force takes over; each side only clears the paint it set
+    const finNavEl = document.getElementById('site-nav') as (HTMLElement & { toneAt?: ((x: number, y: number) => string | null) | null }) | null;
+    let finPaintR = 0;
+    const finToneAt = (x: number, y: number) => (Math.hypot(x - ww / 2, Math.max(wh, stackH) - y) <= finPaintR ? 'dark' : null);
+    const paintNav = (R: number, corners: number) => {
+      if (!finNavEl) return;
+      const on = R > 0 && R < corners;
+      if (on) {
+        if (finNavEl.toneAt !== finToneAt || R !== finPaintR) {
+          finPaintR = R;
+          finNavEl.toneAt = finToneAt;
+          finNavEl.dispatchEvent(new Event('nav:paint'));
+        }
+      } else if (finNavEl.toneAt === finToneAt) {
+        finNavEl.toneAt = null;
+        finNavEl.dispatchEvent(new Event('nav:paint'));
+      }
+    };
+    // the foreground's opacity (written only when it changed by a hundredth). .is-fading gives it a compositor layer
+    // only while it is see-through, so the fade never repaints it; .is-gone takes its nav bands off below half
+    let fgO = 1;
+    const setFg = (o: number) => {
+      if (!westFg) return;
+      const v = Math.round(Math.min(1, Math.max(0, o)) * 100) / 100;
+      if (v === fgO) return;
+      fgO = v;
+      westFg.style.opacity = v >= 1 ? '' : String(v);
+      westFg.classList.toggle('is-fading', v < 1);
+      westFg.classList.toggle('is-gone', v < 0.5);
+    };
+    const ease3 = (t: number) => t * t * (3 - 2 * t);
+    let finST: ScrollTrigger | undefined;
+    // the shooting star and the headline (finale-flight.ts), mounted with the wipe's trigger below (motion only)
+    let finFlight: FinaleFlight | null = null;
+    let finClip = '';
+    let skyLifted = false;
+    let navForced = false;
+    const setNavDark = (force: boolean) => {
+      if (force === navForced) return;
+      navForced = force;
+      if (force) document.body.dataset.navForce = 'dark';
+      else delete document.body.dataset.navForce;
+    };
+    // A circle() radius in % is of hypot(w, h) / √2 of the box it clips, the theme stack (.themes: 100lvh, so on a
+    // phone with its toolbar showing it reaches below the visible bottom, and the circle's centre with it); the
+    // wipe's circle is 150% of that once it is fully open
+    const stackHeight = () => Math.max(wh, stackH);
+    const circleUnit = () => Math.hypot(ww, stackHeight()) / Math.SQRT2;
+    const paintFinale = (p: number) => {
+      // ScrollTrigger's scroll, read once per scroll event (its cache), so this reads no layout
+      const sc = finST ? finST.scroll() : window.scrollY;
+      // The circle's radius: straight with the scroll, from finale-flight.ts when it runs (which draws the star, the
+      // spray and the stage from the same scroll, in this same task), from the trigger's progress without it
+      const R = finFlight && finST ? finFlight.paint(p * (finST.end - finST.start), ww, wh, stackHeight()) : 1.5 * p * circleUnit();
+      const open = R >= 1.5 * circleUnit() - 0.5;
+      const clip = `circle(${((100 * R) / circleUnit()).toFixed(3)}% at 50% 100%)`;
+      if (clip !== finClip) {
+        finClip = clip;
+        if (finLayer) finLayer.style.clipPath = clip;
+        // fully open there is nothing to clip: the sky then costs what it costs in the hero
+        if (skyCanvas) skyCanvas.style.clipPath = open || R <= 0 ? '' : clip;
+      }
+      if (skyCanvas && (R > 0) !== skyLifted) {
+        skyLifted = R > 0;
+        skyCanvas.classList.toggle('is-lifted', skyLifted);
+      }
+      // the screen's top corners are hypot(w/2, stack height) from the circle's centre
+      const corners = Math.hypot(ww / 2, stackHeight());
+      setNavDark(R >= corners);
+      clipWest(R, sc);
+      paintNav(R, corners);
+    };
+    /* Reduced motion and ?still: the same stretch of scroll, as a cross-fade instead of the moving circle. The sky and
+       the tint come up with opacity (the lifted sky holds its one still frame) while the west act's foreground fades
+       out, and the finale's words (its star and headline among them) stay hidden until the sky is nearly on, then
+       come up over its last quarter: before, a snap at 'top 55%' cut the whole screen to stars in one frame, and for
+       the 300px before it the star and the white headline sat on the boardwalk. Tried holding back only the head: the
+       words and buttons under it then showed first, under an empty gap. A button that keyboard focus scrolls to still
+       shows (home.css, .fin-inner:focus-within).
+       In sequence, so the west and the finale's words never show together: the cards go first (by 40% of the stretch),
+       the night is fully on by 65%, nothing changes until 72%, then the words come up to the end. (The night used to
+       take the whole stretch and the words its last quarter, so the town still showed through at a quarter while the
+       headline and the buttons came up over it, 2026-11-09.) The nav goes dark once the night is 60% on, after the
+       cards' bands have gone. */
+    const finInner = document.querySelector<HTMLElement>('#finale .fin-inner');
+    let fadeWas = -1;
+    const paintFade = (f: number) => {
+      const v = Math.round(Math.min(1, Math.max(0, f)) * 1000) / 1000;
+      if (v === fadeWas) return;
+      fadeWas = v;
+      const night = Math.round(ease3(Math.min(1, v / 0.65)) * 1000) / 1000;
+      if (finLayer) finLayer.style.opacity = String(night);
+      if (skyCanvas) {
+        skyCanvas.classList.toggle('is-lifted', night > 0);
+        // see-through only while lifted: at 0 it is the hero's own sky again, under the other worlds, and must show
+        skyCanvas.style.opacity = night >= 1 || night <= 0 ? '' : String(night);
+      }
+      setFg(1 - ease3(Math.min(1, v / 0.4)));
+      if (finInner) finInner.style.opacity = String(ease3(Math.min(1, Math.max(0, (v - 0.72) / 0.28))));
+      setNavDark(night >= 0.6);
+    };
     if (reduce) {
-      gsap.set('.theme--finale', { clipPath: finaleFrom });
+      if (finLayer) finLayer.style.clipPath = 'none';
+      paintFade(0);
       ScrollTrigger.create({
-        trigger: '#finale', start: 'top 55%',
-        onEnter: () => gsap.set('.theme--finale', { clipPath: finaleTo }),
-        onLeaveBack: () => gsap.set('.theme--finale', { clipPath: finaleFrom }),
+        trigger: '#finale', start: 'top bottom', end: 'top 12%',
+        onUpdate: (self) => paintFade(self.progress),
+        onRefresh: (self) => paintFade(self.progress),
+        onLeave: () => paintFade(1),
+        onLeaveBack: () => paintFade(0),
       });
     } else {
-      gsap.fromTo('.theme--finale', { clipPath: finaleFrom }, {
-        clipPath: finaleTo, ease: 'none',
-        scrollTrigger: { trigger: '#finale', start: 'top bottom', end: 'top 12%', scrub: 0.5 },
+      paintFinale(0);
+      // The finale is pinned (home.css .is-pinned: a sticky stage in a section a screen plus the held stretch tall;
+      // finale-flight.ts writes the lengths), only with the flight that drives it
+      const finSection = document.getElementById('finale');
+      const finStage = finSection?.querySelector<HTMLElement>('.fin-stage') ?? null;
+      const finH1 = document.getElementById('final-h1');
+      const finBox = finDustCanvas?.parentElement ?? null;
+      const finHead = finSection?.querySelector<HTMLElement>('.fin-head') ?? null;
+      const pinned = !!(finDust && finDustCanvas && finFlightCanvas && finBox && finHead && finSection && finStage && finH1);
+      if (pinned) finSection!.classList.add('is-pinned');
+      // No scrub: the circle, the star, the spray, the stop and the letters follow the scroll exactly, in one task per
+      // scroll update. (Scrubbed at 0.5, the progress lagged a fast scroll and caught up in a rush, and the emblem,
+      // drawn from it, trailed the headline.) The circle still opens over 'top bottom' to 'top 12%'; pinned, the
+      // trigger runs on to the section's bottom at the screen's top, past the stage letting go (finale-flight.ts)
+      finST = ScrollTrigger.create({
+        trigger: '#finale', start: 'top bottom', end: pinned ? 'bottom top' : 'top 12%',
+        onUpdate: (self) => paintFinale(self.progress),
+        onRefresh: (self) => paintFinale(self.progress),
       });
+      /* The finale (finale-flight.ts): a shooting star is in the night from the moment the circle opens (nothing of it
+         shows outside the circle), crosses the screen's middle and flies out, dropping a spray of the emblem's stars
+         that hangs a moment and is then drawn down into the emblem as the stage slows to a stop in the middle; held
+         still, the letters rise in from below, each at its own pace, then the buttons and the socials, and the emblem
+         fades to its faint rest; a grace, then the stage lets go. All of it scrubbed by the scroll, both ways. */
+      if (pinned && finST) {
+        finFlight = mountFinaleFlight({
+          ScrollTrigger, st: finST, emblem: finDust!, section: finSection!, stage: finStage!, head: finHead!, emblemBox: finBox!,
+          homeCanvas: finDustCanvas!, flightCanvas: finFlightCanvas!, h1: finH1!,
+          chars: splitChars(finH1!),
+          followers: Array.from(finSection!.querySelectorAll<HTMLElement>('[data-fin-in]')),
+        });
+        paintFinale(finST.progress);
+      }
     }
+
+    // the west act: the blueprint sheet tears away from its top edge, and as it scrolls the camera tilts up from the
+    // town at sundown to the first stars (src/components/west); it handles reduced motion itself. Wired here, next to
+    // the other layer wipes and before the sections' own mounts, so an error in one of those cannot leave its world
+    // hidden behind the blueprint sheet.
+    initWest({ gsap, ScrollTrigger, reduced: reduce });
+    const scan = document.querySelector<HTMLElement>('.bp-scan');
     if (!reduce) {
       // the scan line rides the edge of the blueprint sheet
+      if (scan) {
+        scan.style.top = '0';
+        scan.style.transform = `translateY(${vh}px)`;
+      }
       gsap.fromTo('.bp-scan', { opacity: 1 }, {
         opacity: 0, ease: 'none',
         scrollTrigger: {
           trigger: '#act-blueprint', start: 'top bottom', end: 'top top', scrub: true,
-          onUpdate: () => {
-            const top = document.getElementById('act-blueprint')!.getBoundingClientRect().top;
-            gsap.set('.bp-scan', { top: Math.max(0, top) });
+          // moved by transform (top was a layout per frame and a layout shift). Rounded to whole CSS pixels, as
+          // gsap.set rounded the `top` it replaces (CSSPlugin's autoRound): tried rounding to device pixels and the
+          // line sat one device pixel higher than before on most frames
+          onUpdate: (self) => {
+            const top = Math.max(0, topOf(bpAct, self.scroll()));
+            if (scan) scan.style.transform = `translateY(${Math.round(top)}px)`;
           },
         },
       });
@@ -565,45 +1211,450 @@ const shapes = [
       });
     }
 
-    if (reduce) { syncNav(); return; }
+    // Endless Pursuit's black world is a fixed layer (.theme--ep): it fades in over Vaultt's as soon as the jobs have
+    // unfolded (src/scripts/backdrops.ts, below) and stays under the page, so the stripes wipe over it on one clean
+    // diagonal.
+    const epSec = document.getElementById('mq-endless-pursuit');
+    // the section itself: the working Today screen, its sounds and the star ∞ (src/components/ep); it handles
+    // reduced motion and ?still itself. The backdrops below tell it where its world's switch is and when it shows
+    const epWorld = epSec ? mountEp(epSec, { gsap, ScrollTrigger }) : null;
 
-    /* ---------- hero: four worlds rise, then fall away into act I ---------- */
-    const worlds = gsap.utils.toArray<HTMLElement>('.world');
-    const nameChars = splitChars(document.getElementById('hero-h1')!);
-    gsap.timeline({ delay: 0.1 })
-      .from(worlds, { clipPath: 'inset(100% 0% 0% 0%)', duration: 1.2, ease: 'expo.out', stagger: 0.09 }, 0)
-      .from(worlds.map((w) => w.querySelector('.world__art')), { yPercent: 18, scale: 1.08, duration: 1.6, ease: 'expo.out', stagger: 0.09, clearProps: 'transform' }, 0.1)
-      .from(nameChars, { yPercent: 110, duration: 1, ease: 'power4.out', stagger: 0.03 }, 0.45)
-      .from(['#hero-body', '#hero-cta', '.world__meta'], { opacity: 0, y: 16, duration: 0.7, ease: 'power2.out', stagger: 0.04 }, 0.9);
-    // On phones the panels sit below the CTAs and simply scroll past.
-    gsap.matchMedia().add('(min-width: 768px)', () => {
-      gsap.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', end: '70% top', scrub: 0.5 } })
-        .to(worlds.slice(1), { yPercent: 100, ease: 'power1.in', stagger: 0.1 }, 0)
-        .to('.world--astral .world__art', { yPercent: -20, opacity: 0, ease: 'none' }, 0)
-        // Labels go first, so they don't ride down the screen with the panels.
-        // Explicit start values: the intro animates these too, and a scroll that
-        // begins mid-intro must not capture a half-faded state.
-        .fromTo('.world__meta', { opacity: 1 }, { opacity: 0, ease: 'none', duration: 0.2, immediateRender: false }, 0)
-        .fromTo(['.worlds__title', '#hero-cta'], { y: 0, opacity: 1 }, { y: -120, opacity: 0, ease: 'none', immediateRender: false }, 0);
+    // Vaultt's scene (its world's network, the intro and the three numbers); it handles reduced motion itself
+    const vxWorld = initVaulttHome({ gsap, ScrollTrigger, reduced: reduce });
+
+    // The work's backdrops (src/scripts/backdrops.ts): Atlas's, Vaultt's and Endless Pursuit's worlds cross-fade in
+    // place at their switch points while the content scrolls over them (at once, without the fade, under reduced
+    // motion), and the sky sleeps under them
+    createBackdrops({ ScrollTrigger, sky, reduced: reduce, vaultt: vxWorld, ep: epWorld });
+
+    // the free stuff act: the dome hand-over from the stripes, the black hole, the words held until the dark
+    // covers the screen and the band's tilt (src/components/free-act); it handles reduced motion itself
+    mountFreeAct({ gsap, ScrollTrigger, reduced: reduce });
+
+    if (reduce) return;
+
+    /* ---------- hero: the stars gather into the emblem, the name lands, the cards are dealt ---------- */
+    const cardIns = gsap.utils.toArray<HTMLElement>('.wc').map((c) => c.querySelector('.wc__in'));
+    // deal from the middle outwards
+    const dealOrder = [...cardIns].sort((x, y) => {
+      const d = (el: Element | null) => Math.abs(parseFloat((el?.parentElement as HTMLElement)?.style.transform.match(/rotate\(([-\d.]+)/)?.[1] ?? '0'));
+      return d(x) - d(y);
     });
-
-    /* ---------- the project band: starts tilted and sticking up out of the
-       bottom of the hero (so it's obvious the page goes on), then straightens
-       and settles into place as you scroll ---------- */
-    gsap.matchMedia().add({ desktop: '(min-width: 768px)', mobile: '(max-width: 767px)' }, (ctx) => {
-      const { desktop } = ctx.conditions as { desktop: boolean };
-      const band = document.querySelector<HTMLElement>('.h-band')!;
-      // how far to lift it so roughly two thirds of it shows above the fold
-      const lift = () => -(parseFloat(getComputedStyle(document.getElementById('now')!).paddingTop) + band.offsetHeight * 0.7);
-      gsap.fromTo(band, { y: desktop ? lift : 0, rotation: desktop ? -5 : -4 }, {
-        y: 0, rotation: 0, ease: 'none',
-        scrollTrigger: { trigger: '#now', start: 'top bottom', end: desktop ? 'top 35%' : 'top 60%', scrub: true, invalidateOnRefresh: true },
+    // lift the intro gate first: from() tweens read the resting state as their end point
+    document.documentElement.classList.remove('hero-intro');
+    // The cards come first (Yanis, 2026-11-08: "have the cards of the projects appear sooner"): dealt from 0.4 s, the
+    // name blurs in over them from 0.9 s, the line and the buttons follow from 1.25 s (they were the name at 1.35 s,
+    // the deal at 1.5 s and the line at 1.75 s). A card's inner box has a CSS transition on transform (its hover lift,
+    // home-wheel.css): it turned the deal's from-state into a 0.6 s slide down, which GSAP then read back as a stray
+    // 491px offset, so the deal ended with the cards still below the screen and they only came up when clearProps
+    // dropped the transform, at about 4.4 s after load. The transition is off for the deal and comes back with
+    // clearProps.
+    gsap.set(dealOrder, { transition: 'none' });
+    gsap.timeline({ delay: 0.15 })
+      .from(dealOrder, { yPercent: 120, duration: 1.3, ease: 'expo.out', stagger: 0.07, clearProps: 'transform,transition' }, 0.4)
+      .fromTo('.sx-word', { opacity: 0, y: 18, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power3.out', clearProps: 'filter' }, 0.9)
+      .from('[data-hero-in]', { opacity: 0, y: 16, duration: 0.9, ease: 'power2.out', stagger: 0.08 }, 1.25);
+    // scrolling away: the name drifts up. Its fade belongs to the Atlas flight below: it clears exactly as the picked
+    // card rises towards it, so the card never crosses words or buttons that are still showing. Without the flight
+    // it fades with the scroll instead (headFadeByScroll, further down).
+    const heroHead = document.querySelector<HTMLElement>('.sx-hero__head');
+    gsap.fromTo('.sx-hero__head', { y: 0 }, {
+      y: -120, ease: 'none', immediateRender: false,
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: '34% top', scrub: 0.5 },
+    });
+    const headFadeByScroll = () =>
+      gsap.fromTo('.sx-hero__head', { opacity: 1 }, {
+        opacity: 0, ease: 'none', immediateRender: false,
+        scrollTrigger: { trigger: '#hero', start: 'top top', end: '34% top', scrub: 0.5 },
       });
-      // on first load it slides up into view just after the hero has assembled
-      if (desktop && window.scrollY < 40) {
-        gsap.from('.h-marquee', { yPercent: 160, duration: 1.3, ease: 'expo.out', delay: 1.2 });
+
+    /* ---------- the Atlas card gets picked. The first scroll turns the wheel until Atlas is at the front; the card
+       lifts out of the hand (the hero's words clear as it rises to them), its video slides up out of the card, and in
+       mid-air it turns and comes apart into its layers, each one named in plain words, from the bottom up: the idea,
+       the script, your take, the edit (its cut clips close up), the words, the post. The layers fold back together
+       and it glides over to wait right above the editor's preview, at the preview's size. Then the editor rises round
+       it and the card drops into the preview from the front, and lands as the preview, moving with the page at the
+       hand-over so nothing jumps. The editor's title bar has no text while the card is over it: the file name, the
+       status and the length appear as the card clears them, so the card never covers words (the take arriving is
+       what opens the file).
+       Scrubbed both ways: scrolling back runs it backwards, and every scroll position is a finished frame. ---------- */
+    const editorEl = document.querySelector<HTMLElement>('#mq-atlas .ae');
+    const editor = editorEl ? mountEditor(editorEl, { gsap, ScrollTrigger, mode: 'loop', reduced: reduce }) : null;
+    const flyer = document.querySelector<HTMLElement>('.wc-flyer');
+    const flyEl = flyer?.querySelector<HTMLElement>('[data-reel]') ?? null;
+    const mon = document.querySelector<HTMLElement>('#mq-atlas [data-ae-mon]');
+    const atlasCard = wheel?.card('atlas') ?? null;
+    const atlasFace = atlasCard?.querySelector<HTMLElement>('.wc__face') ?? null;
+    const cardReelEl = atlasCard?.querySelector<HTMLElement>('[data-reel]') ?? null;
+    if (cardReelEl) {
+      cardReel = createReel(cardReelEl, gsap);
+      if (cardWant) cardReel.play();
+    }
+    if (wheel && flyer && flyEl && mon && atlasCard && atlasFace) {
+      const flyReel = createReel(flyEl, gsap);
+      const edReel = editor?.reel ?? null;
+
+      // the first scroll turns Atlas round to the front, from wherever the wheel happens to be
+      ScrollTrigger.create({
+        trigger: '#hero', start: 'top+=4 top', end: 'bottom top',
+        onEnter: () => {
+          wheel.hold(true);
+          wheel.goTo('atlas', 0.9);
+        },
+        onLeaveBack: () => wheel.hold(false),
+      });
+
+      // Layout that only changes on a resize, read once per refresh instead of every frame (so the scrub forces no
+      // layout of its own): the card's size, the preview's place on the page, its size and corners, the strip of the
+      // editor window above the preview, how far above the preview the title bar's text ends, the flyer's size, and
+      // where the hero's buttons end.
+      // The flyer is laid out at the biggest size it is ever shown at and only scaled down, so it stays sharp.
+      const heroCtas = document.querySelector<HTMLElement>('.sx-ctas');
+      const edStatus = editorEl?.querySelector<HTMLElement>('.ae-status') ?? null;
+      const L = { cw: 1, ch: 1, mx: 0, my: 0, mw: 1, mh: 1, mr: 0, band: 0, tbB: 12, fw: 1, fh: 1, hs: 1, phone: false, dock: 0, pm: 0.7, ctaB: 0, gap0: 1, sx: 0 };
+      let flightST: ScrollTrigger | undefined;
+      const measure = () => {
+        const vh = window.innerHeight;
+        L.cw = atlasCard.offsetWidth || 1;
+        L.ch = atlasCard.offsetHeight || 1;
+        const r = mon.getBoundingClientRect();
+        L.sx = window.scrollX;
+        L.mx = r.left + r.width / 2 + L.sx;
+        L.my = r.top + r.height / 2 + window.scrollY;
+        L.mw = r.width || 1;
+        L.mh = r.height || 1;
+        L.mr = parseFloat(getComputedStyle(mon).borderTopLeftRadius) || r.width * 0.071;
+        // the editor window's top bar and the gap under it (the editor's top edge reaches the waiting card this far
+        // before the preview does), and how far above the preview the title bar's text ends (its tallest piece is
+        // the status pill): the text shows only once the card's top edge has passed below that line
+        L.band = editorEl ? Math.max(0, r.top - editorEl.getBoundingClientRect().top) : 0;
+        // (from the bar's middle and the pill's layout height: the pill itself is moved by --tb, so its rect is not used)
+        const bar = edStatus?.parentElement?.getBoundingClientRect();
+        L.tbB = edStatus && bar ? Math.max(4, r.top - ((bar.top + bar.bottom) / 2 + edStatus.offsetHeight / 2)) : 12;
+        L.phone = window.innerWidth < 768;
+        L.hs = Math.min(L.phone ? 0.96 : 1.04, (vh * 0.56) / L.ch);
+        L.fw = Math.ceil(Math.max(L.cw * L.hs, L.mw, L.cw) * 1.02);
+        L.fh = (L.fw * 16) / 9;
+        // where the card waits for the editor (this far above the middle, its top clear of the nav), and the share of
+        // the scroll at which the editor's top edge reaches the waiting card: from there it only settles in
+        L.dock = Math.max(0, Math.min(vh * 0.15, vh / 2 - L.mh / 2 - 76));
+        // (up to 0.9: since the flight is longer, 2026-11-08, it is 0.76 at 1440x900 and 0.87 at 2560x1440, and the old
+        // 0.8 cap set the card settling in before the editor reached it; the editor's rise is the same scroll as ever,
+        // so the extra length all goes to the card's time in the air)
+        if (flightST) {
+          const len = Math.max(1, flightST.end - flightST.start);
+          L.pm = Math.min(0.9, Math.max(0.5, 1 - (L.mh + L.band - L.dock) / len));
+        }
+        // the hero's buttons: their bottom edge on the page without the drift, and how far below it the card rests
+        // (--top is read here, not once: short screens set a smaller one)
+        if (heroHead && heroCtas && wheelEl) {
+          const drift = Number(gsap.getProperty(heroHead, 'y')) || 0;
+          const wheelTop = parseFloat(getComputedStyle(wheelEl).getPropertyValue('--top')) || 70;
+          L.ctaB = heroCtas.getBoundingClientRect().bottom + window.scrollY - drift;
+          L.gap0 = Math.max(24, wheelEl.getBoundingClientRect().top + window.scrollY + wheelTop - 16 - L.ctaB);
+        }
+        flyer.style.setProperty('--fw', `${L.fw}px`);
+        flyer.style.setProperty('--fk', (L.fw / L.cw).toFixed(4));
+      };
+      measure();
+
+      const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+      const seg = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
+      const easeIO = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+      const easeSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
+      const smooth = (t: number) => t * t * (3 - 2 * t);
+      // The beats, as shares of the card's time in the air (u, 0 to 1). The air time ends where the editor's top
+      // edge reaches the waiting card (L.pm of the scroll); the rest of the scroll is the editor rising round it.
+      // The split comes early (Yanis: "the splitting should happen faster"): lift, slide-out, split and strip moved up
+      // together (they were A 0.27, M 0.13 to 0.37, X 0.3 to 0.6, C 0.5 to 0.66). Measured (2026-11-07, scrollY): fully
+      // apart at 300 instead of 480 at 1440x900, 240 instead of 420 at 390x844; all six names up from about 250 to 586
+      // on desktop (was 420 to 586). The fold, the glide and the landing are where they were. Tried A 0.2, X 0.2 to
+      // 0.42 first: only about 120px sooner. X0 stays at A: the lift's turn and the split's sideways move would fight.
+      // (Those scroll positions predate the longer flight, 2026-11-08: see airU below.)
+      const A = 0.15; // lifted out of the hand and held in the middle
+      const M0 = 0.04, M1 = 0.2; // the video slides up out of the card; the card's name and frame fade
+      const X0 = 0.15, X1 = 0.34; // it turns and comes apart; the names arrive from the bottom layer up
+      const C0 = 0.29, C1 = 0.42; // the edit layer's film strip: the cut clips close up, right after its name arrives
+      const F0 = 0.7, F1 = 0.9; // it folds back together
+      const G0 = 0.76; // from here it glides over to wait above the editor's preview, at the preview's size and corners
+      // The card's way out of the hand and its way into the editor take 1.5 times their old scroll, the held state in
+      // between (every name showing, u 0.316 to F0) its old scroll (Yanis, 2026-11-08: the card placement's in and out
+      // animations "50% longer"; stretched evenly, the hold grew to about 460px of scroll that only moved a label's
+      // highlight, full-site check). airU maps the share of the scroll in the air (v) onto the beats above, which are
+      // untouched; home.css .sx-hero__flight adds the scroll this needs (0.31 of the old air time). The landing, the
+      // editor rising round the card, is the page's own scroll and stays as long as it was
+      const OUT_U = 0.316; // the sixth name is in
+      const OUT_W = 1.5 * OUT_U, HOLD_W = F0 - OUT_U, IN_W = 1.5 * (1 - F0);
+      const V1 = OUT_W / (OUT_W + HOLD_W + IN_W), V2 = (OUT_W + HOLD_W) / (OUT_W + HOLD_W + IN_W);
+      const airU = (v: number) =>
+        v < V1 ? (v / V1) * OUT_U : v < V2 ? OUT_U + ((v - V1) / (V2 - V1)) * HOLD_W : F0 + ((v - V2) / (1 - V2)) * (1 - F0);
+
+      let state: 'rest' | 'flying' | 'landed' = 'rest';
+      // the playhead of whichever copy of the reel is showing, so the next one picks up on the same frame
+      const shownTime = () => (state === 'rest' ? cardReel?.time() : state === 'flying' ? flyReel.time() : edReel?.time()) ?? 0;
+      // the scrub calls place() every frame: each style is written only when its value changed
+      const was: Record<string, string> = {};
+      const put = (el: HTMLElement, key: string, prop: string, v: string) => {
+        if (was[key] === v) return;
+        was[key] = v;
+        el.style.setProperty(prop, v);
+      };
+      // the hero's words (opacity 0 also hides them, so the invisible buttons cannot be clicked)
+      const headTo = (o: number) => {
+        if (!heroHead) return;
+        put(heroHead, 'ho', 'opacity', o.toFixed(3));
+        put(heroHead, 'hv', 'visibility', o < 0.005 ? 'hidden' : '');
+      };
+      // the editor's title bar text (file name, status, length; atlas-editor.css reads --tb): none while the card is
+      // in the air or over it, all of it once the card has landed
+      const tbTo = (v: number) => {
+        if (editorEl) put(editorEl, 'tb', '--tb', v.toFixed(3));
+      };
+      // The flying copy's look: words, music, post and colour (the editor drives the same four on its copy). When the
+      // card leaves the editor mid-edit (scrolling back up while the editor shows the raw take), the flying copy first
+      // takes the editor's look as it is, then finishes itself on the way up, so the hand-back shows no jump from the
+      // grey raw take to the finished video. The punch-ins come back with the words, like a cut in the video.
+      const LOOK = ['--ow', '--om', '--op', '--grade'];
+      // where the editor keeps each of them on its copy: the colour on the graded picture and the music pill's on the
+      // pill (each on the smallest element that reads it, so a frame of the edit restyles one element, not the whole
+      // reel: atlas-editor.ts), the words and the post, switched in one step, on the reel itself
+      const lookOn = (src: HTMLElement, k: string) =>
+        (k === '--grade' ? src.querySelector<HTMLElement>('.ar-pic') : k === '--om' ? src.querySelector<HTMLElement>('.ar-music') : null) ?? src;
+      let lookTween: gsap.core.Tween | null = null;
+      const finishLook = () => {
+        lookTween?.kill();
+        lookTween = null;
+        gsap.set(flyEl, { '--ow': 1, '--om': 1, '--op': 1, '--grade': 1 });
+        flyEl.classList.remove('is-raw');
+      };
+      // `fin`: the editor was showing the real finished video (atlas-final.ts), which carries its own small captions
+      // and none of the reel's hook card, music pill or post chips. The flying copy then starts bare (the graded
+      // take, nothing on it) and its words, music and post come in on the way up, as from the raw take: the video
+      // cannot fly (one decoder, no video in the card or the flyer), and a reel that kept its full look jumped from
+      // the video's frame to a hook card and captions the moment the card lifted
+      const takeLook = (src: HTMLElement, fin = false) => {
+        const from: Record<string, number> = {};
+        let done = !fin;
+        for (const k of LOOK) {
+          const v = fin ? (k === '--grade' ? 1 : 0) : parseFloat(lookOn(src, k).style.getPropertyValue(k));
+          from[k] = Number.isFinite(v) ? v : 1;
+          if (from[k] < 0.999) done = false;
+        }
+        // (bare also means wide, no punch-in, like the video's own framing: is-raw holds the camera still)
+        const raw = fin || src.classList.contains('is-raw');
+        if (done && !raw) return finishLook();
+        lookTween?.kill();
+        gsap.set(flyEl, from);
+        flyEl.classList.toggle('is-raw', raw);
+        // the colour and the music pill come up; the words and the post come back in one step with the punch-ins
+        // (switched, like the editor's own: a half faded hook over the face read as a ghost)
+        lookTween = gsap.to(flyEl, {
+          '--om': 1, '--grade': 1, duration: 0.7, delay: 0.2, ease: 'power2.inOut',
+          onStart: () => {
+            flyEl.classList.remove('is-raw');
+            gsap.set(flyEl, { '--ow': 1, '--op': 1 });
+          },
+        });
+      };
+      const place = (p: number) => {
+        if (p <= 0.001) {
+          if (state !== 'rest') {
+            const t = shownTime();
+            if (state === 'landed') editor?.stop();
+            flyReel.pause();
+            state = 'rest';
+            cardHeld = false;
+            finishLook();
+            flyer.classList.remove('is-on');
+            atlasCard.classList.remove('is-flying');
+            mon.classList.remove('is-waiting');
+            if (cardReel) {
+              cardReel.seek(t);
+              if (cardWant) cardReel.play();
+            }
+          }
+          headTo(1);
+          tbTo(0);
+          wheel.setSelection(0, 'atlas');
+          return;
+        }
+        if (p >= 0.999) {
+          if (state !== 'landed') {
+            const t = shownTime();
+            flyReel.pause();
+            cardReel?.pause();
+            cardHeld = true;
+            state = 'landed';
+            finishLook();
+            flyer.classList.remove('is-on');
+            atlasCard.classList.add('is-flying');
+            mon.classList.remove('is-waiting');
+            edReel?.seek(t);
+            editor?.seek0();
+            editor?.start();
+          }
+          headTo(0);
+          tbTo(1);
+          wheel.setSelection(1, 'atlas');
+          return;
+        }
+        if (state !== 'flying') {
+          const t = shownTime();
+          const fromEditor = state === 'landed';
+          const finWas = fromEditor && (editor?.finShowing() ?? false);
+          if (fromEditor) editor?.stop();
+          cardReel?.pause();
+          cardHeld = true;
+          state = 'flying';
+          flyReel.seek(t);
+          if (fromEditor && edReel) takeLook(edReel.el, finWas);
+          else finishLook();
+          flyReel.play();
+          atlasCard.classList.add('is-flying');
+          mon.classList.add('is-waiting');
+          flyer.classList.add('is-on');
+        }
+        const { cw, ch, fw, fh } = L;
+        // the screen's size from resize events (ww/wh above): on phones every read of innerWidth/innerHeight runs
+        // a layout first, and this runs inside GSAP's tick after other tweens have written styles. The scroll is
+        // still read live, once: the card must sit exactly on the preview at the hand-over, and during the scripted
+        // "See our work" scroll ScrollTrigger's cached value is a frame behind the page. The horizontal scroll is
+        // always 0 here; it comes from the last measure()
+        const vw = ww;
+        const vh = wh;
+        const scrollNow = window.scrollY;
+        // the card's time in the air (1 from the moment the editor's top edge reaches it)
+        const u = airU(Math.min(1, p / L.pm));
+        // how far apart the layers are: in on the way up, out on the way down (0 flat, 1 every name showing)
+        const xa = easeSine(seg(u, X0, X1)) * (1 - easeSine(seg(u, F0, F1)));
+        // held a little above the middle; while it is apart it moves left, so the stack and its names sit centred.
+        // It gets there by half way open, before the long names arrive
+        const hx = vw / 2 - (L.phone ? vw * 0.235 : Math.min(96, vw * 0.066)) * easeSine(Math.min(1, xa / 0.55));
+        const hy = vh * (L.phone ? 0.45 : 0.47);
+        // where it lands: the editor's preview (from the layout read at refresh, moved by the scroll)
+        const ex = L.mx - L.sx;
+        const ey = L.my - scrollNow;
+        const es = L.mw / cw;
+        const yd = vh / 2 - L.dock; // where it waits for the editor, right above the preview's final place
+        let x: number, y: number, s: number;
+        let rot = 0, rx = 0, ry = 0;
+        let tb = 0; // the editor's title bar text, 0 until the card has cleared it
+        if (u < A) {
+          // picked: it pops up out of the hand, the rest of the hand drops back, and it rises to the middle.
+          // Where the card sits in the hand is read here only (it moves with the page, and may still be turning)
+          const ang = wheel.angleOf('atlas');
+          const rad = (ang * Math.PI) / 180;
+          const fr = atlasFace.getBoundingClientRect();
+          const sc = fr.width / (Math.abs(Math.cos(rad)) * cw + Math.abs(Math.sin(rad)) * ch) || 1;
+          const sx = fr.left + fr.width / 2;
+          const sy = fr.top + fr.height / 2;
+          const k = u / A;
+          const e = easeIO(k);
+          const base = sy - 34 * easeOut(Math.min(1, k / 0.35));
+          x = sx + (hx - sx) * e;
+          y = base + (hy - base) * e;
+          s = sc + (L.hs - sc) * e;
+          rot = ang * (1 - e);
+          rx = Math.sin(e * Math.PI) * -10;
+          wheel.setSelection(easeOut(Math.min(1, k / 0.6)), 'atlas');
+          // the hero's words clear as the card comes up to them: gone the moment its top edge reaches the buttons
+          const ctaBottom = L.ctaB - scrollNow + (heroHead ? Number(gsap.getProperty(heroHead, 'y')) || 0 : 0);
+          headTo(smooth(clamp01((y - (s * ch) / 2 - ctaBottom) / L.gap0)));
+        } else if (u < G0) {
+          // held while it comes apart
+          x = hx;
+          y = hy;
+          s = L.hs;
+          headTo(0);
+          wheel.setSelection(1, 'atlas');
+        } else if (u < 1) {
+          // folded, it glides over to wait right above the editor's preview, at the preview's size, flat again
+          const e = easeIO(seg(u, G0, 1));
+          x = hx + (ex - hx) * e;
+          y = hy + (yd - hy) * e;
+          s = L.hs + (es - L.hs) * e;
+          ry = Math.sin(e * Math.PI) * -10;
+          rx = Math.sin(e * Math.PI) * 3;
+          headTo(0);
+          wheel.setSelection(1, 'atlas');
+        } else {
+          // the editor rises round it and the card drops into the preview from the front: a blend from where it waits
+          // to the preview, so it starts from rest and ends moving with the page (no jump at the hand-over).
+          // Tried first: the card behind the window, seen through the preview, with the strip above the preview
+          // clipped away. It read as one card cut in two by the title bar (its top above the window, its bottom in
+          // the preview), so it stays in front, and the title bar has no text under it instead.
+          // d: how far above its place the card still is. The text fades in once the card's top edge is below the
+          // text's bottom edge (L.tbB above the preview), so the card never covers it
+          const w = smooth(seg(p, L.pm, 1));
+          x = ex;
+          y = yd + (ey - yd) * w;
+          s = es;
+          const d = Math.max(0, ey - y);
+          tb = smooth(clamp01((L.tbB - d) / L.tbB));
+          headTo(0);
+          wheel.setSelection(1, 'atlas');
+        }
+        const m = easeIO(seg(u, M0, M1));
+        // a slow turn while it hangs apart, gone again once it is flat
+        const tz = (seg(u, X0, F1) - 0.5) * 9 * xa;
+        // the film strip's cut clips close up (and open again only if you scroll back)
+        const cut = easeIO(seg(u, C0, C1));
+        // the corners: the card's, then the preview's before it settles in (in the flyer's own, unscaled pixels)
+        const land = easeIO(seg(u, 0.84, 1));
+        const r0 = fw * 0.09;
+        const r1 = (L.mr * fw) / L.mw;
+        put(flyer, 'tf', 'transform', `translate3d(${(x - fw / 2).toFixed(1)}px, ${(y - fh / 2).toFixed(1)}px, 0) perspective(1100px) rotate(${rot.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale(${((s * cw) / fw).toFixed(4)})`);
+        tbTo(tb);
+        put(flyer, 'm', '--m', m.toFixed(3));
+        put(flyer, 'fr', '--fr', `${(r0 + (r1 - r0) * land).toFixed(2)}px`);
+        put(flyer, 'xa', '--xa', xa.toFixed(4));
+        put(flyEl, 'em', '--m', m.toFixed(3));
+        put(flyEl, 'x', '--x', xa.toFixed(4));
+        put(flyEl, 'tz', '--tz', `${tz.toFixed(2)}deg`);
+        put(flyEl, 'cut', '--cut', cut.toFixed(3));
+      };
+      const flight = { p: 0 };
+      const flightTween = gsap.to(flight, {
+        p: 1, ease: 'none',
+        scrollTrigger: {
+          // no invalidateOnRefresh: nothing in this tween comes from layout, and invalidating reverted it to 0 for
+          // the length of every refresh, so onRefresh ran place(0) on a landed card: the editor loop restarted and
+          // the reels were re-seeded on every resize (and every refresh another section asks for)
+          trigger: '#hero', start: 'top+=40 top', endTrigger: mon, end: 'center center', scrub: 0.35,
+          onRefresh: () => {
+            measure();
+            place(flight.p);
+          },
+        },
+        onUpdate: () => place(flight.p),
+      });
+      flightST = flightTween.scrollTrigger;
+      measure(); // again, now that the trigger knows where it ends (L.pm)
+      // "See our work" ends in the middle of the dissected card, every layer named (Yanis, 2026-11-08: "it should just
+      // scroll to this here where you dissect the video"; it went all the way to the landed card). Halfway between the
+      // sixth name and the fold, from the same shares as the flight itself (airU), so it follows the hold wherever the
+      // layout puts it
+      if (flightST) {
+        const st = flightST;
+        workY = () => st.start + ((V1 + V2) / 2) * L.pm * (st.end - st.start);
       }
-    });
+      // between a resize and ScrollTrigger's own refresh (debounced, it runs onRefresh above), keep the flyer on the
+      // new layout: once per frame at most, since a drag-resize fires many events a frame. Also covers a phone's
+      // address bar showing or hiding, which can change the height without a refresh
+      let resizeRaf = 0;
+      window.addEventListener('resize', () => {
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(() => {
+          resizeRaf = 0;
+          measure();
+          place(flight.p);
+        });
+      });
+    } else {
+      headFadeByScroll();
+      editor?.start();
+    }
 
     /* ---------- big names rise letter by letter ---------- */
     document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
@@ -622,23 +1673,25 @@ const shapes = [
       });
     });
 
-    /* ---------- act I: Vaultt visual drift ---------- */
-    gsap.to('.h-v-cards', { yPercent: -10, rotate: -1, ease: 'none', scrollTrigger: { trigger: '#mq-vaultt', start: 'top bottom', end: 'bottom top', scrub: true } });
-    gsap.to('.h-v-phone', { yPercent: -26, ease: 'none', scrollTrigger: { trigger: '#mq-vaultt', start: 'top bottom', end: 'bottom top', scrub: true } });
-    gsap.to('.h-planet', { rotate: 40, yPercent: 12, ease: 'none', scrollTrigger: { trigger: '#mq-vaultt', start: 'top bottom', end: 'bottom top', scrub: true } });
-
-    /* ---------- act II: Endless Pursuit's sun rises and the loop draws itself, tiles land ---------- */
-    const epScroll = () => ({ trigger: '#mq-endless-pursuit', start: 'top 85%', end: 'center center', scrub: 0.6 });
-    gsap.from('.h-ep__sun', { scale: 0.3, transformOrigin: '50% 50%', ease: 'none', scrollTrigger: epScroll() });
-    gsap.fromTo('.h-ep__track', { strokeDashoffset: 1000 }, { strokeDashoffset: 0, ease: 'none', scrollTrigger: epScroll() });
-    gsap.from('.h-phone--front', { rotate: -14, scale: 0.75, yPercent: 18, ease: 'none', scrollTrigger: epScroll() });
-    gsap.from('.h-phone--back', { rotate: 16, xPercent: 30, yPercent: 10, ease: 'none', scrollTrigger: epScroll() });
-    gsap.from('.h-ep__stamp', {
-      scale: 0, rotate: -120, duration: 1, ease: 'back.out(1.6)',
-      scrollTrigger: { trigger: '#mq-endless-pursuit', start: 'top 55%', once: true },
-    });
-    gsap.from('.h-tile', {
-      y: 70, opacity: 0, rotate: (i: number) => (i % 2 ? 5 : -5), duration: 0.9, ease: 'back.out(1.4)', stagger: 0.07,
+    // The tiles' CSS transition (transform and box-shadow, there for hover) restarted on every frame GSAP wrote during
+    // the reveal, so the reveal was eased twice and trailed behind. It is off from the moment GSAP sets the reveal's
+    // start state until that tile's own part of the reveal ends, then the stylesheet's transition is back for hover
+    // (Yanis, 2026-11-07, Q4). The stagger object's onComplete runs once per tile.
+    const tiles = gsap.utils.toArray<HTMLElement>('.h-tile');
+    tiles.forEach((t) => (t.style.transition = 'none'));
+    gsap.from(tiles, {
+      y: 70, opacity: 0, rotate: (i: number) => (i % 2 ? 5 : -5), duration: 0.9, ease: 'back.out(1.4)',
+      stagger: {
+        each: 0.07,
+        onComplete(this: gsap.core.Tween) {
+          const tile = this.targets()[0] as HTMLElement;
+          tile.style.transition = '';
+          // GSAP's end state (translate(0px, 0px), opacity 1) is the stylesheet's own, but left inline it beat the
+          // .h-tile:hover transform, so the hover lift never ran (only its shadow did). Cleared, nothing moves and
+          // the hover rule applies again; a tile already under the pointer lifts in through the restored transition.
+          gsap.set(tile, { clearProps: 'transform,opacity' });
+        },
+      },
       scrollTrigger: { trigger: '.h-tiles', start: 'top 85%', once: true },
     });
 
@@ -672,6 +1725,39 @@ const shapes = [
       });
     }
 
+    /* ---------- act III: Kleus's figures and the cut follow the scroll ----------
+       One scrubbed trigger each sets the variable its drawing reads (home.css .bp-kx and .bp-cut): the path's source,
+       arrows and lessons, the check's ring, score and notes, the commit grid inking in week by week, and the cut
+       drawing out from its bubble. Scroll back and they undo; nothing plays on its own. (Under reduced motion this
+       never runs and the CSS keeps every drawing finished.) */
+    const scrubVar = (el: HTMLElement | null, name: string, start: string, end: string, onP?: (p: number) => void) => {
+      if (!el) return;
+      const set = (p: number) => {
+        el.style.setProperty(name, p.toFixed(4));
+        onP?.(p);
+      };
+      ScrollTrigger.create({ trigger: el, start, end, scrub: true, onUpdate: (self) => set(self.progress), onRefresh: (self) => set(self.progress) });
+    };
+    const kx = document.querySelector<HTMLElement>('[data-kx]');
+    if (kx) {
+      scrubVar(kx.querySelector<HTMLElement>('[data-kx-fig="path"]'), '--kp', 'top 88%', 'bottom 62%');
+      // the score counts up with its ring (the ring fills in the first 62% of the figure's scroll, home.css)
+      const score = kx.querySelector<HTMLElement>('[data-kx-score]');
+      let shown = -1;
+      scrubVar(kx.querySelector<HTMLElement>('[data-kx-fig="check"]'), '--kc', 'top 88%', 'bottom 70%', (p) => {
+        const n = Math.round(93 * Math.min(1, p * 1.6));
+        if (score && n !== shown) {
+          shown = n;
+          score.textContent = String(n);
+        }
+      });
+      // the grid inks in whole weeks at a time: a cut through a column left a sliver of its squares at the edge
+      const commits = kx.querySelector<HTMLElement>('[data-kx-fig="commits"]');
+      const weeks = Number(commits?.querySelector<HTMLElement>('.cg__grid')?.style.getPropertyValue('--weeks')) || 18;
+      scrubVar(commits, '--kgp', 'top 88%', 'bottom 72%', (p) => commits?.style.setProperty('--kg', (Math.ceil(p * weeks - 0.001) / weeks).toFixed(4)));
+    }
+    scrubVar(document.querySelector<HTMLElement>('[data-bp-cut]'), '--cut', 'top 92%', 'top 50%');
+
     /* ---------- counters ---------- */
     document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
       const target = Number(el.dataset.count);
@@ -679,21 +1765,28 @@ const shapes = [
       const pre = el.dataset.prefix ?? '';
       const suf = el.dataset.suffix ?? '';
       const obj = { v: 0 };
+      // The first frame writes textContent as before; after that the same text node takes the new string, and only
+      // when the string changed. textContent on every frame removed and inserted a text node each time (560 times
+      // a pass in blueprint) and re-laid out the line even on frames where the number had not moved.
+      let node: Text | null = null;
       gsap.to(obj, {
         v: target, duration: 1.8, ease: 'power3.out',
         scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-        onUpdate: () => { el.textContent = pre + obj.v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf; },
+        onUpdate: () => {
+          const s = pre + obj.v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf;
+          if (node && node.parentNode === el) {
+            if (node.data !== s) node.data = s;
+          } else {
+            el.textContent = s;
+            node = el.firstChild instanceof Text ? el.firstChild : null;
+          }
+        },
       });
     });
 
-    /* ---------- finale: the same headline lands again ---------- */
-    const finalChars = splitChars(document.getElementById('final-h1')!);
-    gsap.from(finalChars, {
-      opacity: 0, y: 40, rotate: () => (Math.random() - 0.5) * 30, duration: 0.9, ease: 'power3.out', stagger: 0.015,
-      scrollTrigger: { trigger: '#finale', start: 'top 70%', once: true },
-    });
+    /* ---------- finale: the headline lands with the shooting star's emblem, every pass (finale-flight.ts, mounted with
+       the circle wipe above; it used to land once, here) ---------- */
 
-    syncNav();
     window.addEventListener('load', () => ScrollTrigger.refresh());
   })();
 </script>

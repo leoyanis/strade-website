@@ -1,0 +1,114 @@
+---
+/**
+ * VaulttNumber: one big Vaultt figure. Two ways to land:
+ * - 'reels' (default, the case study): each digit rolls the last two steps into place (number-reels.ts), left
+ *   first, then the unit (k, +) drops in.
+ * - 'chaos' (the homepage): one plain span per glyph, for the number and for its label, which a page script
+ *   scatters and settles (number-chaos.ts): the letters arrive from a spread-out cloud, the centre first, and
+ *   leave the same way toward the top.
+ * Without a script, or with reduced motion / ?still, either mode shows the finished number.
+ *
+ * Props
+ * - n:        a VaulttNumber from VAULTT_NUMBERS (src/data/work.ts): value, decimals, suffix, display, label
+ * - beat?:    a name a page script uses to find this block (data-beat); the homepage drives its own landing
+ * - label?:   the line under the number (default n.label)
+ * - mode?:    'reels' (default) or 'chaos'
+ * - animate?: reels only: land by itself once it is well into view (default false; use it anywhere but the homepage)
+ * - class?:   extra classes
+ *
+ * Slot: anything that belongs to the figure.
+ * Type: Bricolage Grotesque 700 for the number (load it on the page), the unit in Vaultt blue.
+ */
+import type { VaulttNumber as VN } from '../../data/work';
+
+interface Props { n: VN; beat?: string; label?: string; mode?: 'reels' | 'chaos'; animate?: boolean; class?: string }
+const { n, beat = '', label = n.label, mode = 'reels', animate = false, class: cls = '' } = Astro.props;
+const chaos = mode === 'chaos';
+
+// split the finished text into rolling digits (with their place value) and fixed symbols
+const text = n.display;
+const point = text.indexOf('.');
+const digitsBefore = (point < 0 ? text : text.slice(0, point)).replace(/[^0-9]/g, '').length;
+type Part = { t: 'digit'; d: number; place: number } | { t: 'sym'; c: string; place: number; unit: boolean };
+const parts: Part[] = [];
+let k = 0;
+let lastPlace = 1;
+for (const ch of text) {
+  if (/[0-9]/.test(ch)) {
+    // 1,200 gives 1000, 100, 10, 1; 23.7 gives 10, 1, 0.1
+    const place = Math.pow(10, digitsBefore - 1 - k);
+    parts.push({ t: 'digit', d: Number(ch), place });
+    lastPlace = place;
+    k++;
+  } else {
+    // a thousands comma folds away with the digit before it; '.', 'k' and '+' always show
+    parts.push({ t: 'sym', c: ch, place: ch === ',' ? lastPlace : 0, unit: /[^0-9.,]/.test(ch) });
+  }
+}
+// chaos: the label's words, each kept whole on a line (its letters are inline blocks, which could break anywhere)
+const words = label.split(' ');
+---
+
+<div class:list={['vn', chaos && 'vn--chaos', cls]} data-vn data-vn-mode={mode} data-beat={beat} data-value={n.value} data-dec={n.decimals} data-vn-auto={animate && !chaos ? '' : undefined}>
+  <p class="vn__num">
+    {chaos ? (
+      <span class="vn__line" aria-hidden="true">
+        {[...text].map((ch) => <span class:list={['vn__g', /[^0-9.,]/.test(ch) && 'vn__sym--unit']}>{ch}</span>)}
+      </span>
+    ) : (
+      <span class="vn__odo" aria-hidden="true">
+        {parts.map((p) =>
+          p.t === 'digit' ? (
+            <span class="vn__col" data-place={p.place} style={`--d:${p.d}`}>
+              <span class="vn__strip">{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((x) => <span>{x}</span>)}</span>
+            </span>
+          ) : (
+            <span class:list={['vn__sym', p.unit && 'vn__sym--unit']} data-place={p.place || undefined}>{p.c}</span>
+          ),
+        )}
+      </span>
+    )}
+    <span class="vn__sr">{n.display} {label}</span>
+  </p>
+  <p class="vn__label" aria-hidden="true">
+    {chaos ? (
+      <span class="vn__line">{words.map((w, i) => <>{i > 0 && ' '}<span class="vn__w">{[...w].map((ch) => <span class="vn__g">{ch}</span>)}</span></>)}</span>
+    ) : label}
+  </p>
+  <slot />
+</div>
+
+<style>
+  .vn { position: relative; }
+  .vn__num {
+    margin: 0; font-family: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif; font-weight: 700;
+    font-size: clamp(72px, 8.4vw, 128px); line-height: 1; letter-spacing: -0.04em; color: #E8F1FF;
+    font-variant-numeric: tabular-nums; font-optical-sizing: auto;
+  }
+  .vn__odo { display: inline-flex; align-items: flex-start; height: 1.06em; }
+  .vn__col { display: block; width: 0.6em; height: 1.06em; overflow: hidden; text-align: center; will-change: width, opacity; }
+  .vn__strip { display: flex; flex-direction: column; transform: translate3d(0, calc(var(--d) * -1.06em), 0); will-change: transform; }
+  .vn__strip span { display: block; height: 1.06em; line-height: 1.06em; }
+  .vn__sym { display: block; height: 1.06em; line-height: 1.06em; }
+  .vn__sym--unit { color: #6FA8FF; margin-left: 0.02em; }
+  .vn__label { margin: 10px 0 0; font-family: 'Hanken Grotesk', 'Inter', system-ui, sans-serif; font-size: clamp(17px, 1.5vw, 21px); font-weight: 500; color: rgba(232, 241, 255, 0.66); letter-spacing: -0.005em; }
+  .vn__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* chaos: every glyph its own inline block, so a script can move it; nothing here clips them (no overflow on
+     any box of the number), and the finished layout is the plain text, so no-JS reads right */
+  .vn--chaos .vn__line { display: inline-block; white-space: nowrap; }
+  .vn--chaos .vn__num .vn__line { line-height: 1.06; }
+  .vn--chaos .vn__label .vn__line { white-space: normal; }
+  .vn--chaos .vn__w { display: inline-block; white-space: nowrap; }
+  /* the homepage's label sits closer under a big number: the line box below the digits grows with the number
+     (128px at 1920 left 44px from the baseline to the label, against 30px on a phone), so the margin shrinks by a
+     third of the size above 72px, 16px at most. Every width then keeps 26 to 30px, as the phone always had. The
+     case study's reels keep their own spacing */
+  .vn--chaos .vn__label { margin-top: calc(10px - clamp(0px, 2.8vw - 24px, 16px)); }
+  .vn--chaos .vn__g { display: inline-block; transform-origin: 50% 58%; }
+</style>
+
+<script>
+  import { mountAutoReels } from './number-reels';
+  mountAutoReels();
+</script>

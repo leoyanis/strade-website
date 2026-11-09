@@ -1,24 +1,24 @@
 ---
 import { projectSchema, projectCrumbs } from '../../data/seo';
-// Vaultt (formerly StudentVenture): the flagship case study.
-// Brand matches vaultt.io: navy + light blue, Bricolage Grotesque / Hanken Grotesk / mono labels.
+// Vaultt (formerly StudentVenture): the flagship case study, revamped 2026-11-07 around "the network for builders".
+// Brand matches vaultt.io and the homepage's Vaultt world: navy + light blue, Bricolage Grotesque / Hanken Grotesk /
+// mono labels. Inside the phones everything is the app itself (charcoal, Inter, the Network map's kind colours).
+// Order: the live network (hero) -> how it works (the map grows, four numbers) -> every kind of project -> the apps ->
+// the rebrand -> the journey -> the stack -> Liam's words -> go and look.
 import Base from '../../layouts/Base.astro';
 import CaseNext from '../../components/CaseNext.astro';
 import { getProject } from '../../data/work';
-import Hero from '../../components/case/vaultt/Hero.astro';
-import Numbers from '../../components/case/vaultt/Numbers.astro';
-import Story from '../../components/case/vaultt/Story.astro';
+import VtHero from '../../components/case/vaultt/VtHero.astro';
+import VtHow from '../../components/case/vaultt/VtHow.astro';
+import VtKinds from '../../components/case/vaultt/VtKinds.astro';
+import VtApps from '../../components/case/vaultt/VtApps.astro';
 import Rebrand from '../../components/case/vaultt/Rebrand.astro';
-import BriefDemo from '../../components/case/vaultt/BriefDemo.astro';
-import Tour from '../../components/case/vaultt/Tour.astro';
-import Compare from '../../components/case/vaultt/Compare.astro';
+import VtJourney from '../../components/case/vaultt/VtJourney.astro';
 import Stack from '../../components/case/vaultt/Stack.astro';
-import Working from '../../components/case/vaultt/Working.astro';
 import Quote from '../../components/case/vaultt/Quote.astro';
 import Links from '../../components/case/vaultt/Links.astro';
 
 const p = getProject('vaultt')!;
-const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
 ---
 
 <Base
@@ -30,6 +30,12 @@ const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
   crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
+  navBands={{
+    '#vt-quote': 'light',
+    // the white store buttons span a phone's width under the links, and the giant white words (the hero's name, its
+    // big number, the morphing "Vaultt") pass behind them: under the navy pool they left the blue Free stuff at 2.4:1
+    '.vs-store': 'auto', '#vt-hero-h': 'busy', '.vt-hero__num': 'busy', '#vt-morph': 'busy',
+  }}
   ogImage="/og/work-vaultt.png"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -38,17 +44,15 @@ const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
   <meta slot="head" name="theme-color" content="#0C2748" />
 
   <div class="vt" id="vt">
-    <Hero appStore={APP_STORE} />
-    <Numbers />
-    <Story />
+    <VtHero />
+    <VtHow />
+    <VtKinds />
+    <VtApps />
     <Rebrand />
-    <BriefDemo />
-    <Tour appStore={APP_STORE} />
-    <Compare />
+    <VtJourney />
     <Stack />
-    <Working />
     {p.testimonial && <Quote t={p.testimonial} />}
-    <Links appStore={APP_STORE} />
+    <Links />
   </div>
 
   <CaseNext current="vaultt" />
@@ -63,10 +67,16 @@ const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
   /* ---------- page-level brand overrides (this page only) ---------- */
   body.is-bare { background: #0C2748; }
   body.is-bare #scroll-progress { background: #6FA8FF; }
-  body.is-bare #site-nav.is-scrolled { background: rgba(10, 33, 64, 0.8); border-bottom-color: rgba(232, 241, 255, 0.08); }
-  body.is-bare .nav-links .nav-free { color: #6FA8FF; }
-  body.is-bare .nav-links .nav-book { background: #6FA8FF; color: #0C2748; }
-  body.is-bare .nav-links .nav-book:hover { color: #0C2748; box-shadow: 0 0 26px rgba(111, 168, 255, 0.5); }
+  /* the nav (src/styles/nav.css): a navy pool under its light ink and blue accents; over the light quote band
+     (navBands above) navy ink on a pale-blue pool */
+  body.is-bare #site-nav {
+    /* the navy pool all but matches the navy page, so it runs dense: it is what keeps the mid-blue Free stuff
+       readable over the white headlines passing behind it (at 0.68 their strokes left it near 2.5:1) */
+    --pool-dark: 10 33 64; --pool-dark-a: 0.84; --pool-dark-mixed-a: 0.9;
+    --pool-light: 232 241 255;
+    --nav-accent: #6FA8FF; --nav-accent-ink: #0C2748; --nav-accent-glow: rgba(111, 168, 255, 0.5);
+    --ink-on-light: #0C2748; --ink-on-light-soft: rgb(12 39 72 / 0.76);
+  }
 
   /* ---------- tokens ---------- */
   .vt {
@@ -78,6 +88,8 @@ const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
     --vt-light: #E8F1FF;
     --vt-soft: rgba(232, 241, 255, 0.68);
     --vt-faint: rgba(232, 241, 255, 0.42);
+    /* the quieter half of a headline: 42% read as grey on navy on a projector or a phone in daylight */
+    --vt-dim: rgba(232, 241, 255, 0.62);
     --vt-blue: #6FA8FF;
     --vt-blue-2: #8EBBFF;
     --vt-blue-deep: #2F80EE;
@@ -117,17 +129,29 @@ const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
   }
   .vt-tag .no { color: var(--vt-faint); }
 
+  /* a one-line build note under a visual: what it took, in a few words */
+  .vt-note {
+    font-family: var(--vt-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    line-height: 1.5; color: var(--vt-faint);
+  }
+
   .vt-h2 {
     font-family: var(--vt-display); font-weight: 700;
     font-size: clamp(38px, 5.4vw, 78px); line-height: 0.98; letter-spacing: -0.04em;
     text-wrap: balance; color: var(--vt-light);
   }
-  .vt-h2 .lt { color: var(--vt-faint); }
+  .vt-h2 .lt { color: var(--vt-dim); }
   .vt-h2 .ac { color: var(--vt-blue); }
-  .vt-lede { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: var(--vt-soft); max-width: 640px; }
+  .vt-lede { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: var(--vt-soft); max-width: 640px; text-wrap: pretty; }
   .vt-lede strong { color: var(--vt-light); font-weight: 600; }
 
   .vt-section { position: relative; padding: clamp(96px, 12vw, 168px) 0; }
+
+  /* a faint grain over the network scenes: it breaks up the banding of the big soft glows on navy */
+  .vt-grain {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
   .vt-head { display: flex; flex-direction: column; gap: 22px; margin-bottom: clamp(44px, 6vw, 72px); }
 
   /* buttons */
@@ -143,20 +167,12 @@ const APP_STORE = 'https://apps.apple.com/gb/app/vaultt/id6738582949';
   .vt-btn--blue:hover { background: var(--vt-blue-2); transform: translateY(-2px); box-shadow: 0 16px 38px -12px rgba(111, 168, 255, 0.9); }
   .vt-btn--ghost { color: var(--vt-light); border-color: var(--vt-line-2); }
   .vt-btn--ghost:hover { background: var(--vt-light); color: var(--vt-navy); border-color: var(--vt-light); }
+  .vt-btn:focus-visible { outline: 2px solid var(--vt-blue); outline-offset: 3px; }
 
-  /* App Store badge (white, like vaultt.io) */
-  .vt-store {
-    display: inline-flex; align-items: center; gap: 11px;
-    background: #fff; color: #0C2748; border-radius: 14px; padding: 10px 18px 10px 15px;
-    box-shadow: 0 14px 34px -16px rgba(0, 0, 0, 0.6);
-    transition: transform 0.18s var(--vt-ease), box-shadow 0.2s;
-  }
-  .vt-store:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -16px rgba(111, 168, 255, 0.55); }
-  .vt-store svg { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
-  .vt-store > span { display: flex; flex-direction: column; font-family: var(--vt-sans); font-size: 17px; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; white-space: nowrap; }
-  .vt-store em { font-style: normal; }
-  .vt-store small { font-size: 10.5px; font-weight: 500; letter-spacing: 0.01em; color: #4a5b74; }
-  .vt-store b { color: var(--vt-blue-deep); font-weight: 700; }
+  /* "drag", "push", "hover" hints only show when the page can be played with (motion.ts adds .is-play) */
+  .vt:not(.is-play) :is(.vt-hero__hint, .vt-kinds__push, .vt-glass__hover) { display: none; }
+  /* ?still (and no JS): nothing pulses on its own either */
+  .vt:not(.is-play) :is(.vt-hub__ring, .vt-hero__pulse, .vt-wire i) { animation: none; }
 
   @media (prefers-reduced-motion: reduce) {
     .vt *, .vt *::before, .vt *::after { animation: none !important; transition: none !important; }

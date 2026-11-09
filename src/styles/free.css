@@ -39,12 +39,8 @@
 }
 .sk-hero__grid { display: grid; gap: 48px; align-items: center; }
 .sk-hero__text { max-width: 760px; }
-.sk-eyebrow {
-  display: inline-flex; align-items: center; gap: 10px; min-height: 1.4em;
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--acc);
-}
-.sk-eyebrow::before { content: ''; width: 8px; height: 8px; background: var(--acc); box-shadow: 0 0 12px var(--acc); animation: ql-blink 1.4s steps(2) infinite; }
+/* no eyebrow over the title (2026-11-08): the mono "FREE CLAUDE SKILL" line with its blinking dot went, as on the
+   homepage's free cards (free-act.css) */
 .sk-title {
   font-size: clamp(48px, 8.4vw, 112px); letter-spacing: -0.055em; line-height: 0.92;
   margin-top: 16px; text-wrap: balance;
@@ -58,7 +54,9 @@
   animation: sk-sheen 4.2s ease-in-out 1.6s infinite;
 }
 @keyframes sk-sheen { 0%, 70% { left: -60%; } 100% { left: 130%; } }
-.sk-get small { flex-basis: 100%; font-size: 12px; color: var(--text-muted); }
+/* over the hero's stars: the grey of the byline's handle (portfolio.css .free-from), 4.5:1 and up there; the muted
+   grey read 2.5:1 (2026-11-09 re-check) */
+.sk-get small { flex-basis: 100%; font-size: 12px; color: #9a9a9a; }
 .sk-note { font-size: 14px; color: var(--text-secondary); border-bottom: 1px dashed rgba(255, 255, 255, 0.25); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
 a.sk-note:hover { color: var(--acc); border-color: var(--acc); }
 .sk-hero__preview { perspective: 1400px; }
@@ -279,20 +277,21 @@ a.sk-note:hover { color: var(--acc); border-color: var(--acc); }
 .fp-caret { display: inline-block; width: 8px; height: 15px; margin-top: 10px; background: var(--acc); animation: ql-blink 1s steps(2) infinite; }
 
 /* ================================================================
-   RESOURCE CARDS: each one wears its resource's accent
+   RESOURCE CARDS (/free, and "More free stuff" under each skill page)
+   All alike, as the homepage's free cards (free-act.css): the resource's accent shows in one place only, its
+   "Get it free" link. Until 2026-11-08 each card also had a mono kind eyebrow in its accent, an accent wash in its
+   corner, an accent scan sweep and an accent number on hover. The sweep and the number stay, neutral.
    ================================================================ */
-.res-card {
-  background:
-    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--acc, #00e5ff) 16%, transparent), transparent 60%),
-    linear-gradient(160deg, #0f1418, #07090b 70%);
-}
-.res-card::after { background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--acc, #00e5ff) 18%, transparent), transparent); }
-.res-card .res-kind { color: var(--acc, var(--cyan)); }
-.res-card:hover .res-card__num { color: color-mix(in srgb, var(--acc, #00e5ff) 30%, transparent); }
+.res-card { background: linear-gradient(160deg, #0f1418, #07090b 70%); }
+.res-card::after { background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06), transparent); }
+.res-card:hover .res-card__num { color: rgba(255, 255, 255, 0.09); }
+.res-card .res-go { color: var(--acc, var(--cyan)); }
+/* drafts (npm run dev only) keep their tag, now on its own line above the title */
+.res-card .res-draft { align-self: flex-start; margin-left: 0; }
 .res-card .res-go i { display: inline-block; font-style: normal; transition: transform 0.4s var(--ease-out-expo); }
 .res-card:hover .res-go i { transform: translateX(6px); }
 
 @media (prefers-reduced-motion: reduce) {
-  .sk-eyebrow::before, .fp-caret, .sk-get .btn-primary::after { animation: none; }
+  .fp-caret, .sk-get .btn-primary::after { animation: none; }
   .sk-card, .sk-card::before, .sk-card::after, .sk-chips li, .sk-steps li, .sk-steps__n { transition: none; }
 }

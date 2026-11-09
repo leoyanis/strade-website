@@ -34,6 +34,35 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;6
   crumbs={projectCrumbs(p)}
   bare
   navTheme={p.brand.light ? 'light' : 'dark'}
+  navBands={{
+    // the coloured sections are flat colours to the nav (Base.astro readFlat, from their gradients): no pool, the ink
+    // that reads on each colour, and a knockout in it; the white app screens on them (the cook-mode and chef-chat
+    // phones, the shopping list) count as light where they pass under the links, and their pool keeps off the colour
+    '#yc-cook': 'dark', '#yc-cook .cphone': 'light', '#yc-chat': 'dark', '#yc-chat .xphone': 'light',
+    '#yc-duo': 'dark', '#yc-duo .nb': 'light', '#yc-store': 'dark',
+    // each store screenshot says what the nav sees in it (StoreRail.astro, `nav`): its colour as a flat surface, its
+    // phone and the cards past it as light bands (the lock screen dark)
+    '#yc-store .rail__video': 'light',
+    '#yc-store .rail__item--ad img': 'dark',
+    // the clip's "App preview" pill and the ad's "A Meta ad I made" caption, white on the teal: a link over either takes
+    // dark ink and a white knockout, not white ink on the white pill (390 at 9694, 1440 at 9365, 2026-11-09 re-check)
+    '#yc-store .rail__rec': { tone: 'light', surface: 'auto' },
+    '#yc-store .rail__cap': { tone: 'light', surface: 'auto' },
+    // The hero's two phones, white app screens: light like the page round them, tagged so they stay light whatever
+    // lies behind. The fridge scan's camera view is dark, like a lock screen: light ink on a dark pool. Before, a white
+    // fog lay over the photo and the camera's black bar under dark ink (390 at 2738 to 2834). It fades out with
+    // autoAlpha as it slides away (HowItWorks.astro), so it only counts while it shows (hides).
+    '.hero__phone': 'light',
+    '.stage__phone': { tone: 'dark', hides: true },
+    // the split section's two halves are bands of their own (the section itself paints nothing): the salmon one is a
+    // flat colour by its saturation, the navy one by declaration (its own gradient, surface 'auto'), so each half takes
+    // its own ink and knockout instead of one dark pool across both (a brown smudge on the salmon, a blur on the navy)
+    '#yc-duo .duo__panel--list': 'light',
+    '#yc-duo .duo__panel--remind': { tone: 'dark', surface: 'auto' },
+    // the reminder's lock screen on the navy: a phone, darker than the navy and lit inside, so a link over it keeps a
+    // pool (a knockout in the navy would ring the links paler over its darker screen) and the knockout keeps off its bezel
+    '#yc-duo .lock': 'dark',
+  }}
   ogImage="/og/work-youcook.png"
 >
   <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
@@ -60,7 +89,6 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;6
 
 <style>
   :global(body) { background: #ffffff; }
-  :global(body[data-nav='light'] #site-nav.is-scrolled) { background: rgba(255, 255, 255, 0.82); }
 
   .yc {
     --yc-surface: #fff5f3;

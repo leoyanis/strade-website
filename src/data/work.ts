@@ -53,7 +53,132 @@ export interface Project {
   testimonial?: { quote: string; name: string; role: string; photo?: string; href?: string };
 }
 
+/** One Vaultt figure: `value` drives a counter, `display` is the finished text, `exact` the raw count behind it. */
+export interface VaulttNumber {
+  value: number;
+  decimals: number;
+  prefix?: string;
+  suffix: string;
+  display: string;
+  label: string;
+  exact?: number;
+}
+
+/**
+ * Every Vaultt number on the site lives here (homepage section, wheel card, metrics, case study),
+ * so a number changes in one edit. Read-only from Vaultt's production database on 2026-11-07 and
+ * rounded down, never up. Exception: `builders` is Yanis's headline figure (23.7k, confirmed by Yanis
+ * 2026-11-07); the users table held 13,239 accounts that day (`accounts`).
+ * It sits above PROJECTS because the Vaultt entry reads it.
+ */
+export const VAULTT_NUMBERS = {
+  asOf: '2026-11-07',
+  builders: { value: 23.7, decimals: 1, suffix: 'k', display: '23.7k', label: 'builders' },
+  projects: { value: 1200, decimals: 0, suffix: '+', display: '1,200+', label: 'projects shared', exact: 1270 },
+  feedback: { value: 3000, decimals: 0, suffix: '+', display: '3,000+', label: 'feedback messages', exact: 3100 },
+  connections: { value: 1500, decimals: 0, suffix: '+', display: '1,500+', label: 'connection requests', exact: 1567 },
+  views: { value: 24.9, decimals: 1, suffix: 'k', display: '24.9k', label: 'project views', exact: 24937 },
+  applications: { value: 10500, decimals: 0, suffix: '+', display: '10,500+', label: 'job applications', exact: 10584 },
+  nationalities: { value: 100, decimals: 0, suffix: '+', display: '100+', label: 'nationalities', exact: 120 },
+  universities: { value: 300, decimals: 0, suffix: '+', display: '300+', label: 'universities', exact: 308 },
+  accounts: 13239,
+  builderProfiles: 13197,
+  likes: 2455,
+  feedbackThreads: 1570,
+  connectionsAccepted: 579,
+  connectionsPending: 983,
+  /** Projects by the category their builder picked: the top twelve, so they sum to less than `projects.exact`. */
+  categories: [
+    { name: 'Creative Arts', count: 249 },
+    { name: 'Game Development', count: 242 },
+    { name: 'Software Development', count: 197 },
+    { name: 'Marketing', count: 62 },
+    { name: 'Sciences and Research', count: 51 },
+    { name: 'App Development', count: 39 },
+    { name: 'Analytics', count: 38 },
+    { name: 'Entrepreneurship', count: 30 },
+    { name: 'Data Analytics', count: 24 },
+    { name: 'Content Creation', count: 23 },
+    { name: 'Film', count: 22 },
+    { name: 'Web App Development', count: 20 },
+  ],
+};
+
+/** One kind of project on Vaultt: a few of the top categories folded together, so every chart on the
+ *  site groups projects the same way (the homepage stacks and the case study's squares). */
+export interface VaulttKind { id: 'art' | 'code' | 'games' | 'sci' | 'biz' | 'other'; label: string; short: string; n: number }
+
+/**
+ * The twelve biggest categories folded into five kinds, plus `other` (every project outside those twelve),
+ * so the six add up to all 1,270 projects. Art and film 294, Code 256, Games 242, Science and data 113,
+ * Business 92, Other kinds 273 (2026-11-07). A chart that shows fewer kinds sums the rest itself and
+ * says so in its label ("Everything else"), never reusing a name for a different count.
+ */
+export const VAULTT_KINDS: VaulttKind[] = (() => {
+  const count = (name: string) => VAULTT_NUMBERS.categories.find((c) => c.name === name)?.count ?? 0;
+  const sum = (...names: string[]) => names.reduce((s, n) => s + count(n), 0);
+  const top = VAULTT_NUMBERS.categories.reduce((s, c) => s + c.count, 0);
+  return [
+    { id: 'art', label: 'Art & film', short: 'Art & film', n: sum('Creative Arts', 'Film', 'Content Creation') },
+    { id: 'code', label: 'Code', short: 'Code', n: sum('Software Development', 'App Development', 'Web App Development') },
+    { id: 'games', label: 'Games', short: 'Games', n: count('Game Development') },
+    { id: 'sci', label: 'Science & data', short: 'Science', n: sum('Sciences and Research', 'Analytics', 'Data Analytics') },
+    { id: 'biz', label: 'Business', short: 'Business', n: sum('Marketing', 'Entrepreneurship') },
+    { id: 'other', label: 'Other kinds', short: 'Other', n: (VAULTT_NUMBERS.projects.exact ?? top) - top },
+  ];
+})();
+
+/** Where Vaultt lives. All four returned 200 on 2026-11-07; the iPhone app is out of beta. */
+export const VAULTT_LINKS = {
+  appStore: 'https://apps.apple.com/gb/app/vaultt/id6738582949',
+  playStore: 'https://play.google.com/store/apps/details?id=io.studentventure.app',
+  // the marketing site
+  web: 'https://vaultt.io',
+  // the web app itself
+  app: 'https://platform.vaultt.io',
+};
+
 export const PROJECTS: Project[] = [
+  {
+    slug: 'atlas',
+    tier: 'main',
+    name: 'Atlas',
+    client: 'Brandzey',
+    kind: 'client',
+    year: '2026 – now',
+    status: 'Live',
+    featured: true,
+    summary: 'You film it, Atlas does the rest: it finds an idea that worked, writes it in your voice, edits the video and posts it. We build the app, the editing engine and the website.',
+    accent: '#A795FF',
+    brand: {
+      bg: '#0B0B0D', surface: '#141418', text: '#F2F2F4', muted: '#8E8E98', accent: '#A795FF',
+      display: "'Geist', 'Inter', system-ui, sans-serif",
+      body: "'Geist', 'Inter', system-ui, sans-serif",
+      fontsHref: 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@1&display=swap',
+      logo: '/images/work/atlas/mark-white.svg',
+    },
+    cover: { type: 'image', src: '/images/work/atlas/og.webp', fit: 'contain', bg: '#0B0B0D' },
+    tags: ['Claude', 'Remotion on AWS Lambda', 'Supabase', 'Vercel'],
+    metrics: [
+      { value: '2:07 → 0:51', label: 'a raw take in, a finished video out' },
+      { value: '7', label: 'platforms posted to from one place' },
+      { value: 'Live', label: 'since 1 October 2026, sign-ups open' },
+    ],
+    problem:
+      "People who already post lose days to editing, and generic AI clip tools only chop podcasts and add captions, so everything looks like every other AI video. Brandzey wanted one place that goes from idea to script to finished edit to posted, in the creator's own style.",
+    built: [
+      'The editing engine: transcribe the take, cut retakes and silences, plan the edit with Claude and render it with Remotion on AWS Lambda',
+      'Editing styles rebuilt from real videos that already worked, down to the pacing, zooms, headers and b-roll rhythm',
+      'The Atlas agent: ideas scored against your own best posts, scripts in your voice, and a chat that changes the edit for you',
+      'Carousel and story sequence builders that work from one prompt',
+      'Posting and analytics for Instagram, TikTok, YouTube, LinkedIn, X, Threads and Facebook',
+      'Sign-up, billing, onboarding and the marketing site, getatlas.site',
+    ],
+    how:
+      'Atlas runs on Vercel and Supabase. Every edit is planned by Claude, checked against Atlas’s own rules, repaired once if it fails, and rendered by Remotion on AWS Lambda. The same rules gate every caption and graphic, so nothing that looks like AI slop reaches the creator.',
+    outcome: 'Live for customers since 1 October 2026, and still being built out.',
+    links: [{ label: 'getatlas.site', href: 'https://getatlas.site' }],
+  },
   {
     slug: 'vaultt',
     tier: 'main',
@@ -63,7 +188,7 @@ export const PROJECTS: Project[] = [
     year: '2025 – now',
     status: 'Live',
     featured: true,
-    summary: 'A platform where young talent builds in public and gets hired on proof, not a CV. Built from zero to 12.4k users.',
+    summary: `The network for builders: post what you're making, get real feedback and find people to build with. ${VAULTT_NUMBERS.builders.display} builders, live on iPhone and Android.`,
     accent: '#6FA8FF',
     brand: {
       bg: '#0C2748', surface: '#0E2C52', text: '#E8F1FF', muted: '#8FA8CC', accent: '#6FA8FF',
@@ -72,33 +197,36 @@ export const PROJECTS: Project[] = [
       fontsHref: 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
       logo: '/images/work/vaultt/icon.png',
     },
-    cover: { type: 'image', src: '/images/work/vaultt/panel.webp', fit: 'cover', bg: '#0C2748' },
+    // the case study's network radiating from the app icon (captured from /work/vaultt, invented people only)
+    cover: { type: 'image', src: '/images/work/vaultt/cover-network.webp', fit: 'cover', bg: '#0C2748' },
     tags: ['Flutter', 'Supabase', 'Postgres', 'OpenAI', 'Next.js'],
     metrics: [
-      { value: '12.4k', label: 'users on the platform' },
-      { value: '3 months', label: 'from idea to live v1' },
-      { value: '65', label: 'database tables, 23 server functions' },
-      { value: 'Since 2025', label: 'still building together' },
+      { value: VAULTT_NUMBERS.builders.display, label: 'builders on the network' },
+      { value: VAULTT_NUMBERS.projects.display, label: VAULTT_NUMBERS.projects.label },
+      { value: VAULTT_NUMBERS.feedback.display, label: VAULTT_NUMBERS.feedback.label },
+      { value: 'iOS + Android', label: 'native apps, live in both stores' },
     ],
+    // problem, built, how and outcome are not rendered for Vaultt today (only the Atlas page reads them);
+    // kept true to the new positioning so any future page or export can use them as they are
     problem:
-      "Great young talent without a polished CV was invisible to companies, and Liam needed a real product to prove the idea, not another landing page. He had the vision and the network. He didn't have someone to make every product and technical call and then ship it.",
+      "People who make things (games, films, code, art) had no one place to show work in progress, get real feedback and find people to build with. Liam had the vision and the community. He didn't have someone to make every product and technical call and then ship it.",
     built: [
-      'Talent app: portfolios, a build-in-public showcase feed, projects, challenges, events and referrals',
-      'Company side: task-based hiring, applicant management, analytics and verified onboarding',
-      'An AI chat that turns "I need a marketer" into a full hiring brief',
-      'AI search that ranks people by real fit instead of keywords',
-      'An admin console, an accelerator intake flow and the iOS app',
+      "The app: post what you're making, get feedback in private threads, and find people to build with",
+      'The Network map: your connections as a living graph that glows with how much you talk',
+      'AI search that finds people by what they have made, not by keywords',
+      "Native apps for iPhone (with Apple's Liquid Glass tab bar) and Android, and the web app",
+      'An admin console and an accelerator intake form',
     ],
     how:
-      'v1 went live in three months on FlutterFlow and Firebase as StudentVenture. As it grew I moved it to a hand-maintained Flutter codebase on Supabase: 65 tables, 23 server functions and row-level security. Then it rebranded to Vaultt. I now work as fractional CTO.',
-    outcome: 'From an idea to an app, a website and 12.4k users, and still growing.',
-    gallery: [
-      { src: '/images/work/vaultt/g1.webp', alt: 'StudentVenture v1 "For you" feed on desktop' },
-      { src: '/images/work/vaultt/g2.webp', alt: 'StudentVenture v1 company directory' },
-      { src: '/images/work/vaultt/g3.webp', alt: 'Company analytics dashboard' },
-      { src: '/images/work/vaultt/g4.webp', alt: 'Job detail screen on iPhone' },
+      'v1 went live in three months on FlutterFlow and Firebase as StudentVenture. As it grew I took it off FlutterFlow: one Flutter codebase for iPhone, Android and the web, with Supabase as the main database and Firebase for sign-in. Then it rebranded to Vaultt. I now work as fractional CTO.',
+    outcome: `From an idea to native apps, a web app and ${VAULTT_NUMBERS.builders.display} builders, and still growing.`,
+    // no gallery: the old one showed the CV-era v1 screens, and the case study draws its own pictures
+    links: [
+      { label: 'vaultt.io', href: VAULTT_LINKS.web },
+      { label: 'Web app', href: VAULTT_LINKS.app },
+      { label: 'App Store', href: VAULTT_LINKS.appStore },
+      { label: 'Google Play', href: VAULTT_LINKS.playStore },
     ],
-    links: [{ label: 'vaultt.io', href: 'https://vaultt.io' }],
     testimonial: {
       quote:
         "Working with Yanis has been game-changing for the success of StudentVenture. From design to development, his quick understanding and execution have turned ideas into reality within months. It's truly unbelievable what he can accomplish. Thanks to him, StudentVenture is now both an app and a website. His communication, transparency, honesty, and exceptional talent make him the perfect addition to any team looking to build a product.",
@@ -254,7 +382,7 @@ export const PROJECTS: Project[] = [
       'Most people don’t fail to start learning. They fail to continue. Courses are passive, coaches are expensive, and the saved video stays saved.',
     built: [
       'Paste a book, PDF, YouTube video or podcast and get a learning plan',
-      'Daily 15-minute lessons that end with you producing something, not just reading',
+      'Daily 15-minute lessons that end with you producing something instead of just reading',
       'Check-ins and slip recovery, so a missed day doesn’t become a missed month',
       'Subscriptions and billing',
     ],
@@ -355,40 +483,90 @@ export const PROJECTS: Project[] = [
 
 export const getProject = (slug: string) => PROJECTS.find((p) => p.slug === slug);
 
-export const MAIN_QUESTS = ['vaultt', 'kleus', 'endless-pursuit'].map((s) => getProject(s)!);
+export const MAIN_QUESTS = ['atlas', 'vaultt', 'endless-pursuit', 'kleus'].map((s) => getProject(s)!);
 export const SIDE_QUESTS = PROJECTS.filter((p) => p.tier === 'side');
 
 /** Bragging numbers for the top of /work. Update by hand. */
 export const STATS = [
-  { value: 39.6, suffix: 'B', decimals: 1, label: 'tokens through Claude' },
-  { value: 2043, suffix: 'h', decimals: 0, label: 'in Claude Code' },
+  // Yanis approved both on 2026-11-07. Tokens: Claude Code's own /stats total to 5 Nov plus what the session
+  // logs show since. Hours: the 2,043 he gave on 7 Oct plus 546 active session hours logged since then.
+  { value: 112.5, suffix: 'B', decimals: 1, label: 'tokens through Claude' },
+  { value: 2589, suffix: 'h', decimals: 0, label: 'in Claude Code' },
   { value: 200, prefix: '~', suffix: 'h', decimals: 0, label: 'in Codex' },
-  { value: 12.4, suffix: 'k', decimals: 1, label: 'users on things I built' },
+  // Yanis 2026-11-09, his words: "6+ figs made by my platforms" (Vaultt alone has made over six figures in revenue;
+  // the other products' revenue is unknown, so the claim rests on Vaultt). Replaced the users stat. `static` keeps it
+  // out of the count-up: counting 0 to 6 read "1+ figs", "2+ figs" on the way, which says something else. `unit`
+  // renders small after the number: "6+ figs" at full size wrapped to two lines in the stat cells (and in /work's mono
+  // it is a character wider than its column).
+  { value: 6, suffix: '+', unit: 'figs', decimals: 0, label: 'made by my platforms', static: true },
 ];
 
 /**
- * Old projects whose sites are gone. Shown as "Archived" side quests with a
- * generated animation instead of screenshots. `art` picks the animation.
- * Entries with `draft: true` only render in `npm run dev` (layout preview).
+ * Honorable mentions, at the bottom of /work: things that are built but cannot be tried live (a private console, a
+ * local tool, an app not in a store yet), each shown with a generated animation instead of a screenshot (`art` picks
+ * it). Yanis picked the list on 2026-11-08. Rules: no links (nothing here opens for a visitor), no screenshots of a
+ * private console, no real users' names or data. Facts come from the project inventory
+ * (.scratch/inventory/projects.md, 2026-11-08) and Yanis's notes: anything they don't say stays out, so a line stays
+ * plain rather than guess a number or a date.
  */
-export interface ArchivedQuest {
+export interface HonorableMention {
   name: string;
-  year: string;
+  /** Where it stands, the card's first label: 'In build', 'Built', 'Live', 'Prototype', 'Parked'. */
+  stage: string;
+  /** What it is or where it runs, after the stage: 'iPhone', 'macOS', 'login only', a year. */
+  kind: string;
   what: string;
   accent: string;
-  art: 'orbit' | 'wave' | 'grid' | 'pulse';
-  draft?: boolean;
+  art: 'orbit' | 'wave' | 'grid' | 'pulse' | 'bars' | 'stack';
 }
 
-export const ARCHIVED: ArchivedQuest[] = [
+export const HONORABLE_MENTIONS: HonorableMention[] = [
   {
-    name: 'Example archived quest',
-    year: '20XX',
-    what: 'Placeholder so the layout can be previewed. Replace with a real old project and remove `draft`.',
-    accent: '#a78bfa',
+    name: 'Liquid Orbit',
+    stage: 'In build',
+    kind: 'iPhone',
+    what: 'A native iPhone satellite tracker, with the Earth and the Moon rendered in RealityKit and Metal.',
+    accent: '#7CC4FF',
     art: 'orbit',
-    draft: true,
+  },
+  {
+    name: 'Bloom',
+    stage: 'Built',
+    kind: 'macOS',
+    what: 'Two Mac games made in Godot, Monolith and Farlands. Playable, never released.',
+    accent: '#FF8FB8',
+    art: 'grid',
+  },
+  {
+    name: 'Endless Pursuit admin console',
+    stage: 'Live',
+    kind: 'login only',
+    what: "The admin app behind Endless Pursuit: the app's settings, notifications, trophies, challenges and reports.",
+    accent: '#E8C784',
+    art: 'bars',
+  },
+  {
+    name: 'Kleus Creators CRM',
+    stage: 'Built',
+    kind: 'private',
+    what: 'A private workspace for reaching out to creators, with a lead finder built in.',
+    accent: '#E0A458',
+    art: 'pulse',
+  },
+  {
+    name: 'HeyGen video console',
+    stage: 'Prototype',
+    kind: 'local',
+    what: 'A Next.js playground for generating videos with HeyGen. An internal tool that runs locally, not hosted.',
+    accent: '#A795FF',
+    art: 'wave',
+  },
+  {
+    name: 'Findo',
+    stage: 'Parked',
+    kind: '2025',
+    what: 'A property platform built as three Next.js and Supabase apps. Parked.',
+    accent: '#5FD3A2',
+    art: 'stack',
   },
 ];
-
-export const visibleArchived = () => ARCHIVED.filter((a) => !a.draft || import.meta.env.DEV);
